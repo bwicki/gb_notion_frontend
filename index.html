@@ -9,290 +9,493 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Basket">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-title" content="Basket Reporting">
+<meta name="theme-color" content="#E4E7EA">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="icon" href="icons/icon-192.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 
 <style>
 :root{
-  --bg:#FFFFFF; --ink:#16181A; --muted:#71767B; --line:#E6E8EA;
-  --btn-bg:#16181A; --btn-ink:#FFFFFF;
-  --pad:22px;
+  --bg:#E4E7EA; --card:#F4F6F7; --field:#FFFFFF;
+  --ink:#22262A; --muted:#6D757B; --carry:#5A6268;
+  --line:#C9D0D5; --line-soft:#DDE2E6;
+  --sel:#2E3438; --sel-ink:#F4F6F7;
+  --pad:16px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
+/* night palettes — chosen in the setup */
 html[data-theme="night"]{
-  --bg:#000000; --ink:#FF4E2A; --muted:#9A331B; --line:#33110A;
-  --btn-bg:#FF4E2A; --btn-ink:#000000;
+  --bg:#000000; --card:#0A0403; --field:#150705; --ink:#FF4E2A; --muted:#9A3A20; --carry:#B0442A;
+  --line:#4A1A10; --line-soft:#2A0D07; --sel:#FF4E2A; --sel-ink:#000000;
+}
+html[data-theme="night"][data-night="amber"]{
+  --card:#0A0603; --field:#140D04; --ink:#FFA82E; --muted:#96601A; --carry:#B8781F;
+  --line:#432C0B; --line-soft:#251803; --sel:#FFA82E;
+}
+html[data-theme="night"][data-night="green"]{
+  --card:#030A06; --field:#04140B; --ink:#3BE083; --muted:#1E7A47; --carry:#28965A;
+  --line:#0F3D25; --line-soft:#062114; --sel:#3BE083;
+}
+html[data-theme="night"][data-night="white"]{
+  --card:#08090A; --field:#0E1113; --ink:#C6CBD0; --muted:#6A7076; --carry:#868C92;
+  --line:#2B3035; --line-soft:#17191C; --sel:#C6CBD0;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%}
-body{
-  background:var(--bg); color:var(--ink);
-  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -webkit-user-select:none;user-select:none;
-  padding:var(--safe-t) 0 var(--safe-b);
-  display:flex;flex-direction:column;min-height:100%;
-}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);
+  font:400 16px/1.35 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
-.wrap{width:100%;max-width:520px;margin:0 auto;padding:0 var(--pad)}
 
-header{flex:0 0 auto;border-bottom:1px solid var(--line)}
-header .wrap{display:flex;align-items:center;gap:14px;height:50px}
-header .id{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
-header .st{flex:1;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden}
-header button{width:38px;height:38px;display:grid;place-items:center;flex:0 0 auto}
-header button:last-child{margin-right:-9px}
-header svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-
-main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 0 44px}
-.view{display:none}.view.on{display:block}
-
-#logo{display:none;max-height:44px;max-width:70%;margin-bottom:24px}
-#logo.on{display:block}
-.readout{margin-bottom:34px}
-.readout b{display:block;font-size:58px;font-weight:300;letter-spacing:-.035em;line-height:1}
-.readout span{display:block;font-size:14px;color:var(--muted);margin-top:9px}
-
-.lab{font-size:13px;color:var(--muted);margin:0 0 10px}
-
-.types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px}
-.types button{height:62px;border:1px solid var(--line);border-radius:10px;font-size:17px}
-.types button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-.blk{display:none;margin-bottom:30px}.blk.on{display:block}
-.f{margin-bottom:22px}
-input[type=text],input[type=number],textarea{
-  width:100%;background:none;border:0;border-bottom:1px solid var(--line);
-  border-radius:0;color:var(--ink);font:inherit;padding:12px 0;appearance:none;
+.app{height:100dvh;max-width:480px;margin:0 auto;background:var(--card);
+  display:flex;flex-direction:column;overflow:hidden;padding:var(--safe-t) 0 var(--safe-b)}
+@supports not (height:100dvh){.app{height:100vh}}
+@media(min-width:520px) and (min-height:640px){
+  body{padding:18px 0}
+  .app{height:calc(100dvh - 36px);border:1px solid var(--line);border-radius:16px}
 }
-textarea{min-height:80px;resize:none;line-height:1.45}
+
+header{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:46px;
+  padding:0 8px 0 var(--pad);border-bottom:1px solid var(--line-soft)}
+header .clock{font-size:15px;flex:0 0 auto}
+header .id{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:8px}
+header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
+header button.on{background:var(--sel);color:var(--sel-ink)}
+header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.body{flex:1 1 auto;min-height:0;display:flex}
+.view{display:none;flex:1;min-width:0;flex-direction:column}
+.view.on{display:flex}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 var(--pad)}
+.foot{flex:0 0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));border-top:1px solid var(--line-soft)}
+
+/* brand — discreet, as on the Tally form */
+.brand{flex:0 0 auto;padding:8px var(--pad) 2px;display:flex;align-items:center;gap:9px}
+.brand img{height:30px;width:auto;display:none}
+.brand svg{height:24px;width:auto;opacity:.65}
+.brand span{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.brand.haslogo img{display:block}
+.brand.haslogo svg{display:none}
+html[data-theme="night"] .brand img{display:none}
+html[data-theme="night"] .brand.haslogo svg{display:block}
+
+.readout{flex:0 0 auto;padding:8px var(--pad);display:flex;align-items:center;gap:8px;min-height:56px}
+.readout .ball{min-width:0}
+.readout .ball.hide{display:none}
+.readout b{font-size:29px;font-weight:400;letter-spacing:-.025em;line-height:1.05;display:block}
+.readout i{font-style:normal;font-size:11.5px;color:var(--muted);line-height:1.3;display:block}
+.rep{margin-left:auto;flex:0 0 auto;border:1px solid var(--line);background:var(--field);
+  border-radius:9px;padding:6px 11px;min-height:42px;text-align:right;max-width:56%}
+.rep.hide{display:none}
+.rep em{font-style:normal;display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rep b{display:block;font-size:14px;font-weight:400;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep.on{background:var(--sel);border-color:var(--sel);color:var(--sel-ink)}
+.rep.on em{color:var(--sel-ink);opacity:.75}
+
+.types{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 var(--pad) 10px}
+.types button{height:42px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+  font-size:12.5px;display:grid;place-items:center}
+.types button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+
+.blk{display:none;padding-top:2px}.blk.on{display:block}
+.sub{display:none}.sub.on{display:block}
+.f{margin-bottom:10px}
+.lab{font-size:11.5px;color:var(--muted);margin:0 0 6px}
+.hint{font-size:11px;color:var(--muted);margin:-4px 0 10px}
+input[type=text],input[type=number],input[type=password],input[type=tel],textarea{
+  width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;
+  color:var(--ink);font:inherit;padding:10px 12px;appearance:none;min-height:44px}
+textarea{min-height:74px;resize:none;line-height:1.35}
 input::placeholder,textarea::placeholder{color:var(--muted)}
-input:focus,textarea:focus{outline:0;border-bottom-color:var(--ink)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+input:focus,textarea:focus{outline:0;border-color:var(--sel)}
+input.pre{color:var(--carry);border-style:dashed}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.unit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+.unit span{font-size:13px;color:var(--muted)}
+.carry{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:11.5px;color:var(--muted)}
+.carry.hide{display:none}
+.carry button{padding:5px 11px;border:1px solid var(--line);border-radius:14px;font-size:12px;flex:0 0 auto}
+.calc{border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px;font-size:13px;
+  color:var(--muted);margin-bottom:10px;line-height:1.5}
+.calc b{color:var(--ink);font-weight:400}
 
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pills button{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:22px;font-size:15px}
-.pills button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.links{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:14px;color:var(--muted)}
-.links button{text-decoration:underline;text-underline-offset:3px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills button{min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:21px;
+  background:var(--field);font-size:14px}
+.pills button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.pills.four{display:grid;grid-template-columns:repeat(4,1fr)}
+.pills.four button{padding:0;font-size:13px}
+.pills.g2{display:grid;grid-template-columns:repeat(2,1fr)}
+.pills.g3{display:grid;grid-template-columns:repeat(3,1fr)}
+.pills.g2 button,.pills.g3 button{padding:0 4px;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links button{padding:6px 10px;border-radius:14px;border:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
 
-.go{width:100%;height:58px;border-radius:10px;background:var(--btn-bg);color:var(--btn-ink);font-size:17px}
-.go:active{opacity:.8}
-.go.sec{background:none;color:var(--ink);border:1px solid var(--line)}
-.go.warn{background:none;color:var(--ink);border:1px solid var(--ink)}
-.go+.go{margin-top:10px}
+.check{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  border:1px solid var(--line);background:var(--field);border-radius:9px;padding:11px 12px;min-height:48px;
+  font-size:14px;margin-bottom:10px}
+.check .box{width:21px;height:21px;flex:0 0 auto;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center}
+.check .box svg{width:14px;height:14px;stroke:var(--sel-ink);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.check.on .box{background:var(--sel);border-color:var(--sel)}
+.check.on .box svg{opacity:1}
+.check em{font-style:normal;color:var(--muted);font-size:12px;display:block;margin-top:2px}
 
-.nav{display:flex;gap:22px;margin-top:36px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
-.nav button.on{color:var(--ink)}
+.go{width:100%;height:52px;border-radius:10px;background:var(--sel);color:var(--sel-ink);font-size:16px;
+  display:flex;align-items:center;justify-content:center;text-decoration:none}
+.go:active{opacity:.82}
+.go.sec{background:var(--field);color:var(--ink);border:1px solid var(--line)}
+.go.warn{background:var(--field);color:var(--ink);border:1px solid var(--ink)}
+.go.sm{height:44px;font-size:14px}
+.go+.go{margin-top:8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row2 .go+.go{margin-top:0}
+.ftline{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.tiny{flex:1;min-width:0;font-size:11px;color:var(--muted);text-align:center;margin:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ver{flex:0 0 auto;font-size:9px;letter-spacing:.02em;color:var(--muted);opacity:.65;
+  font-variant-numeric:tabular-nums}
 
-.entry{padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:baseline}
-.entry .t{font-size:13px;color:var(--muted);width:46px;flex:0 0 auto}
-.entry .c{flex:1;min-width:0}
-.entry .c i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:3px;word-break:break-word}
+.entry{width:100%;text-align:left;padding:11px 0;border-bottom:1px solid var(--line-soft);
+  display:flex;gap:10px;align-items:baseline}
+.entry .t{font-size:12px;color:var(--muted);width:44px;flex:0 0 auto}
+.entry .c{flex:1;min-width:0;font-size:14.5px}
+.entry .c i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .entry .p{width:7px;height:7px;border-radius:50%;border:1px solid var(--muted);flex:0 0 auto}
 .entry .p.done{background:var(--muted)}
-.none{color:var(--muted);font-size:15px;padding:22px 0}
-h3{font-size:13px;color:var(--muted);font-weight:400;margin:34px 0 12px}
+.none{color:var(--muted);font-size:14px;padding:20px 0}
+h3{font-size:11.5px;color:var(--muted);font-weight:400;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.08em}
+h3:first-child{margin-top:14px}
 
-#puck{display:none;position:fixed;z-index:60;padding:14px 20px;border-radius:26px;
-  background:var(--bg);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.14);
-  font-size:20px;touch-action:none;white-space:nowrap}
-html[data-theme="night"] #puck{box-shadow:0 6px 24px rgba(255,78,42,.14)}
-#puck span{font-size:13px;color:var(--muted);margin-left:5px}
-body.min>header,body.min>main{display:none}
+.fold{border:1px solid var(--line);border-radius:10px;margin-top:14px;overflow:hidden}
+.fold>summary{list-style:none;padding:14px;font-size:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::after{content:"+";color:var(--muted)}
+.fold[open]>summary::after{content:"–"}
+.fold .in{padding:12px 14px 14px;border-top:1px solid var(--line-soft)}
+.lock{padding:16px;border:1px dashed var(--line);border-radius:10px;margin:14px 0;font-size:13.5px;color:var(--muted);line-height:1.45}
+
+#modal{position:fixed;inset:0;background:rgba(10,12,14,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}
+html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
+#modal.on{display:flex}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;max-width:400px;max-height:86dvh;overflow-y:auto}
+.sheet h4{margin:0 0 8px;font-size:17px;font-weight:500}
+.sheet p{margin:0 0 12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+.sheetBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.sheetBtns .go+.go{margin-top:0}
+.waPre{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px;
+  font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:34dvh;overflow-y:auto;
+  -webkit-user-select:text;user-select:text;margin-bottom:12px}
+.waList{display:grid;gap:8px}
+
+#puck{display:none;position:fixed;z-index:60;padding:12px 18px;border-radius:24px;
+  background:var(--card);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.18);
+  font-size:19px;touch-action:none;white-space:nowrap}
+#puck span{font-size:12px;color:var(--muted);margin-left:4px}
+body.min .app{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
 
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);
-  background:var(--ink);color:var(--bg);border-radius:8px;padding:12px 18px;font-size:15px;
-  opacity:0;pointer-events:none;transition:.2s;z-index:90;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);
+  background:var(--sel);color:var(--sel-ink);border-radius:9px;padding:11px 17px;font-size:14px;
+  opacity:0;pointer-events:none;transition:.18s;z-index:120;max-width:86vw;text-align:center}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
+<div class="app">
 <header>
-  <div class="wrap">
-    <span class="id" id="hId">—</span>
-    <span class="st" id="hSt"></span>
-    <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
-    <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
-  </div>
+  <span class="clock num" id="hClock">--:--:--Z</span>
+  <span class="id" id="hId">—</span>
+  <button id="btnLog" aria-label="Log"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+  <button id="btnSet" aria-label="Setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6 6 18M18 18l-1.4-1.4M7.4 7.4 6 6"/></svg></button>
+  <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
+  <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
 
-<main>
+<div class="body">
+
   <!-- REPORT -->
-  <div class="view on wrap" id="v-form">
-    <img id="logo" alt="">
-    <div class="readout">
-      <b class="num" id="rNum">—</b>
-      <span id="rSub">on board</span>
+  <section class="view on" id="v-form">
+    <div class="brand">
+      <img id="brandImg" src="logo.png" alt="">
+      <svg id="brandSvg" viewBox="8 20 84 58" fill="none" aria-hidden="true">
+        <path d="M38,12 L62,12 C60,20 58,24 56,28 C68,34 78,50 78,66 C78,80 68,88 50,88 C32,88 22,80 22,66 C22,50 32,34 44,28 C42,24 40,20 38,12 Z" fill="currentColor" transform="translate(-1,19) scale(0.62)"/>
+        <path d="M41,28 L59,28" stroke="var(--card)" stroke-width="4" stroke-linecap="round" transform="translate(-1,19) scale(0.62)"/>
+        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <path d="M56,36 L56,66"/><path d="M65,36 L65,66"/><path d="M74,36 L74,66"/><path d="M83,36 L83,66"/><path d="M52,69 L87,33"/>
+        </g>
+      </svg>
+      <span>Basket Reporting</span>
     </div>
 
-    <p class="lab">Message type</p>
+    <div class="readout">
+      <div class="ball" id="ballBox"><b class="num" id="rNum">—</b><i id="rSub"></i></div>
+      <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
+    </div>
+
     <div class="types" id="types">
       <button data-t="Ballast" class="on">Ballast</button>
       <button data-t="ATC">ATC</button>
-      <button data-t="Ressources">Ressources</button>
+      <button data-t="Ressources">Ressou.</button>
       <button data-t="Other">Other</button>
     </div>
 
-    <div class="blk on" id="b-Ballast">
-      <div class="f">
-        <div class="pills" id="bAct">
-          <button data-v="drop" class="on">Drop</button>
-          <button data-v="take">Take on</button>
-          <button data-v="count">Count on board</button>
+    <div class="scroll">
+      <div class="blk on" id="b-Ballast">
+        <div class="f"><div class="pills" id="bAct">
+          <button data-v="drop">Drop</button><button data-v="count">Take Inventory</button>
+        </div></div>
+
+        <div class="sub on" id="s-drop">
+          <div class="f"><div class="pills" id="bQuick"></div></div>
+          <div class="f"><input type="number" id="bKg" inputmode="decimal" step="0.5" placeholder="Kilograms dropped"></div>
+          <div class="f"><input type="text" id="bNote" placeholder="Remark (optional)"></div>
+        </div>
+
+        <div class="sub" id="s-count">
+          <div class="f"><div class="unit"><input type="number" id="iBags" inputmode="numeric" step="1" placeholder="Bags"><span id="iBagUnit">bags</span></div></div>
+          <p class="hint">Count total incl. safety ballast</p>
+          <div class="f"><div class="unit"><input type="number" id="iWater" inputmode="decimal" step="1" placeholder="Water"><span>litres</span></div></div>
+          <div class="f"><p class="lab">Ready ballast <span id="iReadyFull"></span></p>
+            <div class="pills four" id="iReady">
+              <button data-v="25">25%</button><button data-v="50">50%</button>
+              <button data-v="75">75%</button><button data-v="100">100%</button>
+            </div></div>
+          <div class="calc" id="iCalc"></div>
+          <div class="f"><input type="text" id="iNote" placeholder="Remark (optional)"></div>
         </div>
       </div>
-      <div class="f" id="bQuickWrap"><div class="pills" id="bQuick"></div></div>
-      <div class="f"><input type="number" id="bKg" inputmode="decimal" step="0.5" placeholder="Kilograms"></div>
-      <div class="f"><input type="text" id="bNote" placeholder="Remark (optional)"></div>
-    </div>
 
-    <div class="blk" id="b-ATC">
-      <div class="f">
-        <div class="pills" id="aDir">
-          <button data-v="RX" class="on">Received</button>
-          <button data-v="TX">Sent</button>
+      <div class="blk" id="b-ATC">
+        <div class="f"><div class="pills" id="aDir">
+          <button data-v="RX">Received</button><button data-v="TX">Sent</button>
+        </div></div>
+        <div class="f"><input type="text" id="aStation" placeholder="Station" autocapitalize="characters"></div>
+        <div class="f two">
+          <input type="text" id="aFreq" inputmode="decimal" placeholder="Frq">
+          <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="SQ">
         </div>
+        <div class="carry hide" id="aCarry"><span>Carried over from the last call</span><button id="aConfirm">Confirm</button></div>
+        <div class="f"><textarea id="aMsg" placeholder="Message"></textarea></div>
+        <div class="f"><div class="links" id="aChips"></div></div>
+        <button class="check" id="waATC"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
+          <span>Send also to WhatsApp recipients<em id="waCntATC"></em></span></button>
       </div>
-      <div class="f two">
-        <input type="text" id="aStation" placeholder="Station" autocapitalize="characters">
-        <input type="text" id="aFreq" inputmode="decimal" placeholder="Frequency">
+
+      <div class="blk" id="b-Ressources">
+        <div class="f two">
+          <div><p class="lab">Pilot in command</p><div class="pills g2" id="cPic"></div></div>
+          <div><p class="lab">Resting</p><div class="pills g3" id="cRest"></div></div>
+        </div>
+        <div class="f"><div class="unit"><input type="number" id="rBat" inputmode="numeric" step="1" min="0" max="100" placeholder="Battery"><span>%</span></div></div>
+        <div class="f two">
+          <div><p class="lab">Fuel cell</p><div class="pills g2" id="rFuel">
+            <button data-v="on">On</button><button data-v="off">Off</button></div></div>
+          <div><p class="lab">Solar</p><div class="pills g2" id="rSolar">
+            <button data-v="on">On</button><button data-v="off">Off</button></div></div>
+        </div>
+        <div class="f"><input type="text" id="cNote" placeholder="Remark (optional)"></div>
+        <button class="check" id="waRes"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
+          <span>Send also to WhatsApp recipients<em id="waCntRes"></em></span></button>
       </div>
-      <div class="f"><input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="Squawk"></div>
-      <div class="f"><textarea id="aMsg" placeholder="Message"></textarea>
-        <div class="links" id="aChips" style="margin-top:12px"></div>
+
+      <div class="blk" id="b-Other">
+        <div class="f"><textarea id="oMsg" placeholder="Note" style="min-height:120px"></textarea></div>
+        <button class="check" id="waOth"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
+          <span>Send also to WhatsApp recipients<em id="waCntOth"></em></span></button>
       </div>
     </div>
 
-    <div class="blk" id="b-Ressources">
-      <div class="f">
-        <p class="lab">Pilot in command</p>
-        <div class="pills" id="cPic"></div>
-      </div>
-      <div class="f">
-        <p class="lab">Resting</p>
-        <div class="pills" id="cRest"></div>
-      </div>
-      <div class="f"><input type="text" id="cNote" placeholder="Remark (optional)"></div>
+    <div class="foot">
+      <button class="go" id="btnPost">Post to CC Notion</button>
+      <div class="ftline"><p class="tiny" id="hSt"></p><span class="ver"></span></div>
     </div>
-
-    <div class="blk" id="b-Other">
-      <div class="f"><textarea id="oMsg" placeholder="Note"></textarea></div>
-    </div>
-
-    <button class="go" id="btnPost">Post to CC Notion</button>
-
-    <div class="nav">
-      <button data-v="form" class="on">Report</button>
-      <button data-v="log">Log</button>
-      <button data-v="set">Setup</button>
-    </div>
-  </div>
+  </section>
 
   <!-- LOG -->
-  <div class="view wrap" id="v-log">
-    <p class="lab">Log</p>
-    <div id="logList"></div>
-    <h3>Transfer</h3>
-    <button class="go" id="btnSync">Send to GitHub now</button>
-    <button class="go sec" id="btnCsv">Save CSV</button>
-    <button class="go sec" id="btnJson">Save JSON</button>
-    <p class="lab" id="syncNote" style="margin-top:14px"></p>
-    <div class="nav">
-      <button data-v="form">Report</button>
-      <button data-v="log" class="on">Log</button>
-      <button data-v="set">Setup</button>
+  <section class="view" id="v-log">
+    <div class="scroll">
+      <h3>Log — tap an entry to edit</h3>
+      <div id="logList"></div>
     </div>
-  </div>
+    <div class="foot">
+      <div class="row2">
+        <button class="go sm sec" id="btnPull">Reload</button>
+        <button class="go sm" id="btnSync">Send now</button>
+      </div>
+      <div class="row2" style="margin-top:8px">
+        <button class="go sm sec" id="btnCsv">CSV</button>
+        <button class="go sm sec" id="btnJson">JSON</button>
+      </div>
+      <div class="ftline"><p class="tiny" id="syncNote"></p><span class="ver"></span></div>
+    </div>
+  </section>
 
   <!-- SETUP -->
-  <div class="view wrap" id="v-set">
-    <p class="lab">Flight</p>
-    <div class="f"><input type="text" id="sFlight" placeholder="Flight ID"></div>
-    <div class="f"><input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters"></div>
-    <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
-    <div class="f two"><input type="number" id="sInit" inputmode="decimal" placeholder="Start ballast kg"><input type="text" id="sSteps" placeholder="Bag sizes"></div>
+  <section class="view" id="v-set">
+    <div class="scroll">
+      <div id="setLocked">
+        <p class="lock">Settings are protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.</p>
+        <button class="go" id="btnUnlock">Unlock settings</button>
+      </div>
 
-    <h3>GitHub</h3>
-    <div class="f"><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
-    <div class="f two"><input type="text" id="sBranch" placeholder="Branch" autocapitalize="none"><input type="text" id="sDir" placeholder="Folder" autocapitalize="none"></div>
-    <div class="f"><input type="text" id="sToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-    <div class="f">
-      <p class="lab">Sending</p>
-      <div class="pills" id="sAuto"><button data-v="1">Automatic</button><button data-v="0">Manual only</button></div>
+      <div id="setOpen" style="display:none">
+        <h3>This device</h3>
+        <div class="f"><div class="pills" id="sMode">
+          <button data-v="personal">Personal device</button><button data-v="shared">Shared device</button>
+        </div></div>
+        <div class="f"><p class="lab" id="sReporterLab">Your name — every entry from this device is filed under it</p>
+          <input type="text" id="sReporter" placeholder="Name"></div>
+
+        <h3>Flight</h3>
+        <div class="f"><input type="text" id="sFlight" placeholder="Flight ID"></div>
+        <div class="f two"><input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters">
+          <input type="number" id="sInit" inputmode="decimal" placeholder="Start ballast kg"></div>
+        <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
+
+        <h3>Ballast</h3>
+        <div class="f two"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="Weight per bag kg">
+          <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" placeholder="Full ready ballast kg"></div>
+        <div class="f"><input type="text" id="sSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
+
+        <h3>App</h3>
+        <div class="f"><p class="lab">Night colour</p>
+          <div class="pills four" id="sNight">
+            <button data-v="red">Red</button><button data-v="amber">Amber</button>
+            <button data-v="green">Green</button><button data-v="white">White</button>
+          </div></div>
+        <div class="f"><p class="lab">Confirmation tone</p>
+          <div class="pills" id="sBeep"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+        <p class="hint">Entries are posted automatically. Without a connection they are held on the
+          device and go out in chronological order as soon as the link is back.</p>
+
+        <details class="fold" id="foldWa">
+          <summary>WhatsApp recipients</summary>
+          <div class="in">
+            <p class="lab">Up to eight. Number in international form, digits only, e.g. 41791234567.</p>
+            <div id="waRows"></div>
+          </div>
+        </details>
+
+        <details class="fold" id="foldGit">
+          <summary>GitHub connection</summary>
+          <div class="in">
+            <div class="f"><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
+            <div class="f two"><input type="text" id="sBranch" placeholder="Branch" autocapitalize="none">
+              <input type="text" id="sDir" placeholder="Folder" autocapitalize="none"></div>
+            <div class="f"><input type="password" id="sToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+            <button class="go sm sec" id="btnTest">Check connection</button>
+          </div>
+        </details>
+
+        <div style="height:14px"></div>
+        <button class="go warn" id="btnWipe">Clear entries on this device</button>
+      </div>
     </div>
-
-    <h3>App</h3>
-    <div class="f"><input type="text" id="sLogo" placeholder="Logo URL (optional)" autocapitalize="none" autocorrect="off"></div>
-    <div class="f">
-      <p class="lab">Confirmation tone</p>
-      <div class="pills" id="sBeep"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div class="foot">
+      <button class="go" id="btnSave" disabled>Save settings</button>
+      <div class="ftline"><p class="tiny" id="setNote">Locked</p><span class="ver"></span></div>
     </div>
+  </section>
 
-    <button class="go" id="btnSave">Save settings</button>
-    <button class="go sec" id="btnTest">Check connection</button>
-    <button class="go warn" id="btnWipe">Clear entries on this device</button>
-
-    <div class="nav">
-      <button data-v="form">Report</button>
-      <button data-v="log">Log</button>
-      <button data-v="set" class="on">Setup</button>
-    </div>
-  </div>
-</main>
+</div>
+</div>
 
 <div id="puck" role="button" tabindex="0" aria-label="Open Basket Reporting"><b class="num" id="pNum">—</b><span>kg</span></div>
+<div id="modal"></div>
 <div id="toast"></div>
 
 <script>
 "use strict";
-/* ── State ─────────────────────────────────────────────────────────── */
-const K_CFG='bsk.cfg.v2', K_ENT='bsk.entries.v2', K_UI='bsk.ui.v2';
+/* ── Storage ───────────────────────────────────────────────────────── */
+/* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
+const APP_VERSION='v260812-02';
+const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
+const PASS='1234';
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           repo:'',branch:'main',dir:'data',token:'',auto:1,beep:1,logo:'',theme:''};
+           bagKg:15,readyKg:30,mode:'personal',reporter:'',
+           repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[]};
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
-let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form'},load(K_UI,{}));
-let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null;
+let TOMB=load(K_TOMB,[]);
+let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
+                      wa:0,alt:0,ready:100,fuel:'',solar:'',lastAtc:{station:'',freq:'',squawk:''}},load(K_UI,{}));
+let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false;
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
+function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('Storage full')}}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const r1=n=>Math.round(n*10)/10;
 const pad=(n,w)=>String(n).padStart(w,'0');
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nz=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
 
 /* ── Ballast maths ─────────────────────────────────────────────────── */
-const chrono=()=>ENT.slice().sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:a.seq-b.seq);
-function onBoard(){
-  let a=Number(CFG.init)||0;
-  for(const e of chrono()){
-    if(e.ballast_action==='count') a=Number(e.ballast_abs_kg)||0;
-    else if(e.ballast_delta_kg) a=r1(a+Number(e.ballast_delta_kg));
+const chrono=l=>(l||ENT).slice().sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:(a.seq||0)-(b.seq||0));
+/* ready ballast counts as sand, so sand + water = total */
+function invCalc(bags,litres,pct){
+  const sand=r1(nz(bags)*nz(CFG.bagKg)+nz(CFG.readyKg)*nz(pct)/100);
+  const water=r1(nz(litres));
+  return{sand,water,total:r1(sand+water)};
+}
+function recalc(list){
+  let a=Number(CFG.init)||0, base=(Number(CFG.init)||0)>0;
+  for(const e of chrono(list)){
+    if(e.type!=='Ballast')continue;
+    if(e.ballast_action==='count'){
+      const t=r1(Number(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)||0);
+      e.tally_diff_kg=base?r1(t-a):null;   /* counted minus expected */
+      a=t;e.ballast_abs_kg=a;base=true;
+    }else if(e.ballast_delta_kg!=null){a=r1(a+Number(e.ballast_delta_kg));e.ballast_abs_kg=a}
+    else if(e.ballast_abs_kg!=null){a=r1(Number(e.ballast_abs_kg))}
   }
   return a;
 }
-function droppedTotal(){let s=0;for(const e of ENT)if(e.ballast_delta_kg<0)s+=-e.ballast_delta_kg;return r1(s)}
+const onBoard=()=>recalc(ENT);
+const firstInv=()=>chrono(ENT).find(e=>e.type==='Ballast'&&e.ballast_action==='count');
+function droppedTotal(){
+  const f=firstInv();
+  const start=f?(Number(f.total_ballast_kg!=null?f.total_ballast_kg:f.ballast_abs_kg)||0):(Number(CFG.init)||0);
+  return r1(Math.max(0,start-onBoard()));
+}
 
-/* ── Entries ───────────────────────────────────────────────────────── */
-const picName=()=>UI.pic==='p2'?(CFG.p2||'Pilot 2'):(CFG.p1||'Pilot 1');
-const restName=()=>UI.rest==='p1'?(CFG.p1||'Pilot 1'):UI.rest==='p2'?(CFG.p2||'Pilot 2'):'';
+/* ── Entry helpers ─────────────────────────────────────────────────── */
+const p1n=()=>CFG.p1||'Pilot 1',p2n=()=>CFG.p2||'Pilot 2';
+const picName=()=>UI.pic==='p2'?p2n():p1n();
+const otherName=()=>UI.pic==='p2'?p1n():p2n();
+const restName=()=>UI.rest==='p1'?p1n():UI.rest==='p2'?p2n():'';
+const shared=()=>CFG.mode==='shared';
+const reporter=()=>shared()?(UI.alt?otherName():picName()):(CFG.reporter||picName());
+const waList=()=>(CFG.wa||[]).filter(r=>r&&r.p&&String(r.p).replace(/\D/g,'').length>5);
 function localISO(d){const o=-d.getTimezoneOffset(),s=o>=0?'+':'-',a=Math.abs(o);
   return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+'T'+pad(d.getHours(),2)+':'+
          pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2)+s+pad(Math.floor(a/60),2)+':'+pad(a%60,2)}
-const hm=i=>i?i.slice(11,16):'—';
+const hm=i=>i?String(i).slice(11,16):'--:--';
+
+/* position of THIS device, short notation: 484532N / 0072345E, altitude in feet */
+function dms(v,w){
+  const a=Math.abs(v);let d=Math.floor(a),mf=(a-d)*60,m=Math.floor(mf),s=Math.round((mf-m)*60);
+  if(s===60){s=0;m++}if(m===60){m=0;d++}
+  return pad(d,w)+pad(m,2)+pad(s,2);
+}
+const dm=(v,w)=>{const a=Math.abs(v);let d=Math.floor(a),m=Math.round((a-d)*60);
+  if(m===60){d++;m=0}return pad(d,w)+pad(m,2)};
 function gpsSnap(){
-  if(!GPS)return{lat:null,lon:null,alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
+  if(!GPS)return{lat:null,lon:null,pos_lat:'',pos_lon:'',alt_ft:null,
+    alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
   return{lat:+GPS.lat.toFixed(6),lon:+GPS.lon.toFixed(6),
+    pos_lat:dms(GPS.lat,2)+(GPS.lat>=0?'N':'S'),
+    pos_lon:dms(GPS.lon,3)+(GPS.lon>=0?'E':'W'),
+    alt_ft:GPS.alt==null?null:Math.round(GPS.alt*3.28084),
     alt_gps_m:GPS.alt==null?null:Math.round(GPS.alt),
     gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
     gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
@@ -300,20 +503,62 @@ function gpsSnap(){
 function add(part){
   const now=new Date();
   const e=Object.assign({
-    id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),
+    id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()),
     flight_id:CFG.flight||'UNTITLED',callsign:CFG.call||'',
-    seq:ENT.length?Math.max(...ENT.map(x=>x.seq||0))+1:1,device:DEV,
+    seq:ENT.length?Math.max(...ENT.map(x=>x.seq||0))+1:1,
+    device:DEV,device_mode:CFG.mode,reporter:reporter(),source:'app',
     ts_utc:now.toISOString(),ts_local:localISO(now),
     type:'Other',ballast_action:'',ballast_delta_kg:null,ballast_abs_kg:null,
+    sand_kg:null,water_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
-    crew_pic:picName(),crew_rest:restName(),note:'',synced:false
+    crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',note:'',
+    whatsapp:'',whatsapp_to:'',edited_at:'',edited_by:'',synced:false
   },gpsSnap(),part);
-  if(e.ballast_action!=='count') e.ballast_abs_kg=r1(onBoard()+(Number(e.ballast_delta_kg)||0));
-  ENT.push(e);save(K_ENT,ENT);paint();beep();
-  if(Number(CFG.auto)&&CFG.repo&&CFG.token)sync(true);
+  ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();
+  if(configured())sync(true,true);
+  return e;
 }
 
-/* ── GPS, wake lock, tone ──────────────────────────────────────────── */
+/* ── WhatsApp ──────────────────────────────────────────────────────── */
+function waText(e){
+  const cs=CFG.call||'Basket';
+  const L=['*Msg from '+cs+' Basket - '+e.type+'*'];
+  if(e.type==='ATC'){
+    L.push((e.atc_dir==='TX'?'Sent to ':'Received from ')+(e.atc_station||'-'));
+    L.push('Frq '+(e.atc_freq||'-')+'  SQ '+(e.atc_squawk||'-'));
+    L.push('Msg: '+(e.atc_msg||'-'));
+  }else if(e.type==='Ressources'){
+    L.push('PIC '+(e.crew_pic||'-')+'  Resting '+(e.crew_rest||'nobody'));
+    if(e.res_battery_pct!=null&&e.res_battery_pct!=='')L.push('Battery '+e.res_battery_pct+' %');
+    if(e.res_fuel_cell||e.res_solar)
+      L.push('Fuel cell '+(e.res_fuel_cell||'n/a')+'  Solar '+(e.res_solar||'n/a'));
+    L.push('Msg: '+(e.note||'-'));
+  }else L.push('Msg: '+(e.note||'-'));
+  L.push(String(e.ts_utc).slice(11,16)+'Z');
+  if(e.gps_fix){
+    L.push('pos '+dm(e.lat,2)+(e.lat>=0?'N':'S')+' '+dm(e.lon,3)+(e.lon>=0?'E':'W')
+      +(e.alt_ft==null?'':' '+Math.round(e.alt_ft/10)*10+' ft'));
+    L.push('https://maps.google.com/?q='+e.lat.toFixed(5)+','+e.lon.toFixed(5));
+  }else L.push('pos not available');
+  return L.join('\n');
+}
+async function waSheet(e){
+  const list=waList(),txt=waText(e);
+  if(!list.length){await ask({title:'No recipients',cancel:false,ok:'Close',
+    text:'Add WhatsApp recipients in the setup first. The entry has been posted regardless.',
+    html:'<div class="waPre">'+esc(txt)+'</div>'});return}
+  const enc=encodeURIComponent(txt);
+  const rows=list.map(r=>`<a class="go sec sm" target="_blank" rel="noopener"
+      href="https://wa.me/${String(r.p).replace(/\D/g,'')}?text=${enc}">${esc(r.n||r.p)}</a>`).join('');
+  await ask({title:'Send to WhatsApp',
+    text:'WhatsApp opens one chat at a time. Tap a name, press send, come back, tap the next.',
+    html:'<div class="waPre">'+esc(txt)+'</div><div class="waList">'+rows+'</div>',
+    ok:'Copy text',cancel:'Done',
+    onMount:m=>{m.querySelector('[data-a="1"]').onclick=async()=>{
+      try{await navigator.clipboard.writeText(txt);toast('Message copied')}catch(err){toast('Select the text to copy')}}}});
+}
+
+/* ── GPS, wake lock, tone, clock ───────────────────────────────────── */
 if(navigator.geolocation)navigator.geolocation.watchPosition(
   p=>{GPS={lat:p.coords.latitude,lon:p.coords.longitude,alt:p.coords.altitude,acc:p.coords.accuracy,t:Date.now()};GPSERR=null;paintStatus()},
   e=>{GPSERR=e.code===1?'location off':'no fix';paintStatus()},
@@ -327,219 +572,501 @@ function beep(){if(!Number(CFG.beep))return;try{
   const o=AC.createOscillator(),g=AC.createGain();
   o.frequency.value=880;g.gain.value=.06;o.connect(g);g.connect(AC.destination);o.start();
   g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.12);o.stop(AC.currentTime+.13)}catch(e){}}
+function tick(){const d=new Date();
+  $('#hClock').textContent=pad(d.getUTCHours(),2)+':'+pad(d.getUTCMinutes(),2)+':'+pad(d.getUTCSeconds(),2)+'Z'}
+setInterval(tick,1000);tick();
 
-/* ── GitHub ────────────────────────────────────────────────────────── */
+/* ── GitHub, multi-device merge ────────────────────────────────────── */
 const API='https://api.github.com';
+const ETAG={};
 const hdr=()=>({Authorization:'Bearer '+CFG.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'});
 const b64e=s=>{const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x)};
 const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob((s||'').replace(/\s/g,'')),c=>c.charCodeAt(0)));
 const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
-  return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`}};
-async function ghGet(p){
-  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}?ref=${encodeURIComponent(CFG.branch||'main')}`,{headers:hdr(),cache:'no-store'});
-  if(r.status===404)return{sha:null,text:''};
+  return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`,del:`${d}/${b}.deleted.json`}};
+const configured=()=>!!(CFG.repo&&CFG.token);
+async function ghGet(p,cond){
+  const h=hdr();
+  if(cond&&ETAG[p])h['If-None-Match']=ETAG[p];
+  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
+    {headers:h,cache:'no-store'});
+  if(r.status===304)return{notModified:true};
+  if(r.status===404){delete ETAG[p];return{sha:null,text:''}}
   if(!r.ok)throw new Error('GET '+r.status);
+  const et=r.headers.get('etag');if(et)ETAG[p]=et;
   const j=await r.json();return{sha:j.sha,text:j.content?b64d(j.content):''};
 }
 async function ghPut(p,text,sha,msg){
   const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}`,{method:'PUT',headers:hdr(),
     body:JSON.stringify({message:msg,content:b64e(text),sha:sha||undefined,branch:CFG.branch||'main'})});
-  if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,100));
+  if(r.status===409||r.status===422){delete ETAG[p];throw Object.assign(new Error('conflict'),{conflict:true})}
+  if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,90));
+  delete ETAG[p];
 }
-const COLS=['flight_id','callsign','seq','device','ts_utc','ts_local','type','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
-  'ballast_action','ballast_delta_kg','ballast_abs_kg','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg','crew_pic','crew_rest','note','id'];
+const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
+const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
+  'pos_lat','pos_lon','alt_ft','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
+  'ballast_action','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','total_ballast_kg','tally_diff_kg',
+  'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
+  'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar','note',
+  'whatsapp','whatsapp_to','edited_at','edited_by','id'];
 const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
 const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
 
-async function sync(silent){
+let pollN=0;
+async function sync(silent,push,attempt){
+  attempt=attempt||0;push=push!==false;
   if(SYNCING)return;
-  if(!CFG.repo||!CFG.token){if(!silent)toast('Add repository and token in Setup');return}
+  if(!configured()){if(!silent)toast('Add repository and token in Setup');return}
   if(!navigator.onLine){if(!silent)toast('Offline — entries stay on this device');return}
   SYNCING=true;paintStatus();
   try{
-    const p=paths();let remote=[];
-    const g=await ghGet(p.json);
-    if(g.text){try{remote=JSON.parse(g.text)}catch(e){remote=[]}}
-    if(!Array.isArray(remote))remote=[];
+    const p=paths();
+    const g=await ghGet(p.json,!push);
+    if(g.notModified&&!push&&!ENT.some(e=>!e.synced)){LASTSYNC=new Date();return}
+
+    let rt=null;
+    if(push||pollN%6===0){try{rt=parse((await ghGet(p.del)).text)}catch(e){rt=null}}
+    if(rt){
+      const ids=new Set([...TOMB.map(t=>t.id),...rt.map(t=>t.id)]);
+      TOMB=[...ids].map(id=>TOMB.find(t=>t.id===id)||rt.find(t=>t.id===id));save(K_TOMB,TOMB);
+    }
+    const newTombs=rt?TOMB.filter(t=>!rt.some(x=>x.id===t.id)):[];
+    const tid=new Set(TOMB.map(t=>t.id));
+
+    const remote=g.notModified?null:parse(g.text);
+    const unsent=new Set(ENT.filter(e=>!e.synced).map(e=>e.id));
     const m=new Map();
-    remote.forEach(e=>{if(e&&e.id)m.set(e.id,e)});
-    ENT.forEach(e=>{const c=Object.assign({},e);delete c.synced;m.set(c.id,c)});
-    const all=[...m.values()].sort((a,b)=>a.ts_utc<b.ts_utc?-1:1);
-    const msg=`${CFG.flight||'flight'} · ${all.length} rows · ${DEV}`;
-    await ghPut(p.json,JSON.stringify(all,null,1),g.sha,msg);
-    let cs=null;try{cs=(await ghGet(p.csv)).sha}catch(e){}
-    await ghPut(p.csv,toCsv(all),cs,msg);
-    ENT.forEach(e=>e.synced=true);save(K_ENT,ENT);LASTSYNC=new Date();paint();
-    if(!silent)toast('Sent '+all.length+' rows');
-  }catch(e){if(!silent)toast(String(e.message||e))}
-  finally{SYNCING=false;paintStatus()}
+    if(remote)remote.forEach(e=>{if(e&&e.id)m.set(e.id,e)});
+    else ENT.forEach(e=>{if(e&&e.id&&e.synced)m.set(e.id,Object.assign({},e))});
+    ENT.forEach(e=>{if(!e||!e.id)return;const c=Object.assign({},e);delete c.synced;m.set(c.id,c)});
+    tid.forEach(id=>m.delete(id));
+    const all=chrono([...m.values()]);
+    recalc(all);
+
+    if(push){
+      const msg=`${CFG.flight||'flight'} · ${all.length} rows · ${reporter()}`;
+      await ghPut(p.json,JSON.stringify(all,null,1),g.sha,msg);
+      let cs=null;try{cs=(await ghGet(p.csv)).sha}catch(e){}
+      await ghPut(p.csv,toCsv(all),cs,msg);
+      if(newTombs.length){let ds=null;try{ds=(await ghGet(p.del)).sha}catch(e){}
+        await ghPut(p.del,JSON.stringify(TOMB,null,1),ds,'deletions · '+reporter())}
+      ENT=all.map(e=>Object.assign({},e,{synced:true}));
+    }else{
+      ENT=all.map(e=>Object.assign({},e,{synced:!unsent.has(e.id)}));
+    }
+    save(K_ENT,ENT);LASTSYNC=new Date();paint();
+    if(!silent)toast((push?'Synced ':'Reloaded ')+all.length+' rows');
+  }catch(e){
+    if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1)}
+    if(!silent)toast(String(e.message||e));
+  }finally{SYNCING=false;paintStatus()}
 }
 
 /* ── Painting ──────────────────────────────────────────────────────── */
 function paintStatus(){
   $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' · '+CFG.call:'');
-  const bits=[];
-  if(GPS&&Date.now()-GPS.t<30000)bits.push('GPS ±'+Math.round(GPS.acc||0)+' m');
-  else bits.push(GPS?'GPS stale':(GPSERR||'GPS searching'));
+  const b=[];
+  b.push(GPS&&Date.now()-GPS.t<30000?'GPS ±'+Math.round(GPS.acc||0)+' m':(GPS?'GPS stale':(GPSERR||'GPS searching')));
   const un=ENT.filter(e=>!e.synced).length;
-  bits.push(SYNCING?'sending':un?un+' pending':(CFG.repo&&CFG.token?'sent':'local'));
-  $('#hSt').textContent=bits.join(' · ');
-  $('#syncNote').textContent=un?un+' entry(ies) not sent yet.'
-    :(LASTSYNC?'All sent, last at '+localISO(LASTSYNC).slice(11,19)+'.':'Nothing sent yet.');
+  b.push(SYNCING?'syncing':un?un+' queued':(configured()?'synced':'no repository'));
+  b.push(ENT.length+' rows');
+  $('#hSt').textContent=b.join(' · ');
+  $('#syncNote').textContent=un?un+' entry(ies) queued, going out as soon as there is a link.'
+    :(LASTSYNC?'In sync, last at '+localISO(LASTSYNC).slice(11,19):'Not sent yet.');
 }
 function paintReadout(){
   const v=onBoard();
   $('#rNum').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
   $('#pNum').textContent=Number.isInteger(v)?v:v.toFixed(1);
-  $('#rSub').textContent='on board · '+droppedTotal()+' kg dropped · PIC '+picName();
+  $('#rSub').innerHTML='on board · '+droppedTotal()+' kg dropped '+(firstInv()?'since 1st inventory':'since start');
+  $('#ballBox').classList.toggle('hide',UI.type!=='Ballast');
+  $('#repName').textContent=reporter();
+  $('#repRole').textContent=shared()?(UI.alt?'Not the PIC':'Reporter — PIC'):'Reporter';
+  $('#btnRep').classList.toggle('on',shared()&&!!UI.alt);
+  $('#btnRep').classList.toggle('hide',!shared());
+}
+function line(e){
+  let h='',s='';
+  if(e.type==='Ballast'){
+    if(e.ballast_action==='count'){
+      h='Inventory '+(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)+' kg';
+      s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' · water '+(e.water_kg!=null?e.water_kg:'?')
+        +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')+(e.inv_ready_pct!=null?' · ready '+e.inv_ready_pct+'%':'')
+        +(e.tally_diff_kg!=null?' · diff '+(e.tally_diff_kg>0?'+':'')+e.tally_diff_kg+' kg':'')
+        +(e.note?' · '+e.note:'');
+    }else{h=(e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg \u2192 '+e.ballast_abs_kg+' kg';s=e.note||''}
+  }else if(e.type==='ATC'){
+    h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')
+      +(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
+    s=e.atc_msg||'';
+  }else if(e.type==='Ressources'){
+    h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' resting':' \u00b7 both awake');
+    s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?'bat '+e.res_battery_pct+'%':'',
+       e.res_fuel_cell?'fuel cell '+e.res_fuel_cell:'',e.res_solar?'solar '+e.res_solar:'',e.note||'']
+       .filter(Boolean).join(' \u00b7 ');
+  }else{h=e.note||'Note';s=''}
+  return{h,s};
 }
 function paintLog(){
-  const l=chrono().reverse(),box=$('#logList');
+  const l=chrono(ENT).reverse(),box=$('#logList');
   if(!l.length){box.innerHTML='<p class="none">No entries yet.</p>';return}
   box.innerHTML=l.map(e=>{
-    let h='',s='';
-    if(e.type==='Ballast'){
-      h=e.ballast_action==='count'?'Counted '+e.ballast_abs_kg+' kg':
-        (e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg \u2192 '+e.ballast_abs_kg+' kg';
-      s=e.note||'';
-    }else if(e.type==='ATC'){
-      h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')+(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
-      s=e.atc_msg||'';
-    }else if(e.type==='Ressources'){
-      h='PIC '+(e.crew_pic||'\u2014');s=(e.crew_rest?e.crew_rest+' resting':'both awake')+(e.note?' \u00b7 '+e.note:'');
-    }else{h='Note';s=e.note||''}
-    const pos=e.gps_fix?e.lat.toFixed(4)+', '+e.lon.toFixed(4)+(e.alt_gps_m!=null?' \u00b7 '+e.alt_gps_m+' m':''):'no position';
-    return `<div class="entry"><span class="t num">${hm(e.ts_local)}</span>
-      <span class="c">${esc(h)}<i>${esc(s?s+' \u2014 ':'')}${esc(pos)}</i></span>
-      <span class="p ${e.synced?'done':''}"></span></div>`;
+    const {h,s}=line(e);
+    const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'');
+    return `<button class="entry" data-id="${esc(e.id)}"><span class="t num">${hm(e.ts_local||e.ts_utc)}</span>
+      <span class="c">${esc(h)}<i>${esc(who)}${s?' \u00b7 '+esc(s):''}</i></span>
+      <span class="p ${e.synced?'done':''}"></span></button>`;
   }).join('');
 }
 function paintQuick(){
-  $('#bQuick').innerHTML=(CFG.steps||DEF.steps).split(',').map(s=>parseFloat(s)).filter(n=>n>0).slice(0,8)
-    .map(n=>`<button data-v="${n}">${n} kg</button>`).join('');
+  $('#bQuick').innerHTML=(CFG.steps||DEF.steps).split(',').map(s=>parseFloat(s)).filter(n=>n>0).slice(0,6)
+    .map(n=>`<button data-v="${n}">${n}</button>`).join('');
 }
 function paintCrew(){
-  const a=CFG.p1||'Pilot 1',b=CFG.p2||'Pilot 2';
-  $('#cPic').innerHTML=`<button data-v="p1"${UI.pic==='p1'?' class="on"':''}>${esc(a)}</button><button data-v="p2"${UI.pic==='p2'?' class="on"':''}>${esc(b)}</button>`;
-  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>Nobody</button><button data-v="p1"${UI.rest==='p1'?' class="on"':''}>${esc(a)}</button><button data-v="p2"${UI.rest==='p2'?' class="on"':''}>${esc(b)}</button>`;
+  $('#cPic').innerHTML=`<button data-v="p1"${UI.pic==='p1'?' class="on"':''}>${esc(p1n())}</button><button data-v="p2"${UI.pic==='p2'?' class="on"':''}>${esc(p2n())}</button>`;
+  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>Nobody</button><button data-v="p1"${UI.rest==='p1'?' class="on"':''}>${esc(p1n())}</button><button data-v="p2"${UI.rest==='p2'?' class="on"':''}>${esc(p2n())}</button>`;
+}
+function paintWaChecks(){
+  const n=waList().length;
+  const t=n?' — '+n+' recipient'+(n>1?'s':''):' — none set up yet';
+  ['ATC','Res','Oth'].forEach(k=>{$('#waCnt'+k).textContent=t});
+  $$('.check').forEach(c=>c.classList.toggle('on',!!UI.wa));
+}
+function paintInv(){
+  $('#iBagUnit').textContent='bags à '+nz(CFG.bagKg)+' kg';
+  $('#iReadyFull').textContent='(full '+nz(CFG.readyKg)+' kg, sand)';
+  const c=invCalc($('#iBags').value,$('#iWater').value,UI.ready);
+  const exp=onBoard();
+  const d=r1(c.total-exp);
+  $('#iCalc').innerHTML=`Sand <b>${c.sand} kg</b> · Water <b>${c.water} kg</b> · Total <b>${c.total} kg</b>`
+    +(ENT.some(e=>e.ballast_action==='count')||nz(CFG.init)>0
+      ? `<br>Expected ${exp} kg · difference <b>${d>0?'+':''}${d} kg</b>` : '');
 }
 function paint(){paintReadout();paintLog();paintStatus()}
 
+/* ── Modal ─────────────────────────────────────────────────────────── */
+function ask(o){
+  return new Promise(res=>{
+    const m=$('#modal');
+    m.innerHTML=`<div class="sheet">
+      <h4>${esc(o.title||'')}</h4>${o.text?`<p>${esc(o.text)}</p>`:''}
+      ${o.html||''}
+      ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
+      <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
+        ${o.cancel===false?'':`<button class="go sec" data-a="0">${esc(o.cancel||'Cancel')}</button>`}
+        <button class="go ${o.danger?'warn':''}" data-a="1">${esc(o.ok||'OK')}</button>
+      </div></div>`;
+    m.classList.add('on');
+    const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
+    const done=v=>{m.classList.remove('on');m.innerHTML='';res(v)};
+    if(o.cancel!==false)m.querySelector('[data-a="0"]').onclick=()=>done(null);
+    m.querySelector('[data-a="1"]').onclick=()=>done(o.input?m.querySelector('#mIn').value:(o.html?collect():true));
+    m.onclick=ev=>{if(ev.target===m)done(null)};
+    if(o.onMount)o.onMount(m,()=>done(null));
+    const i=m.querySelector('#mIn');if(i)setTimeout(()=>i.focus(),60);
+  });
+}
+async function confirm2(a,b){
+  if(!await ask({title:a.title,text:a.text,ok:a.ok||'Continue',danger:true}))return false;
+  if(!await ask({title:b.title,text:b.text,ok:b.ok||'Yes, do it',danger:true}))return false;
+  return true;
+}
+
 /* ── Theme ─────────────────────────────────────────────────────────── */
-const SUN='<circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M5.2 12H3M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4"/>';
+const SUN='<circle cx="12" cy="12" r="4"/><path d="M12 2.8v2.1M12 19.1v2.1M21.2 12h-2.1M4.9 12H2.8M18.4 5.6 16.9 7.1M7.1 16.9 5.6 18.4M18.4 18.4 16.9 16.9M7.1 7.1 5.6 5.6"/>';
 const MOON='<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>';
+const NIGHT_BG={red:'#000000',amber:'#000000',green:'#000000',white:'#000000'};
 function setTheme(t,persist){
   document.documentElement.dataset.theme=t;
+  document.documentElement.dataset.night=CFG.night||'red';
   $('#icTheme').innerHTML=t==='night'?SUN:MOON;
-  const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='night'?'#000000':'#FFFFFF';
+  const m=document.querySelector('meta[name=theme-color]');
+  if(m)m.content=t==='night'?NIGHT_BG[CFG.night||'red']:'#E4E7EA';
   if(persist){CFG.theme=t;save(K_CFG,CFG)}
 }
 $('#btnTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='night'?'day':'night',true);
 
-/* ── Interaction ───────────────────────────────────────────────────── */
-function pills(sel,cb){$(sel).addEventListener('click',ev=>{
-  const b=ev.target.closest('button');if(!b)return;
-  [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v,b)})}
-
+/* ── Navigation ────────────────────────────────────────────────────── */
 function setView(v){
   UI.view=v;save(K_UI,UI);
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $$('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  document.querySelector('main').scrollTop=0;
+  $('#btnLog').classList.toggle('on',v==='log');
+  $('#btnSet').classList.toggle('on',v==='set');
+  if(v!=='set')lockSettings();
+  if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
-$$('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$('#btnLog').onclick=()=>setView(UI.view==='log'?'form':'log');
+$('#btnSet').onclick=()=>setView(UI.view==='set'?'form':'set');
+$('#btnRep').onclick=()=>{if(!shared())return;
+  UI.alt=UI.alt?0:1;save(K_UI,UI);paintReadout();
+  toast('Reporting as '+reporter()+(UI.alt?' — not the PIC':''))};
 
 function setType(t){
   UI.type=t;save(K_UI,UI);
   $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+t));
+  paintReadout();
+  if(t==='ATC')carryAtc();
+  if(t==='Ballast'&&UI.act==='count')paintInv();
 }
 $('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.t)});
 
-pills('#bAct',v=>{UI.act=v;save(K_UI,UI);
-  $('#bQuickWrap').style.display=v==='count'?'none':'';
-  $('#bKg').placeholder=v==='count'?'Kilograms counted':'Kilograms'});
+function pills(sel,cb){$(sel).addEventListener('click',ev=>{
+  const b=ev.target.closest('button');if(!b)return;
+  [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v,b)})}
+const mark=(sel,v)=>$$(sel+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(v)));
+
+function setAct(v){
+  UI.act=v;save(K_UI,UI);
+  $('#s-drop').classList.toggle('on',v==='drop');
+  $('#s-count').classList.toggle('on',v==='count');
+  if(v==='count')paintInv();
+}
+pills('#bAct',setAct);
 $('#bQuick').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   $$('#bQuick button').forEach(x=>x.classList.toggle('on',x===b));
   $('#bKg').value=b.dataset.v;
 });
+pills('#iReady',v=>{UI.ready=Number(v);save(K_UI,UI);paintInv()});
+$('#iBags').addEventListener('input',paintInv);
+$('#iWater').addEventListener('input',paintInv);
+
 pills('#aDir',v=>{UI.adir=v;save(K_UI,UI)});
-const MSGS=['Initial call','Position report','Level clearance','Squawk assigned','Frequency change','Leaving frequency'];
+const MSGS=['Initial call','Position report','QNH','Ops Normal','Level clearance','Squawk','Freq change','Leaving freq'];
 $('#aChips').innerHTML=MSGS.map(m=>`<button data-v="${m}">${m}</button>`).join('');
 $('#aChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   const t=$('#aMsg');t.value=(t.value?t.value+' \u00b7 ':'')+b.dataset.v});
 pills('#cPic',v=>{UI.pic=v;save(K_UI,UI);paintReadout()});
 pills('#cRest',v=>{UI.rest=v;save(K_UI,UI)});
+pills('#rFuel',v=>{UI.fuel=v;save(K_UI,UI)});
+pills('#rSolar',v=>{UI.solar=v;save(K_UI,UI)});
+$$('.check').forEach(c=>c.onclick=()=>{UI.wa=UI.wa?0:1;save(K_UI,UI);paintWaChecks()});
 
-$('#btnPost').onclick=()=>{
-  const t=UI.type;
+/* ── ATC carried-over values ───────────────────────────────────────── */
+const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
+function carryAtc(){
+  const l=UI.lastAtc||{};let any=false;
+  ATCF.forEach(([sel,k])=>{const el=$(sel);
+    if(!el.value&&l[k]){el.value=l[k];el.classList.add('pre');any=true}
+    else if(el.classList.contains('pre'))any=true});
+  $('#aCarry').classList.toggle('hide',!any);
+}
+ATCF.forEach(([sel])=>{const el=$(sel);
+  const clear=()=>{if(el.classList.contains('pre')){el.classList.remove('pre');
+    if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide')}};
+  el.addEventListener('focus',clear);el.addEventListener('input',clear)});
+$('#aConfirm').onclick=()=>{$$('#b-ATC input.pre').forEach(i=>i.classList.remove('pre'));
+  $('#aCarry').classList.add('hide');toast('Carried-over values confirmed')};
+
+/* ── Post ──────────────────────────────────────────────────────────── */
+$('#btnPost').onclick=async()=>{
+  const t=UI.type;let e=null;
   if(t==='Ballast'){
-    const kg=parseFloat($('#bKg').value);
-    if(!(kg>=0))return toast('Enter an amount in kilograms');
-    add(UI.act==='count'
-      ?{type:'Ballast',ballast_action:'count',ballast_abs_kg:r1(kg),note:$('#bNote').value.trim()}
-      :{type:'Ballast',ballast_action:UI.act,ballast_delta_kg:r1(UI.act==='drop'?-kg:kg),note:$('#bNote').value.trim()});
-    $('#bKg').value='';$('#bNote').value='';$$('#bQuick button').forEach(x=>x.classList.remove('on'));
-    toast(UI.act==='count'?'On board set to '+kg+' kg':(UI.act==='drop'?'\u2212':'+')+kg+' kg');
-  }else if(t==='ATC'){
+    if(UI.act==='count'){
+      const bags=$('#iBags').value,water=$('#iWater').value;
+      if(bags===''&&water==='')return toast('Enter the bags and the water');
+      const c=invCalc(bags,water,UI.ready);
+      add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
+        sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
+        inv_bags:bags===''?null:Math.round(nz(bags)),inv_ready_pct:UI.ready,note:$('#iNote').value.trim()});
+      $('#iNote').value='';paintInv();
+      const last=chrono(ENT)[chrono(ENT).length-1];
+      toast('Inventory '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
+    }else{
+      const kg=parseFloat($('#bKg').value);
+      if(!(kg>0))return toast('Enter the kilograms dropped');
+      add({type:'Ballast',ballast_action:'drop',ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim()});
+      $('#bKg').value='';$('#bNote').value='';$$('#bQuick button').forEach(x=>x.classList.remove('on'));
+      toast('\u2212'+kg+' kg');
+    }
+    return;
+  }
+  if(t==='ATC'){
+    if($$('#b-ATC input.pre').length)return toast('Confirm the carried-over station, Frq and SQ');
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
     if(!st&&!msg)return toast('Enter a station or a message');
-    add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
-         atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg});
-    $('#aMsg').value='';$('#aSquawk').value='';toast('ATC posted');
+    const wa=!!UI.wa;
+    e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
+      atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg,
+      whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
+    UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:$('#aSquawk').value.trim()};
+    save(K_UI,UI);$('#aMsg').value='';toast('ATC posted');carryAtc();
   }else if(t==='Ressources'){
-    add({type:'Ressources',note:$('#cNote').value.trim()});
+    const wa=!!UI.wa;
+    const bat=$('#rBat').value.trim();
+    e=add({type:'Ressources',note:$('#cNote').value.trim(),
+      res_battery_pct:bat===''?null:Math.round(nz(bat)),
+      res_fuel_cell:UI.fuel,res_solar:UI.solar,
+      whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
     $('#cNote').value='';toast('Crew status posted');
   }else{
     const v=$('#oMsg').value.trim();
     if(!v)return toast('The note is empty');
-    add({type:'Other',note:v});$('#oMsg').value='';toast('Note posted');
+    const wa=!!UI.wa;
+    e=add({type:'Other',note:v,whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
+    $('#oMsg').value='';toast('Note posted');
   }
+  if(UI.wa&&e)waSheet(e);
 };
 
-$('#btnSync').onclick=()=>sync(false);
+/* ── Log: edit and delete ──────────────────────────────────────────── */
+function fieldsFor(e){
+  if(e.type==='Ballast')
+    return e.ballast_action==='count'
+      ? [['inv_bags','Bags','number'],['water_kg','Water litres','number'],['inv_ready_pct','Ready ballast %','number'],['note','Remark','text']]
+      : [['_kg','Kilograms dropped','number'],['note','Remark','text']];
+  if(e.type==='ATC')
+    return [['atc_station','Station','text'],['atc_freq','Frq','text'],['atc_squawk','SQ','text'],['atc_msg','Message','area']];
+  if(e.type==='Ressources')
+    return [['crew_pic','Pilot in command','text'],['crew_rest','Resting','text'],
+            ['res_battery_pct','Battery %','number'],['res_fuel_cell','Fuel cell on/off','text'],
+            ['res_solar','Solar on/off','text'],['note','Remark','text']];
+  return [['note','Note','area']];
+}
+$('#logList').addEventListener('click',e=>{const b=e.target.closest('.entry');if(b)editEntry(b.dataset.id)});
+async function editEntry(id){
+  const e=ENT.find(x=>x.id===id);if(!e)return;
+  const val=k=>k==='_kg'?Math.abs(e.ballast_delta_kg||0):(e[k]==null?'':e[k]);
+  const html=fieldsFor(e).map(([k,l,t])=>`<div class="f"><p class="lab">${esc(l)}</p>`+
+    (t==='area'?`<textarea data-k="${k}">${esc(val(k))}</textarea>`
+      :`<input data-k="${k}" type="${t}" ${t==='number'?'inputmode="decimal" step="0.5"':''} value="${esc(val(k))}">`)+'</div>').join('')
+    +`<p class="lab">${esc(e.type)}${e.ballast_action?' · '+esc(e.ballast_action):''} · ${esc(hm(e.ts_local||e.ts_utc))} · ${esc(e.reporter||e.device||'')}`
+    +(e.pos_lat?` · ${esc(e.pos_lat)} ${esc(e.pos_lon)}${e.alt_ft!=null?' '+e.alt_ft+' ft':''}`:'')+`</p>`
+    +`<button class="go sec sm" id="mDel" style="margin-top:10px">Delete this entry</button>`;
+  const r=await ask({title:'Edit entry',html,ok:'Save',cancel:'Close',onMount:(m,close)=>{
+    m.querySelector('#mDel').onclick=async()=>{
+      close();
+      if(await confirm2(
+        {title:'Delete entry?',text:line(e).h+' — recorded by '+(e.reporter||e.device||'unknown')+'. The deletion is shared with the other devices.'},
+        {title:'Confirm deletion',text:'This removes the row from the table Notion reads. It cannot be undone.',ok:'Delete'})){
+        TOMB.push({id:e.id,ts:new Date().toISOString(),by:reporter()});save(K_TOMB,TOMB);
+        ENT=ENT.filter(x=>x.id!==e.id);recalc(ENT);save(K_ENT,ENT);paint();
+        toast('Entry deleted');if(configured())sync(true,true);
+      }};
+  }});
+  if(r===null||typeof r!=='object')return;
+  applyEdit(e,r);
+}
+function applyEdit(e,v){
+  for(const k in v){
+    if(k==='_kg'){const kg=parseFloat(v[k]);if(kg>0)e.ballast_delta_kg=r1(-kg)}
+    else if(['inv_bags','water_kg','inv_ready_pct'].includes(k))e[k]=v[k]===''?null:nz(v[k]);
+    else e[k]=v[k];
+  }
+  if(e.ballast_action==='count'){
+    const c=invCalc(e.inv_bags,e.water_kg,e.inv_ready_pct==null?100:e.inv_ready_pct);
+    e.sand_kg=c.sand;e.water_kg=c.water;e.total_ballast_kg=c.total;e.ballast_abs_kg=c.total;
+  }
+  e.edited_at=new Date().toISOString();e.edited_by=reporter();e.synced=false;
+  recalc(ENT);save(K_ENT,ENT);paint();toast('Entry updated');
+  if(configured())sync(true,true);
+}
+
+/* ── Transfer ──────────────────────────────────────────────────────── */
+$('#btnSync').onclick=()=>sync(false,true);
+$('#btnPull').onclick=()=>{delete ETAG[paths().json];sync(false,false)};
 const dl=(txt,name,mime)=>{const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:mime+';charset=utf-8'}));a.download=name;
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
-$('#btnCsv').onclick=()=>dl(toCsv(chrono()),(CFG.flight||'flightlog')+'.csv','text/csv');
-$('#btnJson').onclick=()=>dl(JSON.stringify(chrono(),null,1),(CFG.flight||'flightlog')+'.json','application/json');
+$('#btnCsv').onclick=()=>dl(toCsv(chrono(ENT)),(CFG.flight||'flightlog')+'.csv','text/csv');
+$('#btnJson').onclick=()=>dl(JSON.stringify(chrono(ENT),null,1),(CFG.flight||'flightlog')+'.json','application/json');
 
-/* Setup */
-const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',steps:'#sSteps',
-          repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken',logo:'#sLogo'};
-function fillSetup(){
-  for(const k in SF)$(SF[k]).value=CFG[k]??'';
-  [['#sAuto','auto'],['#sBeep','beep']].forEach(([s,k])=>
-    [...$(s).children].forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(CFG[k]))));
+/* ── Settings ──────────────────────────────────────────────────────── */
+const SF={reporter:'#sReporter',flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',steps:'#sSteps',
+  repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
+function paintWaRows(){
+  const w=CFG.wa||[];
+  $('#waRows').innerHTML=Array.from({length:8},(_,i)=>{
+    const r=w[i]||{n:'',p:''};
+    return `<div class="f two"><input type="text" data-wn="${i}" placeholder="Name ${i+1}" value="${esc(r.n)}">
+      <input type="tel" data-wp="${i}" inputmode="numeric" placeholder="41791234567" value="${esc(r.p)}"></div>`;
+  }).join('');
 }
-pills('#sAuto',v=>{CFG.auto=Number(v);save(K_CFG,CFG)});
-pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
-$('#btnSave').onclick=()=>{
-  for(const k in SF)CFG[k]=$(SF[k]).value.trim();
+function readWaRows(){
+  const out=[];
+  for(let i=0;i<8;i++){
+    const n=($('[data-wn="'+i+'"]')||{}).value||'',p=($('[data-wp="'+i+'"]')||{}).value||'';
+    if(String(p).replace(/\D/g,'').length>5)out.push({n:n.trim(),p:String(p).replace(/\D/g,'')});
+  }
+  return out;
+}
+function paintModeLab(){
+  $('#sReporterLab').textContent=($('#sMode button.on')||{dataset:{}}).dataset.v==='shared'
+    ? 'Fallback name — on a shared device the PIC and the reporter button decide'
+    : 'Your name — every entry from this device is filed under it';
+}
+function fillSetup(){
+  for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
+  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sNight',CFG.night);
+  paintWaRows();paintModeLab();
+}
+function lockSettings(){
+  UNLOCKED=false;$('#setLocked').style.display='';$('#setOpen').style.display='none';
+  $('#btnSave').disabled=true;$('#setNote').textContent='Locked';
+  $('#foldGit').open=false;$('#foldWa').open=false;
+}
+$('#btnUnlock').onclick=async()=>{
+  const v=await ask({title:'Settings password',text:'Enter the password to change the flight setup.',
+    input:'password',ph:'••••',ok:'Unlock'});
+  if(v===null)return;
+  if(v!==PASS)return toast('Wrong password');
+  UNLOCKED=true;fillSetup();
+  $('#setLocked').style.display='none';$('#setOpen').style.display='';
+  $('#btnSave').disabled=false;$('#setNote').textContent='Unlocked — changes need two confirmations';
+};
+pills('#sBeep',v=>{CFG.beep=Number(v);beep()});
+pills('#sMode',()=>paintModeLab());
+pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
+  if(document.documentElement.dataset.theme!=='night')setTheme('night',false)});
+$('#btnSave').onclick=async()=>{
+  if(!UNLOCKED)return;
+  const next={};for(const k in SF)next[k]=$(SF[k]).value.trim();
+  const wa=readWaRows();
+  const mode=($('#sMode button.on')||{dataset:{v:'personal'}}).dataset.v;
+  const night=($('#sNight button.on')||{dataset:{v:'red'}}).dataset.v;
+  const flightChanged=next.flight!==CFG.flight;
+  if(!await confirm2(
+    {title:'Save settings?',text:flightChanged
+      ?'The flight ID changes from "'+(CFG.flight||'none')+'" to "'+(next.flight||'none')+'". Entries are written to a different file from now on.'
+      :'These settings apply to every entry made on this device from now on. '+mode+' device, '+wa.length+' WhatsApp recipient(s).'},
+    {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
+  Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.night=night;
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
-  CFG.init=parseFloat(CFG.init)||0;
-  save(K_CFG,CFG);paintQuick();paintCrew();paintLogo();paint();toast('Settings saved');
+  CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
+  if(!shared())UI.alt=0;save(K_UI,UI);
+  save(K_CFG,CFG);paintQuick();paintCrew();paintWaChecks();paintInv();
+  setTheme(document.documentElement.dataset.theme,false);
+  recalc(ENT);save(K_ENT,ENT);paint();
+  toast('Settings saved');lockSettings();setView('form');
 };
 $('#btnTest').onclick=async()=>{
-  for(const k in SF)CFG[k]=$(SF[k]).value.trim();save(K_CFG,CFG);
-  if(!CFG.repo||!CFG.token)return toast('Add repository and token first');
-  try{const r=await fetch(`${API}/repos/${CFG.repo}`,{headers:hdr()});
+  const repo=$('#sRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+  const tok=$('#sToken').value.trim();
+  if(!repo||!tok)return toast('Enter repository and token first');
+  try{const r=await fetch(`${API}/repos/${repo}`,{headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'}});
     if(!r.ok)throw new Error(r.status===404?'Repository not found, or the token has no access':'Response '+r.status);
     const j=await r.json();toast('Connected to '+j.full_name);
   }catch(e){toast(String(e.message||e))}
 };
-$('#btnWipe').onclick=()=>{
+$('#btnWipe').onclick=async()=>{
   const un=ENT.filter(e=>!e.synced).length;
-  if(!confirm('Clear all '+ENT.length+' entries on this device?'+(un?'\n'+un+' have not been sent.':'')))return;
-  ENT=[];save(K_ENT,ENT);paint();toast('Cleared');
+  if(!await confirm2(
+    {title:'Clear this device?',text:ENT.length+' rows are held locally, '+un+' of them not sent. Rows already on GitHub stay there and come back on the next reload.'},
+    {title:'Confirm',text:'Clear the local copy?',ok:'Clear'}))return;
+  ENT=[];save(K_ENT,ENT);paint();toast('Local copy cleared');
 };
-function paintLogo(){const i=$('#logo');if(CFG.logo){i.src=CFG.logo;i.classList.add('on')}else i.classList.remove('on')}
-$('#logo').onerror=()=>$('#logo').classList.remove('on');
+/* the embedded mark is replaced by logo.png when that file sits next to index.html */
+/* the club logo is used by day; at night it would glare and its navy would vanish,
+   so the embedded mark takes over in the night palette */
+$('#brandImg').onload=()=>document.querySelector('.brand').classList.add('haslogo');
+$('#brandImg').onerror=()=>$('#brandImg').remove();
 
-/* Minimised pill */
+/* ── Minimised pill ────────────────────────────────────────────────── */
 const puck=$('#puck');
-let pp=load('bsk.puck',null)||{x:innerWidth-150,y:innerHeight-120};
+let pp=load('bsk.puck',null)||{x:innerWidth-140,y:innerHeight-110};
 const place=()=>{puck.style.left=Math.max(8,Math.min(innerWidth-puck.offsetWidth-8,pp.x))+'px';
                  puck.style.top=Math.max(8,Math.min(innerHeight-puck.offsetHeight-8,pp.y))+'px'};
 $('#btnMin').onclick=()=>{document.body.classList.add('min');place()};
@@ -552,20 +1079,26 @@ puck.addEventListener('pointerup',()=>{if(!drag)return;
   if(!drag.m)document.body.classList.remove('min');else save('bsk.puck',pp);drag=null});
 addEventListener('resize',place);
 
-/* Toast */
 let tt=null;
 function toast(m){const t=$('#toast');t.textContent=m;t.className='on';clearTimeout(tt);tt=setTimeout(()=>t.className='',2000)}
 
 /* ── Start ─────────────────────────────────────────────────────────── */
+$$('.ver').forEach(e=>e.textContent=APP_VERSION);
 setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
-fillSetup();paintQuick();paintCrew();paintLogo();setType(UI.type);setView(UI.view);
-$$('#bAct button').forEach(b=>b.classList.toggle('on',b.dataset.v===UI.act));
-$$('#aDir button').forEach(b=>b.classList.toggle('on',b.dataset.v===UI.adir));
-$('#bQuickWrap').style.display=UI.act==='count'?'none':'';
-paint();wake();
-addEventListener('online',()=>Number(CFG.auto)&&sync(true));
+fillSetup();paintQuick();paintCrew();paintWaChecks();lockSettings();
+setType(UI.type);setView(UI.view==='set'?'form':UI.view);
+mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
+mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);setAct(UI.act);
+recalc(ENT);paint();wake();
+addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
-setInterval(()=>{if(Number(CFG.auto)&&ENT.some(e=>!e.synced))sync(true)},60000);
+setInterval(()=>{
+  if(!configured()||!navigator.onLine||document.hidden)return;
+  pollN++;
+  const pending=ENT.some(e=>!e.synced);
+  if(pending){if(pollN%2===0)sync(true,true)}
+  else sync(true,false);
+},5000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
