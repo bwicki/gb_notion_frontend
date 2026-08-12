@@ -30,7 +30,7 @@ a{color:inherit}
 
 .nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
-<p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="index.html">Back to the app</a></p>
+<p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
 <h1>GB Notion Frontend — Basket Reporting</h1>
 <p>An offline version of the Basket Reporting form for use in the basket during a gas balloon
 flight. Same four message types as the Tally form, same submit action, but it keeps working
@@ -49,7 +49,7 @@ white face. Night mode is red on black and preserves dark adaptation. The sun/mo
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.</p>
 <p>The header shows UTC to the second and, at its right, the ballast still on board in the same
-size, then the flight and callsign with the live navigation line beneath them — <code>293° TC · 12.3 kn · ± 8 m</code>, course over ground, ground speed
+size, then the flight and callsign with the live navigation line beneath them — <code>293° · 12.3 kn · ± 8 m</code>, course over ground, ground speed
 and the accuracy of the current fix. Before a fix it reads <code>GPS searching</code>; with a fix but no
 movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
@@ -64,7 +64,9 @@ line, and the three screens are always one tap apart through the menu.</p>
 <p>Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
 Red preserves dark adaptation best; the others are there for personal preference and for
 screens where red reads badly.</p>
-<p>The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white.
+<p>The app icon and the favicon are a sandbag beside four tally strokes, in club navy. The
+favicons have a transparent ground so they sit in a browser tab of any colour; the home screen
+icons stay opaque, since iOS renders transparency in an app icon as black.
 The set covers all three platforms: <code>apple-touch-icon</code> in 120, 152, 167 and 180 pixels for
 iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
 with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
@@ -224,7 +226,7 @@ difference live, before an inventory is posted.</p>
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.</p>
 <h2>7. ATC, Ressources, Other</h2>
-<p><strong>ATC</strong> puts the station on its own line, then frequency, squawk and a VFR button side by side,
+<p><strong>ATC</strong> puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.</p>
 <p>The <strong>frequency</strong> places its own point: after the third digit one appears as you type, so
 <code>12345</code> reads <code>123.45</code> on screen while you are still typing and settles to <code>123.450</code> when you
@@ -236,7 +238,7 @@ one to three digits is refused on posting. The emergency codes are listed in the
 the entry goes out, because they are three keystrokes away from ordinary codes.</p>
 <p>The <strong>VFR</strong> button fills the squawk with the conspicuity code from the setup, <code>7000</code> by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, Frq and SQ arrive filled in from the previous call, in grey with a dashed outline,
+turns the light off. Station, FREQ and SQ arrive filled in from the previous call, in grey with a dashed outline,
 under a <em>Confirm from last call</em> button. Touching any one of the three accepts the whole set —
 change the frequency and the station comes with it, with no second question when you post. A
 run of calls to the same station is one tap on Confirm; a changed call is simply typed over.</p>
@@ -245,23 +247,47 @@ it out, so QNH and Ops Normal are a toggle rather than something that accumulate
 <p>The remark field on Ballast and Ressources is the same size as the ATC message field, since a
 remark is often the more important part of the entry.</p>
 <p><strong>Ressources</strong> puts current PIC and who is resting on the first line as panel switches, then
-battery, fuel cell and solar cell on the second. Only pilots the master actually named appear:
-leave the second name empty and the switches shrink to a single-handed flight — battery as a list in ten-percent steps with 75, 85 and 95 added,
+battery, fuel cell and solar cell on the second, then methanol level, <em>Crew on O2</em> and the O2
+level on the third. Only pilots the master actually named appear: leave the second name empty
+and the switches shrink to a single-handed flight.</p>
+<p>Changing the PIC puts the other pilot on rest automatically, because that is what a handover
+normally means. <em>Nobody</em> is still one tap away for the stretches when both are awake.</p>
+<p><em>Methanol level</em> opens the same list of percentages the battery uses. <em>O2 level</em> opens a row per
+cylinder — as many as the setup defines, up to four — each naming its size in liters and asking
+for the pressure in bars. The row is recorded readably in <code>res_o2</code> (<code>#1 2 l 180 bar; #2 2 l 120
+bar</code>) and machine-readably in <code>res_o2_bars</code> (<code>180;120</code>) — battery as a list in ten-percent steps with 75, 85 and 95 added,
 where the reading actually matters. The PIC and resting state stays active and is
 attached to every following entry of any type; battery, fuel cell and solar belong to the entry
 they were filed with.</p>
-<p><strong>Other</strong> is a free note, and up to four pictures. They are scaled down to 1024 pixels and
+<p>Opening the Ballast tab always lands on <strong>Drop</strong> with <strong>Sand</strong> selected. Those are the
+overwhelming majority of entries, and a form that opens on Inventory because that is what
+happened an hour ago costs a tap every single time.</p>
+<p><strong>Other</strong> is a free note, up to four pictures, and a voice note. They are scaled down to 1024 pixels and
 about 60 per cent JPEG quality in the browser before anything is stored, because a queued entry
 has to survive in the device's local storage until there is a link again. Each picture is
 written to <code>data/media/&lt;entry-id&gt;-&lt;n&gt;.jpg</code> in the repository and the row records how many were
-attached and where they landed. Without a connection the entry itself queues normally; the
-pictures go up with the next successful send.</p>
-<p>Above the ATC form the last ATC entry of the flight is shown as
-<code>LAST MSG: 21:04:37Z recvd ZURICH INFO 124.700 7000 QNH 1013</code>, so a follow-up call never has to
-be reconstructed from memory.</p>
+attached and where they landed.</p>
+<p><em>Add voice msg</em> records through the microphone — press once to start, once again to stop, two
+minutes at most. The recording appears with a player so it can be listened to before posting,
+and is written to <code>data/media/&lt;entry-id&gt;-voice.webm</code>, or <code>.m4a</code> on iOS, where Safari records
+in that format instead.</p>
+<p><strong>Attachments are not queued.</strong> Unlike the entries themselves, pictures and voice notes live
+only in memory until they are uploaded; posting without a connection files the note and says so,
+but the attachment is gone on the next reload. Record and photograph when there is a link, or
+expect to repeat it.</p>
+<p><strong>Each of the four forms opens with the last entry of its own kind</strong>, in a panel headed
+<code>Last Message | A. Wicki | 21:04:37Z</code> — what it was, who filed it and when. ATC spells the call
+out as <code>RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450</code> with the wording beneath; Ballast shows the
+drop or the inventory; Ressources the crew and power state; Other the note. Where nothing of
+that kind has been reported yet, the panel simply reads <code>-</code>.</p>
+<p>The reporter is named because the entry may well have come from the other pilot's device: the
+panel is read from the table, not from what this device happens to remember. A follow-up call
+never has to be reconstructed from memory, and never depends on who made the last one.</p>
 <h2>8. WhatsApp</h2>
 <p>ATC, Ressources and Other each list the recipients individually at the foot of the form, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.</p>
+<p>On ATC the coordinator sits on a line of its own above the rest of the list, so the one
+recipient that matters is never lost among the others.</p>
 <p>The <strong>ATC Coordinator</strong> is listed first and only on ATC, and is the only one ticked there by
 default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
 Other the coordinator does not appear and everybody else is ticked by default. Each choice is
@@ -277,7 +303,7 @@ to both, or to nobody. Ressources and Other never see the coordinator.</p>
 finished message and one button per recipient. An ATC entry reads:</p>
 <pre><code>*ATC | HB-QWV*
 Station: ZURICH INFO
-Frq: 124.700  SQ: 7000
+FREQ: 124.700  SQ: 7000
 Msg: QNH 1013, Ops Normal
 21:04Z 484532N 0072345E 2340 ft
 Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
@@ -291,6 +317,11 @@ keep the link on the last line so WhatsApp's own map preview card sits under the
 the raw address really must not appear, the only route is a shortener, which means an outside
 service and a network call at the moment of posting; in a basket over the Vosges that is the
 wrong trade.</p>
+<p><strong>Every post says what became of it.</strong> The post button itself becomes the answer for three
+seconds — pale green <em>Posted to CC Notion</em> when the row reached GitHub, pale yellow <em>Queued for
+later delivery (no internet connection currently)</em> when it is waiting, pale red <em>Failed</em> with
+the reason when something else went wrong — an expired token, a repository that is not there. The entry itself
+is never lost either way; the band only says where it stands.</p>
 <p><strong>Sending is immediate.</strong> With a box ticked, pressing <em>Post to CC Notion</em> writes the entry and
 opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
 tick survives from one message to the next, so a run of ATC calls to the coordinator is one
@@ -413,16 +444,22 @@ apply the change within about thirty seconds with a note on screen. Rename a pil
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
 one device may be the master; two would overwrite each other's publication.</p>
 <h2>8b. What carries over</h2>
-<p>Every form arrives holding what was entered last time, greyed and dashed: the station,
+<p>Every form arrives holding what was reported last time, greyed and dashed: the station,
 frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
-the last inventory, the last battery reading. Selections — sand or water, drop or inventory,
-PIC and resting, fuel cell and solar cell, ready-ballast percentage, the WhatsApp ticks — simply
-stay where they were.</p>
+the last inventory, the last battery, methanol and oxygen readings. Selections — sand or water,
+PIC and resting, fuel cell, solar cell, crew on oxygen, the ready-ballast percentage — arrive at
+the same setting they were left in.</p>
+<p><strong>The defaults come from the table, not from the device.</strong> They are read from the last entry of
+that kind on the whole flight, whoever made it and on whichever iPad. Hand the reporting over
+mid-flight and the second device opens with exactly what the first one last reported, within the
+five seconds it takes the table to arrive. Only free text is never carried over — remarks, notes
+and the ATC message are typed each time.</p>
 <p>Touching any greyed field in a form accepts all of them at once, and nothing is asked again at
 posting. Notes and messages are never carried over: repeating yesterday's wording verbatim is
 worse than typing it again.</p>
-<p>The footer names the last entry and the state of the upload — <code>last Msg 21:04:37Z/AW | upload ✓</code>
-when everything has reached GitHub, <code>✗ 3</code> when three are still queued.</p>
+<p>The footer names the last entry, its reporter and its kind, plus the state of the upload —
+<code>last msg 21:04:37Z/AW/Ballast | upload ✓</code> when everything has reached GitHub, <code>✗ 3</code> when three
+are still queued.</p>
 <h2>9. Sending, and what happens without a link</h2>
 <p>There is nothing to switch on. Pressing <strong>Post to CC Notion</strong> writes the entry to the device and
 sends it straight away. If there is no connection the entry is held in a queue — the header
@@ -575,6 +612,14 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <td>battery, fuel cell and solar cell as reported on a Ressources entry</td>
 </tr>
 <tr>
+<td><code>res_methanol_pct</code></td>
+<td>methanol level in per cent</td>
+</tr>
+<tr>
+<td><code>res_o2_crew</code>, <code>res_o2</code>, <code>res_o2_bars</code></td>
+<td>whether the crew is on oxygen, and the cylinder pressures</td>
+</tr>
+<tr>
 <td><code>note</code></td>
 <td>free remark</td>
 </tr>
@@ -635,28 +680,54 @@ produces duplicates.</p>
   picture-in-picture on a laptop is the only true always-on-top.</li>
 </ul>
 <h2>14a. Language</h2>
+<p>Night colour, confirmation tone and language sit above the password, because they are personal
+preferences rather than flight settings and every crew member may want their own. A device
+whose holder does not know the settings password is a <strong>follower</strong> on a <strong>personal device</strong> —
+that is what the app assumes when the master question is declined, and neither can be changed
+without the password.</p>
 <p>The setup switches the interface between English and German, above the password, because it is
 a personal preference rather than a flight setting and every crew member may want a different
 one.</p>
-<p><strong>Only the interface changes.</strong> Everything written to GitHub and everything sent to WhatsApp
+<p>Every label, button, hint, dialog and message in the app follows the switch. <strong>Only the
+interface changes:</strong> everything written to GitHub and everything sent to WhatsApp
 stays English: the column names, the values in <code>type</code>, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.</p>
 <h2>15. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. <code>v260812-16</code> is the sixteenth build of 12 August 2026.</p>
+build released that day. <code>v260812-23</code> is the twenty-third build of 12 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> and <code>setup.html</code> are
 generated from <code>README.md</code> and <code>SETUP.md</code> and have to be regenerated whenever those change. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
-<h2>16. Files</h2>
+<h2>16. License</h2>
+<p>Custom license, © 2026 Wicki Aero GmbH — the full text is in
+<a href="license.html">LICENSE</a>, reachable from the menu inside the app.</p>
+<p>In short: use it and host it as it is, for yourself, your club or your school, free of charge.
+Do not modify it, translate it, republish a changed version of it, strip the attribution from
+it, or build a competing product on it, without asking first — balthasar@wicki.aero. Any public
+copy keeps the copyright notice and a visible link back to
+<a href="https://github.com/bwicki/gb_notion_frontend">the source repository</a>.</p>
+<p>Two things the licence spells out that are easy to get wrong:</p>
+<p><strong>Configuration is not modification.</strong> Entering your flight, crew, ballast, WhatsApp and GitHub
+settings, switching language or colour scheme, editing the message templates in the setup, and
+dropping your own logo file next to the app are all ordinary use. You are meant to do all of
+that.</p>
+<p><strong>The flight data is yours.</strong> The JSON, CSV and media files the app writes into your repository
+are your records, not part of the licensed software.</p>
+<p><strong>Third-party components: none.</strong> No libraries, no fonts, no frameworks, no trackers, nothing
+from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
+service, and to the wa.me links you tap. That is the whole list, which is also why it works with
+no signal and why there is nothing to keep up to date but the app itself.</p>
+<h2>17. Files</h2>
 <pre><code>index.html                  the complete app
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
 readme.html                 this document, opened from the menu
 SETUP.md / setup.html       the GitHub and Notion setup guide
+LICENSE / license.html      the licence
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
 data/                       destination folder for flight files
