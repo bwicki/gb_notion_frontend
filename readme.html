@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Basket Reporting — Manual</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<style>
+:root{--bg:#E4E7EA;--card:#F4F6F7;--ink:#22262A;--muted:#6D757B;--line:#C9D0D5}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0D0F10;--card:#131617;--ink:#D8DCE0;--muted:#8A9198;--line:#2C3236}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 16px/1.6 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:720px;margin:0 auto;padding:28px 20px 80px;background:var(--card);min-height:100vh}
+h1{font-size:26px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:13px;font-weight:400;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  margin:38px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+h3{font-size:17px;font-weight:500;margin:26px 0 8px}
+p,li{font-size:15.5px}
+code{font:13.5px/1.5 ui-monospace,"SF Mono",Menlo,monospace;background:var(--bg);
+  padding:1px 5px;border-radius:4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:13px 15px;overflow-x:auto}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+a{color:inherit}
+</style></head><body><main>
+<h1>GB Notion Frontend — Basket Reporting</h1>
+<p>An offline version of the Basket Reporting form for use in the basket during a gas balloon
+flight. Same four message types as the Tally form, same submit action, but it keeps working
+without signal, stamps every entry with time and GPS position, carries the ballast figure
+forward across all devices, and lets several people report in parallel.</p>
+<p>Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
+files. The app reads the same files back every five seconds, so each device always shows the
+complete flight.</p>
+<p>No build step, no dependencies, no external requests other than to the GitHub API.</p>
+<hr />
+<h2>1. The screen</h2>
+<p>The whole app fits one phone screen without scrolling, and its outline is always visible.
+Only the log and the setup scroll.</p>
+<p>Day mode is dark anthracite on a grey ground; unselected buttons carry a visible outline and a
+white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
+the header switches in one tap and the choice is remembered; on first launch the app follows
+the iPad's own appearance setting.</p>
+<p>The header shows UTC to the second, the flight, and four buttons: log, day/night, menu,
+minimise. Below it, flush against the header, sit the four message types; the kilograms on
+board appear under them only on the Ballast tab, where they are relevant. There is no logo and
+no title inside the app — the home screen icon already says what this is, and the room is
+better spent on the form.</p>
+<p>The day/night button always shows the mode you are <em>not</em> in: a moon by day, a sun at night.
+Tapping it is the switch.</p>
+<p>Settings, transfer, export and this document live behind the menu button between day/night and
+minimise. The log screen is therefore nothing but the log. <em>About — more info</em> opens this
+README as a page in its own window.</p>
+<p>Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
+Red preserves dark adaptation best; the others are there for personal preference and for
+screens where red reads badly.</p>
+<p>The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white.
+The set covers all three platforms: <code>apple-touch-icon</code> in 120, 152, 167 and 180 pixels for
+iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
+with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
+<code>mask-icon.svg</code> for pinned tabs in desktop Safari, and a multi-resolution <code>favicon.ico</code>.
+The icons are opaque — iOS renders transparency in a home screen icon as black — and the
+manifest background is white to match, so the Android splash shows no seam. The 16 and 32 pixel
+favicons carry a simplified version with three uprights instead of four; at that size the
+narrower gaps of the full mark close up into a smudge.</p>
+<h2>2. Set up</h2>
+<p><strong>Hosting</strong></p>
+<ol>
+<li>Put these files in the repository root.</li>
+<li>Settings → Pages → Source: <code>Deploy from a branch</code>, branch <code>main</code>, folder <code>/ (root)</code>.</li>
+<li>The app is served at <code>https://&lt;owner&gt;.github.io/&lt;repo&gt;/</code> after about a minute.</li>
+</ol>
+<p><strong>Token</strong></p>
+<p>Settings → Developer settings → Personal access tokens → Fine-grained tokens:</p>
+<ul>
+<li>Repository access: the data repository only</li>
+<li>Permissions → Repository permissions → <strong>Contents: Read and write</strong></li>
+<li>Short expiry, for example one week after the flight</li>
+</ul>
+<p><strong>In the app</strong></p>
+<p>The <em>Ballast on board at start</em> field beside the flight ID is only needed before the first
+inventory: it seeds the running figure so that early drops count, and it gives the first
+inventory something to compare against in <code>tally_diff_kg</code>. Leave it empty and the ballast
+figure simply starts with the first Take Inventory.</p>
+<p>The reporter name for this device sits at the top of the setup and needs no password — it
+changes often enough, and getting it wrong only mislabels entries. Everything below it is
+locked: press <em>Unlock settings</em> and enter <strong>1234</strong>. Fill in the device mode and name, the flight, the two
+pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
+amounts. The GitHub connection and the WhatsApp recipients sit in collapsed sections at the
+bottom — open them once per device, then close them again. Saving asks twice before it
+applies, so a flight in progress cannot be overwritten by a stray tap. Leaving the setup
+screen locks it again.</p>
+<h2>3. Install on the iPad</h2>
+<p>Safari → Share → <strong>Add to Home Screen</strong>. It is saved as <em>Basket Reporting</em> and launches full
+screen without Safari's bars, and location and wake lock work as expected. Location permission is requested on the
+first entry; "While Using the App" is enough. Without it, entries are still recorded, with
+<code>gps_fix</code> set to <code>false</code>.</p>
+<h2>4. Floating over other apps</h2>
+<p>iPadOS gives no web app a system-wide overlay. What works:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Slide Over</strong> — drag the app from the Dock onto a running app</td>
+<td>narrow floating window over a map or Foreflight</td>
+</tr>
+<tr>
+<td><strong>Split View</strong></td>
+<td>fixed split screen</td>
+</tr>
+<tr>
+<td><strong>Stage Manager</strong> (iPadOS 16+)</td>
+<td>freely placed, overlapping window</td>
+</tr>
+</tbody>
+</table>
+<p>All three need the app installed from the Home Screen. The minimise button additionally
+collapses the app to a draggable pill showing the kilograms still on board; tapping the pill
+opens it again.</p>
+<h2>5. Who is reporting</h2>
+<p>The setup asks whether this is a <strong>personal device</strong> or a <strong>shared device</strong>.</p>
+<p>On a personal device — the default, and what the two pilots' own phones should be set to —
+every entry is filed under the name entered there, whoever happens to be pilot in command. The
+reporter button is hidden; there is nothing to get wrong.</p>
+<p>On a shared device the reporter defaults to whoever is pilot in command, and the button at the
+top right of the readout switches to the other pilot for the exceptional case. It turns dark
+while the alternate is active, so the exception is visible, and every entry carries that name
+until it is switched back. Changing the PIC on the Ressources tab moves the default with it.</p>
+<p>Each row also records <code>device_mode</code>, so it is possible to tell afterwards which reporting
+regime a row came from.</p>
+<h2>5a. Position</h2>
+<p>The position on every row is the fix of the device that made the entry, taken at the moment of
+posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
+re-stamped. Three columns carry it in short notation: <code>pos_lat</code> as <code>484532N</code>, <code>pos_lon</code> as
+<code>0072345E</code>, and <code>alt_ft</code> as WGS84 altitude in feet. The decimal degrees and metres stay
+alongside for map links and for anything that needs the raw value.</p>
+<p>Track and ground speed come with every entry. iOS and Android supply both with the fix once the
+device is moving; when they do not, the app derives them from the previous fix, requiring at
+least three seconds and five metres between the two so that a stationary basket does not
+produce a random course. Both fields stay empty rather than guessing when neither source is
+available. The header shows the current values live beside the GPS accuracy.</p>
+<h2>6. Ballast</h2>
+<p><strong>Drop</strong> subtracts the kilograms thrown. The quick buttons only fill the field; posting is
+always the one dark button, so a knock against the iPad cannot log a drop.</p>
+<p><strong>Take Inventory</strong> records what is actually on board and resets the running figure. Three
+inputs:</p>
+<ul>
+<li><em>Bags</em> and <em>Water</em> on one line — bags counted in total including safety ballast and
+  multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
+<li><em>Ready ballast</em> — 0, 25, 50, 75 or 100 per cent of the full ready-ballast weight from the
+  setup, normally 30 kg.</li>
+</ul>
+<p>The running total under the fields shows the result before it is posted, and the entry lands
+in the table as three columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sand_kg</code></td>
+<td>bags × weight per bag, <strong>plus</strong> the ready ballast</td>
+</tr>
+<tr>
+<td><code>water_kg</code></td>
+<td>litres</td>
+</tr>
+<tr>
+<td><code>total_ballast_kg</code></td>
+<td>sand + water, and the new figure on board</td>
+</tr>
+</tbody>
+</table>
+<p>Ready ballast is always sand, so sand + water = total. <code>inv_bags</code> and <code>inv_ready_pct</code> are
+carried alongside so an inventory can be reopened and corrected later.</p>
+<p><strong><code>tally_diff_kg</code> records where the figures parted company.</strong> Every inventory stores the
+counted total minus what the running calculation expected at that moment. A reading of −60
+means sixty kilograms left the basket without being logged; a positive figure means a drop was
+logged that did not happen, or a bag was miscounted. The first inventory has no predecessor to
+compare against and leaves the column empty unless a start ballast was entered in the setup.
+The figure is recalculated over the whole flight after every edit, deletion or merge, so it
+always reflects the current state of the table. The app also shows the expected value and the
+difference live, before an inventory is posted.</p>
+<p><strong>The dropped figure is measured from the first inventory</strong>, not from the sum of the drops:
+<code>first inventory total − currently on board</code>. Throwing sand is not exact; counting sacks is.
+Every later inventory therefore feeds straight into the dropped figure, including whatever
+went overboard without being logged.</p>
+<h2>7. ATC, Ressources, Other</h2>
+<p><strong>ATC</strong> puts the station on its own line, frequency and squawk side by side beneath it, then
+the message. Station, Frq and SQ are carried over from the previous call and shown in grey
+with a dashed outline; they have to be confirmed before the entry can be posted, either by
+tapping into a field to change it or with the <em>Confirm</em> button. A long sequence of calls to
+the same station costs one tap, without any risk of an unnoticed stale frequency. The dashed
+chips append standard phrases — including QNH and Ops Normal — to the message.</p>
+<p><strong>Ressources</strong> puts current PIC and who is resting on the first line, then battery, fuel cell
+and solar on the second — battery as a list in ten-percent steps with 75, 85 and 95 added,
+where the reading actually matters. The PIC and resting state stays active and is
+attached to every following entry of any type; battery, fuel cell and solar belong to the entry
+they were filed with.</p>
+<p><strong>Other</strong> is a free note.</p>
+<h2>8. WhatsApp</h2>
+<p>ATC, Ressources and Other each carry a checkbox at the foot of the form: <em>Send also to
+WhatsApp recipients</em>. It is one setting, remembered across the three types, and has no effect
+on Ballast entries.</p>
+<p>Recipients are defined in the setup, up to eight, each with a name and a number in
+international form with digits only, for example <code>41791234567</code>.</p>
+<p>Above them sits a ninth, separate entry: the <strong>ATC Coordinator</strong>. It is offered on ATC entries
+only, as its own checkbox above the general one, and it is ticked by default there — an ATC
+call normally goes to the coordinator whether or not the rest of the list is in play. The two
+checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
+to both, or to nobody. Ressources and Other never see the coordinator.</p>
+<p>With the box ticked, posting first writes the entry as usual, then opens a sheet with the
+finished message and one button per recipient. An ATC entry reads:</p>
+<pre><code>*ATC | HB-QWV*
+Station: ZURICH INFO
+Frq: 124.700  SQ: 7000
+Msg: QNH 1013, Ops Normal
+21:04Z 484532N 0072345E 2340 ft
+https://maps.google.com/?q=48.75890,7.39580
+</code></pre>
+<p>The first line is bold in WhatsApp.</p>
+<h3>The layout is yours</h3>
+<p>The setup holds one template per message type under <em>WhatsApp message layout</em>. Placeholders in
+braces are substituted; <strong>a line whose placeholders are all empty is dropped</strong>, so optional
+fields cost nothing when they were not reported, and a single empty placeholder among filled
+ones becomes an en dash. <em>Reset to default</em> puts the three back.</p>
+<table>
+<thead>
+<tr>
+<th>Placeholder</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{type}</code> <code>{callsign}</code> <code>{flight}</code> <code>{reporter}</code></td>
+<td>who and what</td>
+</tr>
+<tr>
+<td><code>{dir}</code> <code>{station}</code> <code>{freq}</code> <code>{squawk}</code> <code>{msg}</code></td>
+<td>the ATC fields</td>
+</tr>
+<tr>
+<td><code>{pic}</code> <code>{resting}</code> <code>{battery}</code> <code>{fuelcell}</code> <code>{solar}</code></td>
+<td>the Ressources fields</td>
+</tr>
+<tr>
+<td><code>{note}</code></td>
+<td>the free remark</td>
+</tr>
+<tr>
+<td><code>{time}</code></td>
+<td>UTC as <code>21:04Z</code></td>
+</tr>
+<tr>
+<td><code>{pos}</code></td>
+<td>degrees, minutes and seconds, <code>484532N 0072345E</code></td>
+</tr>
+<tr>
+<td><code>{posdm}</code></td>
+<td>degrees and minutes only, <code>4745N 00732E</code></td>
+</tr>
+<tr>
+<td><code>{alt}</code></td>
+<td>GPS altitude in feet, rounded to ten</td>
+</tr>
+<tr>
+<td><code>{tc}</code> <code>{speed}</code></td>
+<td>track as <code>TC 235</code> and ground speed as <code>12.4 kn</code></td>
+</tr>
+<tr>
+<td><code>{maps}</code></td>
+<td>link to the position on Google Maps</td>
+</tr>
+</tbody>
+</table>
+<p>Without a position fix, <code>{pos}</code>, <code>{alt}</code> and <code>{maps}</code> are empty, which drops their lines
+entirely rather than sending a placeholder.</p>
+<p><strong>One chat at a time.</strong> No browser can push a message into several WhatsApp chats at once —
+<code>wa.me</code> opens a single conversation with the text prefilled, and the send button still has to
+be pressed by hand. The sheet lists the recipients; tap a name, send, come back, tap the next.
+<em>Copy text</em> puts the message on the clipboard for pasting into a group, which is faster when
+one exists.</p>
+<p>The row records <code>whatsapp</code> = <code>yes</code> and <code>whatsapp_to</code> with the names, so the table shows which
+entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
+cannot be recorded here.</p>
+<h2>9. Sending, and what happens without a link</h2>
+<p>There is nothing to switch on. Pressing <strong>Post to CC Notion</strong> writes the entry to the device and
+sends it straight away. If there is no connection the entry is held in a queue — the header
+shows how many are waiting — and the queue goes out on its own as soon as the link returns,
+either on the browser's online event or on the next five-second cycle, whichever comes first.</p>
+<p>Order is never in doubt: the file is always written as the complete set of rows sorted by
+<code>ts_utc</code>, so a queued entry lands in its correct place in the sequence rather than at the end.
+An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.</p>
+<p><em>Send now</em> in the menu forces an attempt, and <em>Reload from GitHub</em> pulls the table without
+writing. Neither is needed in normal use.</p>
+<h2>10. Several devices at once</h2>
+<p>Every row carries <code>reporter</code> (who entered it), <code>device</code> (which iPad) and <code>source</code> (<code>app</code> for
+this tool).</p>
+<p>Sending is a merge, never an overwrite: the app reads the file on GitHub, merges it with what
+is held locally by <code>id</code>, recalculates the ballast column over the whole set, and writes the
+result back. If another device wrote in the meantime, GitHub rejects the write and the app
+retries with the fresh version, up to three times.</p>
+<p><strong>The table is played back every five seconds.</strong> A drop made on one iPad shows up on the other
+within a few seconds, and the ballast figure accounts for both. A device that joins mid-flight,
+or whose local copy was cleared, gets the whole flight back with <em>Reload</em> in the log screen.</p>
+<p>Polling that often is affordable because the app sends a conditional request: when nothing has
+changed, GitHub answers 304 with no body, and a 304 does not count against the hourly limit of
+5000 requests. Only an actual change costs a request. Polling pauses while the app is in the
+background.</p>
+<p><strong>Tally rows.</strong> Anything appended to the same JSON file appears in the app and in the ballast
+calculation, provided it carries at least <code>id</code>, <code>ts_utc</code> and <code>type</code>. Give Tally-sourced rows
+<code>reporter: "Tally"</code> and <code>source: "tally"</code> so it is visible where they came from. A ballast row
+may be relative (<code>ballast_delta_kg</code>, negative for a drop) or an inventory
+(<code>ballast_action: "count"</code> with <code>total_ballast_kg</code>, which resets the running total).</p>
+<p><strong>Deletions</strong> are shared through <code>data/&lt;flight-id&gt;.deleted.json</code>, holding the ids that were
+removed with the time and the person who removed them. Every device applies that list, so a
+deleted row does not reappear from another iPad's copy, and the main table stays clean.</p>
+<h2>11. The log</h2>
+<p>The list button in the header opens the log: the whole flight, newest first, with time,
+content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
+export moved into the menu.</p>
+<p>Tapping an entry opens it for editing. The editable fields depend on the type — kilograms and
+remark for a drop, bags, water and ready ballast for an inventory, station through message for
+ATC. Saving stamps <code>edited_at</code> and <code>edited_by</code>. The ballast column is recalculated over the
+whole flight after every edit and every deletion, so the figures stay consistent wherever in
+the sequence the change was made.</p>
+<p>Deleting asks twice, states what is being removed and who recorded it, and warns that the
+deletion is shared with the other devices.</p>
+<h2>12. What the app writes</h2>
+<pre><code>data/&lt;flight-id&gt;.json          the table
+data/&lt;flight-id&gt;.csv           the same rows as CSV
+data/&lt;flight-id&gt;.deleted.json  ids that were removed
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flight_id</code>, <code>callsign</code></td>
+<td>from the setup</td>
+</tr>
+<tr>
+<td><code>seq</code></td>
+<td>running number on the capturing device</td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td>device tag</td>
+</tr>
+<tr>
+<td><code>reporter</code></td>
+<td>who made the entry</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>app</code>, or whatever an external writer sets, e.g. <code>tally</code></td>
+</tr>
+<tr>
+<td><code>ts_utc</code>, <code>ts_local</code></td>
+<td>the same instant in UTC and with local offset</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>Ballast</code>, <code>ATC</code>, <code>Ressources</code>, <code>Other</code> — the values used on the Tally form</td>
+</tr>
+<tr>
+<td><code>pos_lat</code>, <code>pos_lon</code>, <code>alt_ft</code></td>
+<td>position of the reporting device in short notation, <code>484532N</code> / <code>0072345E</code>, and altitude in feet</td>
+</tr>
+<tr>
+<td><code>tc_deg</code>, <code>speed_kt</code></td>
+<td>track over ground in degrees and ground speed in knots, one decimal</td>
+</tr>
+<tr>
+<td><code>lat</code>, <code>lon</code>, <code>alt_gps_m</code></td>
+<td>the same fix in decimal degrees and metres, for map links</td>
+</tr>
+<tr>
+<td><code>gps_acc_m</code>, <code>gps_age_s</code>, <code>gps_fix</code></td>
+<td>quality of the position at the moment of the entry</td>
+</tr>
+<tr>
+<td><code>device_mode</code></td>
+<td><code>personal</code> or <code>shared</code></td>
+</tr>
+<tr>
+<td><code>ballast_action</code></td>
+<td><code>drop</code> or <code>count</code></td>
+</tr>
+<tr>
+<td><code>ballast_delta_kg</code></td>
+<td>kilograms thrown, negative</td>
+</tr>
+<tr>
+<td><code>ballast_abs_kg</code></td>
+<td>on board after this entry, recalculated across all devices</td>
+</tr>
+<tr>
+<td><code>sand_kg</code>, <code>water_kg</code>, <code>total_ballast_kg</code></td>
+<td>inventory result</td>
+</tr>
+<tr>
+<td><code>tally_diff_kg</code></td>
+<td>counted total minus what was expected at that moment</td>
+</tr>
+<tr>
+<td><code>inv_bags</code>, <code>inv_ready_pct</code></td>
+<td>what the inventory was built from</td>
+</tr>
+<tr>
+<td><code>atc_dir</code></td>
+<td><code>RX</code> received, <code>TX</code> sent</td>
+</tr>
+<tr>
+<td><code>atc_station</code>, <code>atc_freq</code>, <code>atc_squawk</code>, <code>atc_msg</code></td>
+<td>message content</td>
+</tr>
+<tr>
+<td><code>crew_pic</code>, <code>crew_rest</code></td>
+<td>crew state at the moment of the entry</td>
+</tr>
+<tr>
+<td><code>res_battery_pct</code>, <code>res_fuel_cell</code>, <code>res_solar</code></td>
+<td>power state as reported on a Ressources entry</td>
+</tr>
+<tr>
+<td><code>note</code></td>
+<td>free remark</td>
+</tr>
+<tr>
+<td><code>whatsapp</code>, <code>whatsapp_to</code></td>
+<td>set when the entry was marked for WhatsApp, and to whom</td>
+</tr>
+<tr>
+<td><code>edited_at</code>, <code>edited_by</code></td>
+<td>set when a row was changed after the fact</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>UUID, the stable key for Notion</td>
+</tr>
+</tbody>
+</table>
+<p><code>type</code> deliberately uses the spelling from the Tally form, including <code>Ressources</code>, so the
+existing Notion select options match without editing. To change it, edit the four <code>data-t</code>
+attributes in <code>index.html</code> and the matching strings in the post handler.</p>
+<h2>13. Polling from Notion</h2>
+<p><strong>GitHub API — immediate, recommended</strong></p>
+<pre><code>GET https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/contents/data/&lt;flight-id&gt;.json
+Authorization: Bearer &lt;token&gt;
+Accept: application/vnd.github.raw
+</code></pre>
+<p>Poll <code>&lt;flight-id&gt;.deleted.json</code> the same way and archive the matching rows in Notion. Use <code>id</code>
+as the unique key and upsert; the file always holds the complete set of rows, so appending
+produces duplicates.</p>
+<p><strong>raw.githubusercontent.com — public repositories only, delayed</strong></p>
+<pre><code>GET https://raw.githubusercontent.com/&lt;owner&gt;/&lt;repo&gt;/main/data/&lt;flight-id&gt;.csv
+</code></pre>
+<p>Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.</p>
+<h2>14. Limits worth knowing before takeoff</h2>
+<ul>
+<li><strong>GPS in the background:</strong> once the app is not in the foreground and the display locks,
+  iPadOS suspends location updates. The app holds a wake lock while it is active. This records
+  events, not a track — use a dedicated logger for a gapless trace.</li>
+<li><strong>Altitude:</strong> <code>alt_gps_m</code> is GPS altitude above the WGS84 ellipsoid, not the altimeter
+  reading. The altimeter governs what is reported to ATC.</li>
+<li><strong>Rate limit:</strong> with two iPads and a Notion poll on the same token, the hourly budget is
+  comfortable as long as the conditional requests keep returning 304. Frequent writes are what
+  cost — each post is roughly four requests.</li>
+<li><strong>The password is 1234 and lives in the source.</strong> It guards against a mistaken tap in the
+  basket, not against anyone with the file. Change the <code>PASS</code> constant in <code>index.html</code> if a
+  different one is wanted.</li>
+<li><strong>Token on the device:</strong> stored unencrypted in the browser. If the iPad is lost, revoking the
+  token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
+  server side and point the API host in the code at the Worker.</li>
+<li><strong>The pill floats inside the app only.</strong> A true overlay is not possible on iPadOS without a
+  native app; Slide Over is the intended route.</li>
+</ul>
+<h2>15. Version</h2>
+<p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
+the date written backwards, then a counter that restarts at 01 each day and goes up with every
+build released that day. <code>v260812-06</code> is the sixth build of 12 August 2026.</p>
+<p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
+the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> is generated from
+this file and has to be regenerated whenever it changes. Bumping the cache name is what
+forces the service worker to fetch the new files rather than serve the old ones, so a build
+with an unchanged cache name may not reach a device that already has the app installed.</p>
+<h2>16. Files</h2>
+<pre><code>index.html                  the complete app
+manifest.webmanifest        Home Screen installation
+sw.js                       offline cache
+readme.html                 this document, opened from the menu
+favicon.ico                 multi-resolution favicon
+icons/                      app icons and favicons
+data/                       destination folder for flight files
+</code></pre>
+</main></body></html>

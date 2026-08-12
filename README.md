@@ -32,14 +32,21 @@ better spent on the form.
 The day/night button always shows the mode you are *not* in: a moon by day, a sun at night.
 Tapping it is the switch.
 
-Settings, transfer and export live behind the menu button between day/night and minimise. The
-log screen is therefore nothing but the log.
+Settings, transfer, export and this document live behind the menu button between day/night and
+minimise. The log screen is therefore nothing but the log. *About — more info* opens this
+README as a page in its own window.
 
 Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
 Red preserves dark adaptation best; the others are there for personal preference and for
 screens where red reads badly.
 
-The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white. The 16 and 32 pixel
+The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white.
+The set covers all three platforms: `apple-touch-icon` in 120, 152, 167 and 180 pixels for
+iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
+with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
+`mask-icon.svg` for pinned tabs in desktop Safari, and a multi-resolution `favicon.ico`.
+The icons are opaque — iOS renders transparency in a home screen icon as black — and the
+manifest background is white to match, so the Android splash shows no seam. The 16 and 32 pixel
 favicons carry a simplified version with three uprights instead of four; at that size the
 narrower gaps of the full mark close up into a smudge.
 
@@ -61,7 +68,14 @@ Settings → Developer settings → Personal access tokens → Fine-grained toke
 
 **In the app**
 
-The setup screen is locked. Press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
+The *Ballast on board at start* field beside the flight ID is only needed before the first
+inventory: it seeds the running figure so that early drops count, and it gives the first
+inventory something to compare against in `tally_diff_kg`. Leave it empty and the ballast
+figure simply starts with the first Take Inventory.
+
+The reporter name for this device sits at the top of the setup and needs no password — it
+changes often enough, and getting it wrong only mislabels entries. Everything below it is
+locked: press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
 pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
 amounts. The GitHub connection and the WhatsApp recipients sit in collapsed sections at the
 bottom — open them once per device, then close them again. Saving asks twice before it
@@ -113,6 +127,12 @@ re-stamped. Three columns carry it in short notation: `pos_lat` as `484532N`, `p
 `0072345E`, and `alt_ft` as WGS84 altitude in feet. The decimal degrees and metres stay
 alongside for map links and for anything that needs the raw value.
 
+Track and ground speed come with every entry. iOS and Android supply both with the fix once the
+device is moving; when they do not, the app derives them from the previous fix, requiring at
+least three seconds and five metres between the two so that a stationary basket does not
+produce a random course. Both fields stay empty rather than guessing when neither source is
+available. The header shows the current values live beside the GPS accuracy.
+
 ## 6. Ballast
 
 **Drop** subtracts the kilograms thrown. The quick buttons only fill the field; posting is
@@ -121,10 +141,9 @@ always the one dark button, so a knock against the iPad cannot log a drop.
 **Take Inventory** records what is actually on board and resets the running figure. Three
 inputs:
 
-- *Bags* — count the total including safety ballast. Multiplied by the weight per bag from
-  the setup.
-- *Water* — litres, counted as one kilogram per litre.
-- *Ready ballast* — 25, 50, 75 or 100 per cent of the full ready-ballast weight from the
+- *Bags* and *Water* on one line — bags counted in total including safety ballast and
+  multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.
+- *Ready ballast* — 0, 25, 50, 75 or 100 per cent of the full ready-ballast weight from the
   setup, normally 30 kg.
 
 The running total under the fields shows the result before it is posted, and the entry lands
@@ -162,8 +181,9 @@ tapping into a field to change it or with the *Confirm* button. A long sequence 
 the same station costs one tap, without any risk of an unnoticed stale frequency. The dashed
 chips append standard phrases — including QNH and Ops Normal — to the message.
 
-**Ressources** puts pilot in command and who is resting side by side, then the battery
-percentage, then fuel cell and solar as on/off. The PIC and resting state stays active and is
+**Ressources** puts current PIC and who is resting on the first line, then battery, fuel cell
+and solar on the second — battery as a list in ten-percent steps with 75, 85 and 95 added,
+where the reading actually matters. The PIC and resting state stays active and is
 attached to every following entry of any type; battery, fuel cell and solar belong to the entry
 they were filed with.
 
@@ -188,20 +208,38 @@ With the box ticked, posting first writes the entry as usual, then opens a sheet
 finished message and one button per recipient. An ATC entry reads:
 
 ```
-*Msg from HB-QWV Basket - ATC*
-Received from ZURICH INFO
-Frq 124.700  SQ 7000
+*ATC | HB-QWV*
+Station: ZURICH INFO
+Frq: 124.700  SQ: 7000
 Msg: QNH 1013, Ops Normal
-21:04Z
-pos 4745N 00732E 2340 ft
-https://maps.google.com/?q=47.75000,7.53330
+21:04Z 484532N 0072345E 2340 ft
+https://maps.google.com/?q=48.75890,7.39580
 ```
 
-The first line is bold in WhatsApp. `Received from` becomes `Sent to` for an outgoing call.
-Position is degrees and minutes, altitude is the GPS altitude converted to feet and rounded to
-the nearest ten. Ressources sends PIC and who is resting in place of the station block, Other
-sends the note alone. Without a fix the line reads `pos not available` and the map link is
-omitted.
+The first line is bold in WhatsApp.
+
+### The layout is yours
+
+The setup holds one template per message type under *WhatsApp message layout*. Placeholders in
+braces are substituted; **a line whose placeholders are all empty is dropped**, so optional
+fields cost nothing when they were not reported, and a single empty placeholder among filled
+ones becomes an en dash. *Reset to default* puts the three back.
+
+| Placeholder | Value |
+|---|---|
+| `{type}` `{callsign}` `{flight}` `{reporter}` | who and what |
+| `{dir}` `{station}` `{freq}` `{squawk}` `{msg}` | the ATC fields |
+| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Ressources fields |
+| `{note}` | the free remark |
+| `{time}` | UTC as `21:04Z` |
+| `{pos}` | degrees, minutes and seconds, `484532N 0072345E` |
+| `{posdm}` | degrees and minutes only, `4745N 00732E` |
+| `{alt}` | GPS altitude in feet, rounded to ten |
+| `{tc}` `{speed}` | track as `TC 235` and ground speed as `12.4 kn` |
+| `{maps}` | link to the position on Google Maps |
+
+Without a position fix, `{pos}`, `{alt}` and `{maps}` are empty, which drops their lines
+entirely rather than sending a placeholder.
 
 **One chat at a time.** No browser can push a message into several WhatsApp chats at once —
 `wa.me` opens a single conversation with the text prefilled, and the send button still has to
@@ -289,6 +327,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `ts_utc`, `ts_local` | the same instant in UTC and with local offset |
 | `type` | `Ballast`, `ATC`, `Ressources`, `Other` — the values used on the Tally form |
 | `pos_lat`, `pos_lon`, `alt_ft` | position of the reporting device in short notation, `484532N` / `0072345E`, and altitude in feet |
+| `tc_deg`, `speed_kt` | track over ground in degrees and ground speed in knots, one decimal |
 | `lat`, `lon`, `alt_gps_m` | the same fix in decimal degrees and metres, for map links |
 | `gps_acc_m`, `gps_age_s`, `gps_fix` | quality of the position at the moment of the entry |
 | `device_mode` | `personal` or `shared` |
@@ -356,10 +395,11 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-03` is the third build of 12 August 2026.
+build released that day. `v260812-06` is the sixth build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
-the script in `index.html`, and the cache name `V` in `sw.js`. Bumping the cache name is what
+the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` is generated from
+this file and has to be regenerated whenever it changes. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
@@ -369,6 +409,7 @@ with an unchanged cache name may not reach a device that already has the app ins
 index.html                  the complete app
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
+readme.html                 this document, opened from the menu
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
 data/                       destination folder for flight files
