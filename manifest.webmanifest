@@ -1,13 +1,13 @@
 {
   "name": "Basket Reporting",
-  "short_name": "Basket",
+  "short_name": "Basket Reporting",
   "description": "Report ballast, ATC calls and crew status from the basket into a table Notion can poll.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#E4E7EA",
+  "theme_color": "#E4E7EA",
   "lang": "en",
   "icons": [
     { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },

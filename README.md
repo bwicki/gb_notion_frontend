@@ -23,19 +23,23 @@ white face. Night mode is red on black and preserves dark adaptation. The sun/mo
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.
 
-The header shows UTC to the second, the flight, and four buttons: log, setup, day/night,
-minimise. The kilograms on board appear only on the Ballast tab, where they are relevant.
+The header shows UTC to the second, the flight, and four buttons: log, day/night, menu,
+minimise. Below it, flush against the header, sit the four message types; the kilograms on
+board appear under them only on the Ballast tab, where they are relevant. There is no logo and
+no title inside the app — the home screen icon already says what this is, and the room is
+better spent on the form.
+
+The day/night button always shows the mode you are *not* in: a moon by day, a sun at night.
+Tapping it is the switch.
+
+Settings, transfer and export live behind the menu button between day/night and minimise. The
+log screen is therefore nothing but the log.
 
 Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
 Red preserves dark adaptation best; the others are there for personal preference and for
 screens where red reads badly.
 
-The Gas Balloon Team Switzerland mark sits above the form, cached for offline use. At night it
-is replaced by the app's own glyph — a sandbag beside four tally strokes — drawn in the night
-colour, because the club navy all but disappears on black and the red in the wordmark fights
-the red palette.
-
-The app icon and the favicon use that same glyph in club navy on white. The 16 and 32 pixel
+The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white. The 16 and 32 pixel
 favicons carry a simplified version with three uprights instead of four; at that size the
 narrower gaps of the full mark close up into a smudge.
 
@@ -174,6 +178,12 @@ on Ballast entries.
 Recipients are defined in the setup, up to eight, each with a name and a number in
 international form with digits only, for example `41791234567`.
 
+Above them sits a ninth, separate entry: the **ATC Coordinator**. It is offered on ATC entries
+only, as its own checkbox above the general one, and it is ticked by default there — an ATC
+call normally goes to the coordinator whether or not the rest of the list is in play. The two
+checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
+to both, or to nobody. Ressources and Other never see the coordinator.
+
 With the box ticked, posting first writes the entry as usual, then opens a sheet with the
 finished message and one button per recipient. An ATC entry reads:
 
@@ -214,8 +224,8 @@ Order is never in doubt: the file is always written as the complete set of rows 
 `ts_utc`, so a queued entry lands in its correct place in the sequence rather than at the end.
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.
 
-*Send now* in the log screen forces an attempt, and *Reload* pulls the table without writing.
-Neither is needed in normal use.
+*Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
+writing. Neither is needed in normal use.
 
 ## 10. Several devices at once
 
@@ -249,7 +259,8 @@ deleted row does not reappear from another iPad's copy, and the main table stays
 ## 11. The log
 
 The list button in the header opens the log: the whole flight, newest first, with time,
-content, reporter and a dot showing whether the row has been sent.
+content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
+export moved into the menu.
 
 Tapping an entry opens it for editing. The editable fields depend on the type — kilograms and
 remark for a drop, bags, water and ready ballast for an inventory, station through message for
@@ -345,7 +356,7 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-02` is the second build of 12 August 2026.
+build released that day. `v260812-03` is the third build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. Bumping the cache name is what
@@ -358,7 +369,6 @@ with an unchanged cache name may not reach a device that already has the app ins
 index.html                  the complete app
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
-logo.png                    Gas Balloon Team Switzerland mark, shown by day
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
 data/                       destination folder for flight files

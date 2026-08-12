@@ -74,17 +74,7 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 var(--pad)}
 .foot{flex:0 0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));border-top:1px solid var(--line-soft)}
 
-/* brand — discreet, as on the Tally form */
-.brand{flex:0 0 auto;padding:8px var(--pad) 2px;display:flex;align-items:center;gap:9px}
-.brand img{height:30px;width:auto;display:none}
-.brand svg{height:24px;width:auto;opacity:.65}
-.brand span{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-.brand.haslogo img{display:block}
-.brand.haslogo svg{display:none}
-html[data-theme="night"] .brand img{display:none}
-html[data-theme="night"] .brand.haslogo svg{display:block}
-
-.readout{flex:0 0 auto;padding:8px var(--pad);display:flex;align-items:center;gap:8px;min-height:56px}
+.readout{flex:0 0 auto;padding:6px var(--pad) 8px;display:flex;align-items:center;gap:8px;min-height:54px}
 .readout .ball{min-width:0}
 .readout .ball.hide{display:none}
 .readout b{font-size:29px;font-weight:400;letter-spacing:-.025em;line-height:1.05;display:block}
@@ -97,7 +87,7 @@ html[data-theme="night"] .brand.haslogo svg{display:block}
 .rep.on{background:var(--sel);border-color:var(--sel);color:var(--sel-ink)}
 .rep.on em{color:var(--sel-ink);opacity:.75}
 
-.types{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 var(--pad) 10px}
+.types{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px var(--pad) 4px}
 .types button{height:42px;border:1px solid var(--line);border-radius:9px;background:var(--field);
   font-size:12.5px;display:grid;place-items:center}
 .types button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
@@ -192,6 +182,8 @@ html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
   font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:34dvh;overflow-y:auto;
   -webkit-user-select:text;user-select:text;margin-bottom:12px}
 .waList{display:grid;gap:8px}
+.menu{display:grid;gap:8px}
+.menu .go{justify-content:flex-start;padding:0 16px}
 
 #puck{display:none;position:fixed;z-index:60;padding:12px 18px;border-radius:24px;
   background:var(--card);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.18);
@@ -214,9 +206,9 @@ body.min #puck{display:block}
 <header>
   <span class="clock num" id="hClock">--:--:--Z</span>
   <span class="id" id="hId">—</span>
-  <button id="btnLog" aria-label="Log"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
-  <button id="btnSet" aria-label="Setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6 6 18M18 18l-1.4-1.4M7.4 7.4 6 6"/></svg></button>
+  <button id="btnLog" aria-label="Log"><svg viewBox="0 0 24 24"><path d="M5 7h0M5 12h0M5 17h0" stroke-width="2.3"/><path d="M10 7h9M10 12h9M10 17h6"/></svg></button>
   <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
+  <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
 
@@ -224,28 +216,16 @@ body.min #puck{display:block}
 
   <!-- REPORT -->
   <section class="view on" id="v-form">
-    <div class="brand">
-      <img id="brandImg" src="logo.png" alt="">
-      <svg id="brandSvg" viewBox="8 20 84 58" fill="none" aria-hidden="true">
-        <path d="M38,12 L62,12 C60,20 58,24 56,28 C68,34 78,50 78,66 C78,80 68,88 50,88 C32,88 22,80 22,66 C22,50 32,34 44,28 C42,24 40,20 38,12 Z" fill="currentColor" transform="translate(-1,19) scale(0.62)"/>
-        <path d="M41,28 L59,28" stroke="var(--card)" stroke-width="4" stroke-linecap="round" transform="translate(-1,19) scale(0.62)"/>
-        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
-          <path d="M56,36 L56,66"/><path d="M65,36 L65,66"/><path d="M74,36 L74,66"/><path d="M83,36 L83,66"/><path d="M52,69 L87,33"/>
-        </g>
-      </svg>
-      <span>Basket Reporting</span>
-    </div>
-
-    <div class="readout">
-      <div class="ball" id="ballBox"><b class="num" id="rNum">—</b><i id="rSub"></i></div>
-      <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
-    </div>
-
     <div class="types" id="types">
       <button data-t="Ballast" class="on">Ballast</button>
       <button data-t="ATC">ATC</button>
       <button data-t="Ressources">Ressou.</button>
       <button data-t="Other">Other</button>
+    </div>
+
+    <div class="readout">
+      <div class="ball" id="ballBox"><b class="num" id="rNum">—</b><i id="rSub"></i></div>
+      <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
     </div>
 
     <div class="scroll">
@@ -286,6 +266,8 @@ body.min #puck{display:block}
         <div class="carry hide" id="aCarry"><span>Carried over from the last call</span><button id="aConfirm">Confirm</button></div>
         <div class="f"><textarea id="aMsg" placeholder="Message"></textarea></div>
         <div class="f"><div class="links" id="aChips"></div></div>
+        <button class="check" id="waAtcCo"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
+          <span>Send to ATC Coordinator<em id="waAtcName"></em></span></button>
         <button class="check" id="waATC"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
           <span>Send also to WhatsApp recipients<em id="waCntATC"></em></span></button>
       </div>
@@ -327,14 +309,6 @@ body.min #puck{display:block}
       <div id="logList"></div>
     </div>
     <div class="foot">
-      <div class="row2">
-        <button class="go sm sec" id="btnPull">Reload</button>
-        <button class="go sm" id="btnSync">Send now</button>
-      </div>
-      <div class="row2" style="margin-top:8px">
-        <button class="go sm sec" id="btnCsv">CSV</button>
-        <button class="go sm sec" id="btnJson">JSON</button>
-      </div>
       <div class="ftline"><p class="tiny" id="syncNote"></p><span class="ver"></span></div>
     </div>
   </section>
@@ -380,7 +354,10 @@ body.min #puck{display:block}
         <details class="fold" id="foldWa">
           <summary>WhatsApp recipients</summary>
           <div class="in">
-            <p class="lab">Up to eight. Number in international form, digits only, e.g. 41791234567.</p>
+            <p class="lab">Numbers in international form, digits only, e.g. 41791234567.</p>
+            <div class="f two"><input type="text" id="sAtcName" placeholder="ATC Coordinator">
+              <input type="tel" id="sAtcNum" inputmode="numeric" placeholder="Number"></div>
+            <p class="hint">Offered on ATC entries only, and ticked by default there.</p>
             <div id="waRows"></div>
           </div>
         </details>
@@ -417,17 +394,17 @@ body.min #puck{display:block}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-02';
+const APP_VERSION='v260812-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,mode:'personal',reporter:'',
+           bagKg:15,readyKg:30,mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[]};
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      wa:0,alt:0,ready:100,fuel:'',solar:'',lastAtc:{station:'',freq:'',squawk:''}},load(K_UI,{}));
+                      wa:0,waAtc:1,alt:0,ready:100,fuel:'',solar:'',lastAtc:{station:'',freq:'',squawk:''}},load(K_UI,{}));
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false;
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
@@ -476,6 +453,15 @@ const restName=()=>UI.rest==='p1'?p1n():UI.rest==='p2'?p2n():'';
 const shared=()=>CFG.mode==='shared';
 const reporter=()=>shared()?(UI.alt?otherName():picName()):(CFG.reporter||picName());
 const waList=()=>(CFG.wa||[]).filter(r=>r&&r.p&&String(r.p).replace(/\D/g,'').length>5);
+const atcCo=()=>String(CFG.atcNum||'').replace(/\D/g,'').length>5
+  ? {n:CFG.atcName||'ATC Coordinator',p:String(CFG.atcNum).replace(/\D/g,'')} : null;
+/* the coordinator is offered on ATC entries only, and ticked by default there */
+function recipients(type){
+  const out=[];
+  if(type==='ATC'&&UI.waAtc&&atcCo())out.push(atcCo());
+  if(UI.wa)waList().forEach(r=>{if(!out.some(x=>x.p===r.p))out.push(r)});
+  return out;
+}
 function localISO(d){const o=-d.getTimezoneOffset(),s=o>=0?'+':'-',a=Math.abs(o);
   return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+'T'+pad(d.getHours(),2)+':'+
          pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2)+s+pad(Math.floor(a/60),2)+':'+pad(a%60,2)}
@@ -542,8 +528,8 @@ function waText(e){
   }else L.push('pos not available');
   return L.join('\n');
 }
-async function waSheet(e){
-  const list=waList(),txt=waText(e);
+async function waSheet(e,list){
+  list=list||waList();const txt=waText(e);
   if(!list.length){await ask({title:'No recipients',cancel:false,ok:'Close',
     text:'Add WhatsApp recipients in the setup first. The entry has been posted regardless.',
     html:'<div class="waPre">'+esc(txt)+'</div>'});return}
@@ -731,7 +717,10 @@ function paintWaChecks(){
   const n=waList().length;
   const t=n?' — '+n+' recipient'+(n>1?'s':''):' — none set up yet';
   ['ATC','Res','Oth'].forEach(k=>{$('#waCnt'+k).textContent=t});
-  $$('.check').forEach(c=>c.classList.toggle('on',!!UI.wa));
+  const co=atcCo();
+  $('#waAtcName').textContent=co?' — '+co.n:' — no number set up yet';
+  $('#waAtcCo').classList.toggle('on',!!UI.waAtc&&!!co);
+  ['#waATC','#waRes','#waOth'].forEach(id=>$(id).classList.toggle('on',!!UI.wa));
 }
 function paintInv(){
   $('#iBagUnit').textContent='bags à '+nz(CFG.bagKg)+' kg';
@@ -787,17 +776,37 @@ function setTheme(t,persist){
 }
 $('#btnTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='night'?'day':'night',true);
 
-/* ── Navigation ────────────────────────────────────────────────────── */
+/* ── Navigation and menu ───────────────────────────────────────────── */
+const dl=(txt,name,mime)=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:mime+';charset=utf-8'}));a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 function setView(v){
   UI.view=v;save(K_UI,UI);
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   $('#btnLog').classList.toggle('on',v==='log');
-  $('#btnSet').classList.toggle('on',v==='set');
+  $('#btnMenu').classList.toggle('on',v==='set');
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
 $('#btnLog').onclick=()=>setView(UI.view==='log'?'form':'log');
-$('#btnSet').onclick=()=>setView(UI.view==='set'?'form':'set');
+$('#btnMenu').onclick=()=>openMenu();
+async function openMenu(){
+  const items=[['set','Settings'],['pull','Reload from GitHub'],['sync','Send now'],
+               ['csv','Save CSV'],['json','Save JSON']];
+  await ask({title:'Menu',cancel:false,ok:'Close',
+    text:ENT.length+' rows on this device · '+APP_VERSION,
+    html:'<div class="menu">'+items.map(([k,l])=>
+      `<button class="go sec sm" data-m="${k}">${esc(l)}</button>`).join('')+'</div>',
+    onMount:(m,close)=>{m.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
+      close();
+      const k=b.dataset.m;
+      if(k==='set')setView('set');
+      else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
+      else if(k==='sync')sync(false,true);
+      else if(k==='csv')dl(toCsv(chrono(ENT)),(CFG.flight||'flightlog')+'.csv','text/csv');
+      else if(k==='json')dl(JSON.stringify(chrono(ENT),null,1),(CFG.flight||'flightlog')+'.json','application/json');
+    })}});
+}
 $('#btnRep').onclick=()=>{if(!shared())return;
   UI.alt=UI.alt?0:1;save(K_UI,UI);paintReadout();
   toast('Reporting as '+reporter()+(UI.alt?' — not the PIC':''))};
@@ -842,7 +851,9 @@ pills('#cPic',v=>{UI.pic=v;save(K_UI,UI);paintReadout()});
 pills('#cRest',v=>{UI.rest=v;save(K_UI,UI)});
 pills('#rFuel',v=>{UI.fuel=v;save(K_UI,UI)});
 pills('#rSolar',v=>{UI.solar=v;save(K_UI,UI)});
-$$('.check').forEach(c=>c.onclick=()=>{UI.wa=UI.wa?0:1;save(K_UI,UI);paintWaChecks()});
+$$('.check').forEach(c=>c.onclick=()=>{
+  if(c.id==='waAtcCo')UI.waAtc=UI.waAtc?0:1; else UI.wa=UI.wa?0:1;
+  save(K_UI,UI);paintWaChecks()});
 
 /* ── ATC carried-over values ───────────────────────────────────────── */
 const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
@@ -887,28 +898,27 @@ $('#btnPost').onclick=async()=>{
     if($$('#b-ATC input.pre').length)return toast('Confirm the carried-over station, Frq and SQ');
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
     if(!st&&!msg)return toast('Enter a station or a message');
-    const wa=!!UI.wa;
+    const rc=recipients('ATC');
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg,
-      whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
+      whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:$('#aSquawk').value.trim()};
     save(K_UI,UI);$('#aMsg').value='';toast('ATC posted');carryAtc();
   }else if(t==='Ressources'){
-    const wa=!!UI.wa;
-    const bat=$('#rBat').value.trim();
+    const bat=$('#rBat').value.trim();const rc=recipients('Ressources');
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
-      whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
+      whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     $('#cNote').value='';toast('Crew status posted');
   }else{
     const v=$('#oMsg').value.trim();
     if(!v)return toast('The note is empty');
-    const wa=!!UI.wa;
-    e=add({type:'Other',note:v,whatsapp:wa?'yes':'',whatsapp_to:wa?waList().map(r=>r.n||r.p).join('; '):''});
+    const rc=recipients('Other');
+    e=add({type:'Other',note:v,whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     $('#oMsg').value='';toast('Note posted');
   }
-  if(UI.wa&&e)waSheet(e);
+  if(e){const rc=recipients(t);if(rc.length)waSheet(e,rc)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -964,18 +974,10 @@ function applyEdit(e,v){
   if(configured())sync(true,true);
 }
 
-/* ── Transfer ──────────────────────────────────────────────────────── */
-$('#btnSync').onclick=()=>sync(false,true);
-$('#btnPull').onclick=()=>{delete ETAG[paths().json];sync(false,false)};
-const dl=(txt,name,mime)=>{const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([txt],{type:mime+';charset=utf-8'}));a.download=name;
-  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
-$('#btnCsv').onclick=()=>dl(toCsv(chrono(ENT)),(CFG.flight||'flightlog')+'.csv','text/csv');
-$('#btnJson').onclick=()=>dl(JSON.stringify(chrono(ENT),null,1),(CFG.flight||'flightlog')+'.json','application/json');
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={reporter:'#sReporter',flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',steps:'#sSteps',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',steps:'#sSteps',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 function paintWaRows(){
   const w=CFG.wa||[];
@@ -1058,11 +1060,6 @@ $('#btnWipe').onclick=async()=>{
     {title:'Confirm',text:'Clear the local copy?',ok:'Clear'}))return;
   ENT=[];save(K_ENT,ENT);paint();toast('Local copy cleared');
 };
-/* the embedded mark is replaced by logo.png when that file sits next to index.html */
-/* the club logo is used by day; at night it would glare and its navy would vanish,
-   so the embedded mark takes over in the night palette */
-$('#brandImg').onload=()=>document.querySelector('.brand').classList.add('haslogo');
-$('#brandImg').onerror=()=>$('#brandImg').remove();
 
 /* ── Minimised pill ────────────────────────────────────────────────── */
 const puck=$('#puck');
