@@ -1,6 +1,6 @@
-/* Ballastbuch — App-Shell offline halten.
-   GitHub-API und GPS laufen nie über den Cache. */
-const V = 'ballastbuch-v1';
+/* GB Notion Frontend — keeps the app shell available offline.
+   The GitHub API is never served from cache. */
+const V = 'gb-notion-frontend-v1';
 const SHELL = [
   './',
   './index.html',
@@ -25,10 +25,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (url.hostname === 'api.github.com') return;          // immer live
+  if (url.hostname === 'api.github.com') return;          // always live
   if (url.origin !== self.location.origin) return;
 
-  // Netz zuerst, damit ein Deploy sofort greift; Cache als Rückfall im Flug.
+  // Network first so a deploy takes effect at once; cache as the fallback in flight.
   e.respondWith(
     fetch(e.request)
       .then(r => {

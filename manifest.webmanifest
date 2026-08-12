@@ -1,14 +1,14 @@
 {
-  "name": "Ballastbuch — Gasballon",
-  "short_name": "Ballastbuch",
-  "description": "Erfassung von Ballastverbrauch, ATC-Meldungen und Crew-Status während einer Gasballonfahrt.",
+  "name": "GB Notion Frontend",
+  "short_name": "GB Notion",
+  "description": "Capture ballast use, ATC messages and crew status during a gas balloon flight, into a table Notion can poll.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0A1113",
   "theme_color": "#0A1113",
-  "lang": "de",
+  "lang": "en",
   "icons": [
     { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

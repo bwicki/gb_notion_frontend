@@ -1,199 +1,196 @@
-# Ballastbuch
+# GB Notion Frontend
 
-Erfassungstool für Gasballonfahrten: Ballastverbrauch, ATC-Meldungen, Crew-Status.
-Läuft als installierbare Web-App auf dem iPad, schreibt jede Zeile mit Zeit und GPS-Position
-in eine JSON- und eine CSV-Datei im GitHub-Repository. Notion pollt diese Dateien.
+Capture tool for gas balloon flights: ballast use, ATC messages, crew status.
+Runs as an installable web app on the iPad and writes every entry, with timestamp and
+GPS position, into a JSON and a CSV file in a GitHub repository. Notion polls those files.
 
-Kein Build, keine Abhängigkeiten, keine externen Requests außer zur GitHub-API.
-Nach dem ersten Laden vollständig offline bedienbar.
+No build step, no dependencies, no external requests other than to the GitHub API.
+Fully usable offline after the first load.
 
 ---
 
-## 1. Einrichten
+## 1. Set up
 
-**Repository und Hosting**
+**Repository and hosting**
 
-1. Dateien in ein Repository legen (öffentlich oder privat).
-2. Settings → Pages → Source: `Deploy from a branch`, Branch `main`, Ordner `/ (root)`.
-3. App liegt danach unter `https://<benutzer>.github.io/<repo>/`.
+1. Put these files in a repository.
+2. Settings → Pages → Source: `Deploy from a branch`, branch `main`, folder `/ (root)`.
+3. The app is then served at `https://<owner>.github.io/<repo>/`.
 
-Bei privatem Repository funktioniert Pages nur mit GitHub Pro/Team. Alternative:
-Repository öffentlich lassen und den Ordner `data/` per `.gitignore` leer halten ist
-**nicht** möglich, da die App genau dorthin schreibt. Wer die Fahrtdaten nicht öffentlich
-haben will, hostet die App in einem öffentlichen Repo und lässt die App in ein zweites,
-privates Datenrepo schreiben — das Feld „Repository" im Setup kann ein beliebiges Repo sein.
+Pages only serves private repositories on GitHub Pro or Team. If the flight data must
+stay private, host the app from a public repository and point the app at a second,
+private repository for the data — the Repository field in Setup can name any repository
+the token has access to.
 
 **Token**
 
-Fine-grained Personal Access Token anlegen unter
+Create a fine-grained personal access token under
 Settings → Developer settings → Personal access tokens → Fine-grained tokens:
 
-- Repository access: nur das Datenrepository
+- Repository access: the data repository only
 - Permissions → Repository permissions → **Contents: Read and write**
-- Ablaufdatum knapp setzen, z. B. eine Woche nach der Fahrt
+- Set a short expiry, for example one week after the flight
 
-Mehr Rechte braucht die App nicht.
+The app needs nothing beyond that.
 
-**In der App**
+**In the app**
 
-Setup-Reiter ausfüllen: Kennung der Fahrt, Rufzeichen, beide Piloten, Startballast,
-Sacktafel (die kg-Werte der Schnelltasten), Repository (`benutzer/repo`), Branch, Ordner, Token.
-Dann „Verbindung prüfen" und „Einstellungen sichern".
+Fill in the Setup tab: flight ID, callsign, both pilots, start ballast, bag sizes (the kg
+values on the quick keys), repository (`owner/repo`), branch, folder, token.
+Then use Check connection, then Save settings.
 
-## 2. Auf dem iPad installieren
+## 2. Install on the iPad
 
-Safari öffnen → Teilen → **Zum Home-Bildschirm**. Danach erscheint das Ballon-Symbol,
-die App startet ohne Safari-Leisten im Vollbild.
+Open in Safari → Share → **Add to Home Screen**. The balloon icon appears and the app
+launches full screen without Safari's bars.
 
-Beim ersten Eintrag fragt iPadOS nach der Standortfreigabe. „Beim Verwenden der App"
-genügt. Ohne Freigabe werden Einträge weiterhin gespeichert, nur ohne Koordinaten —
-das Feld `gps_fix` steht dann auf `false`.
+iPadOS asks for location permission on the first entry. "While Using the App" is enough.
+Without permission entries are still recorded, just without coordinates — the `gps_fix`
+field is then `false`.
 
-## 3. Schwebend über anderen Apps
+## 3. Floating over other apps
 
-iPadOS erlaubt keiner Web-App ein systemweites Overlay. Was tatsächlich geht:
+iPadOS gives no web app a system-wide overlay. What does work:
 
-| Weg | Ergebnis |
+| Route | Result |
 |---|---|
-| **Slide Over** — App vom Dock über eine laufende App ziehen | schmales, schwebendes Fenster über Karte, Wetter oder Foreflight; mit einer Wischgeste an den Rand weggeschoben und wieder hervorgeholt |
-| **Split View** | fest geteilter Bildschirm, App dauerhaft sichtbar |
-| **Stage Manager** (iPadOS 16+) | frei platzierbares, überlappendes Fenster |
+| **Slide Over** — drag the app from the Dock onto a running app | narrow floating window over a map, weather or Foreflight; swipe it off the edge and back |
+| **Split View** | fixed split screen, app permanently visible |
+| **Stage Manager** (iPadOS 16+) | freely placed, overlapping window |
 
-Voraussetzung für alle drei: die App muss vom Home-Bildschirm installiert sein.
+All three require the app to be installed from the Home Screen.
 
-Zusätzlich hat die App eine eigene Minimierung: Der Knopf oben rechts klappt die
-Oberfläche zu einem runden Regler zusammen, der den Restballast und den Füllstand zeigt.
-Der Regler lässt sich frei über den Bildschirm ziehen; ein Tippen öffnet die App wieder.
-Innerhalb eines Slide-Over-Fensters ist das der praktikable Dauerzustand.
+The app also minimises on its own: the button at the top right collapses the interface
+into a round dial showing remaining ballast and fill level. The dial can be dragged
+anywhere on screen; tapping it opens the app again. Inside a Slide Over window that is
+the practical resting state.
 
-## 4. Was die App schreibt
+## 4. What the app writes
 
-Zwei Dateien pro Fahrt, Dateiname aus der Fahrtkennung:
+Two files per flight, named after the flight ID:
 
 ```
-data/<fahrtkennung>.json
-data/<fahrtkennung>.csv
+data/<flight-id>.json
+data/<flight-id>.csv
 ```
 
-Beide enthalten denselben Datenbestand, chronologisch nach `ts_utc` sortiert.
+Both hold the same rows, sorted chronologically by `ts_utc`.
 
-### Spalten
+### Columns
 
-| Feld | Inhalt |
+| Field | Content |
 |---|---|
-| `flight_id` | Kennung der Fahrt |
-| `callsign` | Rufzeichen |
-| `seq` | laufende Nummer auf dem erfassenden Gerät |
-| `device` | Gerätekürzel, trennt Einträge bei zwei iPads |
-| `ts_utc` | Zeitpunkt UTC, ISO 8601 |
-| `ts_local` | derselbe Zeitpunkt mit Ortszeitversatz |
+| `flight_id` | flight identifier |
+| `callsign` | aircraft callsign |
+| `seq` | running number on the capturing device |
+| `device` | device tag, separates entries when two iPads are in use |
+| `ts_utc` | timestamp in UTC, ISO 8601 |
+| `ts_local` | same instant with local time offset |
 | `type` | `BALLAST`, `TALLY`, `ATC`, `CREW`, `NOTE` |
-| `lat`, `lon` | Position in Grad, 6 Nachkommastellen |
-| `alt_gps_m` | GPS-Höhe in Metern (nicht barometrisch) |
-| `gps_acc_m` | gemeldete Genauigkeit in Metern |
-| `gps_age_s` | Alter des Fixes zum Zeitpunkt des Eintrags |
-| `gps_fix` | `true`, wenn eine Position anlag |
-| `ballast_delta_kg` | relative Änderung, Abwurf negativ, Aufnahme positiv |
-| `ballast_abs_kg` | Bestand nach diesem Eintrag |
-| `atc_dir` | `RX` empfangen, `TX` gesendet |
-| `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | Meldungsinhalt |
-| `crew_pic` | verantwortliche Führung zum Zeitpunkt des Eintrags |
-| `crew_rest` | wer ruht, leer wenn beide wach |
-| `note` | freie Bemerkung |
-| `id` | UUID, stabiler Schlüssel für Notion |
+| `lat`, `lon` | position in degrees, six decimal places |
+| `alt_gps_m` | GPS altitude in metres (not barometric) |
+| `gps_acc_m` | reported accuracy in metres |
+| `gps_age_s` | age of the fix at the moment of the entry |
+| `gps_fix` | `true` when a position was available |
+| `ballast_delta_kg` | relative change, drop negative, take-on positive |
+| `ballast_abs_kg` | amount on board after this entry |
+| `atc_dir` | `RX` received, `TX` sent |
+| `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
+| `crew_pic` | pilot in command at the time of the entry |
+| `crew_rest` | who is resting, empty when both are awake |
+| `note` | free remark |
+| `id` | UUID, the stable key for Notion |
 
-### Ballastlogik
+### How ballast is calculated
 
-`ballast_abs_kg` wird fortgeschrieben: Startwert aus dem Setup, jeder `BALLAST`-Eintrag
-addiert sein `ballast_delta_kg`. Ein `TALLY`-Eintrag setzt den Bestand auf den physisch
-gezählten Wert; alle folgenden Abwürfe rechnen ab dort weiter. So bleibt die Rechnung
-korrekt, auch wenn zwischendurch unprotokolliert Sand ausgeworfen wurde.
+`ballast_abs_kg` is carried forward: it starts at the value from Setup, and every
+`BALLAST` entry adds its `ballast_delta_kg`. A `TALLY` entry sets the amount on board to
+what was physically counted, and every later drop is calculated from there. That keeps
+the figure correct even when sand went overboard without being logged.
 
-Jede Zeile trägt ihren eigenen `ballast_abs_kg`, Notion muss nichts nachrechnen.
+Every row carries its own `ballast_abs_kg`, so Notion never has to recalculate.
 
-## 5. Aus Notion pollen
+## 5. Polling from Notion
 
-Zwei Endpunkte, unterschiedliche Aktualität:
+Two endpoints, with different freshness:
 
-**GitHub-API — sofort aktuell, empfohlen**
+**GitHub API — immediate, recommended**
 
 ```
-GET https://api.github.com/repos/<benutzer>/<repo>/contents/data/<fahrtkennung>.json
+GET https://api.github.com/repos/<owner>/<repo>/contents/data/<flight-id>.json
 Authorization: Bearer <token>
 Accept: application/vnd.github.raw
 ```
 
-Mit `Accept: application/vnd.github.raw` kommt der Dateiinhalt direkt, ohne Base64-Umweg.
-Limit: 5000 Anfragen pro Stunde und Token. Ein Poll-Intervall von 30 Sekunden reicht
-für eine Fahrt weit aus.
+`Accept: application/vnd.github.raw` returns the file content directly, with no base64
+step. Limit: 5000 requests per hour per token. A 30 second poll interval is more than
+enough for one flight.
 
-**raw.githubusercontent.com — nur für öffentliche Repos, aber verzögert**
-
-```
-GET https://raw.githubusercontent.com/<benutzer>/<repo>/main/data/<fahrtkennung>.csv
-```
-
-Dieser Endpunkt liegt hinter einem CDN mit rund fünf Minuten Cache. Für eine
-Live-Verfolgung während der Fahrt zu langsam, für die Nachbereitung völlig ausreichend.
-
-**Auf Notion-Seite**
-
-`id` als eindeutigen Schlüssel verwenden und beim Import upserten, nicht anhängen.
-Die Datei enthält immer den vollständigen Stand, nicht nur die neuen Zeilen — bei
-reinem Anhängen entstehen Dubletten.
-
-## 6. Offline und Übertragung
-
-Jeder Eintrag geht zuerst in den lokalen Speicher des iPads und bleibt dort, bis er
-bestätigt übertragen ist. Der Punkt rechts an jeder Zeile im Bordbuch zeigt den Stand:
-gelb offen, grün übertragen. Die Statusleiste nennt die Zahl der offenen Zeilen.
-
-Ohne Netz wird nichts verworfen. Sobald wieder Verbindung besteht, überträgt die App
-automatisch — sofern „Auto-Übertragung" an ist — und zusätzlich einmal pro Minute,
-solange offene Zeilen vorliegen.
-
-Beim Übertragen liest die App die Datei auf GitHub, führt sie über die `id` mit dem
-lokalen Bestand zusammen und schreibt das Ergebnis zurück. Zwei iPads auf derselben
-Fahrt überschreiben sich dadurch nicht gegenseitig, solange sie nicht in derselben
-Sekunde senden.
-
-Über „CSV sichern" und „JSON sichern" lässt sich der Stand jederzeit ohne Netz in
-die Dateien-App exportieren.
-
-## 7. Grenzen, die vor dem Start bekannt sein sollten
-
-- **GPS im Hintergrund:** Sobald die App nicht im Vordergrund ist und das Display sperrt,
-  hält iPadOS die Standortabfrage an. Die App fordert eine Wake-Lock an, damit das
-  Display bei aktiver App nicht sperrt. Für eine lückenlose Track-Aufzeichnung ist ein
-  eigenes Loggergerät die richtige Wahl — diese App protokolliert Ereignisse, keinen Track.
-- **Höhe:** `alt_gps_m` ist die GPS-Höhe über dem WGS84-Ellipsoid, nicht der Höhenmesserwert.
-  Für Meldungen an ATC ist der Höhenmesser maßgeblich, nicht dieses Feld.
-- **Token auf dem Gerät:** Der Token liegt unverschlüsselt im lokalen Speicher des Browsers.
-  Bei Verlust des iPads reicht ein Widerruf des Tokens auf GitHub. Wer das vermeiden will,
-  schaltet einen Cloudflare Worker als Proxy davor, der den Token serverseitig hält; das
-  Feld „Repository" bleibt dann leer und der API-Host wird im Code auf den Worker gesetzt.
-- **Der Regler schwebt nur innerhalb der App.** Ein Overlay über fremden Apps ist auf
-  iPadOS ohne native App nicht möglich; Slide Over ist der vorgesehene Weg (Abschnitt 3).
-
-## 8. Bedienung während der Fahrt
-
-Der Nachtmodus im Setup schaltet die Oberfläche auf Rot auf Schwarz und erhält das
-Dunkelsehen. Der Quittungston bestätigt jeden Eintrag, damit ein Abwurf ohne Blick
-aufs Display erfasst werden kann.
-
-Die Schnelltasten im Ballast-Reiter tragen sofort ein, ohne Rückfrage — eine Berührung,
-eine Zeile. Der Wert stammt aus der Sacktafel im Setup; sinnvoll ist, dort die tatsächlich
-an Bord befindlichen Sackgrößen einzutragen.
-
-Im Crew-Reiter erzeugen „Wechsel" und „Ruhe" jeweils einen Eintrag und ändern gleichzeitig
-den Stand, der allen folgenden Einträgen mitgegeben wird.
-
-## 9. Dateien
+**raw.githubusercontent.com — public repositories only, and delayed**
 
 ```
-index.html                  vollständige App
-manifest.webmanifest        Installation auf dem Home-Bildschirm
-sw.js                       Offline-Cache
-icons/                      App-Symbole
-data/                       Zielordner der Fahrtdateien
+GET https://raw.githubusercontent.com/<owner>/<repo>/main/data/<flight-id>.csv
+```
+
+This endpoint sits behind a CDN with roughly a five minute cache. Too slow to follow a
+flight live, fine for working through the data afterwards.
+
+**On the Notion side**
+
+Use `id` as the unique key and upsert on import rather than appending. The file always
+holds the complete set of rows, not just the new ones — appending produces duplicates.
+
+## 6. Offline and transfer
+
+Every entry goes to the iPad's local storage first and stays there until it has been
+confirmed as sent. The dot at the right of each row in the log shows the state: amber
+pending, green sent. The status rail gives the number of pending rows.
+
+Nothing is discarded when there is no signal. Once a connection returns the app sends
+automatically — as long as Auto transfer is on — and additionally once a minute while
+rows are still pending.
+
+To send, the app reads the file on GitHub, merges it with the local set by `id`, and
+writes the result back. Two iPads on the same flight therefore do not overwrite each
+other, unless they send in the same second.
+
+Save CSV and Save JSON export the current state to the Files app at any time, without
+a connection.
+
+## 7. Limits worth knowing before takeoff
+
+- **GPS in the background:** once the app is not in the foreground and the display locks,
+  iPadOS suspends location updates. The app requests a wake lock so the display stays on
+  while the app is active. For a gapless track, use a dedicated logger — this app records
+  events, not a track.
+- **Altitude:** `alt_gps_m` is GPS altitude above the WGS84 ellipsoid, not the altimeter
+  reading. The altimeter governs what is reported to ATC, not this field.
+- **Token on the device:** the token sits unencrypted in the browser's local storage. If
+  the iPad is lost, revoking the token on GitHub is enough. To avoid that entirely, put a
+  Cloudflare Worker in front as a proxy holding the token server side; leave the
+  Repository field empty and point the API host in the code at the Worker.
+- **The dial floats inside the app only.** An overlay across other apps is not possible on
+  iPadOS without a native app; Slide Over is the intended route (section 3).
+
+## 8. Using it in flight
+
+Night mode in Setup switches the interface to red on black and preserves dark adaptation.
+The confirmation tone acknowledges each entry, so a drop can be logged without looking
+at the display.
+
+The quick keys on the Ballast tab record immediately, with no confirmation step — one
+touch, one row. Their values come from the bag sizes in Setup; enter the sack sizes
+actually carried on board.
+
+On the Crew tab, Hand over and Rest each write an entry and at the same time change the
+status attached to every following entry.
+
+## 9. Files
+
+```
+index.html                  the complete app
+manifest.webmanifest        Home Screen installation
+sw.js                       offline cache
+icons/                      app icons
+data/                       destination folder for flight files
 ```
