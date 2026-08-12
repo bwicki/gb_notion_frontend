@@ -67,6 +67,7 @@ a{color:inherit}
 header{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:52px;
   padding:0 8px 0 var(--pad);border-bottom:1px solid var(--line-soft)}
 header .clock{font-size:15px;flex:0 0 auto}
+#hBal{padding-right:4px;white-space:nowrap}
 .hinfo{flex:1;min-width:0;padding-left:9px;display:flex;flex-direction:column;justify-content:center;gap:1px}
 header .id{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
@@ -79,11 +80,22 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 var(--pad)}
 .foot{flex:0 0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));border-top:1px solid var(--line-soft)}
 
-.readout{flex:0 0 auto;padding:6px var(--pad) 8px;display:flex;align-items:center;gap:8px;min-height:54px}
-.readout .ball{min-width:0}
+.readout{flex:0 0 auto;padding:6px var(--pad) 8px;display:flex;align-items:center;gap:8px;min-height:56px}
+.lastmsg{font-size:11px;line-height:1.35;color:var(--muted);margin:0 0 10px;
+  border-left:2px solid var(--line);padding-left:9px}
+.lastmsg.hide{display:none}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumbs figure{position:relative;margin:0}
+.thumbs img{width:62px;height:62px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:11px;
+  background:var(--sel);color:var(--sel-ink);font-size:13px;line-height:1}
+.links.wa button{padding:7px 11px;font-size:12.5px;border-style:solid}
+.readout .ball{min-width:0;display:flex;gap:24px}
+.stat b{display:block;font-size:23px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
+.stat i{display:block;font-style:normal;font-size:10px;color:var(--muted);margin-top:2px;
+  line-height:1.2;max-width:110px}
 .readout .ball.hide{display:none}
-.readout b{font-size:29px;font-weight:400;letter-spacing:-.025em;line-height:1.05;display:block}
-.readout i{font-style:normal;font-size:11.5px;color:var(--muted);line-height:1.3;display:block}
+
 .rep{margin-left:auto;flex:0 0 auto;border:1px solid var(--line);background:var(--field);
   border-radius:9px;padding:6px 11px;min-height:42px;text-align:right;max-width:56%}
 .rep.hide{display:none}
@@ -120,6 +132,7 @@ select{width:100%;min-height:44px;padding:10px 12px;background:var(--field);
 select:focus{outline:0;border-color:var(--sel)}
 .sfx{position:relative}
 .sfx input{padding-right:46px}
+.sfx.wide input{padding-right:56px}
 .sfx>span{position:absolute;right:11px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--muted);pointer-events:none}
 .unit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
@@ -136,13 +149,30 @@ select:focus{outline:0;border-color:var(--sel)}
   background:var(--field);font-size:14px}
 .pills button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .pills.four{display:grid;grid-template-columns:repeat(4,1fr)}
-.pills.five{display:grid;grid-template-columns:repeat(5,1fr)}
+.pills.five{display:grid;grid-template-columns:repeat(6,1fr)}
 .pills.four button,.pills.five button{padding:0;font-size:12.5px}
+.pnl{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;min-height:44px;
+  border:1px solid var(--line);border-radius:9px;background:var(--field)}
+.pnl.pnl3{grid-template-columns:1fr 1fr 1fr}
+.pnl button{border-radius:6px;font-size:12.5px;color:var(--muted);min-height:36px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
+.pnl button.on{background:var(--sel);color:var(--sel-ink)}
+.qrow{display:flex;align-items:flex-end;gap:8px}
+.qrow .pills{flex:1;min-width:0}
+.qrow .unitlab{flex:0 0 auto;font-size:10px;color:var(--muted);padding-bottom:14px}
+.sumrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.sumrow button{min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:9px;
+  background:var(--field);font-size:13px;color:var(--muted)}
+.sumrow button.hide{display:none}
 .pills.g2{display:grid;grid-template-columns:repeat(2,1fr)}
 .pills.g3{display:grid;grid-template-columns:repeat(3,1fr)}
 .pills.g2 button,.pills.g3 button{padding:0 4px;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .links{display:flex;flex-wrap:wrap;gap:6px}
 .links button{padding:6px 10px;border-radius:14px;border:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+.links.small button{padding:4px 9px;font-size:11.5px;border-radius:12px}
+.links button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel);border-style:solid}
+.carry{justify-content:flex-start}
+select.pre{color:var(--carry);border-style:dashed}
 
 .check{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
   border:1px solid var(--line);background:var(--field);border-radius:9px;padding:11px 12px;min-height:48px;
@@ -201,12 +231,16 @@ html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
   -webkit-user-select:text;user-select:text;margin-bottom:12px}
 .waList{display:grid;gap:8px}
 .menu{display:grid;gap:8px}
-.menu .go{justify-content:flex-start;padding:0 16px}
+.menu .go{justify-content:flex-start;padding:0 16px;gap:12px}
+.menu .go svg{width:19px;height:19px;flex:0 0 auto;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-#puck{display:none;position:fixed;z-index:60;padding:12px 18px;border-radius:24px;
-  background:var(--card);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.18);
-  font-size:19px;touch-action:none;white-space:nowrap}
-#puck span{font-size:12px;color:var(--muted);margin-left:4px}
+#puck{display:none;position:fixed;z-index:2147483647;padding:11px 18px;border-radius:24px;
+  background:#1B3A6B;color:#FFFFFF;border:1px solid #14294D;
+  box-shadow:0 8px 26px rgba(0,0,0,.32);touch-action:none;white-space:nowrap;text-align:center}
+#puck b{display:block;font-size:15px;font-weight:600;letter-spacing:.01em}
+#puck span{display:block;font-size:12px;font-weight:400;opacity:.72;margin-top:2px}
+html[data-theme="night"] #puck{background:#0C1B33;border-color:#1B3A6B;color:#FF7A50}
 body.min .app{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
@@ -224,6 +258,7 @@ body.min #puck{display:block}
 <header>
   <span class="clock num" id="hClock">--:--:--Z</span>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
+  <span class="clock num" id="hBal"></span>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -240,89 +275,99 @@ body.min #puck{display:block}
     </div>
 
     <div class="readout">
-      <div class="ball" id="ballBox"><b class="num" id="rNum">—</b><i id="rSub"></i></div>
+      <div class="ball" id="ballBox">
+        <div class="stat"><b class="num" id="rOn">—</b><i data-t="onBoard">on board</i></div>
+        <div class="stat"><b class="num" id="rDrop">—</b><i data-t="droppedSince">dropped since first inventory</i></div>
+      </div>
       <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
     </div>
 
     <div class="scroll">
       <div class="blk on" id="b-Ballast">
         <div class="f"><div class="pills" id="bAct">
-          <button data-v="drop">Drop</button><button data-v="count">Take Inventory</button>
+          <button data-v="drop" data-t="drop">Drop</button><button data-v="count" data-t="takeInv">Take Inventory</button>
         </div></div>
 
         <div class="sub on" id="s-drop">
-          <div class="f"><div class="pills" id="bQuick"></div></div>
-          <div class="f"><input type="number" id="bKg" inputmode="decimal" step="0.5" placeholder="Kilograms dropped"></div>
-          <div class="f"><input type="text" id="bNote" placeholder="Remark (optional)"></div>
+          <div class="f"><div class="pills g2" id="bMed">
+            <button data-v="sand" data-t="sand">Sand</button><button data-v="water" data-t="waterW">Water</button>
+          </div></div>
+          <div class="f qrow"><div class="pills" id="bQuick"></div><span class="unitlab">kg</span></div>
+          <div class="f sumrow">
+            <input type="number" id="bKg" inputmode="decimal" step="0.5" data-tp="kgDropped" placeholder="Kilograms dropped">
+            <button id="bReset" class="hide" data-t="reset">Reset</button>
+          </div>
+          <div class="f"><textarea id="bNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
         </div>
 
         <div class="sub" id="s-count">
           <div class="f two">
-            <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" placeholder="Bags"><span>bags</span></div>
-            <div class="sfx"><input type="number" id="iWater" inputmode="decimal" step="1" placeholder="Water"><span>l</span></div>
+            <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" data-tp="bags" placeholder="Bags"><span>bags</span></div>
+            <div class="sfx wide"><input type="number" id="iWater" inputmode="decimal" step="1" data-tp="water" placeholder="Water"><span>liter</span></div>
           </div>
           <p class="hint" id="iHint">Count total incl. safety ballast</p>
-          <div class="f"><p class="lab">Ready ballast <span id="iReadyFull"></span></p>
-            <div class="pills five" id="iReady">
-              <button data-v="0">0%</button><button data-v="25">25%</button><button data-v="50">50%</button>
-              <button data-v="75">75%</button><button data-v="100">100%</button>
-            </div></div>
+          <div class="f"><p class="lab"><span data-t="readyBallast">Ready ballast</span> <span id="iReadyFull"></span></p>
+            <div class="pills" id="iReady"></div></div>
           <div class="calc" id="iCalc"></div>
-          <div class="f"><input type="text" id="iNote" placeholder="Remark (optional)"></div>
+          <div class="f"><textarea id="iNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
         </div>
       </div>
 
       <div class="blk" id="b-ATC">
+        <p class="lastmsg hide" id="aLast"></p>
         <div class="f"><div class="pills" id="aDir">
-          <button data-v="RX">Received</button><button data-v="TX">Sent</button>
+          <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="sent">Sent</button>
         </div></div>
-        <div class="f"><input type="text" id="aStation" placeholder="Station" autocapitalize="characters"></div>
+        <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
         <div class="f atcrow">
           <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div>
           <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="SQ">
           <button class="vfr" id="btnVfr">VFR</button>
         </div>
-        <div class="carry hide" id="aCarry"><span>Carried over from the last call</span><button id="aConfirm">Confirm</button></div>
-        <div class="f"><textarea id="aMsg" placeholder="Message"></textarea></div>
-        <div class="f"><div class="links" id="aChips"></div></div>
-        <button class="check" id="waAtcCo"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
-          <span>Send to ATC Coordinator<em id="waAtcName"></em></span></button>
-        <button class="check" id="waATC"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
-          <span>Send also to WhatsApp recipients<em id="waCntATC"></em></span></button>
+        <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last call</button></div>
+        <div class="f"><div class="links small" id="aChips"></div></div>
+        <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
+        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+          <div class="links wa" id="waATC"></div></div>
       </div>
 
       <div class="blk" id="b-Ressources">
         <div class="f two">
-          <div><p class="lab">Current PIC</p><div class="pills g2" id="cPic"></div></div>
-          <div><p class="lab">Resting</p><div class="pills g3" id="cRest"></div></div>
+          <div><p class="lab" data-t="currentPic">Current PIC</p><div class="pnl" id="cPic"></div></div>
+          <div><p class="lab" data-t="resting">Resting</p><div class="pnl pnl3" id="cRest"></div></div>
         </div>
         <div class="f three">
-          <div><p class="lab">Battery</p><select id="rBat">
+          <div><p class="lab" data-t="battery">Battery</p><select id="rBat">
             <option value="">—</option><option value="100">100%</option><option value="95">95%</option>
             <option value="90">90%</option><option value="85">85%</option><option value="80">80%</option>
             <option value="75">75%</option><option value="70">70%</option><option value="60">60%</option>
             <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option>
             <option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
           </select></div>
-          <div><p class="lab">Fuel cell</p><div class="pills g2" id="rFuel">
-            <button data-v="on">On</button><button data-v="off">Off</button></div></div>
-          <div><p class="lab">Solar</p><div class="pills g2" id="rSolar">
-            <button data-v="on">On</button><button data-v="off">Off</button></div></div>
+          <div><p class="lab" data-t="fuelCell">Fuel cell</p><div class="pnl" id="rFuel">
+            <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
+          <div><p class="lab" data-t="solarCell">Solar Cell</p><div class="pnl" id="rSolar">
+            <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
         </div>
-        <div class="f"><input type="text" id="cNote" placeholder="Remark (optional)"></div>
-        <button class="check" id="waRes"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
-          <span>Send also to WhatsApp recipients<em id="waCntRes"></em></span></button>
+        <div class="f"><textarea id="cNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
+        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+          <div class="links wa" id="waRes"></div></div>
       </div>
 
       <div class="blk" id="b-Other">
-        <div class="f"><textarea id="oMsg" placeholder="Note" style="min-height:120px"></textarea></div>
-        <button class="check" id="waOth"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
-          <span>Send also to WhatsApp recipients<em id="waCntOth"></em></span></button>
+        <div class="f"><textarea id="oMsg" data-tp="note" placeholder="Note" style="min-height:100px"></textarea></div>
+        <div class="f">
+          <input type="file" id="oFiles" accept="image/*" multiple style="display:none">
+          <button class="go sec sm" id="btnPic" data-t="addPictures">Add pictures</button>
+          <div class="thumbs" id="oThumbs"></div>
+        </div>
+        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+          <div class="links wa" id="waOth"></div></div>
       </div>
     </div>
 
     <div class="foot">
-      <button class="go" id="btnPost">Post to CC Notion</button>
+      <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
       <div class="ftline"><p class="tiny" id="hSt"></p><span class="ver"></span></div>
     </div>
   </section>
@@ -330,7 +375,7 @@ body.min #puck{display:block}
   <!-- LOG -->
   <section class="view" id="v-log">
     <div class="scroll">
-      <h3>Log — tap an entry to edit</h3>
+      <h3 data-t="logHead">Log — tap an entry to edit</h3>
       <div id="logList"></div>
     </div>
     <div class="foot">
@@ -341,55 +386,63 @@ body.min #puck{display:block}
   <!-- SETUP -->
   <section class="view" id="v-set">
     <div class="scroll">
-      <h3>Reporter on this device</h3>
+      <h3 data-t="hLanguage">Language</h3>
+      <div class="f"><div class="pills g2" id="sLang">
+        <button data-v="en">English</button><button data-v="de">Deutsch</button>
+      </div></div>
+      <p class="hint" data-t="langHint">The interface only. Everything written to GitHub and to WhatsApp stays English.</p>
+
+      <h3 data-t="hReporter">Reporter on this device</h3>
       <div class="f"><input type="text" id="sReporterOpen" placeholder="Name"></div>
-      <button class="go sec sm" id="btnSaveRep">Save name</button>
+      <button class="go sec sm" id="btnSaveRep" data-t="saveName">Save name</button>
       <p class="hint" id="repHint"></p>
 
       <div id="setLocked">
         <p class="lock">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.</p>
-        <button class="go" id="btnUnlock">Unlock settings</button>
+        <button class="go" id="btnUnlock" data-t="unlock">Unlock settings</button>
       </div>
 
       <div id="setOpen" style="display:none">
-        <h3>This device</h3>
-        <div class="f"><p class="lab">Setup role</p><div class="pills" id="sRole">
-          <button data-v="master">Master</button><button data-v="follower">Follower</button>
+        <h3 data-t="hDevice">This device</h3>
+        <div class="f"><p class="lab" data-t="setupRole">Setup role</p><div class="pills" id="sRole">
+          <button data-v="master" data-t="master">Master</button><button data-v="follower" data-t="follower">Follower</button>
         </div></div>
         <p class="hint">The master owns the flight setup and publishes it. Followers pick up
           every change the master saves, so the crew never drifts apart mid-flight.</p>
         <div class="f"><div class="pills" id="sMode">
-          <button data-v="personal">Personal device</button><button data-v="shared">Shared device</button>
+          <button data-v="personal" data-t="personalDev">Personal device</button><button data-v="shared" data-t="sharedDev">Shared device</button>
         </div></div>
         <p class="hint" id="sReporterLab"></p>
 
-        <h3>Flight</h3>
+        <h3 data-t="hFlight">Flight</h3>
         <div class="f two"><input type="text" id="sFlight" placeholder="Flight ID">
           <input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters"></div>
         <div class="f two"><input type="number" id="sInit" inputmode="decimal" placeholder="Ballast on board at start, kg">
           <input type="text" id="sVfr" inputmode="numeric" maxlength="4" placeholder="VFR squawk"></div>
+        <div class="f"><input type="text" id="sEmerg" placeholder="Emergency squawks, e.g. 7500,7600,7700"></div>
         <p class="hint">Only needed before the first inventory. Leave empty and the ballast figure
           starts with the first Take Inventory.</p>
         <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
 
-        <h3>Ballast</h3>
+        <h3 data-t="hBallast">Ballast</h3>
         <div class="f two"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="Weight per bag kg">
           <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" placeholder="Full ready ballast kg"></div>
         <div class="f"><input type="text" id="sSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
+        <div class="f"><input type="text" id="sReady" placeholder="Ready ballast steps, e.g. 0,10,25,50,75,100"></div>
 
-        <h3>App</h3>
-        <div class="f"><p class="lab">Night colour</p>
+        <h3 data-t="hApp">App</h3>
+        <div class="f"><p class="lab" data-t="nightColour">Night colour</p>
           <div class="pills four" id="sNight">
             <button data-v="red">Red</button><button data-v="amber">Amber</button>
             <button data-v="green">Green</button><button data-v="white">White</button>
           </div></div>
-        <div class="f"><p class="lab">Confirmation tone</p>
+        <div class="f"><p class="lab" data-t="tone">Confirmation tone</p>
           <div class="pills" id="sBeep"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
         <p class="hint">Entries are posted automatically. Without a connection they are held on the
           device and go out in chronological order as soon as the link is back.</p>
 
         <details class="fold" id="foldWa">
-          <summary>WhatsApp recipients</summary>
+          <summary data-t="waRecipients">WhatsApp recipients</summary>
           <div class="in">
             <p class="lab">Numbers in international form, digits only, e.g. 41791234567.</p>
             <div class="f two"><input type="text" id="sAtcName" placeholder="ATC Coordinator">
@@ -400,7 +453,7 @@ body.min #puck{display:block}
         </details>
 
         <details class="fold" id="foldTpl">
-          <summary>WhatsApp message layout</summary>
+          <summary data-t="waLayout">WhatsApp message layout</summary>
           <div class="in">
             <p class="lab">One template per message type. A line whose placeholders are all
               empty is dropped; a single empty placeholder becomes –.</p>
@@ -413,22 +466,22 @@ body.min #puck{display:block}
         </details>
 
         <details class="fold" id="foldGit">
-          <summary>GitHub connection</summary>
+          <summary data-t="ghConn">GitHub connection</summary>
           <div class="in">
             <div class="f"><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
             <div class="f two"><input type="text" id="sBranch" placeholder="Branch" autocapitalize="none">
               <input type="text" id="sDir" placeholder="Folder" autocapitalize="none"></div>
             <div class="f"><input type="password" id="sToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-            <button class="go sm sec" id="btnTest">Check connection</button>
+            <button class="go sm sec" id="btnTest" data-t="checkConn">Check connection</button>
           </div>
         </details>
 
         <div style="height:14px"></div>
-        <button class="go warn" id="btnWipe">Clear entries on this device</button>
+        <button class="go warn" id="btnWipe" data-t="clearDevice">Clear entries on this device</button>
       </div>
     </div>
     <div class="foot">
-      <button class="go" id="btnSave" disabled>Save settings</button>
+      <button class="go" id="btnSave" data-t="saveSettings" disabled>Save settings</button>
       <div class="ftline"><p class="tiny" id="setNote">Locked</p><span class="ver"></span></div>
     </div>
   </section>
@@ -436,7 +489,7 @@ body.min #puck{display:block}
 </div>
 </div>
 
-<div id="puck" role="button" tabindex="0" aria-label="Open Basket Reporting"><b class="num" id="pNum">—</b><span>kg</span></div>
+<div id="puck" role="button" tabindex="0" aria-label="Open Basket Reporting"><b id="pTitle">Reporting</b><span class="num" id="pNum">—</span></div>
 <div id="modal"></div>
 <div id="toast"></div>
 
@@ -444,11 +497,12 @@ body.min #puck{display:block}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-11';
+const APP_VERSION='v260812-16';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
-const PASS='1234';
+const PASS='1234';        /* opens the settings on any device */
+const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,vfr:'7000',role:'master',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
+           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',vfr:'7000',emerg:'7500,7600,7700',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
@@ -461,7 +515,8 @@ let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      wa:0,waAtc:1,alt:0,ready:100,fuel:'',solar:'',lastAtc:{station:'',freq:'',squawk:''}},load(K_UI,{}));
+                      waSel:{},alt:0,ready:100,fuel:'',solar:'',med:'sand',
+                      lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false;
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
@@ -472,6 +527,93 @@ const r1=n=>Math.round(n*10)/10;
 const pad=(n,w)=>String(n).padStart(w,'0');
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nz=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+
+
+/* ── Language ───────────────────────────────────────────────────────
+   The interface only. Everything written to GitHub or sent to WhatsApp stays English,
+   so the table and the coordinator never depend on who set which device to what. */
+const L={en:{
+ onBoard:'on board', droppedSince:'dropped since first inventory', droppedStart:'dropped since start',
+ drop:'Drop', takeInv:'Take Inventory', sand:'Sand', waterW:'Water',
+ kgDropped:'Kilograms dropped', bags:'Bags', water:'Water', remark:'Remark (optional)',
+ readyBallast:'Ready ballast', received:'Received', sent:'Sent', station:'Station',
+ message:'Message', confirmLast:'Confirm from last call', sendWa:'Send to WhatsApp',
+ noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
+ nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
+ export:'Export', format:'Format', destination:'Destination', download:'Download', share:'Share…', battery:'Battery', fuelCell:'Fuel cell', solarCell:'Solar Cell',
+ on:'On', off:'Off', note:'Note', addPictures:'Add pictures', post:'Post to CC Notion',
+ logHead:'Log — tap an entry to edit', unlock:'Unlock settings', saveName:'Save name',
+ saveSettings:'Save settings', clearDevice:'Clear entries on this device',
+ checkConn:'Check connection', hDevice:'This device', hFlight:'Flight', hBallast:'Ballast',
+ hApp:'App', hLanguage:'Language', hReporter:'Reporter on this device',
+ langHint:'The interface only. Everything written to GitHub and to WhatsApp stays English.',
+ master:'Master', follower:'Follower', personalDev:'Personal device', sharedDev:'Shared device',
+ setupRole:'Setup role', nightColour:'Night colour', tone:'Confirmation tone',
+ waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
+ mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
+ mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
+ mExport:'Export the table', mAbout:'About — more info', menu:'Menu',
+ enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
+ enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
+ sqDigits:'A squawk is four digits, each 0 to 7', atcPosted:'ATC posted',
+ crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
+ takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
+ wrongPass:'Wrong password',
+ roleTitle:'Is this the master device?',
+ roleText:'One device in the crew owns the flight setup and publishes it to the others. If this is that device, enter the master password. If you are joining someone else\'s flight, choose Join as follower — you will be sent the setup.',
+ roleOk:'I am the master', roleCancel:'Join as follower',
+ roleIsMaster:'This device is the master', roleIsFollower:'This device is a follower',
+ masterPassTitle:'Master password', masterPassText:'Only the device that owns the flight setup may be the master.',
+ twoMasters:'Another device is also set as master — only one may be', picFailed:'That picture could not be read',
+ picMax:'Four pictures is the limit', locked:'Locked',
+ unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', lastMsg:'last Msg',
+ upload:'upload', nothingSent:'Not sent yet', queued:'entries queued, going out as soon as there is a link.'
+},de:{
+ onBoard:'an Bord', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
+ drop:'Abwurf', takeInv:'Inventar', sand:'Sand', waterW:'Wasser',
+ kgDropped:'Kilogramm abgeworfen', bags:'Säcke', water:'Wasser', remark:'Bemerkung (optional)',
+ readyBallast:'Ready Ballast', received:'Empfangen', sent:'Gesendet', station:'Stelle',
+ message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', sendWa:'An WhatsApp senden',
+ noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
+ nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
+ export:'Export', format:'Format', destination:'Ziel', download:'Herunterladen', share:'Teilen…', battery:'Batterie', fuelCell:'Brennstoffzelle', solarCell:'Solarzelle',
+ on:'Ein', off:'Aus', note:'Notiz', addPictures:'Bilder anfügen', post:'An CC Notion senden',
+ logHead:'Logbuch — Eintrag antippen zum Ändern', unlock:'Einstellungen entsperren',
+ saveName:'Namen sichern', saveSettings:'Einstellungen sichern',
+ clearDevice:'Einträge auf diesem Gerät löschen', checkConn:'Verbindung prüfen',
+ hDevice:'Dieses Gerät', hFlight:'Fahrt', hBallast:'Ballast', hApp:'App', hLanguage:'Sprache',
+ hReporter:'Melder auf diesem Gerät',
+ langHint:'Nur die Oberfläche. Alles, was nach GitHub und WhatsApp geht, bleibt englisch.',
+ master:'Master', follower:'Follower', personalDev:'Persönliches Gerät', sharedDev:'Gemeinsames Gerät',
+ setupRole:'Rolle', nightColour:'Nachtfarbe', tone:'Quittungston',
+ waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
+ mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
+ mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
+ mExport:'Tabelle exportieren', mAbout:'Über — mehr dazu', menu:'Menü',
+ enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
+ enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
+ sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7', atcPosted:'ATC gesendet',
+ crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
+ takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
+ wrongPass:'Falsches Passwort',
+ roleTitle:'Ist dies das Master-Gerät?',
+ roleText:'Ein Gerät der Crew besitzt die Einrichtung der Fahrt und gibt sie an die anderen weiter. Ist dies dieses Gerät, gib das Master-Passwort ein. Steigst du in die Fahrt eines anderen ein, wähle Als Follower beitreten — die Einrichtung wird dir zugeschickt.',
+ roleOk:'Ich bin der Master', roleCancel:'Als Follower beitreten',
+ roleIsMaster:'Dieses Gerät ist der Master', roleIsFollower:'Dieses Gerät ist ein Follower',
+ masterPassTitle:'Master-Passwort', masterPassText:'Nur das Gerät, dem die Einrichtung gehört, darf Master sein.',
+ twoMasters:'Ein zweites Gerät ist ebenfalls Master — es darf nur eines geben', picFailed:'Dieses Bild liess sich nicht lesen',
+ picMax:'Mehr als vier Bilder gehen nicht', locked:'Gesperrt',
+ unlocked:'Entsperrt — Änderungen brauchen zwei Bestätigungen', noRepo:'kein Repo',
+ lastMsg:'letzte Msg', upload:'Upload', nothingSent:'Noch nichts gesendet',
+ queued:'Einträge warten, sie gehen raus sobald wieder Verbindung besteht.'
+}};
+const t=k=>((L[CFG.lang]||L.en)[k]||L.en[k]||k);
+function applyLang(){
+  document.documentElement.lang=CFG.lang||'en';
+  $$('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  $$('[data-tp]').forEach(el=>{el.placeholder=t(el.dataset.tp)});
+  mark('#sLang',CFG.lang||'en');
+}
 
 /* ── Ballast maths ─────────────────────────────────────────────────── */
 const chrono=l=>(l||ENT).slice().sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:(a.seq||0)-(b.seq||0));
@@ -512,13 +654,28 @@ const reporter=()=>shared()?(UI.alt?otherName():picName()):(CFG.reporter||picNam
 const waList=()=>(CFG.wa||[]).filter(r=>r&&r.p&&String(r.p).replace(/\D/g,'').length>5);
 const atcCo=()=>String(CFG.atcNum||'').replace(/\D/g,'').length>5
   ? {n:CFG.atcName||'ATC Coordinator',p:String(CFG.atcNum).replace(/\D/g,'')} : null;
-/* the coordinator is offered on ATC entries only, and ticked by default there */
-function recipients(type){
-  const out=[];
-  if(type==='ATC'&&UI.waAtc&&atcCo())out.push(atcCo());
-  if(UI.wa)waList().forEach(r=>{if(!out.some(x=>x.p===r.p))out.push(r)});
+/* every recipient is listed on its own. On ATC the coordinator leads and is the only one
+   ticked; elsewhere the coordinator does not appear and everybody else is ticked. */
+function waRoster(type){
+  const out=[],co=atcCo();
+  if(type==='ATC'&&co)out.push(co);
+  waList().forEach(r=>{if(!out.some(x=>x.p===r.p))out.push(r)});
   return out;
 }
+function waDefault(type,r){
+  const co=atcCo();
+  if(type==='ATC')return !!(co&&r.p===co.p);
+  return true;
+}
+function waPicked(type,r){
+  const sel=(UI.waSel||{})[type]||{};
+  return sel[r.p]===undefined?waDefault(type,r):!!sel[r.p];
+}
+function waToggle(type,r){
+  UI.waSel=UI.waSel||{};UI.waSel[type]=UI.waSel[type]||{};
+  UI.waSel[type][r.p]=!waPicked(type,r);save(K_UI,UI);
+}
+const recipients=type=>waRoster(type).filter(r=>waPicked(type,r));
 function localISO(d){const o=-d.getTimezoneOffset(),s=o>=0?'+':'-',a=Math.abs(o);
   return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+'T'+pad(d.getHours(),2)+':'+
          pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2)+s+pad(Math.floor(a/60),2)+':'+pad(a%60,2)}
@@ -554,11 +711,11 @@ function add(part){
     device:DEV,device_mode:CFG.mode,reporter:reporter(),source:'app',
     ts_utc:now.toISOString(),ts_local:localISO(now),
     type:'Other',ballast_action:'',ballast_delta_kg:null,ballast_abs_kg:null,
-    tc_deg:null,speed_kt:null,
+    tc_deg:null,speed_kt:null,ballast_medium:'',
     sand_kg:null,water_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
     crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',note:'',
-    whatsapp:'',whatsapp_to:'',edited_at:'',edited_by:'',synced:false
+    whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',synced:false
   },gpsSnap(),part);
   ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();
   if(configured())sync(true,true);
@@ -692,7 +849,7 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','bagKg','readyKg',
   'vfr','atcName','atcNum','wa','tpl'];
 function setupPayload(withToken){
-  const o={v:1};SHARED.forEach(k=>o[k]=CFG[k]);
+  const o={v:1,master_device:DEV};SHARED.forEach(k=>o[k]=CFG[k]);
   if(withToken&&CFG.token)o.token=CFG.token;
   return o;
 }
@@ -716,6 +873,16 @@ function applyShared(o){
   });
   return changed;
 }
+/* two masters would overwrite each other's setup, so a master watches for a second one */
+async function checkMaster(){
+  if(CFG.role!=='master'||!configured())return;
+  try{
+    const g=await ghGet(setupPath(),true);
+    if(g.notModified||!g.text)return;
+    const o=JSON.parse(g.text);
+    if(o.master_device&&o.master_device!==DEV)toast(t('twoMasters'));
+  }catch(e){}
+}
 async function followSetup(){
   if(CFG.role!=='follower')return;
   try{
@@ -723,7 +890,7 @@ async function followSetup(){
     if(g.notModified||!g.text)return;
     const o=JSON.parse(g.text);
     if(applyShared(o)){
-      save(K_CFG,CFG);paintQuick();paintCrew();paintWaChecks();paintInv();paint();
+      save(K_CFG,CFG);applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paint();
       toast('Setup updated from the master');
     }
   }catch(e){}
@@ -749,10 +916,10 @@ async function ghPut(p,text,sha,msg){
 const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
   'pos_lat','pos_lon','alt_ft','tc_deg','speed_kt','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
-  'ballast_action','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','total_ballast_kg','tally_diff_kg',
+  'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
   'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar','note',
-  'whatsapp','whatsapp_to','edited_at','edited_by','id'];
+  'whatsapp','whatsapp_to','attachments','attachment_paths','edited_at','edited_by','id'];
 const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
 const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
 
@@ -768,7 +935,7 @@ async function sync(silent,push,attempt){
     const g=await ghGet(p.json,!push);
     if(g.notModified&&!push&&!ENT.some(e=>!e.synced)){LASTSYNC=new Date();return}
 
-    if(push||pollN%6===0)await followSetup();
+    if(push||pollN%6===0){await followSetup();await checkMaster()}
 
     let rt=null;
     if(push||pollN%6===0){try{rt=parse((await ghGet(p.del)).text)}catch(e){rt=null}}
@@ -819,19 +986,24 @@ function paintStatus(){
     g.push('\u00b1 '+Math.round(GPS.acc||0)+' m');
     $('#hGps').textContent=g.join(' \u00b7 ');
   }else $('#hGps').textContent=GPS?'GPS stale':(GPSERR||'GPS searching');
-  const b=[];
   const un=ENT.filter(e=>!e.synced).length;
-  b.push(SYNCING?'syncing':un?un+' queued':(configured()?'synced':'no repository'));
-  b.push(ENT.length+' rows');
-  $('#hSt').textContent=b.join(' · ');
-  $('#syncNote').textContent=un?un+' entry(ies) queued, going out as soon as there is a link.'
-    :(LASTSYNC?'In sync, last at '+localISO(LASTSYNC).slice(11,19):'Not sent yet.');
+  const last=chrono(ENT)[ENT.length-1];
+  const when=last?String(last.ts_utc).slice(11,19)+'Z':'--:--:--Z';
+  const who=last?(last.reporter||last.device||'—'):'—';
+  const up=!configured()?t('noRepo'):(SYNCING?'…':(un?'\u2717 '+un:'\u2713'));
+  $('#hSt').textContent=t('lastMsg')+' '+when+'/'+who+'  |  '+t('upload')+' '+up;
+  $('#syncNote').textContent=un?un+'/'+ENT.length+' '+t('queued')
+    :(LASTSYNC?'In sync, last at '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
 }
 function paintReadout(){
   const v=onBoard();
-  $('#rNum').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
-  $('#pNum').textContent=Number.isInteger(v)?v:v.toFixed(1);
-  $('#rSub').innerHTML='on board · '+droppedTotal()+' kg dropped '+(firstInv()?'since 1st inventory':'since start');
+  const txt=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
+  $('#hBal').textContent=txt;
+  $('#pNum').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
+  $('#pTitle').textContent=(CFG.call?CFG.call+' ':'')+'Reporting';
+  $('#rOn').textContent=txt;
+  $('#rDrop').textContent=droppedTotal()+' kg';
+  $$('[data-t="droppedSince"]').forEach(el=>el.textContent=firstInv()?t('droppedSince'):t('droppedStart'));
   $('#ballBox').classList.toggle('hide',UI.type!=='Ballast');
   $('#repName').textContent=reporter();
   $('#repRole').textContent=shared()?(UI.alt?'Not the PIC':'Reporter — PIC'):'Reporter';
@@ -871,23 +1043,47 @@ function paintLog(){
       <span class="p ${e.synced?'done':''}"></span></button>`;
   }).join('');
 }
+function paintReady(){
+  const steps=String(CFG.readySteps||DEF.readySteps).split(/[^0-9.]+/)
+    .map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>=0&&x<=100).slice(0,6);
+  if(!steps.length)steps.push(0,25,50,75,100);
+  if(!steps.includes(Number(UI.ready)))UI.ready=steps[steps.length-1];
+  $('#iReady').className='pills'+(steps.length>4?' five':' four');
+  $('#iReady').innerHTML=steps.map(n=>`<button data-v="${n}"${Number(UI.ready)===n?' class="on"':''}>${n}%</button>`).join('');
+}
 function paintQuick(){
   $('#bQuick').innerHTML=(CFG.steps||DEF.steps).split(',').map(s=>parseFloat(s)).filter(n=>n>0).slice(0,6)
     .map(n=>`<button data-v="${n}">${n}</button>`).join('');
 }
+/* only pilots the master actually named appear; an empty second name means a single-handed
+   flight and the switches shrink to what is real */
+const crewList=()=>[['p1',(CFG.p1||'').trim()],['p2',(CFG.p2||'').trim()]].filter(x=>x[1]);
 function paintCrew(){
-  $('#cPic').innerHTML=`<button data-v="p1"${UI.pic==='p1'?' class="on"':''}>${esc(p1n())}</button><button data-v="p2"${UI.pic==='p2'?' class="on"':''}>${esc(p2n())}</button>`;
-  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>Nobody</button><button data-v="p1"${UI.rest==='p1'?' class="on"':''}>${esc(p1n())}</button><button data-v="p2"${UI.rest==='p2'?' class="on"':''}>${esc(p2n())}</button>`;
+  const crew=crewList();
+  if(!crew.length){$('#cPic').innerHTML='<button class="on">'+esc(t('noPilots'))+'</button>';
+    $('#cRest').innerHTML='<button class="on">'+esc(t('noPilots'))+'</button>';return}
+  if(!crew.some(c=>c[0]===UI.pic)){UI.pic=crew[0][0];save(K_UI,UI)}
+  if(UI.rest&&!crew.some(c=>c[0]===UI.rest)){UI.rest='';save(K_UI,UI)}
+  $('#cPic').className='pnl'+(crew.length>2?' pnl3':'');
+  $('#cPic').innerHTML=crew.map(([k,n])=>
+    `<button data-v="${k}"${UI.pic===k?' class="on"':''}>${esc(n)}</button>`).join('');
+  $('#cRest').className='pnl'+(crew.length>1?' pnl3':'');
+  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>${esc(t('nobody'))}</button>`
+    +crew.map(([k,n])=>`<button data-v="${k}"${UI.rest===k?' class="on"':''}>${esc(n)}</button>`).join('');
 }
+const WABOX={'#waATC':'ATC','#waRes':'Ressources','#waOth':'Other'};
 function paintWaChecks(){
-  const n=waList().length;
-  const t=n?' — '+n+' recipient'+(n>1?'s':''):' — none set up yet';
-  ['ATC','Res','Oth'].forEach(k=>{$('#waCnt'+k).textContent=t});
-  const co=atcCo();
-  $('#waAtcName').textContent=co?' — '+co.n:' — no number set up yet';
-  $('#waAtcCo').classList.toggle('on',!!UI.waAtc&&!!co);
-  ['#waATC','#waRes','#waOth'].forEach(id=>$(id).classList.toggle('on',!!UI.wa));
+  for(const sel in WABOX){
+    const type=WABOX[sel],box=$(sel),list=waRoster(type);
+    if(!list.length){box.innerHTML='<span class="lab">'+t('noRecipients')+'</span>';continue}
+    box.innerHTML=list.map((r,i)=>`<button data-i="${i}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`).join('');
+  }
 }
+for(const sel in WABOX)$(sel).addEventListener('click',ev=>{
+  const b=ev.target.closest('button');if(!b)return;
+  const type=WABOX[sel],r=waRoster(type)[Number(b.dataset.i)];
+  if(r){waToggle(type,r);paintWaChecks()}
+});
 function paintInv(){
   $('#iHint').textContent='Count total incl. safety ballast · '+nz(CFG.bagKg)
     +' kg per bag · water 1 kg per litre';
@@ -899,7 +1095,7 @@ function paintInv(){
     +(ENT.some(e=>e.ballast_action==='count')||nz(CFG.init)>0
       ? `<br>Expected ${exp} kg · difference <b>${d>0?'+':''}${d} kg</b>` : '');
 }
-function paint(){paintReadout();paintLog();paintStatus()}
+function paint(){paintReadout();paintLog();paintStatus();paintLastAtc()}
 
 /* ── Modal ─────────────────────────────────────────────────────────── */
 function ask(o){
@@ -941,6 +1137,37 @@ function setTheme(t,persist){
 const isNight=()=>document.documentElement.dataset.theme==='night';
 
 /* ── Navigation and menu ───────────────────────────────────────────── */
+async function exportSheet(){
+  let fmt='csv';
+  const build=()=>fmt==='csv'
+    ? {text:toCsv(chrono(ENT)),name:(CFG.flight||'flightlog')+'.csv',mime:'text/csv'}
+    : {text:JSON.stringify(chrono(ENT),null,1),name:(CFG.flight||'flightlog')+'.json',mime:'application/json'};
+  const canShare=!!(navigator.canShare&&navigator.share);
+  await ask({title:t('export'),cancel:false,ok:'Close',
+    text:ENT.length+' rows',
+    html:'<p class="lab">'+esc(t('format'))+'</p><div class="pnl" id="exFmt">'
+      +'<button data-v="csv" class="on">CSV</button><button data-v="json">JSON</button></div>'
+      +'<p class="lab" style="margin-top:14px">'+esc(t('destination'))+'</p>'
+      +'<div class="menu"><button class="go sec sm" id="exDl">'+esc(t('download'))+'</button>'
+      +(canShare?'<button class="go sec sm" id="exSh">'+esc(t('share'))+'</button>':'')+'</div>',
+    onMount:(m,close)=>{
+      m.querySelector('#exFmt').addEventListener('click',ev=>{
+        const b=ev.target.closest('button');if(!b)return;fmt=b.dataset.v;
+        [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+      });
+      m.querySelector('#exDl').onclick=()=>{const f=build();dl(f.text,f.name,f.mime);close()};
+      const sh=m.querySelector('#exSh');
+      if(sh)sh.onclick=async()=>{
+        const f=build();
+        try{
+          const file=new File([f.text],f.name,{type:f.mime});
+          if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:f.name});close()}
+          else{dl(f.text,f.name,f.mime);close()}
+        }catch(e){}
+      };
+    }});
+}
+
 async function shareSheet(){
   let withToken=true;
   const render=m=>{
@@ -965,6 +1192,19 @@ async function shareSheet(){
         catch(e){toast('Select the link to copy')}
       };
     }});
+}
+
+/* Asked once, on the very first start of a fresh device. Knowing the master password is
+   what makes a device the master — there is no other switch and no default. */
+async function askRole(){
+  for(let i=0;i<3;i++){
+    const v=await ask({title:t('roleTitle'),text:t('roleText'),input:'password',ph:'••••',
+      ok:t('roleOk'),cancel:t('roleCancel')});
+    if(v===null){CFG.role='follower';save(K_CFG,CFG);toast(t('roleIsFollower'));return}
+    if(v===MASTER_PASS){CFG.role='master';save(K_CFG,CFG);toast(t('roleIsMaster'));return}
+    toast(t('wrongPass'));
+  }
+  CFG.role='follower';save(K_CFG,CFG);toast(t('roleIsFollower'));
 }
 
 /* an invitation link is applied only after the person on the other device says so */
@@ -999,15 +1239,28 @@ function setView(v){
 }
 $('#btnMenu').onclick=()=>openMenu();
 async function openMenu(){
-  const items=[['form','Report'],['log','Log'],['set','Settings'],
-               ['theme',isNight()?'Day mode':'Night mode'],
-               ['pull','Reload from GitHub'],['sync','Send now'],
-               ['share','Share setup with another device'],
-               ['csv','Save CSV'],['json','Save JSON'],['about','About — more info']];
-  await ask({title:'Menu',cancel:false,ok:'Close',
+  const IC={
+    form:'<path d="M4 5h13l3 3v11H4Z"/><path d="M8 10h8M8 14h5"/>',
+    log:'<path d="M5 6h0M5 12h0M5 18h0" stroke-width="2.3"/><path d="M10 6h9M10 12h9M10 18h6"/>',
+    set:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6 6 18M18 18l-1.4-1.4M7.4 7.4 6 6"/>',
+    theme:isNight()
+      ?'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6 17 7M7 17l-1.4 1.4M18.4 18.4 17 17M7 7 5.6 5.6"/>'
+      :'<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>',
+    pull:'<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/>',
+    sync:'<path d="M12 20V9"/><path d="M8 13l4-4 4 4"/><path d="M5 5h14"/>',
+    share:'<circle cx="7" cy="12" r="2.6"/><circle cx="17" cy="6.5" r="2.6"/><circle cx="17" cy="17.5" r="2.6"/><path d="M9.3 10.8 14.7 7.7M9.3 13.2l5.4 3.1"/>',
+    export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>',
+    about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>'
+  };
+  const items=[['form',t('mReport')],['log',t('mLog')],['set',t('mSettings')],
+               ['theme',isNight()?t('mDay'):t('mNight')],
+               ['pull',t('mReload')],['sync',t('mSend')],['share',t('mShare')],
+               ['export',t('mExport')],['about',t('mAbout')]];
+  await ask({title:t('menu'),cancel:false,ok:'Close',
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
-      `<button class="go sec sm" data-m="${k}">${esc(l)}</button>`).join('')+'</div>',
+      `<button class="go sec sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
+      ).join('')+'</div>',
     onMount:(m,close)=>{m.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
       close();
       const k=b.dataset.m;
@@ -1015,8 +1268,7 @@ async function openMenu(){
       else if(k==='theme')setTheme(isNight()?'day':'night',true);
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
-      else if(k==='csv')dl(toCsv(chrono(ENT)),(CFG.flight||'flightlog')+'.csv','text/csv');
-      else if(k==='json')dl(JSON.stringify(chrono(ENT),null,1),(CFG.flight||'flightlog')+'.json','application/json');
+      else if(k==='export')exportSheet();
       else if(k==='share')shareSheet();
       else if(k==='about')window.open('readme.html','_blank','noopener');
     })}});
@@ -1030,8 +1282,9 @@ function setType(t){
   $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+t));
   paintReadout();
-  if(t==='ATC')carryAtc();
-  if(t==='Ballast'&&UI.act==='count')paintInv();
+  if(t==='ATC'){carryAtc();paintChips()}
+  if(t==='Ballast')setAct(UI.act);
+  if(t==='Ressources')carryRes();
 }
 $('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.t)});
 
@@ -1044,35 +1297,61 @@ function setAct(v){
   UI.act=v;save(K_UI,UI);
   $('#s-drop').classList.toggle('on',v==='drop');
   $('#s-count').classList.toggle('on',v==='count');
-  if(v==='count')paintInv();
+  if(v==='count'){carryInv();paintInv()}else carryDrop();
 }
 pills('#bAct',setAct);
+pills('#bMed',v=>{UI.med=v;save(K_UI,UI)});
+/* tapping an amount adds it on, so three sacks of ten are three taps; Reset undoes a slip */
+function paintSum(){
+  const v=$('#bKg').value.trim();
+  $('#bReset').classList.toggle('hide',!v);
+}
 $('#bQuick').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
-  $$('#bQuick button').forEach(x=>x.classList.toggle('on',x===b));
-  $('#bKg').value=b.dataset.v;
+  acceptPre('#b-Ballast');
+  const cur=parseFloat($('#bKg').value);
+  $('#bKg').value=r1((isFinite(cur)?cur:0)+parseFloat(b.dataset.v));
+  b.classList.add('on');setTimeout(()=>b.classList.remove('on'),160);
+  paintSum();
 });
-pills('#iReady',v=>{UI.ready=Number(v);save(K_UI,UI);paintInv()});
+$('#bReset').onclick=()=>{$('#bKg').value='';paintSum()};
+$('#bKg').addEventListener('input',paintSum);
+$('#iReady').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  UI.ready=Number(b.dataset.v);save(K_UI,UI);paintReady();paintInv()});
 $('#iBags').addEventListener('input',paintInv);
 $('#iWater').addEventListener('input',paintInv);
 
 pills('#aDir',v=>{UI.adir=v;save(K_UI,UI)});
 const MSGS=['Initial call','Position report','QNH','Ops Normal','Level clearance','Squawk','Freq change','Leaving freq'];
 $('#aChips').innerHTML=MSGS.map(m=>`<button data-v="${m}">${m}</button>`).join('');
+/* a phrase goes in on the first tap and comes out again on the second */
+const msgParts=()=>$('#aMsg').value.split('\u00b7').map(x=>x.trim()).filter(Boolean);
+function paintChips(){
+  const p=msgParts();
+  $$('#aChips button').forEach(b=>b.classList.toggle('on',p.includes(b.dataset.v)));
+}
 $('#aChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-  const t=$('#aMsg');t.value=(t.value?t.value+' \u00b7 ':'')+b.dataset.v});
+  const parts=msgParts(),i=parts.indexOf(b.dataset.v);
+  if(i>=0)parts.splice(i,1);else parts.push(b.dataset.v);
+  $('#aMsg').value=parts.join(' \u00b7 ');paintChips()});
+$('#aMsg').addEventListener('input',paintChips);
 pills('#cPic',v=>{UI.pic=v;save(K_UI,UI);paintReadout()});
 pills('#cRest',v=>{UI.rest=v;save(K_UI,UI)});
 pills('#rFuel',v=>{UI.fuel=v;save(K_UI,UI)});
 pills('#rSolar',v=>{UI.solar=v;save(K_UI,UI)});
-$$('.check').forEach(c=>c.onclick=()=>{
-  if(c.id==='waAtcCo')UI.waAtc=UI.waAtc?0:1; else UI.wa=UI.wa?0:1;
-  save(K_UI,UI);paintWaChecks()});
 
 /* ── ATC carried-over values ───────────────────────────────────────── */
 const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
+function paintLastAtc(){
+  const last=chrono(ENT).filter(e=>e.type==='ATC').pop(),el=$('#aLast');
+  if(!last){el.classList.add('hide');return}
+  el.classList.remove('hide');
+  el.textContent='LAST MSG: '+String(last.ts_utc).slice(11,19)+'Z '
+    +(last.atc_dir==='TX'?'sent':'recvd')+' '
+    +[last.atc_station,last.atc_freq,last.atc_squawk,last.atc_msg].filter(Boolean).join(' ');
+}
 function carryAtc(){
-  setTimeout(syncVfr,0);
+  setTimeout(syncVfr,0);paintLastAtc();
   const l=UI.lastAtc||{};let any=false;
   ATCF.forEach(([sel,k])=>{const el=$(sel);
     if(!el.value&&l[k]){el.value=l[k];el.classList.add('pre');any=true}
@@ -1083,17 +1362,20 @@ ATCF.forEach(([sel])=>{const el=$(sel);
   const clear=()=>{if(el.classList.contains('pre')){el.classList.remove('pre');
     if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide')}};
   el.addEventListener('focus',clear);el.addEventListener('input',clear)});
-/* 12345 becomes 123.450 — three digits of megahertz, the rest padded to kilohertz */
-function fmtFreq(v){
-  const d=String(v||'').replace(/\D/g,'');
-  if(d.length<3)return String(v||'').trim();
-  return d.slice(0,3)+'.'+d.slice(3,6).padEnd(3,'0');
-}
+/* the point is placed after the third digit while typing; on leaving the field the
+   kilohertz are padded out, so 12345 reads 123.450 */
+const freqDigits=v=>String(v||'').replace(/\D/g,'').slice(0,6);
+function freqLive(v){const d=freqDigits(v);return d.length<=3?d:d.slice(0,3)+'.'+d.slice(3)}
+function fmtFreq(v){const d=freqDigits(v);return d.length<3?d:d.slice(0,3)+'.'+d.slice(3,6).padEnd(3,'0')}
+$('#aFreq').addEventListener('input',()=>{const el=$('#aFreq'),f=freqLive(el.value);
+  if(f!==el.value)el.value=f});
 $('#aFreq').addEventListener('blur',()=>{const el=$('#aFreq');if(el.value.trim())el.value=fmtFreq(el.value)});
 
 /* a squawk is four octal digits, so 8 and 9 never occur */
 const VFR=()=>{const v=String(CFG.vfr||'7000').replace(/[^0-7]/g,'').slice(0,4);return v.length===4?v:'7000'};
-const EMERG={'7500':'hijack','7600':'radio failure','7700':'general emergency'};
+const EMERG_NAMES={'7500':'unlawful interference','7600':'radio failure','7700':'general emergency'};
+const emergList=()=>String(CFG.emerg||'7500,7600,7700').split(/[^0-7]+/).filter(x=>x.length===4);
+const emergName=c=>EMERG_NAMES[c]||'an emergency code';
 function syncVfr(){$('#btnVfr').classList.toggle('on',$('#aSquawk').value===VFR())}
 $('#aSquawk').addEventListener('input',()=>{const el=$('#aSquawk');
   const c=el.value.replace(/[^0-7]/g,'').slice(0,4);if(c!==el.value)el.value=c;syncVfr()});
@@ -1105,61 +1387,123 @@ $('#btnVfr').onclick=()=>{const el=$('#aSquawk');
 $('#aConfirm').onclick=()=>{$$('#b-ATC input.pre').forEach(i=>i.classList.remove('pre'));
   $('#aCarry').classList.add('hide');toast('Carried-over values confirmed')};
 
+/* ── Pictures on an Other entry ─────────────────────────────────────
+   Photos are scaled down in the browser before anything is stored, because a queued
+   entry has to fit in the device's local storage until there is a link again. */
+let PICS=[];
+const MAXPIC=4, PIC_EDGE=1024, PIC_Q=0.6;
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const sc=Math.min(1,PIC_EDGE/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg',PIC_Q));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('unreadable'))};
+    img.src=url;
+  });
+}
+function paintPics(){
+  $('#oThumbs').innerHTML=PICS.map((d,i)=>
+    `<figure><img src="${d}" alt=""><button data-i="${i}">\u00d7</button></figure>`).join('');
+  $('#btnPic').textContent=PICS.length?t('addPictures')+' ('+PICS.length+'/'+MAXPIC+')':t('addPictures');
+}
+$('#btnPic').onclick=()=>$('#oFiles').click();
+$('#oThumbs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  PICS.splice(Number(b.dataset.i),1);paintPics()});
+$('#oFiles').addEventListener('change',async ev=>{
+  const files=[...ev.target.files].slice(0,MAXPIC-PICS.length);
+  for(const f of files){try{PICS.push(await shrink(f))}catch(e){toast(t('picFailed'))}}
+  ev.target.value='';paintPics();
+  if(PICS.length>=MAXPIC)toast(t('picMax'));
+});
+async function uploadPics(e){
+  if(!PICS.length)return[];
+  const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),out=[];
+  for(let i=0;i<PICS.length;i++){
+    const path=d+'/media/'+e.id+'-'+(i+1)+'.jpg';
+    const b64=PICS[i].split(',')[1];
+    try{
+      const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(path)}`,{method:'PUT',headers:hdr(),
+        body:JSON.stringify({message:'picture · '+reporter(),content:b64,branch:CFG.branch||'main'})});
+      if(r.ok)out.push(path);
+    }catch(err){}
+  }
+  return out;
+}
+
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const t=UI.type;let e=null;
   if(t==='Ballast'){
     if(UI.act==='count'){
       const bags=$('#iBags').value,water=$('#iWater').value;
-      if(bags===''&&water==='')return toast('Enter the bags and the water');
+      if(bags===''&&water==='')return toast(t('enterInv'));
       const c=invCalc(bags,water,UI.ready);
       add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
         sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
         inv_bags:bags===''?null:Math.round(nz(bags)),inv_ready_pct:UI.ready,note:$('#iNote').value.trim()});
-      $('#iNote').value='';paintInv();
+      UI.lastInv={bags:bags,water:water};save(K_UI,UI);
+      $('#iNote').value='';acceptPre('#b-Ballast');paintInv();
       const last=chrono(ENT)[chrono(ENT).length-1];
-      toast('Inventory '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
+      toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
     }else{
       const kg=parseFloat($('#bKg').value);
-      if(!(kg>0))return toast('Enter the kilograms dropped');
-      add({type:'Ballast',ballast_action:'drop',ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim()});
-      $('#bKg').value='';$('#bNote').value='';$$('#bQuick button').forEach(x=>x.classList.remove('on'));
-      toast('\u2212'+kg+' kg');
+      if(!(kg>0))return toast(t('enterKg'));
+      add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
+        ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim()});
+      UI.lastDrop={kg:String(kg)};save(K_UI,UI);
+      $('#bKg').value='';$('#bNote').value='';paintSum();
+      acceptPre('#b-Ballast');carryDrop();
+      toast('\u2212'+kg+' kg '+(UI.med||'sand'));
     }
     return;
   }
   if(t==='ATC'){
-    if($$('#b-ATC input.pre').length)return toast('Confirm the carried-over station, Frq and SQ');
     if($('#aFreq').value.trim())$('#aFreq').value=fmtFreq($('#aFreq').value);
     const sq=$('#aSquawk').value.replace(/[^0-7]/g,'').slice(0,4);
     $('#aSquawk').value=sq;syncVfr();
-    if(sq&&sq.length!==4)return toast('A squawk is four digits, each 0 to 7');
-    if(EMERG[sq]){
+    if(sq&&sq.length!==4)return toast(t('sqDigits'));
+    if(sq&&emergList().includes(sq)){
       const go=await ask({title:'Confirm Emergency SQ',danger:true,ok:'Confirm Emergency SQ',
-        text:sq+' is the code for '+EMERG[sq]+'. Post it only if that is what was set.'});
+        cancel:'Go back',text:sq+' is '+emergName(sq)+'. Post it only if that code is actually set.'});
       if(!go)return;
     }
+    acceptPre('#b-ATC');
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
-    if(!st&&!msg)return toast('Enter a station or a message');
+    if(!st&&!msg)return toast(t('enterStation'));
     const rc=recipients('ATC');
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:sq};
-    save(K_UI,UI);$('#aMsg').value='';toast('ATC posted');carryAtc();syncVfr();
+    save(K_UI,UI);$('#aMsg').value='';paintChips();toast(t('atcPosted'));carryAtc();syncVfr();
   }else if(t==='Ressources'){
     const bat=$('#rBat').value;const rc=recipients('Ressources');
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#cNote').value='';toast('Crew status posted');
+    UI.lastRes={bat:bat};save(K_UI,UI);
+    $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
-    if(!v)return toast('The note is empty');
+    if(!v)return toast(t('noteEmpty'));
     const rc=recipients('Other');
-    e=add({type:'Other',note:v,whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#oMsg').value='';toast('Note posted');
+    e=add({type:'Other',note:v,attachments:PICS.length?String(PICS.length):'',
+      whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
+    if(PICS.length&&configured()){
+      const pending=PICS.slice();PICS=[];paintPics();
+      const saved=e;
+      (async()=>{const paths=await uploadPics(saved);
+        if(paths.length){saved.attachment_paths=paths.join('; ');saved.synced=false;
+          save(K_ENT,ENT);paint();sync(true,true)}})();
+    }else{PICS=[];paintPics()}
+    $('#oMsg').value='';toast(t('notePosted'));
   }
   if(e){const rc=recipients(t);if(rc.length)waSend(e,rc)}
 };
@@ -1220,7 +1564,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',steps:'#sSteps',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',steps:'#sSteps',readySteps:'#sReady',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 function paintWaRows(){
   const w=CFG.wa||[];
@@ -1257,12 +1601,12 @@ $('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
-  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sNight',CFG.night);mark('#sRole',CFG.role);
+  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sNight',CFG.night);mark('#sRole',CFG.role);
   paintWaRows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
   UNLOCKED=false;$('#setLocked').style.display='';$('#setOpen').style.display='none';
-  $('#btnSave').disabled=true;$('#setNote').textContent='Locked';
+  $('#btnSave').disabled=true;$('#setNote').textContent=t('locked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
   $('#foldGit').open=false;$('#foldWa').open=false;$('#foldTpl').open=false;
 }
 function paintRepHint(){
@@ -1279,13 +1623,20 @@ $('#btnUnlock').onclick=async()=>{
   const v=await ask({title:'Settings password',text:'Enter the password to change the flight setup.',
     input:'password',ph:'••••',ok:'Unlock'});
   if(v===null)return;
-  if(v!==PASS)return toast('Wrong password');
+  if(v!==PASS)return toast(t('wrongPass'));
   UNLOCKED=true;fillSetup();paintRepHint();
   $('#setLocked').style.display='none';$('#setOpen').style.display='';
-  $('#btnSave').disabled=false;$('#setNote').textContent='Unlocked — changes need two confirmations';
+  $('#btnSave').disabled=false;$('#setNote').textContent=t('unlocked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
 };
 pills('#sBeep',v=>{CFG.beep=Number(v);beep()});
+pills('#sLang',v=>{CFG.lang=v;save(K_CFG,CFG);applyLang();paintCrew();paintWaChecks();paintReady();paintInv();paint()});
 pills('#sMode',()=>paintModeLab());
+$('#sRole').addEventListener('click',async ev=>{
+  const b=ev.target.closest('button');
+  if(!b||b.dataset.v!=='master')return;
+  const v=await ask({title:t('masterPassTitle'),text:t('masterPassText'),input:'password',ph:'••••',ok:'OK'});
+  if(v!==MASTER_PASS){mark('#sRole',CFG.role||'follower');if(v!==null)toast(t('wrongPass'))}
+});
 pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
   if(document.documentElement.dataset.theme!=='night')setTheme('night',false)});
 $('#btnSave').onclick=async()=>{
@@ -1305,10 +1656,10 @@ $('#btnSave').onclick=async()=>{
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.alt=0;save(K_UI,UI);
-  save(K_CFG,CFG);paintQuick();paintCrew();paintWaChecks();paintInv();paintRepHint();
+  save(K_CFG,CFG);applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();
   setTheme(document.documentElement.dataset.theme,false);
   recalc(ENT);save(K_ENT,ENT);paint();
-  toast('Settings saved');lockSettings();setView('form');publishSetup();
+  toast(t('settingsSaved'));lockSettings();setView('form');publishSetup();
 };
 $('#btnTest').onclick=async()=>{
   const repo=$('#sRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
@@ -1332,7 +1683,39 @@ const puck=$('#puck');
 let pp=load('bsk.puck',null)||{x:innerWidth-140,y:innerHeight-110};
 const place=()=>{puck.style.left=Math.max(8,Math.min(innerWidth-puck.offsetWidth-8,pp.x))+'px';
                  puck.style.top=Math.max(8,Math.min(innerHeight-puck.offsetHeight-8,pp.y))+'px'};
-$('#btnMin').onclick=()=>{document.body.classList.add('min');place()};
+/* Chrome's document picture-in-picture is the only browser feature that yields a window
+   floating above everything else. Where it exists we use it; elsewhere the pill floats
+   inside the app and the platform's own split view does the rest. */
+let PIP=null;
+async function openPip(){
+  if(!('documentPictureInPicture'in window))return false;
+  try{
+    const w=await documentPictureInPicture.requestWindow({width:240,height:104});
+    const st=w.document.createElement('style');
+    st.textContent='html,body{margin:0;height:100%}body{display:grid;place-items:center;'
+      +'background:#1B3A6B;color:#fff;cursor:pointer;'
+      +'font:600 17px/1.2 -apple-system,BlinkMacSystemFont,system-ui,sans-serif}'
+      +'span{display:block;text-align:center}#k{font-weight:400;font-size:14px;opacity:.75;margin-top:4px}';
+    w.document.head.appendChild(st);
+    const d=w.document.createElement('div');
+    d.innerHTML='<span id="c"></span><span id="k"></span>';
+    w.document.body.appendChild(d);
+    const upd=()=>{const v=onBoard();
+      w.document.getElementById('c').textContent=(CFG.call?CFG.call+' ':'')+'Reporting';
+      w.document.getElementById('k').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';};
+    upd();
+    PIP={w,timer:setInterval(upd,3000)};
+    w.document.body.onclick=()=>w.close();
+    w.addEventListener('pagehide',()=>{if(PIP)clearInterval(PIP.timer);PIP=null;
+      document.body.classList.remove('min')});
+    return true;
+  }catch(e){return false}
+}
+$('#btnMin').onclick=async()=>{
+  paintReadout();
+  document.body.classList.add('min');place();
+  if(await openPip())document.body.classList.remove('min');
+};
 let drag=null;
 puck.addEventListener('pointerdown',e=>{drag={sx:e.clientX,sy:e.clientY,ox:pp.x,oy:pp.y,m:false};puck.setPointerCapture(e.pointerId)});
 puck.addEventListener('pointermove',e=>{if(!drag)return;
@@ -1348,10 +1731,11 @@ function toast(m){const t=$('#toast');t.textContent=m;t.className='on';clearTime
 /* ── Start ─────────────────────────────────────────────────────────── */
 $$('.ver').forEach(e=>e.textContent=APP_VERSION);
 setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
-fillSetup();paintRepHint();paintQuick();paintCrew();paintWaChecks();lockSettings();
+applyLang();fillSetup();paintRepHint();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
-mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);setAct(UI.act);syncVfr();
+mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#bMed',UI.med||'sand');
+setAct(UI.act);syncVfr();carryAtc();carryRes();paintChips();paintPics();paintSum();
 recalc(ENT);paint();wake();
 addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
@@ -1363,12 +1747,17 @@ setInterval(()=>{
   else sync(true,false);
 },5000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-importFromHash().then(applied=>{
-  if(!applied)return;
-  fillSetup();paintQuick();paintCrew();paintWaChecks();paintInv();paintRepHint();paint();
-  toast('Setup applied — this device is a Follower');
-  if(configured())sync(true,false);
-});
+(async()=>{
+  const applied=await importFromHash();
+  if(applied){
+    applyLang();fillSetup();paintQuick();paintReady();paintCrew();paintWaChecks();
+    paintInv();paintRepHint();paint();
+    toast(t('roleIsFollower'));
+    if(configured())sync(true,false);
+  }
+  if(!CFG.role)await askRole();
+  fillSetup();lockSettings();paintStatus();
+})();
 </script>
 </body>
 </html>

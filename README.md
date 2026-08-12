@@ -23,8 +23,8 @@ white face. Night mode is red on black and preserves dark adaptation. The sun/mo
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.
 
-The header shows UTC to the second, then the flight and callsign with the live navigation
-line beneath it in the same type — `293° TC · 12.3 kn · ± 8 m`, course over ground, ground speed
+The header shows UTC to the second and, at its right, the ballast still on board in the same
+size, then the flight and callsign with the live navigation line beneath them — `293° TC · 12.3 kn · ± 8 m`, course over ground, ground speed
 and the accuracy of the current fix. Before a fix it reads `GPS searching`; with a fix but no
 movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
@@ -100,17 +100,27 @@ first entry; "While Using the App" is enough. Without it, entries are still reco
 
 ## 4. Floating over other apps
 
-iPadOS gives no web app a system-wide overlay. What works:
+The minimise button collapses the app to a blue pill reading `HB-QWV Reporting` with the
+ballast still on board beneath it. Where that pill can float depends entirely on the platform,
+and it is worth being exact about it.
 
-| Route | Result |
+**No web app can draw over other apps on iPadOS, iPhone or Android.** That capability is
+reserved for native apps — on Android it needs the `SYSTEM_ALERT_WINDOW` permission, on iOS it
+does not exist at all. A browser page, installed or not, cannot paint outside its own window.
+Anything claiming otherwise on a web page is drawing inside that page.
+
+So the pill floats inside the app window, and the app window is what the platform puts on top:
+
+| Platform | How to keep it above the other app |
 |---|---|
-| **Slide Over** — drag the app from the Dock onto a running app | narrow floating window over a map or Foreflight |
-| **Split View** | fixed split screen |
-| **Stage Manager** (iPadOS 16+) | freely placed, overlapping window |
+| **iPad** | Install to the Home Screen, then drag it from the Dock onto the running app — **Slide Over** gives a narrow window floating over a map or Foreflight, swiped off the edge and back with one gesture. **Split View** and **Stage Manager** are the fixed and the free-floating variants. |
+| **Android, Samsung** | Install to the Home Screen, then open it in **Pop-up view** from the Edge panel or the recents menu. An installed web app counts as an app there and gets a real floating window. |
+| **Android, others** | **Split screen** from the recents menu. Free-floating windows exist only on Samsung and on devices in desktop mode. |
+| **Chrome on a laptop** | The minimise button opens a genuine always-on-top window through document picture-in-picture — the only browser feature that does this. It survives switching to any other application. Useful for the chase car. |
 
-All three need the app installed from the Home Screen. The minimise button additionally
-collapses the app to a draggable pill showing the kilograms still on board; tapping the pill
-opens it again.
+The app detects the picture-in-picture case on its own: press minimise and you get the
+always-on-top window where the browser supports it, and the in-app pill everywhere else.
+Clicking either brings the app back.
 
 ## 5. Who is reporting
 
@@ -144,7 +154,11 @@ available. The header carries the live values under the flight number.
 
 ## 6. Ballast
 
-**Drop** subtracts the kilograms thrown. The quick buttons only fill the field; posting is
+**Drop** subtracts the kilograms thrown and records whether it was sand or water; sand is the
+default. The quick amounts **add up**: tapping 10 three times gives 30, which is how ballast
+actually leaves a basket — sack by sack, counted as you go. A *Reset* button appears beside the
+total the moment there is something to undo. The `kg` at the right edge of the button row names
+the unit once, so the buttons themselves stay bare numbers. The quick buttons only fill the field; posting is
 always the one dark button, so a knock against the iPad cannot log a drop.
 
 **Take Inventory** records what is actually on board and resets the running figure. Three
@@ -152,8 +166,9 @@ inputs:
 
 - *Bags* and *Water* on one line — bags counted in total including safety ballast and
   multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.
-- *Ready ballast* — 0, 25, 50, 75 or 100 per cent of the full ready-ballast weight from the
-  setup, normally 30 kg.
+- *Ready ballast* — the steps come from the setup, `0,10,25,50,75,100` by default, as a
+  percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
+  selected.
 
 The running total under the fields shows the result before it is posted, and the entry lands
 in the table as three columns:
@@ -186,37 +201,56 @@ went overboard without being logged.
 **ATC** puts the station on its own line, then frequency, squawk and a VFR button side by side,
 then the message.
 
-The **frequency** is completed for you when you leave the field: digits alone are enough, the
-first three read as megahertz and the rest is padded out to kilohertz. `12345` becomes
-`123.450`, `1187` becomes `118.700`, `118005` stays `118.005`. A decimal point or comma you
-type yourself is ignored, so both habits work.
+The **frequency** places its own point: after the third digit one appears as you type, so
+`12345` reads `123.45` on screen while you are still typing and settles to `123.450` when you
+leave the field. `1187` becomes `118.700`, `118` becomes `118.000`. A point or comma you type
+yourself is ignored — the field only ever counts digits — so both habits work.
 
 The **squawk** is four octal digits — 8 and 9 simply do not appear as you type, and a code of
-one to three digits is refused on posting. `7500`, `7600` and `7700` are the emergency codes;
-entering one of them brings up a confirmation naming what it means before the entry goes out,
-because they are three keystrokes away from ordinary codes.
+one to three digits is refused on posting. The emergency codes are listed in the setup, `7500`,
+`7600` and `7700` by default; entering one brings up a confirmation naming what it means before
+the entry goes out, because they are three keystrokes away from ordinary codes.
 
 The **VFR** button fills the squawk with the conspicuity code from the setup, `7000` by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, Frq and SQ are carried over from the previous call and shown in grey
-with a dashed outline; they have to be confirmed before the entry can be posted, either by
-tapping into a field to change it or with the *Confirm* button. A long sequence of calls to
-the same station costs one tap, without any risk of an unnoticed stale frequency. The dashed
-chips append standard phrases — including QNH and Ops Normal — to the message.
+turns the light off. Station, Frq and SQ arrive filled in from the previous call, in grey with a dashed outline,
+under a *Confirm from last call* button. Touching any one of the three accepts the whole set —
+change the frequency and the station comes with it, with no second question when you post. A
+run of calls to the same station is one tap on Confirm; a changed call is simply typed over.
 
-**Ressources** puts current PIC and who is resting on the first line, then battery, fuel cell
-and solar on the second — battery as a list in ten-percent steps with 75, 85 and 95 added,
+The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
+it out, so QNH and Ops Normal are a toggle rather than something that accumulates.
+
+The remark field on Ballast and Ressources is the same size as the ATC message field, since a
+remark is often the more important part of the entry.
+
+**Ressources** puts current PIC and who is resting on the first line as panel switches, then
+battery, fuel cell and solar cell on the second. Only pilots the master actually named appear:
+leave the second name empty and the switches shrink to a single-handed flight — battery as a list in ten-percent steps with 75, 85 and 95 added,
 where the reading actually matters. The PIC and resting state stays active and is
 attached to every following entry of any type; battery, fuel cell and solar belong to the entry
 they were filed with.
 
-**Other** is a free note.
+**Other** is a free note, and up to four pictures. They are scaled down to 1024 pixels and
+about 60 per cent JPEG quality in the browser before anything is stored, because a queued entry
+has to survive in the device's local storage until there is a link again. Each picture is
+written to `data/media/<entry-id>-<n>.jpg` in the repository and the row records how many were
+attached and where they landed. Without a connection the entry itself queues normally; the
+pictures go up with the next successful send.
+
+Above the ATC form the last ATC entry of the flight is shown as
+`LAST MSG: 21:04:37Z recvd ZURICH INFO 124.700 7000 QNH 1013`, so a follow-up call never has to
+be reconstructed from memory.
 
 ## 8. WhatsApp
 
-ATC, Ressources and Other each carry a checkbox at the foot of the form: *Send also to
-WhatsApp recipients*. It is one setting, remembered across the three types, and has no effect
-on Ballast entries.
+ATC, Ressources and Other each list the recipients individually at the foot of the form, one
+chip per person, tapped on and off. Ballast entries never go to WhatsApp.
+
+The **ATC Coordinator** is listed first and only on ATC, and is the only one ticked there by
+default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
+Other the coordinator does not appear and everybody else is ticked by default. Each choice is
+remembered per message type, so the pattern you settle into is the one you keep.
 
 Recipients are defined in the setup, up to eight, each with a name and a number in
 international form with digits only, for example `41791234567`.
@@ -293,7 +327,29 @@ cannot be recorded here.
 
 ## 8a. Master and followers
 
-One device owns the flight setup and is set to **Master** — normally the PIC's iPad. The others
+**The master is whoever knows the master password.** There is no other rule and no default.
+
+Two passwords, doing two different jobs:
+
+| Password | What it does | Who has it |
+|---|---|---|
+| **1234** | opens the settings screen | everybody in the crew |
+| **5678** | makes a device the master | one person, normally the PIC |
+
+The first time the app starts on a fresh device it asks the question outright: *Is this the
+master device?* Entering **5678** makes it the master. Choosing *Join as follower* — or getting
+the password wrong three times — makes it a follower. A device that was set up through an
+invitation link is a follower without being asked, because the link came from a master.
+
+Nothing is assumed. A device that has not answered the question is not yet either, and the
+question comes back on the next start until it is answered.
+
+Later changes go the same way: in the settings the role can be switched to Follower freely, but
+switching to Master asks for **5678** again. And because two masters would overwrite each
+other's setup, each published setup carries the identity of the device that wrote it; a master
+that sees a different one in the file says so on screen.
+
+One device owns the flight setup and is the **Master** — normally the PIC's iPad. The others
 are **Followers**.
 
 Menu → *Share setup with another device* produces a link carrying the flight, the pilots, the
@@ -311,6 +367,21 @@ apply the change within about thirty seconds with a note on screen. Rename a pil
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
 one device may be the master; two would overwrite each other's publication.
 
+## 8b. What carries over
+
+Every form arrives holding what was entered last time, greyed and dashed: the station,
+frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
+the last inventory, the last battery reading. Selections — sand or water, drop or inventory,
+PIC and resting, fuel cell and solar cell, ready-ballast percentage, the WhatsApp ticks — simply
+stay where they were.
+
+Touching any greyed field in a form accepts all of them at once, and nothing is asked again at
+posting. Notes and messages are never carried over: repeating yesterday's wording verbatim is
+worse than typing it again.
+
+The footer names the last entry and the state of the upload — `last Msg 21:04:37Z/AW | upload ✓`
+when everything has reached GitHub, `✗ 3` when three are still queued.
+
 ## 9. Sending, and what happens without a link
 
 There is nothing to switch on. Pressing **Post to CC Notion** writes the entry to the device and
@@ -323,7 +394,10 @@ Order is never in doubt: the file is always written as the complete set of rows 
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.
 
 *Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
-writing. Neither is needed in normal use.
+writing. Neither is needed in normal use. *Export the table* asks for the format first — CSV or
+JSON — and then for the destination: *Download* puts the file in the browser's downloads,
+*Share…* hands it to the system share sheet, which on an iPad is the way into Files, Mail or a
+chat. Share only appears where the browser supports handing over files.
 
 ## 10. Several devices at once
 
@@ -392,6 +466,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `gps_acc_m`, `gps_age_s`, `gps_fix` | quality of the position at the moment of the entry |
 | `device_mode` | `personal` or `shared` |
 | `ballast_action` | `drop` or `count` |
+| `ballast_medium` | `sand` or `water` on a drop |
 | `ballast_delta_kg` | kilograms thrown, negative |
 | `ballast_abs_kg` | on board after this entry, recalculated across all devices |
 | `sand_kg`, `water_kg`, `total_ballast_kg` | inventory result |
@@ -400,9 +475,10 @@ data/<flight-id>.deleted.json  ids that were removed
 | `atc_dir` | `RX` received, `TX` sent |
 | `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
 | `crew_pic`, `crew_rest` | crew state at the moment of the entry |
-| `res_battery_pct`, `res_fuel_cell`, `res_solar` | power state as reported on a Ressources entry |
+| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Ressources entry |
 | `note` | free remark |
 | `whatsapp`, `whatsapp_to` | set when the entry was marked for WhatsApp, and to whom |
+| `attachments`, `attachment_paths` | how many pictures an Other entry carries, and where they were written |
 | `edited_at`, `edited_by` | set when a row was changed after the fact |
 | `id` | UUID, the stable key for Notion |
 
@@ -442,20 +518,34 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 - **Rate limit:** with two iPads and a Notion poll on the same token, the hourly budget is
   comfortable as long as the conditional requests keep returning 304. Frequent writes are what
   cost — each post is roughly four requests.
-- **The password is 1234 and lives in the source.** It guards against a mistaken tap in the
-  basket, not against anyone with the file. Change the `PASS` constant in `index.html` if a
-  different one is wanted.
+- **The passwords are 1234 and 5678 and both live in the source.** They guard against a mistaken
+  tap in the basket and against a second device declaring itself master, not against anyone who
+  reads the file. Change `PASS` and `MASTER_PASS` in `index.html` for different ones — and if
+  you do, tell the crew, because a device that cannot answer the master question ends up a
+  follower.
 - **Token on the device:** stored unencrypted in the browser. If the iPad is lost, revoking the
   token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
   server side and point the API host in the code at the Worker.
-- **The pill floats inside the app only.** A true overlay is not possible on iPadOS without a
-  native app; Slide Over is the intended route.
+- **The pill floats inside the app only** on phones and tablets — see section 4. Slide Over on
+  iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
+  picture-in-picture on a laptop is the only true always-on-top.
+
+## 14a. Language
+
+The setup switches the interface between English and German, above the password, because it is
+a personal preference rather than a flight setting and every crew member may want a different
+one.
+
+**Only the interface changes.** Everything written to GitHub and everything sent to WhatsApp
+stays English: the column names, the values in `type`, the message templates. A table that
+changed language depending on who happened to make the entry would be unusable, and the ATC
+coordinator should not have to guess which language the next message arrives in.
 
 ## 15. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-11` is the eleventh build of 12 August 2026.
+build released that day. `v260812-16` is the sixteenth build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are

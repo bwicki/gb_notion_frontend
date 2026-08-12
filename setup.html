@@ -135,6 +135,14 @@ data/_setup.json               the shared setup the followers read
 underscore replaced by a hyphen. <code>GB 2026/01</code> becomes <code>GB-2026-01.json</code>.</p>
 <p>No workflow, no Action, no build step. The app is the only writer.</p>
 <h2>6. Adding the other crew members</h2>
+<p><strong>How a device becomes the master:</strong> it knows the master password, <strong>5678</strong>. On its first
+start every device is asked <em>Is this the master device?</em> — the password makes it the master,
+<em>Join as follower</em> makes it a follower, and a device set up through an invitation link is a
+follower without being asked. There is no default and nothing is assumed; the question comes
+back on each start until it is answered.</p>
+<p>The settings password <strong>1234</strong> is a different thing entirely: it opens the settings screen on
+any device, master or not, so anyone can correct a reporter name or read the setup. Only
+switching a device <em>to</em> master asks for 5678.</p>
 <p>One device is the <strong>master</strong> and owns the flight setup. The others are <strong>followers</strong>.</p>
 <p><strong>To bring a device on board:</strong> on the master, Menu → <strong>Share setup with another device</strong>. A
 link appears. Send it to the other device however you normally send things — Signal, WhatsApp,
