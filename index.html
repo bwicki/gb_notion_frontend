@@ -3,717 +3,569 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<title>GB Notion Frontend</title>
+<title>Basket Reporting</title>
 
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GB Notion">
-<meta name="theme-color" content="#0A1113">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Basket">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
 
 <style>
-/* ── Tokens ──────────────────────────────────────────────────────────── */
 :root{
-  --void:#0A1113;      /* panel ground, matte petrol black */
-  --panel:#131E20;     /* instrument face */
-  --panel-hi:#1B2A2C;
-  --rule:#2C3E3E;      /* engraved lines */
-  --ink:#E8E2D4;       /* chart-paper ivory */
-  --ink-dim:#8C978F;
-  --sand:#D9A441;      /* ballast */
-  --sky:#6FA8B5;       /* ATC */
-  --olive:#94A470;     /* crew */
-  --alarm:#B5442F;
-
-  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
-
-  --tap:60px;
-  --r:4px;
-  --safe-t:env(safe-area-inset-top,0px);
-  --safe-b:env(safe-area-inset-bottom,0px);
-  --safe-l:env(safe-area-inset-left,0px);
-  --safe-r:env(safe-area-inset-right,0px);
+  --bg:#FFFFFF; --ink:#16181A; --muted:#71767B; --line:#E6E8EA;
+  --btn-bg:#16181A; --btn-ink:#FFFFFF;
+  --pad:22px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
-/* Night mode: monochrome red, preserves dark adaptation */
-body.night{
-  --void:#000; --panel:#0D0403; --panel-hi:#160705; --rule:#3A100A;
-  --ink:#FF5A38; --ink-dim:#8E2C1A; --sand:#FF7A2F; --sky:#E04A2A;
-  --olive:#C0421F; --alarm:#FF3B1F;
+html[data-theme="night"]{
+  --bg:#000000; --ink:#FF4E2A; --muted:#9A331B; --line:#33110A;
+  --btn-bg:#FF4E2A; --btn-ink:#000000;
 }
-
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;overscroll-behavior:none}
+html,body{margin:0;height:100%}
 body{
-  background:var(--void); color:var(--ink);
-  font-family:var(--sans); font-size:17px; line-height:1.35;
-  -webkit-user-select:none; user-select:none;
-  display:flex; flex-direction:column;
-  padding:var(--safe-t) var(--safe-r) 0 var(--safe-l);
+  background:var(--bg); color:var(--ink);
+  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -webkit-user-select:none;user-select:none;
+  padding:var(--safe-t) 0 var(--safe-b);
+  display:flex;flex-direction:column;min-height:100%;
 }
 input,textarea{-webkit-user-select:text;user-select:text}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.wrap{width:100%;max-width:520px;margin:0 auto;padding:0 var(--pad)}
 
-.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim)}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+header{flex:0 0 auto;border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:14px;height:50px}
+header .id{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
+header .st{flex:1;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden}
+header button{width:38px;height:38px;display:grid;place-items:center;flex:0 0 auto}
+header button:last-child{margin-right:-9px}
+header svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* ── Status rail ─────────────────────────────────────────────────────── */
-#rail{
-  flex:0 0 auto; display:flex; align-items:center; gap:14px;
-  padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--rule);
+main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 0 44px}
+.view{display:none}.view.on{display:block}
+
+#logo{display:none;max-height:44px;max-width:70%;margin-bottom:24px}
+#logo.on{display:block}
+.readout{margin-bottom:34px}
+.readout b{display:block;font-size:58px;font-weight:300;letter-spacing:-.035em;line-height:1}
+.readout span{display:block;font-size:14px;color:var(--muted);margin-top:9px}
+
+.lab{font-size:13px;color:var(--muted);margin:0 0 10px}
+
+.types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px}
+.types button{height:62px;border:1px solid var(--line);border-radius:10px;font-size:17px}
+.types button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.blk{display:none;margin-bottom:30px}.blk.on{display:block}
+.f{margin-bottom:22px}
+input[type=text],input[type=number],textarea{
+  width:100%;background:none;border:0;border-bottom:1px solid var(--line);
+  border-radius:0;color:var(--ink);font:inherit;padding:12px 0;appearance:none;
 }
-#rail .flight{font-family:var(--mono);font-size:13px;letter-spacing:.08em}
-.chip{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-dim)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--alarm);flex:0 0 auto}
-.dot.ok{background:var(--olive)} .dot.warn{background:var(--sand)}
-.dot.pulse{animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-#rail .spacer{flex:1}
-#btnMin{width:44px;height:36px;border:1px solid var(--rule);border-radius:var(--r);display:grid;place-items:center}
-#btnMin svg{width:18px;height:18px}
+textarea{min-height:80px;resize:none;line-height:1.45}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+input:focus,textarea:focus{outline:0;border-bottom-color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 
-/* ── Head: ballast readout + sand column (signature) ─────────────────── */
-#head{flex:0 0 auto;display:flex;border-bottom:1px solid var(--rule);background:var(--panel)}
-#column{flex:0 0 46px;position:relative;border-right:1px solid var(--rule);background:var(--void)}
-#colFill{position:absolute;left:0;right:0;bottom:0;background:var(--sand);opacity:.85;transition:height .55s cubic-bezier(.2,.7,.2,1)}
-#colTicks{position:absolute;inset:0}
-#colTicks i{position:absolute;left:0;height:1px;background:var(--rule);display:block}
-#colTicks i.maj{background:var(--ink-dim);opacity:.5}
-#readout{flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px}
-#ballast{font-family:var(--mono);font-size:64px;line-height:.92;letter-spacing:-.04em;font-weight:600}
-#ballast small{font-size:20px;letter-spacing:0;color:var(--ink-dim);margin-left:6px}
-#headMeta{display:flex;gap:18px;margin-top:6px;flex-wrap:wrap}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pills button{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:22px;font-size:15px}
+.pills button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:14px;color:var(--muted)}
+.links button{text-decoration:underline;text-underline-offset:3px}
 
-/* ── Content ─────────────────────────────────────────────────────────── */
-main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px 28px}
-.pane{display:none} .pane.on{display:block}
-section{margin-bottom:22px}
-h2{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);font-weight:400;
-   display:flex;align-items:center;gap:10px}
-h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+.go{width:100%;height:58px;border-radius:10px;background:var(--btn-bg);color:var(--btn-ink);font-size:17px}
+.go:active{opacity:.8}
+.go.sec{background:none;color:var(--ink);border:1px solid var(--line)}
+.go.warn{background:none;color:var(--ink);border:1px solid var(--ink)}
+.go+.go{margin-top:10px}
 
-.grid{display:grid;gap:8px}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g2{grid-template-columns:repeat(2,1fr)}
-@media(min-width:700px){.g3{grid-template-columns:repeat(6,1fr)}}
+.nav{display:flex;gap:22px;margin-top:36px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.nav button.on{color:var(--ink)}
 
-.key{
-  min-height:var(--tap);border:1px solid var(--rule);border-radius:var(--r);
-  background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  transition:transform .08s,background .12s;
-}
-.key:active{transform:scale(.965);background:var(--panel-hi)}
-.key .v{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em}
-.key .u{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-dim)}
-.key.sand .v{color:var(--sand)}
+.entry{padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:baseline}
+.entry .t{font-size:13px;color:var(--muted);width:46px;flex:0 0 auto}
+.entry .c{flex:1;min-width:0}
+.entry .c i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:3px;word-break:break-word}
+.entry .p{width:7px;height:7px;border-radius:50%;border:1px solid var(--muted);flex:0 0 auto}
+.entry .p.done{background:var(--muted)}
+.none{color:var(--muted);font-size:15px;padding:22px 0}
+h3{font-size:13px;color:var(--muted);font-weight:400;margin:34px 0 12px}
 
-.field{margin-bottom:10px}
-.field label{display:block;margin-bottom:5px}
-input[type=text],input[type=number],textarea,select{
-  width:100%;min-height:52px;padding:12px 13px;background:var(--void);
-  border:1px solid var(--rule);border-radius:var(--r);color:var(--ink);
-  font-family:var(--mono);font-size:17px;appearance:none;
-}
-textarea{min-height:88px;line-height:1.4;font-family:var(--sans)}
-input:focus,textarea:focus,select:focus{outline:2px solid var(--sand);outline-offset:1px;border-color:var(--sand)}
-
-.seg{display:flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
-.seg button{flex:1;min-height:52px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink-dim);border-right:1px solid var(--rule)}
-.seg button:last-child{border-right:0}
-.seg button.on{background:var(--panel-hi);color:var(--ink)}
-
-.chips{display:flex;flex-wrap:wrap;gap:7px}
-.chips button{padding:11px 14px;border:1px solid var(--rule);border-radius:var(--r);font-family:var(--mono);font-size:13px;color:var(--ink-dim)}
-.chips button:active{background:var(--panel-hi);color:var(--ink)}
-
-.cta{width:100%;min-height:var(--tap);border-radius:var(--r);font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;
-     background:var(--sand);color:#10161A;font-weight:600;margin-top:4px}
-body.night .cta{color:#000}
-.cta:active{opacity:.75}
-.cta.ghost{background:none;border:1px solid var(--rule);color:var(--ink);font-weight:400}
-.cta.danger{background:none;border:1px solid var(--alarm);color:var(--alarm)}
-.cta[disabled]{opacity:.35}
-
-/* ── Logbook ─────────────────────────────────────────────────────────── */
-#log{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
-.row{background:var(--panel);padding:10px 12px;display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:start}
-.row .seq{font-family:var(--mono);font-size:11px;color:var(--ink-dim);padding-top:3px}
-.row .body .t{font-family:var(--mono);font-size:15px}
-.row .body .m{font-size:13px;color:var(--ink-dim);margin-top:2px;word-break:break-word}
-.row .st{width:7px;height:7px;border-radius:50%;background:var(--sand);margin-top:6px}
-.row .st.done{background:var(--olive)}
-.row.BALLAST .body .t,.row.TALLY .body .t{color:var(--sand)}
-.row.ATC .body .t{color:var(--sky)}
-.row.CREW .body .t{color:var(--olive)}
-.empty{padding:26px 14px;text-align:center;color:var(--ink-dim);font-size:14px;border:1px dashed var(--rule);border-radius:var(--r)}
-
-/* ── Tab bar ─────────────────────────────────────────────────────────── */
-#tabs{flex:0 0 auto;display:flex;background:var(--panel);border-top:1px solid var(--rule);padding-bottom:var(--safe-b)}
-#tabs button{flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--ink-dim);border-top:2px solid transparent}
-#tabs button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6}
-#tabs button.on{color:var(--ink);border-top-color:var(--sand)}
-
-/* ── Minimised: floating dial ────────────────────────────────────────── */
-#puck{
-  display:none;position:fixed;z-index:90;width:92px;height:92px;border-radius:50%;
-  background:var(--panel);border:1px solid var(--rule);box-shadow:0 10px 30px rgba(0,0,0,.6);
-  overflow:hidden;touch-action:none;
-}
-#puck .fill{position:absolute;left:0;right:0;bottom:0;background:var(--sand);opacity:.28;transition:height .5s}
-#puck .v{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-#puck .v b{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.03em}
-#puck .v span{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--ink-dim)}
-body.min>#rail,body.min>#head,body.min>main,body.min>#tabs{display:none}
+#puck{display:none;position:fixed;z-index:60;padding:14px 20px;border-radius:26px;
+  background:var(--bg);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.14);
+  font-size:20px;touch-action:none;white-space:nowrap}
+html[data-theme="night"] #puck{box-shadow:0 6px 24px rgba(255,78,42,.14)}
+#puck span{font-size:13px;color:var(--muted);margin-left:5px}
+body.min>header,body.min>main{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
 
-/* ── Toast ───────────────────────────────────────────────────────────── */
-#toast{position:fixed;left:50%;bottom:calc(78px + var(--safe-b));transform:translateX(-50%) translateY(14px);
-  background:var(--panel-hi);border:1px solid var(--rule);border-radius:var(--r);padding:11px 17px;
-  font-family:var(--mono);font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:120;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);
+  background:var(--ink);color:var(--bg);border-radius:8px;padding:12px 18px;font-size:15px;
+  opacity:0;pointer-events:none;transition:.2s;z-index:90;max-width:88vw;text-align:center}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.err{border-color:var(--alarm);color:var(--alarm)}
-
-.note{font-size:13px;color:var(--ink-dim);line-height:1.5;margin:8px 0 0}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<!-- Status rail -->
-<div id="rail">
-  <span class="flight" id="rFlight">—</span>
-  <span class="chip"><i class="dot" id="dGps"></i><span id="tGps">GPS</span></span>
-  <span class="chip"><i class="dot" id="dSync"></i><span id="tSync">Local</span></span>
-  <span class="spacer"></span>
-  <button id="btnMin" aria-label="Minimise">
-    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.7" stroke-linecap="round">
-      <path d="M20 4 14 10M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/>
-    </svg>
-  </button>
-</div>
-
-<!-- Ballast readout -->
-<div id="head">
-  <div id="column"><div id="colFill"></div><div id="colTicks"></div></div>
-  <div id="readout">
-    <span class="lbl">Ballast on board</span>
-    <div id="ballast" class="num">—<small>kg</small></div>
-    <div id="headMeta">
-      <span class="lbl">Dropped <b class="num" id="mDrop">0</b> kg</span>
-      <span class="lbl">PIC <b id="mPic">—</b></span>
-      <span class="lbl">Last count <b id="mTally">—</b></span>
-    </div>
+<header>
+  <div class="wrap">
+    <span class="id" id="hId">—</span>
+    <span class="st" id="hSt"></span>
+    <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
+    <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
   </div>
-</div>
+</header>
 
 <main>
-  <!-- BALLAST ------------------------------------------------------->
-  <div class="pane on" id="p-ballast">
-    <section>
-      <h2>Log a drop</h2>
-      <div class="grid g3" id="quickKeys"></div>
-    </section>
-    <section>
-      <h2>Custom amount</h2>
-      <div class="field"><input type="number" id="bFree" inputmode="decimal" step="0.1" placeholder="kg"></div>
-      <div class="seg" id="bDir">
-        <button data-v="-1" class="on">Drop −</button>
-        <button data-v="1">Take on +</button>
-      </div>
-      <div class="field" style="margin-top:10px"><input type="text" id="bNote" placeholder="Remark (optional)"></div>
-      <button class="cta" id="bAdd">Add entry</button>
-    </section>
-    <section>
-      <h2>Recount stock</h2>
-      <p class="note">Sets the absolute amount on board to what you counted. Every later drop is calculated from here.</p>
-      <div class="field" style="margin-top:10px"><input type="number" id="tVal" inputmode="decimal" step="0.5" placeholder="Counted, kg"></div>
-      <button class="cta ghost" id="tAdd">Add count</button>
-    </section>
-  </div>
+  <!-- REPORT -->
+  <div class="view on wrap" id="v-form">
+    <img id="logo" alt="">
+    <div class="readout">
+      <b class="num" id="rNum">—</b>
+      <span id="rSub">on board</span>
+    </div>
 
-  <!-- ATC ----------------------------------------------------------->
-  <div class="pane" id="p-atc">
-    <section>
-      <h2>Direction</h2>
-      <div class="seg" id="aDir">
-        <button data-v="RX" class="on">Received</button>
-        <button data-v="TX">Sent</button>
+    <p class="lab">Message type</p>
+    <div class="types" id="types">
+      <button data-t="Ballast" class="on">Ballast</button>
+      <button data-t="ATC">ATC</button>
+      <button data-t="Ressources">Ressources</button>
+      <button data-t="Other">Other</button>
+    </div>
+
+    <div class="blk on" id="b-Ballast">
+      <div class="f">
+        <div class="pills" id="bAct">
+          <button data-v="drop" class="on">Drop</button>
+          <button data-v="take">Take on</button>
+          <button data-v="count">Count on board</button>
+        </div>
       </div>
-    </section>
-    <section>
-      <h2>Station and frequency</h2>
-      <div class="grid g2">
+      <div class="f" id="bQuickWrap"><div class="pills" id="bQuick"></div></div>
+      <div class="f"><input type="number" id="bKg" inputmode="decimal" step="0.5" placeholder="Kilograms"></div>
+      <div class="f"><input type="text" id="bNote" placeholder="Remark (optional)"></div>
+    </div>
+
+    <div class="blk" id="b-ATC">
+      <div class="f">
+        <div class="pills" id="aDir">
+          <button data-v="RX" class="on">Received</button>
+          <button data-v="TX">Sent</button>
+        </div>
+      </div>
+      <div class="f two">
         <input type="text" id="aStation" placeholder="Station" autocapitalize="characters">
-        <input type="text" id="aFreq" inputmode="decimal" placeholder="MHz">
+        <input type="text" id="aFreq" inputmode="decimal" placeholder="Frequency">
       </div>
-      <div class="chips" style="margin-top:8px" id="aStationChips"></div>
-    </section>
-    <section>
-      <h2>Squawk and message</h2>
-      <div class="field"><input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="Squawk"></div>
-      <div class="chips" style="margin-bottom:10px" id="aMsgChips"></div>
-      <div class="field"><textarea id="aMsg" placeholder="Wording or content"></textarea></div>
-      <button class="cta" id="aAdd">Add ATC entry</button>
-    </section>
+      <div class="f"><input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="Squawk"></div>
+      <div class="f"><textarea id="aMsg" placeholder="Message"></textarea>
+        <div class="links" id="aChips" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="blk" id="b-Ressources">
+      <div class="f">
+        <p class="lab">Pilot in command</p>
+        <div class="pills" id="cPic"></div>
+      </div>
+      <div class="f">
+        <p class="lab">Resting</p>
+        <div class="pills" id="cRest"></div>
+      </div>
+      <div class="f"><input type="text" id="cNote" placeholder="Remark (optional)"></div>
+    </div>
+
+    <div class="blk" id="b-Other">
+      <div class="f"><textarea id="oMsg" placeholder="Note"></textarea></div>
+    </div>
+
+    <button class="go" id="btnPost">Post to CC Notion</button>
+
+    <div class="nav">
+      <button data-v="form" class="on">Report</button>
+      <button data-v="log">Log</button>
+      <button data-v="set">Setup</button>
+    </div>
   </div>
 
-  <!-- CREW ---------------------------------------------------------- -->
-  <div class="pane" id="p-crew">
-    <section>
-      <h2>Pilot in command</h2>
-      <div class="seg" id="cPic"></div>
-    </section>
-    <section>
-      <h2>Resting</h2>
-      <div class="seg" id="cRest"></div>
-    </section>
-    <section>
-      <h2>Quick entry</h2>
-      <div class="grid g2">
-        <button class="key" data-crew="swap"><span class="v">Hand over</span><span class="u">swap PIC</span></button>
-        <button class="key" data-crew="rest"><span class="v">Rest</span><span class="u">start / end</span></button>
-      </div>
-      <div class="field" style="margin-top:12px"><input type="text" id="cNote" placeholder="Remark (optional)"></div>
-      <button class="cta" id="cAdd">Add crew status</button>
-    </section>
-    <section>
-      <h2>Note</h2>
-      <div class="field"><textarea id="nMsg" placeholder="Free note for the log"></textarea></div>
-      <button class="cta ghost" id="nAdd">Add note</button>
-    </section>
+  <!-- LOG -->
+  <div class="view wrap" id="v-log">
+    <p class="lab">Log</p>
+    <div id="logList"></div>
+    <h3>Transfer</h3>
+    <button class="go" id="btnSync">Send to GitHub now</button>
+    <button class="go sec" id="btnCsv">Save CSV</button>
+    <button class="go sec" id="btnJson">Save JSON</button>
+    <p class="lab" id="syncNote" style="margin-top:14px"></p>
+    <div class="nav">
+      <button data-v="form">Report</button>
+      <button data-v="log" class="on">Log</button>
+      <button data-v="set">Setup</button>
+    </div>
   </div>
 
-  <!-- LOG ----------------------------------------------------------- -->
-  <div class="pane" id="p-log">
-    <section>
-      <h2>Logbook</h2>
-      <div id="log"></div>
-    </section>
-    <section>
-      <h2>Transfer</h2>
-      <button class="cta" id="btnSync">Send to GitHub now</button>
-      <div class="grid g2" style="margin-top:8px">
-        <button class="cta ghost" id="btnCsv">Save CSV</button>
-        <button class="cta ghost" id="btnJson">Save JSON</button>
-      </div>
-      <p class="note" id="syncNote">—</p>
-    </section>
-  </div>
+  <!-- SETUP -->
+  <div class="view wrap" id="v-set">
+    <p class="lab">Flight</p>
+    <div class="f"><input type="text" id="sFlight" placeholder="Flight ID"></div>
+    <div class="f"><input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters"></div>
+    <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
+    <div class="f two"><input type="number" id="sInit" inputmode="decimal" placeholder="Start ballast kg"><input type="text" id="sSteps" placeholder="Bag sizes"></div>
 
-  <!-- SETUP --------------------------------------------------------- -->
-  <div class="pane" id="p-set">
-    <section>
-      <h2>Flight</h2>
-      <div class="field"><label class="lbl">Flight ID</label><input type="text" id="sFlight" placeholder="GB-2026-01"></div>
-      <div class="field"><label class="lbl">Callsign</label><input type="text" id="sCall" placeholder="HB-QXX" autocapitalize="characters"></div>
-      <div class="grid g2">
-        <div class="field"><label class="lbl">Pilot 1</label><input type="text" id="sP1"></div>
-        <div class="field"><label class="lbl">Pilot 2</label><input type="text" id="sP2"></div>
-      </div>
-      <div class="grid g2">
-        <div class="field"><label class="lbl">Start ballast kg</label><input type="number" id="sInit" inputmode="decimal"></div>
-        <div class="field"><label class="lbl">Bag sizes kg</label><input type="text" id="sSteps" placeholder="1,2,5,10,15,25"></div>
-      </div>
-    </section>
-    <section>
-      <h2>GitHub</h2>
-      <div class="field"><label class="lbl">Repository</label><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
-      <div class="grid g2">
-        <div class="field"><label class="lbl">Branch</label><input type="text" id="sBranch" placeholder="main" autocapitalize="none"></div>
-        <div class="field"><label class="lbl">Folder</label><input type="text" id="sDir" placeholder="data" autocapitalize="none"></div>
-      </div>
-      <div class="field"><label class="lbl">Fine-grained token</label><input type="text" id="sToken" placeholder="github_pat_…" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-      <div class="seg" id="sAuto">
-        <button data-v="1" class="on">Auto transfer on</button>
-        <button data-v="0">Manual only</button>
-      </div>
-      <button class="cta ghost" id="btnTest" style="margin-top:10px">Check connection</button>
-    </section>
-    <section>
-      <h2>Display</h2>
-      <div class="seg" id="sNight">
-        <button data-v="0" class="on">Day</button>
-        <button data-v="1">Night (red)</button>
-      </div>
-      <div class="seg" id="sBeep" style="margin-top:8px">
-        <button data-v="1" class="on">Confirmation tone on</button>
-        <button data-v="0">Muted</button>
-      </div>
-      <button class="cta" id="btnSave" style="margin-top:14px">Save settings</button>
-    </section>
-    <section>
-      <h2>Data</h2>
-      <button class="cta danger" id="btnWipe">Clear local entries</button>
-      <p class="note">Clears this device only. Rows already sent stay on GitHub.</p>
-    </section>
+    <h3>GitHub</h3>
+    <div class="f"><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
+    <div class="f two"><input type="text" id="sBranch" placeholder="Branch" autocapitalize="none"><input type="text" id="sDir" placeholder="Folder" autocapitalize="none"></div>
+    <div class="f"><input type="text" id="sToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="f">
+      <p class="lab">Sending</p>
+      <div class="pills" id="sAuto"><button data-v="1">Automatic</button><button data-v="0">Manual only</button></div>
+    </div>
+
+    <h3>App</h3>
+    <div class="f"><input type="text" id="sLogo" placeholder="Logo URL (optional)" autocapitalize="none" autocorrect="off"></div>
+    <div class="f">
+      <p class="lab">Confirmation tone</p>
+      <div class="pills" id="sBeep"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    </div>
+
+    <button class="go" id="btnSave">Save settings</button>
+    <button class="go sec" id="btnTest">Check connection</button>
+    <button class="go warn" id="btnWipe">Clear entries on this device</button>
+
+    <div class="nav">
+      <button data-v="form">Report</button>
+      <button data-v="log">Log</button>
+      <button data-v="set" class="on">Setup</button>
+    </div>
   </div>
 </main>
 
-<nav id="tabs">
-  <button data-p="ballast" class="on"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6c0 3.5-3.2 6.2-4.6 8.2h-2.8C9.2 15.2 6 12.5 6 9a6 6 0 0 1 6-6Z"/><path d="M10.4 17.5h3.2l-.5 3.5h-2.2Z"/></svg>Ballast</button>
-  <button data-p="atc"><svg viewBox="0 0 24 24"><path d="M12 10.8a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/><path d="M8.2 8.6a5.4 5.4 0 0 0 0 7.6M15.8 8.6a5.4 5.4 0 0 1 0 7.6M5.4 5.8a9.4 9.4 0 0 0 0 13.2M18.6 5.8a9.4 9.4 0 0 1 0 13.2"/></svg>ATC</button>
-  <button data-p="crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16.5 11.5h5M19 9v5"/></svg>Crew</button>
-  <button data-p="log"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5Z"/><path d="M8.5 9.5h7M8.5 13h7M8.5 16.5h4"/></svg>Log</button>
-  <button data-p="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4 5.6 5.6"/></svg>Setup</button>
-</nav>
-
-<!-- Minimised dial -->
-<div id="puck" role="button" tabindex="0" aria-label="Open GB Notion Frontend">
-  <div class="fill" id="puckFill"></div>
-  <div class="v"><b class="num" id="puckVal">—</b><span>kg</span></div>
-</div>
-
+<div id="puck" role="button" tabindex="0" aria-label="Open Basket Reporting"><b class="num" id="pNum">—</b><span>kg</span></div>
 <div id="toast"></div>
 
 <script>
 "use strict";
-/* ══ State ════════════════════════════════════════════════════════════ */
-const LS_CFG='gbnf.cfg.v1', LS_ENT='gbnf.entries.v1', LS_UI='gbnf.ui.v1';
-const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,2,5,10,15,25',
-           repo:'',branch:'main',dir:'data',token:'',auto:1,night:0,beep:1};
-let CFG=Object.assign({},DEF,load(LS_CFG,{}));
-let ENT=load(LS_ENT,[]);
-let UI=Object.assign({pic:'p1',rest:'',dir:-1,adir:'RX',tab:'ballast'},load(LS_UI,{}));
-let GPS=null, GPSERR=null, SYNCING=false, LASTSYNC=null, DEV=devId();
+/* ── State ─────────────────────────────────────────────────────────── */
+const K_CFG='bsk.cfg.v2', K_ENT='bsk.entries.v2', K_UI='bsk.ui.v2';
+const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
+           repo:'',branch:'main',dir:'data',token:'',auto:1,beep:1,logo:'',theme:''};
+let CFG=Object.assign({},DEF,load(K_CFG,{}));
+let ENT=load(K_ENT,[]);
+let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form'},load(K_UI,{}));
+let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null;
+const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('Storage full',1)}}
-function devId(){let d=localStorage.getItem('gbnf.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('gbnf.dev',d)}return d}
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('Storage full')}}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const r1=n=>Math.round(n*10)/10;
 const pad=(n,w)=>String(n).padStart(w,'0');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* ══ Ballast maths ════════════════════════════════════════════════════ */
-function chrono(){return ENT.slice().sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:(a.seq-b.seq))}
-function ballastAt(list){
-  let abs=Number(CFG.init)||0;
-  for(const e of list){
-    if(e.type==='TALLY') abs=Number(e.ballast_abs_kg)||0;
-    else if(e.ballast_delta_kg) abs=r1(abs+Number(e.ballast_delta_kg));
+/* ── Ballast maths ─────────────────────────────────────────────────── */
+const chrono=()=>ENT.slice().sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:a.seq-b.seq);
+function onBoard(){
+  let a=Number(CFG.init)||0;
+  for(const e of chrono()){
+    if(e.ballast_action==='count') a=Number(e.ballast_abs_kg)||0;
+    else if(e.ballast_delta_kg) a=r1(a+Number(e.ballast_delta_kg));
   }
-  return abs;
+  return a;
 }
-function current(){return ballastAt(chrono())}
-function dropped(){
-  let s=0; for(const e of chrono()) if(e.type==='BALLAST'&&e.ballast_delta_kg<0) s+=-e.ballast_delta_kg;
-  return r1(s);
-}
-function lastTally(){const t=chrono().filter(e=>e.type==='TALLY').pop();return t?hm(t.ts_utc):'—'}
-function capacity(){
-  const init=Number(CFG.init)||0;
-  const maxT=Math.max(0,...ENT.filter(e=>e.type==='TALLY').map(e=>Number(e.ballast_abs_kg)||0));
-  return Math.max(init,maxT,current(),1);
-}
+function droppedTotal(){let s=0;for(const e of ENT)if(e.ballast_delta_kg<0)s+=-e.ballast_delta_kg;return r1(s)}
 
-/* ══ Create entry ═════════════════════════════════════════════════════ */
-function nextSeq(){return ENT.length?Math.max(...ENT.map(e=>e.seq||0))+1:1}
+/* ── Entries ───────────────────────────────────────────────────────── */
+const picName=()=>UI.pic==='p2'?(CFG.p2||'Pilot 2'):(CFG.p1||'Pilot 1');
+const restName=()=>UI.rest==='p1'?(CFG.p1||'Pilot 1'):UI.rest==='p2'?(CFG.p2||'Pilot 2'):'';
+function localISO(d){const o=-d.getTimezoneOffset(),s=o>=0?'+':'-',a=Math.abs(o);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+'T'+pad(d.getHours(),2)+':'+
+         pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2)+s+pad(Math.floor(a/60),2)+':'+pad(a%60,2)}
+const hm=i=>i?i.slice(11,16):'—';
 function gpsSnap(){
-  if(!GPS) return {lat:null,lon:null,alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
-  return {lat:+GPS.lat.toFixed(6),lon:+GPS.lon.toFixed(6),
-          alt_gps_m:GPS.alt==null?null:Math.round(GPS.alt),
-          gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
-          gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
+  if(!GPS)return{lat:null,lon:null,alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
+  return{lat:+GPS.lat.toFixed(6),lon:+GPS.lon.toFixed(6),
+    alt_gps_m:GPS.alt==null?null:Math.round(GPS.alt),
+    gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
+    gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
 }
 function add(part){
   const now=new Date();
-  const base={
+  const e=Object.assign({
     id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),
-    flight_id:CFG.flight||'UNTITLED', callsign:CFG.call||'',
-    seq:nextSeq(), device:DEV,
-    ts_utc:now.toISOString(), ts_local:localISO(now),
-    type:'NOTE', ballast_delta_kg:null, ballast_abs_kg:null,
+    flight_id:CFG.flight||'UNTITLED',callsign:CFG.call||'',
+    seq:ENT.length?Math.max(...ENT.map(x=>x.seq||0))+1:1,device:DEV,
+    ts_utc:now.toISOString(),ts_local:localISO(now),
+    type:'Other',ballast_action:'',ballast_delta_kg:null,ballast_abs_kg:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
     crew_pic:picName(),crew_rest:restName(),note:'',synced:false
-  };
-  const e=Object.assign(base,gpsSnap(),part);
-  if(e.type!=='TALLY') e.ballast_abs_kg=r1(ballastAt(chrono())+(Number(e.ballast_delta_kg)||0));
-  ENT.push(e); save(LS_ENT,ENT); render(); beep();
-  if(Number(CFG.auto)&&CFG.repo&&CFG.token) sync(true);
-  return e;
+  },gpsSnap(),part);
+  if(e.ballast_action!=='count') e.ballast_abs_kg=r1(onBoard()+(Number(e.ballast_delta_kg)||0));
+  ENT.push(e);save(K_ENT,ENT);paint();beep();
+  if(Number(CFG.auto)&&CFG.repo&&CFG.token)sync(true);
 }
-function localISO(d){
-  const o=-d.getTimezoneOffset(),s=o>=0?'+':'-',a=Math.abs(o);
-  return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+'T'+
-         pad(d.getHours(),2)+':'+pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2)+s+pad(Math.floor(a/60),2)+':'+pad(a%60,2);
-}
-const hm=iso=>iso?iso.slice(11,16)+'Z':'—';
-const picName=()=>UI.pic==='p1'?(CFG.p1||'Pilot 1'):UI.pic==='p2'?(CFG.p2||'Pilot 2'):'';
-const restName=()=>UI.rest==='p1'?(CFG.p1||'Pilot 1'):UI.rest==='p2'?(CFG.p2||'Pilot 2'):'';
 
-/* ══ GPS ══════════════════════════════════════════════════════════════ */
-function startGps(){
-  if(!navigator.geolocation){GPSERR='unavailable';return}
-  navigator.geolocation.watchPosition(p=>{
-    GPS={lat:p.coords.latitude,lon:p.coords.longitude,alt:p.coords.altitude,acc:p.coords.accuracy,t:Date.now()};
-    GPSERR=null; paintStatus();
-  },err=>{GPSERR=err.code===1?'denied':'no fix';paintStatus()},
+/* ── GPS, wake lock, tone ──────────────────────────────────────────── */
+if(navigator.geolocation)navigator.geolocation.watchPosition(
+  p=>{GPS={lat:p.coords.latitude,lon:p.coords.longitude,alt:p.coords.altitude,acc:p.coords.accuracy,t:Date.now()};GPSERR=null;paintStatus()},
+  e=>{GPSERR=e.code===1?'location off':'no fix';paintStatus()},
   {enableHighAccuracy:true,maximumAge:4000,timeout:20000});
-}
-/* Keep the display awake (iPadOS 16.4+) */
 let WL=null;
 async function wake(){try{if('wakeLock'in navigator&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>WL=null)}}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake()});
-
-/* ══ Tone ═════════════════════════════════════════════════════════════ */
+document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&wake());
 let AC=null;
-function beep(){
-  if(!Number(CFG.beep))return;
-  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.frequency.value=880;o.type='sine';g.gain.value=.07;
-    o.connect(g);g.connect(AC.destination);o.start();
-    g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.13);o.stop(AC.currentTime+.14);
-  }catch(e){}
-}
+function beep(){if(!Number(CFG.beep))return;try{
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.frequency.value=880;g.gain.value=.06;o.connect(g);g.connect(AC.destination);o.start();
+  g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.12);o.stop(AC.currentTime+.13)}catch(e){}}
 
-/* ══ GitHub ═══════════════════════════════════════════════════════════ */
+/* ── GitHub ────────────────────────────────────────────────────────── */
 const API='https://api.github.com';
 const hdr=()=>({Authorization:'Bearer '+CFG.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'});
 const b64e=s=>{const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x)};
-const b64d=s=>{const b=atob((s||'').replace(/\s/g,''));return new TextDecoder().decode(Uint8Array.from(b,c=>c.charCodeAt(0)))};
-const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,'');const b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
-  return {json:`${d}/${b}.json`,csv:`${d}/${b}.csv`}};
-
-async function ghGet(path){
-  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(path)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
-                      {headers:hdr(),cache:'no-store'});
-  if(r.status===404) return {sha:null,text:''};
-  if(!r.ok) throw new Error('GET '+r.status+' '+(await r.text()).slice(0,120));
-  const j=await r.json(); return {sha:j.sha,text:j.content?b64d(j.content):''};
+const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob((s||'').replace(/\s/g,'')),c=>c.charCodeAt(0)));
+const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
+  return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`}};
+async function ghGet(p){
+  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}?ref=${encodeURIComponent(CFG.branch||'main')}`,{headers:hdr(),cache:'no-store'});
+  if(r.status===404)return{sha:null,text:''};
+  if(!r.ok)throw new Error('GET '+r.status);
+  const j=await r.json();return{sha:j.sha,text:j.content?b64d(j.content):''};
 }
-async function ghPut(path,text,sha,msg){
-  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(path)}`,{method:'PUT',headers:hdr(),
+async function ghPut(p,text,sha,msg){
+  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}`,{method:'PUT',headers:hdr(),
     body:JSON.stringify({message:msg,content:b64e(text),sha:sha||undefined,branch:CFG.branch||'main'})});
-  if(!r.ok) throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,120));
-  return r.json();
+  if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,100));
 }
 const COLS=['flight_id','callsign','seq','device','ts_utc','ts_local','type','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
-            'ballast_delta_kg','ballast_abs_kg','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg','crew_pic','crew_rest','note','id'];
+  'ballast_action','ballast_delta_kg','ballast_abs_kg','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg','crew_pic','crew_rest','note','id'];
 const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
-const toCsv=rows=>[COLS.join(',')].concat(rows.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
+const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
 
 async function sync(silent){
-  if(SYNCING) return;
-  if(!CFG.repo||!CFG.token){if(!silent)toast('Repository and token missing',1);return}
-  if(!navigator.onLine){if(!silent)toast('Offline — entries stay on this device',1);return}
-  SYNCING=true; paintStatus();
+  if(SYNCING)return;
+  if(!CFG.repo||!CFG.token){if(!silent)toast('Add repository and token in Setup');return}
+  if(!navigator.onLine){if(!silent)toast('Offline — entries stay on this device');return}
+  SYNCING=true;paintStatus();
   try{
-    const p=paths();
-    let remote=[],sha=null;
-    try{const g=await ghGet(p.json);sha=g.sha;if(g.text)remote=JSON.parse(g.text)}catch(e){if(!/GET 404/.test(e.message))throw e}
+    const p=paths();let remote=[];
+    const g=await ghGet(p.json);
+    if(g.text){try{remote=JSON.parse(g.text)}catch(e){remote=[]}}
     if(!Array.isArray(remote))remote=[];
-    const map=new Map();
-    for(const e of remote) if(e&&e.id) map.set(e.id,e);
-    for(const e of ENT){const c=Object.assign({},e);delete c.synced;map.set(c.id,c)}
-    const merged=[...map.values()].sort((a,b)=>a.ts_utc<b.ts_utc?-1:a.ts_utc>b.ts_utc?1:0);
-    const msg=`Log ${CFG.flight||''} · ${merged.length} rows · ${DEV}`;
-    await ghPut(p.json,JSON.stringify(merged,null,1),sha,msg);
-    let csha=null; try{csha=(await ghGet(p.csv)).sha}catch(e){}
-    await ghPut(p.csv,toCsv(merged),csha,msg);
-    ENT.forEach(e=>e.synced=true); save(LS_ENT,ENT);
-    LASTSYNC=new Date(); render(); if(!silent)toast('Sent '+merged.length+' rows');
-  }catch(e){
-    if(!silent)toast(String(e.message||e),1); else paintStatus();
-  }finally{SYNCING=false;paintStatus()}
+    const m=new Map();
+    remote.forEach(e=>{if(e&&e.id)m.set(e.id,e)});
+    ENT.forEach(e=>{const c=Object.assign({},e);delete c.synced;m.set(c.id,c)});
+    const all=[...m.values()].sort((a,b)=>a.ts_utc<b.ts_utc?-1:1);
+    const msg=`${CFG.flight||'flight'} · ${all.length} rows · ${DEV}`;
+    await ghPut(p.json,JSON.stringify(all,null,1),g.sha,msg);
+    let cs=null;try{cs=(await ghGet(p.csv)).sha}catch(e){}
+    await ghPut(p.csv,toCsv(all),cs,msg);
+    ENT.forEach(e=>e.synced=true);save(K_ENT,ENT);LASTSYNC=new Date();paint();
+    if(!silent)toast('Sent '+all.length+' rows');
+  }catch(e){if(!silent)toast(String(e.message||e))}
+  finally{SYNCING=false;paintStatus()}
 }
 
-/* ══ Painting ═════════════════════════════════════════════════════════ */
+/* ── Painting ──────────────────────────────────────────────────────── */
 function paintStatus(){
-  $('#rFlight').textContent=(CFG.flight||'NO FLIGHT ID')+(CFG.call?' · '+CFG.call:'');
-  const dG=$('#dGps'),tG=$('#tGps');
-  if(GPS&&(Date.now()-GPS.t)<30000){dG.className='dot ok';tG.textContent=(GPS.acc?'±'+Math.round(GPS.acc)+'m':'fix')}
-  else if(GPS){dG.className='dot warn';tG.textContent='stale'}
-  else{dG.className='dot';tG.textContent=GPSERR||'searching'}
-  const un=ENT.filter(e=>!e.synced).length, dS=$('#dSync'),tS=$('#tSync');
-  if(SYNCING){dS.className='dot warn pulse';tS.textContent='sending'}
-  else if(!CFG.repo||!CFG.token){dS.className='dot';tS.textContent='local'}
-  else if(un){dS.className='dot warn';tS.textContent=un+' pending'}
-  else{dS.className='dot ok';tS.textContent='in sync'}
-  $('#syncNote').textContent = un
-    ? un+' row(s) not sent yet.'
-    : (LASTSYNC?'All sent, last at '+localISO(LASTSYNC).slice(11,19)+'.':'Nothing sent yet.');
+  $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' · '+CFG.call:'');
+  const bits=[];
+  if(GPS&&Date.now()-GPS.t<30000)bits.push('GPS ±'+Math.round(GPS.acc||0)+' m');
+  else bits.push(GPS?'GPS stale':(GPSERR||'GPS searching'));
+  const un=ENT.filter(e=>!e.synced).length;
+  bits.push(SYNCING?'sending':un?un+' pending':(CFG.repo&&CFG.token?'sent':'local'));
+  $('#hSt').textContent=bits.join(' · ');
+  $('#syncNote').textContent=un?un+' entry(ies) not sent yet.'
+    :(LASTSYNC?'All sent, last at '+localISO(LASTSYNC).slice(11,19)+'.':'Nothing sent yet.');
 }
-function paintHead(){
-  const cur=current(),cap=capacity(),pct=Math.max(0,Math.min(100,cur/cap*100));
-  $('#ballast').innerHTML=(Number.isInteger(cur)?cur:cur.toFixed(1))+'<small>kg</small>';
-  $('#colFill').style.height=pct+'%';
-  $('#puckFill').style.height=pct+'%';
-  $('#puckVal').textContent=Number.isInteger(cur)?cur:cur.toFixed(1);
-  $('#mDrop').textContent=dropped();
-  $('#mPic').textContent=picName()||'—';
-  $('#mTally').textContent=lastTally();
-  $('#ballast').style.color=cur<0?'var(--alarm)':'';
+function paintReadout(){
+  const v=onBoard();
+  $('#rNum').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
+  $('#pNum').textContent=Number.isInteger(v)?v:v.toFixed(1);
+  $('#rSub').textContent='on board · '+droppedTotal()+' kg dropped · PIC '+picName();
 }
-function paintTicks(){
-  const w=$('#colTicks');w.innerHTML='';
-  for(let i=1;i<20;i++){const b=document.createElement('i');
-    b.style.bottom=(i*5)+'%';b.style.width=(i%4===0?'100%':'46%');if(i%4===0)b.className='maj';w.appendChild(b)}
-}
-function paintKeys(){
-  const g=$('#quickKeys');g.innerHTML='';
-  (CFG.steps||DEF.steps).split(',').map(s=>parseFloat(s.trim())).filter(n=>n>0).slice(0,12).forEach(n=>{
-    const b=document.createElement('button');b.className='key sand';
-    b.innerHTML=`<span class="v">−${n}</span><span class="u">kg</span>`;
-    b.onclick=()=>{add({type:'BALLAST',ballast_delta_kg:-n});toast('−'+n+' kg')};
-    g.appendChild(b);
-  });
-}
-function paintCrew(){
-  const p1=CFG.p1||'Pilot 1',p2=CFG.p2||'Pilot 2';
-  $('#cPic').innerHTML=`<button data-v="p1"${UI.pic==='p1'?' class="on"':''}>${esc(p1)}</button><button data-v="p2"${UI.pic==='p2'?' class="on"':''}>${esc(p2)}</button>`;
-  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>Nobody</button><button data-v="p1"${UI.rest==='p1'?' class="on"':''}>${esc(p1)}</button><button data-v="p2"${UI.rest==='p2'?' class="on"':''}>${esc(p2)}</button>`;
-}
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function paintLog(){
-  const box=$('#log'),list=chrono().slice().reverse();
-  if(!list.length){box.outerHTML='<div id="log" class="empty">No entries yet. The first drop starts the log.</div>';return}
-  box.className='';box.innerHTML=list.map(e=>{
-    let t='',m='';
-    if(e.type==='BALLAST'){t=(e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg → '+e.ballast_abs_kg+' kg';m=e.note||''}
-    else if(e.type==='TALLY'){t='Count '+e.ballast_abs_kg+' kg';m=e.note||''}
-    else if(e.type==='ATC'){t=(e.atc_dir==='TX'?'▲ ':'▼ ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')+(e.atc_squawk?' · '+e.atc_squawk:'');m=e.atc_msg||''}
-    else if(e.type==='CREW'){t='PIC '+(e.crew_pic||'—');m=(e.crew_rest?'Resting: '+e.crew_rest:'Both awake')+(e.note?' · '+e.note:'')}
-    else{t='Note';m=e.note||''}
-    const pos=e.gps_fix?`${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}${e.alt_gps_m!=null?' · '+e.alt_gps_m+' m':''}`:'no position';
-    return `<div class="row ${e.type}"><div class="seq">${pad(e.seq,3)}<br>${hm(e.ts_utc)}</div>
-      <div class="body"><div class="t">${esc(t)}</div><div class="m">${esc(m?m+' — ':'')}${esc(pos)}</div></div>
-      <div class="st ${e.synced?'done':''}"></div></div>`;
+  const l=chrono().reverse(),box=$('#logList');
+  if(!l.length){box.innerHTML='<p class="none">No entries yet.</p>';return}
+  box.innerHTML=l.map(e=>{
+    let h='',s='';
+    if(e.type==='Ballast'){
+      h=e.ballast_action==='count'?'Counted '+e.ballast_abs_kg+' kg':
+        (e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg \u2192 '+e.ballast_abs_kg+' kg';
+      s=e.note||'';
+    }else if(e.type==='ATC'){
+      h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')+(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
+      s=e.atc_msg||'';
+    }else if(e.type==='Ressources'){
+      h='PIC '+(e.crew_pic||'\u2014');s=(e.crew_rest?e.crew_rest+' resting':'both awake')+(e.note?' \u00b7 '+e.note:'');
+    }else{h='Note';s=e.note||''}
+    const pos=e.gps_fix?e.lat.toFixed(4)+', '+e.lon.toFixed(4)+(e.alt_gps_m!=null?' \u00b7 '+e.alt_gps_m+' m':''):'no position';
+    return `<div class="entry"><span class="t num">${hm(e.ts_local)}</span>
+      <span class="c">${esc(h)}<i>${esc(s?s+' \u2014 ':'')}${esc(pos)}</i></span>
+      <span class="p ${e.synced?'done':''}"></span></div>`;
   }).join('');
 }
-function render(){paintHead();paintLog();paintStatus()}
+function paintQuick(){
+  $('#bQuick').innerHTML=(CFG.steps||DEF.steps).split(',').map(s=>parseFloat(s)).filter(n=>n>0).slice(0,8)
+    .map(n=>`<button data-v="${n}">${n} kg</button>`).join('');
+}
+function paintCrew(){
+  const a=CFG.p1||'Pilot 1',b=CFG.p2||'Pilot 2';
+  $('#cPic').innerHTML=`<button data-v="p1"${UI.pic==='p1'?' class="on"':''}>${esc(a)}</button><button data-v="p2"${UI.pic==='p2'?' class="on"':''}>${esc(b)}</button>`;
+  $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>Nobody</button><button data-v="p1"${UI.rest==='p1'?' class="on"':''}>${esc(a)}</button><button data-v="p2"${UI.rest==='p2'?' class="on"':''}>${esc(b)}</button>`;
+}
+function paint(){paintReadout();paintLog();paintStatus()}
 
-/* ══ Toast ════════════════════════════════════════════════════════════ */
-let tt=null;
-function toast(msg,err){const t=$('#toast');t.textContent=msg;t.className='on'+(err?' err':'');
-  clearTimeout(tt);tt=setTimeout(()=>t.className='',err?3600:1600)}
+/* ── Theme ─────────────────────────────────────────────────────────── */
+const SUN='<circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M5.2 12H3M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4"/>';
+const MOON='<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>';
+function setTheme(t,persist){
+  document.documentElement.dataset.theme=t;
+  $('#icTheme').innerHTML=t==='night'?SUN:MOON;
+  const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='night'?'#000000':'#FFFFFF';
+  if(persist){CFG.theme=t;save(K_CFG,CFG)}
+}
+$('#btnTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='night'?'day':'night',true);
 
-/* ══ Controls ═════════════════════════════════════════════════════════ */
-$$('#tabs button').forEach(b=>b.onclick=()=>{
-  $$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  $$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p));
-  UI.tab=b.dataset.p;save(LS_UI,UI);
-});
-function segBind(sel,cb){$(sel).addEventListener('click',ev=>{
+/* ── Interaction ───────────────────────────────────────────────────── */
+function pills(sel,cb){$(sel).addEventListener('click',ev=>{
   const b=ev.target.closest('button');if(!b)return;
-  [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v)})}
+  [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v,b)})}
 
-segBind('#bDir',v=>{UI.dir=Number(v);save(LS_UI,UI)});
-$('#bAdd').onclick=()=>{
-  const v=parseFloat($('#bFree').value);
-  if(!(v>0))return toast('Enter an amount in kg',1);
-  add({type:'BALLAST',ballast_delta_kg:r1(v*UI.dir),note:$('#bNote').value.trim()});
-  $('#bFree').value='';$('#bNote').value='';toast((UI.dir<0?'−':'+')+v+' kg');
-};
-$('#tAdd').onclick=()=>{
-  const v=parseFloat($('#tVal').value);
-  if(!(v>=0))return toast('Enter the counted amount',1);
-  add({type:'TALLY',ballast_abs_kg:r1(v),ballast_delta_kg:null,note:'Stock counted'});
-  $('#tVal').value='';toast('On board set to '+v+' kg');
-};
+function setView(v){
+  UI.view=v;save(K_UI,UI);
+  $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  $$('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelector('main').scrollTop=0;
+}
+$$('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 
-const STATIONS=['INFO','RADAR','TOWER','CENTER','FIC','APP'];
-const MSGS=['Initial call','Position report','Level clearance','Squawk assigned','Frequency change','Level change reported','Landing intention','Leaving frequency'];
-$('#aStationChips').innerHTML=STATIONS.map(s=>`<button data-v="${s}">${s}</button>`).join('');
-$('#aMsgChips').innerHTML=MSGS.map(s=>`<button data-v="${s}">${s}</button>`).join('');
-$('#aStationChips').onclick=e=>{const b=e.target.closest('button');if(b)$('#aStation').value=b.dataset.v};
-$('#aMsgChips').onclick=e=>{const b=e.target.closest('button');if(b){const t=$('#aMsg');t.value=(t.value?t.value+' · ':'')+b.dataset.v}};
-segBind('#aDir',v=>{UI.adir=v;save(LS_UI,UI)});
-$('#aAdd').onclick=()=>{
-  const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
-  if(!st&&!msg)return toast('Enter a station or the wording',1);
-  add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
-       atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg});
-  $('#aMsg').value='';$('#aSquawk').value='';toast('ATC entry added');
-};
+function setType(t){
+  UI.type=t;save(K_UI,UI);
+  $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+t));
+}
+$('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.t)});
 
-segBind('#cPic',v=>{UI.pic=v;save(LS_UI,UI);paintHead()});
-segBind('#cRest',v=>{UI.rest=v;save(LS_UI,UI)});
-$('#p-crew').addEventListener('click',e=>{
-  const b=e.target.closest('[data-crew]');if(!b)return;
-  if(b.dataset.crew==='swap'){UI.pic=UI.pic==='p1'?'p2':'p1';UI.rest=UI.pic==='p1'?'p2':'p1'}
-  else{UI.rest=UI.rest?'':(UI.pic==='p1'?'p2':'p1')}
-  save(LS_UI,UI);paintCrew();
-  add({type:'CREW',note:b.dataset.crew==='swap'?'Handover of command':(UI.rest?'Rest starts':'Rest ends')});
-  toast('PIC '+picName()+(UI.rest?' · resting '+restName():''));
+pills('#bAct',v=>{UI.act=v;save(K_UI,UI);
+  $('#bQuickWrap').style.display=v==='count'?'none':'';
+  $('#bKg').placeholder=v==='count'?'Kilograms counted':'Kilograms'});
+$('#bQuick').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  $$('#bQuick button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#bKg').value=b.dataset.v;
 });
-$('#cAdd').onclick=()=>{add({type:'CREW',note:$('#cNote').value.trim()});$('#cNote').value='';toast('Crew status added')};
-$('#nAdd').onclick=()=>{const v=$('#nMsg').value.trim();if(!v)return toast('The note is empty',1);
-  add({type:'NOTE',note:v});$('#nMsg').value='';toast('Note added')};
+pills('#aDir',v=>{UI.adir=v;save(K_UI,UI)});
+const MSGS=['Initial call','Position report','Level clearance','Squawk assigned','Frequency change','Leaving frequency'];
+$('#aChips').innerHTML=MSGS.map(m=>`<button data-v="${m}">${m}</button>`).join('');
+$('#aChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  const t=$('#aMsg');t.value=(t.value?t.value+' \u00b7 ':'')+b.dataset.v});
+pills('#cPic',v=>{UI.pic=v;save(K_UI,UI);paintReadout()});
+pills('#cRest',v=>{UI.rest=v;save(K_UI,UI)});
+
+$('#btnPost').onclick=()=>{
+  const t=UI.type;
+  if(t==='Ballast'){
+    const kg=parseFloat($('#bKg').value);
+    if(!(kg>=0))return toast('Enter an amount in kilograms');
+    add(UI.act==='count'
+      ?{type:'Ballast',ballast_action:'count',ballast_abs_kg:r1(kg),note:$('#bNote').value.trim()}
+      :{type:'Ballast',ballast_action:UI.act,ballast_delta_kg:r1(UI.act==='drop'?-kg:kg),note:$('#bNote').value.trim()});
+    $('#bKg').value='';$('#bNote').value='';$$('#bQuick button').forEach(x=>x.classList.remove('on'));
+    toast(UI.act==='count'?'On board set to '+kg+' kg':(UI.act==='drop'?'\u2212':'+')+kg+' kg');
+  }else if(t==='ATC'){
+    const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
+    if(!st&&!msg)return toast('Enter a station or a message');
+    add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
+         atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg});
+    $('#aMsg').value='';$('#aSquawk').value='';toast('ATC posted');
+  }else if(t==='Ressources'){
+    add({type:'Ressources',note:$('#cNote').value.trim()});
+    $('#cNote').value='';toast('Crew status posted');
+  }else{
+    const v=$('#oMsg').value.trim();
+    if(!v)return toast('The note is empty');
+    add({type:'Other',note:v});$('#oMsg').value='';toast('Note posted');
+  }
+};
 
 $('#btnSync').onclick=()=>sync(false);
+const dl=(txt,name,mime)=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:mime+';charset=utf-8'}));a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 $('#btnCsv').onclick=()=>dl(toCsv(chrono()),(CFG.flight||'flightlog')+'.csv','text/csv');
 $('#btnJson').onclick=()=>dl(JSON.stringify(chrono(),null,1),(CFG.flight||'flightlog')+'.json','application/json');
-function dl(text,name,mime){
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:mime+';charset=utf-8'}));
-  a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-}
 
 /* Setup */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',steps:'#sSteps',
-          repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
+          repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken',logo:'#sLogo'};
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]??'';
-  [['#sAuto','auto'],['#sNight','night'],['#sBeep','beep']].forEach(([sel,k])=>
-    [...$(sel).children].forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(CFG[k]))));
+  [['#sAuto','auto'],['#sBeep','beep']].forEach(([s,k])=>
+    [...$(s).children].forEach(b=>b.classList.toggle('on',String(b.dataset.v)===String(CFG[k]))));
 }
-segBind('#sAuto',v=>{CFG.auto=Number(v);save(LS_CFG,CFG)});
-segBind('#sNight',v=>{CFG.night=Number(v);document.body.classList.toggle('night',!!Number(v));save(LS_CFG,CFG)});
-segBind('#sBeep',v=>{CFG.beep=Number(v);save(LS_CFG,CFG);beep()});
+pills('#sAuto',v=>{CFG.auto=Number(v);save(K_CFG,CFG)});
+pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
 $('#btnSave').onclick=()=>{
   for(const k in SF)CFG[k]=$(SF[k]).value.trim();
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=parseFloat(CFG.init)||0;
-  save(LS_CFG,CFG);paintKeys();paintCrew();render();toast('Settings saved');
+  save(K_CFG,CFG);paintQuick();paintCrew();paintLogo();paint();toast('Settings saved');
 };
 $('#btnTest').onclick=async()=>{
-  for(const k in SF)CFG[k]=$(SF[k]).value.trim();save(LS_CFG,CFG);
-  if(!CFG.repo||!CFG.token)return toast('Repository and token missing',1);
+  for(const k in SF)CFG[k]=$(SF[k]).value.trim();save(K_CFG,CFG);
+  if(!CFG.repo||!CFG.token)return toast('Add repository and token first');
   try{const r=await fetch(`${API}/repos/${CFG.repo}`,{headers:hdr()});
-    if(!r.ok)throw new Error(r.status===404?'Repository not found, or the token has no access to it':'Response '+r.status);
-    const j=await r.json();toast('Connected to '+j.full_name+' ('+j.default_branch+')');
-  }catch(e){toast(String(e.message||e),1)}
+    if(!r.ok)throw new Error(r.status===404?'Repository not found, or the token has no access':'Response '+r.status);
+    const j=await r.json();toast('Connected to '+j.full_name);
+  }catch(e){toast(String(e.message||e))}
 };
 $('#btnWipe').onclick=()=>{
   const un=ENT.filter(e=>!e.synced).length;
-  if(!confirm('Clear all '+ENT.length+' entries on this device?'+(un?'\n'+un+' of them have not been sent.':'')))return;
-  ENT=[];save(LS_ENT,ENT);render();toast('Local entries cleared');
+  if(!confirm('Clear all '+ENT.length+' entries on this device?'+(un?'\n'+un+' have not been sent.':'')))return;
+  ENT=[];save(K_ENT,ENT);paint();toast('Cleared');
 };
+function paintLogo(){const i=$('#logo');if(CFG.logo){i.src=CFG.logo;i.classList.add('on')}else i.classList.remove('on')}
+$('#logo').onerror=()=>$('#logo').classList.remove('on');
 
-/* ══ Minimised dial: drag and tap ═════════════════════════════════════ */
+/* Minimised pill */
 const puck=$('#puck');
-let px=load('gbnf.puck',null)||{x:innerWidth-112,y:innerHeight-172};
-function place(){puck.style.left=Math.max(6,Math.min(innerWidth-98,px.x))+'px';
-                 puck.style.top=Math.max(6,Math.min(innerHeight-98,px.y))+'px'}
-place();
-$('#btnMin').onclick=()=>{document.body.classList.add('min');place();paintHead()};
+let pp=load('bsk.puck',null)||{x:innerWidth-150,y:innerHeight-120};
+const place=()=>{puck.style.left=Math.max(8,Math.min(innerWidth-puck.offsetWidth-8,pp.x))+'px';
+                 puck.style.top=Math.max(8,Math.min(innerHeight-puck.offsetHeight-8,pp.y))+'px'};
+$('#btnMin').onclick=()=>{document.body.classList.add('min');place()};
 let drag=null;
-puck.addEventListener('pointerdown',e=>{drag={sx:e.clientX,sy:e.clientY,ox:px.x,oy:px.y,moved:false};puck.setPointerCapture(e.pointerId)});
-puck.addEventListener('pointermove',e=>{
-  if(!drag)return;const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
-  if(Math.abs(dx)+Math.abs(dy)>6)drag.moved=true;
-  px={x:drag.ox+dx,y:drag.oy+dy};place();
-});
-puck.addEventListener('pointerup',()=>{
-  if(!drag)return;
-  if(!drag.moved){document.body.classList.remove('min');render()}
-  else save('gbnf.puck',px);
-  drag=null;
-});
+puck.addEventListener('pointerdown',e=>{drag={sx:e.clientX,sy:e.clientY,ox:pp.x,oy:pp.y,m:false};puck.setPointerCapture(e.pointerId)});
+puck.addEventListener('pointermove',e=>{if(!drag)return;
+  const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;if(Math.abs(dx)+Math.abs(dy)>6)drag.m=true;
+  pp={x:drag.ox+dx,y:drag.oy+dy};place()});
+puck.addEventListener('pointerup',()=>{if(!drag)return;
+  if(!drag.m)document.body.classList.remove('min');else save('bsk.puck',pp);drag=null});
 addEventListener('resize',place);
 
-/* ══ Start ════════════════════════════════════════════════════════════ */
-document.body.classList.toggle('night',!!Number(CFG.night));
-fillSetup();paintTicks();paintKeys();paintCrew();render();startGps();wake();
-$$('#tabs button').forEach(b=>{if(b.dataset.p===UI.tab)b.click()});
-addEventListener('online',()=>{if(Number(CFG.auto))sync(true)});
+/* Toast */
+let tt=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.className='on';clearTimeout(tt);tt=setTimeout(()=>t.className='',2000)}
+
+/* ── Start ─────────────────────────────────────────────────────────── */
+setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
+fillSetup();paintQuick();paintCrew();paintLogo();setType(UI.type);setView(UI.view);
+$$('#bAct button').forEach(b=>b.classList.toggle('on',b.dataset.v===UI.act));
+$$('#aDir button').forEach(b=>b.classList.toggle('on',b.dataset.v===UI.adir));
+$('#bQuickWrap').style.display=UI.act==='count'?'none':'';
+paint();wake();
+addEventListener('online',()=>Number(CFG.auto)&&sync(true));
 setInterval(paintStatus,5000);
 setInterval(()=>{if(Number(CFG.auto)&&ENT.some(e=>!e.synced))sync(true)},60000);
-addEventListener('beforeunload',e=>{if(ENT.some(e2=>!e2.synced)){e.preventDefault();e.returnValue=''}});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>

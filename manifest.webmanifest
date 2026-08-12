@@ -1,13 +1,13 @@
 {
-  "name": "GB Notion Frontend",
-  "short_name": "GB Notion",
-  "description": "Capture ballast use, ATC messages and crew status during a gas balloon flight, into a table Notion can poll.",
+  "name": "Basket Reporting",
+  "short_name": "Basket",
+  "description": "Report ballast, ATC calls and crew status from the basket into a table Notion can poll.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0A1113",
-  "theme_color": "#0A1113",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "lang": "en",
   "icons": [
     { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },

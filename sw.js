@@ -1,6 +1,6 @@
 /* GB Notion Frontend — keeps the app shell available offline.
    The GitHub API is never served from cache. */
-const V = 'gb-notion-frontend-v1';
+const V = 'basket-reporting-v2';
 const SHELL = [
   './',
   './index.html',
@@ -31,11 +31,7 @@ self.addEventListener('fetch', e => {
   // Network first so a deploy takes effect at once; cache as the fallback in flight.
   e.respondWith(
     fetch(e.request)
-      .then(r => {
-        const copy = r.clone();
-        caches.open(V).then(c => c.put(e.request, copy));
-        return r;
-      })
+      .then(r => { const copy = r.clone(); caches.open(V).then(c => c.put(e.request, copy)); return r; })
       .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
 });
