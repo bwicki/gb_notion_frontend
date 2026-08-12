@@ -25,7 +25,7 @@
   --bg:#E4E7EA; --card:#F4F6F7; --field:#FFFFFF;
   --ink:#22262A; --muted:#6D757B; --carry:#5A6268;
   --line:#C9D0D5; --line-soft:#DDE2E6;
-  --sel:#2E3438; --sel-ink:#F4F6F7;
+  --sel:#464D53; --sel-ink:#F7F8F9;
   --pad:16px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
@@ -81,19 +81,31 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 .foot{flex:0 0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));border-top:1px solid var(--line-soft)}
 
 .readout{flex:0 0 auto;padding:6px var(--pad) 8px;display:flex;align-items:center;gap:8px;min-height:56px}
-.lastmsg{font-size:11px;line-height:1.35;color:var(--muted);margin:0 0 10px;
-  border-left:2px solid var(--line);padding-left:9px}
+.lastmsg{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:0 0 10px;
+  background:var(--field)}
 .lastmsg.hide{display:none}
+.lm-top{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm-head{font-size:12.5px;line-height:1.3}
+.lm-msg{font-size:12px;line-height:1.35;color:var(--muted);margin-top:2px;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .thumbs figure{position:relative;margin:0}
 .thumbs img{width:62px;height:62px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.voicebar{display:none;align-items:center;gap:10px;margin-top:8px;padding:9px 12px;
+  border:1px solid var(--line);border-radius:9px;background:var(--field);font-size:13px}
+.voicebar.on{display:flex}
+.voicebar audio{flex:1;min-width:0;height:32px}
+.voicebar button{width:26px;height:26px;border-radius:13px;background:var(--sel);
+  color:var(--sel-ink);font-size:14px;line-height:1;flex:0 0 auto}
+#btnVoice.rec{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:11px;
   background:var(--sel);color:var(--sel-ink);font-size:13px;line-height:1}
 .links.wa button{padding:7px 11px;font-size:12.5px;border-style:solid}
-.readout .ball{min-width:0;display:flex;gap:24px}
+.readout .ball{min-width:0;display:flex;gap:34px}
 .stat b{display:block;font-size:23px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
-.stat i{display:block;font-style:normal;font-size:10px;color:var(--muted);margin-top:2px;
-  line-height:1.2;max-width:110px}
+.stat i{display:block;font-style:normal;font-size:9.5px;color:var(--muted);margin-top:3px;
+  line-height:1.2;white-space:nowrap}
 .readout .ball.hide{display:none}
 
 .rep{margin-left:auto;flex:0 0 auto;border:1px solid var(--line);background:var(--field);
@@ -157,6 +169,15 @@ select:focus{outline:0;border-color:var(--sel)}
 .pnl button{border-radius:6px;font-size:12.5px;color:var(--muted);min-height:36px;
   overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
 .pnl button.on{background:var(--sel);color:var(--sel-ink)}
+.lvl{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+  font-size:13px;padding:0 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lvl.set{border-color:var(--sel)}
+.lvlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lvlgrid button{min-height:46px;border:1px solid var(--line);border-radius:9px;
+  background:var(--field);font-size:14px}
+.lvlgrid button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.o2row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:8px}
+.o2row span{font-size:13px;color:var(--muted)}
 .qrow{display:flex;align-items:flex-end;gap:8px}
 .qrow .pills{flex:1;min-width:0}
 .qrow .unitlab{flex:0 0 auto;font-size:10px;color:var(--muted);padding-bottom:14px}
@@ -193,6 +214,8 @@ select.pre{color:var(--carry);border-style:dashed}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .row2 .go+.go{margin-top:0}
 .ftline{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.legal{font-size:10px;color:var(--muted);text-align:center;margin:0 0 6px}
+.legal a{text-decoration:underline;text-underline-offset:2px}
 .tiny{flex:1;min-width:0;font-size:11px;color:var(--muted);text-align:left;margin:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ver{flex:0 0 auto;font-size:9px;letter-spacing:.02em;color:var(--muted);opacity:.65;
@@ -245,6 +268,12 @@ body.min .app{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
 
+#btnPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
+#btnPost.wait{background:#FBF1D2;border:1px solid #E5CE86;color:#5A4306}
+#btnPost.fail{background:#F9DFDB;border:1px solid #E3ADA4;color:#6C2016;font-size:14px}
+html[data-theme="night"] #btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
+html[data-theme="night"] #btnPost.wait{background:#211803;border-color:#5E4708;color:#D8AC33}
+html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;color:#E2705F}
 #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);
   background:var(--sel);color:var(--sel-ink);border-radius:9px;padding:11px 17px;font-size:14px;
   opacity:0;pointer-events:none;transition:.18s;z-index:120;max-width:86vw;text-align:center}
@@ -284,6 +313,9 @@ body.min #puck{display:block}
 
     <div class="scroll">
       <div class="blk on" id="b-Ballast">
+        <div class="lastmsg" id="bLast">
+          <div class="lm-top"></div><div class="lm-head num"></div><div class="lm-msg"></div>
+        </div>
         <div class="f"><div class="pills" id="bAct">
           <button data-v="drop" data-t="drop">Drop</button><button data-v="count" data-t="takeInv">Take Inventory</button>
         </div></div>
@@ -302,7 +334,7 @@ body.min #puck{display:block}
 
         <div class="sub" id="s-count">
           <div class="f two">
-            <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" data-tp="bags" placeholder="Bags"><span>bags</span></div>
+            <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" data-tp="bags" placeholder="sand bags"><span>bags</span></div>
             <div class="sfx wide"><input type="number" id="iWater" inputmode="decimal" step="1" data-tp="water" placeholder="Water"><span>liter</span></div>
           </div>
           <p class="hint" id="iHint">Count total incl. safety ballast</p>
@@ -314,24 +346,32 @@ body.min #puck{display:block}
       </div>
 
       <div class="blk" id="b-ATC">
-        <p class="lastmsg hide" id="aLast"></p>
+        <div class="lastmsg" id="aLast">
+          <div class="lm-top"></div><div class="lm-head num"></div><div class="lm-msg"></div>
+        </div>
         <div class="f"><div class="pills" id="aDir">
-          <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="sent">Sent</button>
+          <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="transmitted">Transmitted</button>
         </div></div>
         <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
         <div class="f atcrow">
-          <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div>
-          <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="SQ">
-          <button class="vfr" id="btnVfr">VFR</button>
+          <div><p class="lab">FREQ</p>
+            <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div></div>
+          <div><p class="lab">SQ</p>
+            <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="xxxx"></div>
+          <div><p class="lab">&nbsp;</p><button class="vfr" id="btnVfr">VFR</button></div>
         </div>
         <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last call</button></div>
         <div class="f"><div class="links small" id="aChips"></div></div>
         <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
         <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+          <div class="links wa" id="waATCco" style="margin-bottom:7px"></div>
           <div class="links wa" id="waATC"></div></div>
       </div>
 
       <div class="blk" id="b-Ressources">
+        <div class="lastmsg" id="cLast">
+          <div class="lm-top"></div><div class="lm-head num"></div><div class="lm-msg"></div>
+        </div>
         <div class="f two">
           <div><p class="lab" data-t="currentPic">Current PIC</p><div class="pnl" id="cPic"></div></div>
           <div><p class="lab" data-t="resting">Resting</p><div class="pnl pnl3" id="cRest"></div></div>
@@ -349,17 +389,32 @@ body.min #puck{display:block}
           <div><p class="lab" data-t="solarCell">Solar Cell</p><div class="pnl" id="rSolar">
             <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
         </div>
+        <div class="f three">
+          <div><p class="lab" data-t="methanol">Methanol level</p>
+            <button class="lvl" id="rMeth">—</button></div>
+          <div><p class="lab" data-t="crewO2">Crew on O2</p><div class="pnl" id="rO2crew">
+            <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
+          <div><p class="lab" data-t="o2level">O2 level</p>
+            <button class="lvl" id="rO2">—</button></div>
+        </div>
         <div class="f"><textarea id="cNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
         <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
           <div class="links wa" id="waRes"></div></div>
       </div>
 
       <div class="blk" id="b-Other">
+        <div class="lastmsg" id="oLast">
+          <div class="lm-top"></div><div class="lm-head num"></div><div class="lm-msg"></div>
+        </div>
         <div class="f"><textarea id="oMsg" data-tp="note" placeholder="Note" style="min-height:100px"></textarea></div>
         <div class="f">
           <input type="file" id="oFiles" accept="image/*" multiple style="display:none">
-          <button class="go sec sm" id="btnPic" data-t="addPictures">Add pictures</button>
+          <div class="row2">
+            <button class="go sec sm" id="btnPic" data-t="addPictures">Add pictures</button>
+            <button class="go sec sm" id="btnVoice" data-t="addVoice">Add voice msg</button>
+          </div>
           <div class="thumbs" id="oThumbs"></div>
+          <div class="voicebar" id="oVoice"></div>
         </div>
         <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
           <div class="links wa" id="waOth"></div></div>
@@ -393,12 +448,21 @@ body.min #puck{display:block}
       <p class="hint" data-t="langHint">The interface only. Everything written to GitHub and to WhatsApp stays English.</p>
 
       <h3 data-t="hReporter">Reporter on this device</h3>
-      <div class="f"><input type="text" id="sReporterOpen" placeholder="Name"></div>
+      <div class="f"><input type="text" id="sReporterOpen" data-tp="pName" placeholder="Name"></div>
       <button class="go sec sm" id="btnSaveRep" data-t="saveName">Save name</button>
-      <p class="hint" id="repHint"></p>
+      <p class="hint" id="repHint" style="margin-top:12px"></p>
+
+      <h3 data-t="hApp">App</h3>
+      <div class="f"><p class="lab" data-t="nightColour">Night colour</p>
+        <div class="pills four" id="sNight">
+          <button data-v="red">Red</button><button data-v="amber">Amber</button>
+          <button data-v="green">Green</button><button data-v="white">White</button>
+        </div></div>
+      <div class="f"><p class="lab" data-t="tone">Confirmation tone</p>
+        <div class="pnl" id="sBeep"><button data-v="0" data-t="off">Off</button><button data-v="1" data-t="on">On</button></div></div>
 
       <div id="setLocked">
-        <p class="lock">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.</p>
+        <p class="lock" data-t="lockText">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake.</p>
         <button class="go" id="btnUnlock" data-t="unlock">Unlock settings</button>
       </div>
 
@@ -407,47 +471,37 @@ body.min #puck{display:block}
         <div class="f"><p class="lab" data-t="setupRole">Setup role</p><div class="pills" id="sRole">
           <button data-v="master" data-t="master">Master</button><button data-v="follower" data-t="follower">Follower</button>
         </div></div>
-        <p class="hint">The master owns the flight setup and publishes it. Followers pick up
-          every change the master saves, so the crew never drifts apart mid-flight.</p>
+        <p class="hint" data-t="hintRole">The master owns the flight setup and publishes it.</p>
         <div class="f"><div class="pills" id="sMode">
           <button data-v="personal" data-t="personalDev">Personal device</button><button data-v="shared" data-t="sharedDev">Shared device</button>
         </div></div>
         <p class="hint" id="sReporterLab"></p>
 
         <h3 data-t="hFlight">Flight</h3>
-        <div class="f two"><input type="text" id="sFlight" placeholder="Flight ID">
-          <input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters"></div>
-        <div class="f two"><input type="number" id="sInit" inputmode="decimal" placeholder="Ballast on board at start, kg">
-          <input type="text" id="sVfr" inputmode="numeric" maxlength="4" placeholder="VFR squawk"></div>
-        <div class="f"><input type="text" id="sEmerg" placeholder="Emergency squawks, e.g. 7500,7600,7700"></div>
-        <p class="hint">Only needed before the first inventory. Leave empty and the ballast figure
-          starts with the first Take Inventory.</p>
-        <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
+        <div class="f two"><input type="text" id="sFlight" data-tp="pFlight" placeholder="Flight ID">
+          <input type="text" id="sCall" data-tp="pCall" placeholder="Callsign" autocapitalize="characters"></div>
+        <div class="f two"><input type="number" id="sInit" inputmode="decimal" data-tp="pInit" placeholder="Ballast on board at start, kg">
+          <input type="text" id="sVfr" inputmode="numeric" maxlength="4" data-tp="pVfr" placeholder="VFR squawk"></div>
+        <div class="f"><input type="text" id="sEmerg" data-tp="pEmerg" placeholder="Emergency squawks, e.g. 7500,7600,7700"></div>
+        <p class="hint" data-t="hintInit">Only needed before the first inventory.</p>
+        <div class="f two"><input type="text" id="sP1" data-tp="pP1" placeholder="Pilot 1"><input type="text" id="sP2" data-tp="pP2" placeholder="Pilot 2"></div>
 
         <h3 data-t="hBallast">Ballast</h3>
-        <div class="f two"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="Weight per bag kg">
-          <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" placeholder="Full ready ballast kg"></div>
-        <div class="f"><input type="text" id="sSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
-        <div class="f"><input type="text" id="sReady" placeholder="Ready ballast steps, e.g. 0,10,25,50,75,100"></div>
+        <div class="f two"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" data-tp="pBagKg" placeholder="Weight per bag kg">
+          <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" data-tp="pReadyKg" placeholder="Full ready ballast kg"></div>
+        <div class="f"><input type="text" id="sSteps" data-tp="pSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
+        <div class="f"><input type="text" id="sReady" data-tp="pReadySteps" placeholder="Ready ballast steps, e.g. 0,10,25,50,75,100"></div>
+        <div class="f"><input type="text" id="sO2" data-tp="pO2" placeholder="O2 cylinders in liters, e.g. 2,2,10"></div>
 
-        <h3 data-t="hApp">App</h3>
-        <div class="f"><p class="lab" data-t="nightColour">Night colour</p>
-          <div class="pills four" id="sNight">
-            <button data-v="red">Red</button><button data-v="amber">Amber</button>
-            <button data-v="green">Green</button><button data-v="white">White</button>
-          </div></div>
-        <div class="f"><p class="lab" data-t="tone">Confirmation tone</p>
-          <div class="pills" id="sBeep"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
-        <p class="hint">Entries are posted automatically. Without a connection they are held on the
-          device and go out in chronological order as soon as the link is back.</p>
+        <p class="hint" data-t="hintAuto">Entries are posted automatically.</p>
 
         <details class="fold" id="foldWa">
           <summary data-t="waRecipients">WhatsApp recipients</summary>
           <div class="in">
-            <p class="lab">Numbers in international form, digits only, e.g. 41791234567.</p>
-            <div class="f two"><input type="text" id="sAtcName" placeholder="ATC Coordinator">
-              <input type="tel" id="sAtcNum" inputmode="numeric" placeholder="Number"></div>
-            <p class="hint">Offered on ATC entries only, and ticked by default there.</p>
+            <p class="lab" data-t="hintWaNums">Numbers in international form, digits only, e.g. 41791234567.</p>
+            <div class="f two"><input type="text" id="sAtcName" data-tp="pAtcName" placeholder="ATC Coordinator">
+              <input type="tel" id="sAtcNum" inputmode="numeric" data-tp="pNumber" placeholder="Number"></div>
+            <p class="hint" data-t="hintAtcCo">Offered on ATC entries only, and ticked by default there.</p>
             <div id="waRows"></div>
           </div>
         </details>
@@ -455,23 +509,22 @@ body.min #puck{display:block}
         <details class="fold" id="foldTpl">
           <summary data-t="waLayout">WhatsApp message layout</summary>
           <div class="in">
-            <p class="lab">One template per message type. A line whose placeholders are all
-              empty is dropped; a single empty placeholder becomes –.</p>
+            <p class="lab" data-t="hintTpl">One template per message type.</p>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
             <p class="hint" id="tplKeys"></p>
-            <button class="go sm sec" id="btnTplReset">Reset to default</button>
+            <button class="go sm sec" id="btnTplReset" data-t="resetDefault">Reset to default</button>
           </div>
         </details>
 
         <details class="fold" id="foldGit">
           <summary data-t="ghConn">GitHub connection</summary>
           <div class="in">
-            <div class="f"><input type="text" id="sRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
-            <div class="f two"><input type="text" id="sBranch" placeholder="Branch" autocapitalize="none">
-              <input type="text" id="sDir" placeholder="Folder" autocapitalize="none"></div>
-            <div class="f"><input type="password" id="sToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+            <div class="f"><input type="text" id="sRepo" data-tp="pRepo" placeholder="owner/repo" autocapitalize="none" autocorrect="off"></div>
+            <div class="f two"><input type="text" id="sBranch" data-tp="pBranch" placeholder="Branch" autocapitalize="none">
+              <input type="text" id="sDir" data-tp="pFolder" placeholder="Folder" autocapitalize="none"></div>
+            <div class="f"><input type="password" id="sToken" data-tp="pToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
             <button class="go sm sec" id="btnTest" data-t="checkConn">Check connection</button>
           </div>
         </details>
@@ -481,6 +534,9 @@ body.min #puck{display:block}
       </div>
     </div>
     <div class="foot">
+      <p class="legal">© 2026 Wicki Aero GmbH · Basket Reporting ·
+        <a href="license.html" target="_blank" rel="noopener">License</a> ·
+        <a href="https://github.com/bwicki/gb_notion_frontend" target="_blank" rel="noopener">Source</a></p>
       <button class="go" id="btnSave" data-t="saveSettings" disabled>Save settings</button>
       <div class="ftline"><p class="tiny" id="setNote">Locked</p><span class="ver"></span></div>
     </div>
@@ -497,31 +553,31 @@ body.min #puck{display:block}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-16';
+const APP_VERSION='v260812-23';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',vfr:'7000',emerg:'7500,7600,7700',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
+           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',o2:'',vfr:'7000',emerg:'7500,7600,7700',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
-  ATC:'*{type} | {callsign}*\nStation: {station}\nFrq: {freq}  SQ: {squawk}\nMsg: {!msg}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
-  Ressources:'*{type} | {callsign}*\nPIC: {pic}  Resting: {resting}\nBattery: {battery}\nFuel cell: {fuelcell}  Solar: {solar}\nMsg: {!note}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
+  ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq}  SQ: {squawk}\nMsg: {!msg}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
+  Ressources:'*{type} | {callsign}*\nPIC: {pic}  Resting: {resting}\nBattery: {battery}\nFuel cell: {fuelcell}  Solar: {solar}\nMethanol: {methanol}\nCrew O2: {o2crew}  {o2}\nMsg: {!note}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
   Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} {pos} {alt}\nShow in Google Maps: {maps}'};
 const TPL_KEYS=['type','callsign','dir','station','freq','squawk','msg','pic','resting',
-  'battery','fuelcell','solar','note','time','pos','posdm','alt','tc','speed','maps','reporter','flight'];
+  'battery','fuelcell','solar','methanol','o2crew','o2','note','time','pos','posdm','alt','tc','speed','maps','reporter','flight'];
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      waSel:{},alt:0,ready:100,fuel:'',solar:'',med:'sand',
+                      waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',meth:null,o2bars:[],med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
-let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false;
+let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false,LASTERR='';
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
 function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('Storage full')}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast(t('storageFull'))}}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const r1=n=>Math.round(n*10)/10;
 const pad=(n,w)=>String(n).padStart(w,'0');
@@ -533,10 +589,10 @@ const nz=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
    The interface only. Everything written to GitHub or sent to WhatsApp stays English,
    so the table and the coordinator never depend on who set which device to what. */
 const L={en:{
- onBoard:'on board', droppedSince:'dropped since first inventory', droppedStart:'dropped since start',
+ onBoard:'on board', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop', takeInv:'Take Inventory', sand:'Sand', waterW:'Water',
- kgDropped:'Kilograms dropped', bags:'Bags', water:'Water', remark:'Remark (optional)',
- readyBallast:'Ready ballast', received:'Received', sent:'Sent', station:'Station',
+ kgDropped:'Kilograms dropped', bags:'sand bags', water:'water', remark:'Remark (optional)',
+ readyBallast:'Ready ballast', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
  message:'Message', confirmLast:'Confirm from last call', sendWa:'Send to WhatsApp',
  noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
  nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
@@ -552,13 +608,45 @@ const L={en:{
  waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
  mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
- mExport:'Export the table', mAbout:'About — more info', menu:'Menu',
+ mExport:'Export the table', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
  enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
  sqDigits:'A squawk is four digits, each 0 to 7', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password',
+ fPosted:'Posted to CC Notion', fQueued:'Queued for later delivery (no internet connection currently)',
+ fFailed:'Failed', fNoRepo:'Failed: no repository configured',
+ methanol:'Methanol level', crewO2:'Crew on O2', o2level:'O2 level',
+ addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
+ noRecorder:'This browser cannot record audio', mediaLater:'Attachments go up with the next connection',
+ o2title:'O2 cylinders', o2none:'No cylinders defined in the setup', liters:'liters', bars:'bars',
+ levelTitle:'Level', notSet:'not set',
+ pName:'Name', pFlight:'Flight ID', pCall:'Callsign', pInit:'Ballast on board at start, kg',
+ pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
+ pBagKg:'Weight per bag kg', pReadyKg:'Full ready ballast kg',
+ pSteps:'Quick drop amounts, e.g. 5,10,15,25', pReadySteps:'Ready ballast steps, e.g. 0,10,25,50,75,100',
+ pO2:'O2 cylinders in liters, e.g. 2,2,10', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
+ pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'xxxx',
+ hintRole:'The master owns the flight setup and publishes it. Followers pick up every change the master saves.',
+ hintInit:'Only needed before the first inventory. Leave it empty and the ballast figure starts with the first Take Inventory.',
+ hintAuto:'Entries are posted automatically. Without a connection they are held on the device and go out in order as soon as the link is back.',
+ hintWaNums:'Numbers in international form, digits only, e.g. 41791234567.',
+ hintAtcCo:'Offered on ATC entries only, and ticked by default there.',
+ hintTpl:'One template per message type. A line whose placeholders are all empty is dropped; {!key} keeps its line and prints -.',
+ lockText:'The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.',
+ resetDefault:'Reset to default', close:'Close', cancel:'Cancel', ok:'OK', save:'Save', del:'Delete',
+ rows:'rows', noEntries:'No entries yet.', editEntry:'Edit entry', deleteEntry:'Delete this entry',
+ entryUpdated:'Entry updated', entryDeleted:'Entry deleted', linkCopied:'Link copied',
+ msgCopied:'Message copied', tplReset:'Templates reset', reporterSet:'Reporter set to',
+ offlineKeep:'Offline — entries stay on this device', addRepo:'Add repository and token in Setup',
+ setupFromMaster:'Setup updated from the master', synced:'Synced', reloaded:'Reloaded',
+ connectedTo:'Connected to', storageFull:'Storage full', cleared:'Local copy cleared',
+ inSync:'In sync, last at', reportingAs:'Reporting as', notThePic:'not the PIC',
+ shareTitle:'Share setup', copyLink:'Copy link', done:'Done',
+ waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
+ lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note'
+,
  roleTitle:'Is this the master device?',
  roleText:'One device in the crew owns the flight setup and publishes it to the others. If this is that device, enter the master password. If you are joining someone else\'s flight, choose Join as follower — you will be sent the setup.',
  roleOk:'I am the master', roleCancel:'Join as follower',
@@ -566,13 +654,13 @@ const L={en:{
  masterPassTitle:'Master password', masterPassText:'Only the device that owns the flight setup may be the master.',
  twoMasters:'Another device is also set as master — only one may be', picFailed:'That picture could not be read',
  picMax:'Four pictures is the limit', locked:'Locked',
- unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', lastMsg:'last Msg',
+ unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', lastMsg:'last msg',
  upload:'upload', nothingSent:'Not sent yet', queued:'entries queued, going out as soon as there is a link.'
 },de:{
  onBoard:'an Bord', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
  drop:'Abwurf', takeInv:'Inventar', sand:'Sand', waterW:'Wasser',
- kgDropped:'Kilogramm abgeworfen', bags:'Säcke', water:'Wasser', remark:'Bemerkung (optional)',
- readyBallast:'Ready Ballast', received:'Empfangen', sent:'Gesendet', station:'Stelle',
+ kgDropped:'Kilogramm abgeworfen', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
+ readyBallast:'Ready Ballast', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
  message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', sendWa:'An WhatsApp senden',
  noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
  nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
@@ -589,13 +677,46 @@ const L={en:{
  waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
  mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
- mExport:'Tabelle exportieren', mAbout:'Über — mehr dazu', menu:'Menü',
+ mExport:'Tabelle exportieren', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
  enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort',
+ fPosted:'An CC Notion gesendet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
+ fFailed:'Fehlgeschlagen', fNoRepo:'Fehlgeschlagen: kein Repository eingerichtet',
+ methanol:'Methanolstand', crewO2:'Crew an O2', o2level:'O2-Stand',
+ addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
+ noRecorder:'Dieser Browser kann keinen Ton aufnehmen', mediaLater:'Anhänge gehen mit der nächsten Verbindung raus',
+ o2title:'O2-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt',
+ liters:'Liter', bars:'bar', levelTitle:'Stand', notSet:'nicht gesetzt',
+ pName:'Name', pFlight:'Fahrtkennung', pCall:'Rufzeichen', pInit:'Ballast an Bord beim Start, kg',
+ pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
+ pBagKg:'Gewicht pro Sack, kg', pReadyKg:'Voller Ready Ballast, kg',
+ pSteps:'Schnellmengen, z. B. 5,10,15,25', pReadySteps:'Ready-Ballast-Stufen, z. B. 0,10,25,50,75,100',
+ pO2:'O2-Flaschen in Liter, z. B. 2,2,10', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
+ pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'xxxx',
+ hintRole:'Der Master besitzt die Einrichtung der Fahrt und gibt sie weiter. Follower übernehmen jede Änderung.',
+ hintInit:'Nur vor dem ersten Inventar nötig. Leer lassen, dann beginnt die Ballastzahl mit dem ersten Inventar.',
+ hintAuto:'Einträge gehen automatisch raus. Ohne Verbindung bleiben sie auf dem Gerät und werden der Reihe nach gesendet, sobald die Leitung steht.',
+ hintWaNums:'Nummern international, nur Ziffern, z. B. 41791234567.',
+ hintAtcCo:'Erscheint nur bei ATC-Meldungen und ist dort standardmässig angewählt.',
+ hintTpl:'Eine Vorlage je Nachrichtentyp. Eine Zeile, deren Platzhalter alle leer sind, fällt weg; {!key} behält die Zeile und schreibt -.',
+ lockText:'Der übrige Teil der Einrichtung ist geschützt, damit eine laufende Fahrt nicht versehentlich überschrieben wird. Melden geht ohne Entsperren.',
+ resetDefault:'Auf Vorgabe zurücksetzen', close:'Schliessen', cancel:'Abbrechen', ok:'OK',
+ save:'Sichern', del:'Löschen', rows:'Zeilen', noEntries:'Noch keine Einträge.',
+ editEntry:'Eintrag ändern', deleteEntry:'Diesen Eintrag löschen',
+ entryUpdated:'Eintrag geändert', entryDeleted:'Eintrag gelöscht', linkCopied:'Link kopiert',
+ msgCopied:'Nachricht kopiert', tplReset:'Vorlagen zurückgesetzt', reporterSet:'Melder ist jetzt',
+ offlineKeep:'Offline — Einträge bleiben auf dem Gerät', addRepo:'Repository und Token in den Einstellungen eintragen',
+ setupFromMaster:'Einrichtung vom Master übernommen', synced:'Gesendet', reloaded:'Geladen',
+ connectedTo:'Verbunden mit', storageFull:'Speicher voll', cleared:'Lokale Kopie geleert',
+ inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', notThePic:'nicht der PIC',
+ shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', done:'Fertig',
+ waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
+ lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz'
+,
  roleTitle:'Ist dies das Master-Gerät?',
  roleText:'Ein Gerät der Crew besitzt die Einrichtung der Fahrt und gibt sie an die anderen weiter. Ist dies dieses Gerät, gib das Master-Passwort ein. Steigst du in die Fahrt eines anderen ein, wähle Als Follower beitreten — die Einrichtung wird dir zugeschickt.',
  roleOk:'Ich bin der Master', roleCancel:'Als Follower beitreten',
@@ -610,7 +731,7 @@ const L={en:{
 const t=k=>((L[CFG.lang]||L.en)[k]||L.en[k]||k);
 function applyLang(){
   document.documentElement.lang=CFG.lang||'en';
-  $$('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  $$('[data-t]').forEach(el=>{if(el.id==='btnPost'&&el.className.match(/ok|wait|fail/))return;el.textContent=t(el.dataset.t)});
   $$('[data-tp]').forEach(el=>{el.placeholder=t(el.dataset.tp)});
   mark('#sLang',CFG.lang||'en');
 }
@@ -628,9 +749,9 @@ function recalc(list){
   for(const e of chrono(list)){
     if(e.type!=='Ballast')continue;
     if(e.ballast_action==='count'){
-      const t=r1(Number(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)||0);
-      e.tally_diff_kg=base?r1(t-a):null;   /* counted minus expected */
-      a=t;e.ballast_abs_kg=a;base=true;
+      const tot=r1(Number(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)||0);
+      e.tally_diff_kg=base?r1(tot-a):null;   /* counted minus expected */
+      a=tot;e.ballast_abs_kg=a;base=true;
     }else if(e.ballast_delta_kg!=null){a=r1(a+Number(e.ballast_delta_kg));e.ballast_abs_kg=a}
     else if(e.ballast_abs_kg!=null){a=r1(Number(e.ballast_abs_kg))}
   }
@@ -714,7 +835,8 @@ function add(part){
     tc_deg:null,speed_kt:null,ballast_medium:'',
     sand_kg:null,water_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
-    crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',note:'',
+    crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',
+    res_methanol_pct:null,res_o2_crew:'',res_o2:'',res_o2_bars:'',note:'',
     whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',synced:false
   },gpsSnap(),part);
   ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();
@@ -731,7 +853,9 @@ function waVals(e){
     station:e.atc_station||'', freq:e.atc_freq||'', squawk:e.atc_squawk||'', msg:e.atc_msg||'',
     pic:e.crew_pic||'', resting:e.crew_rest||'',
     battery:(e.res_battery_pct==null||e.res_battery_pct==='')?'':e.res_battery_pct+' %',
-    fuelcell:e.res_fuel_cell||'', solar:e.res_solar||'', note:e.note||'',
+    fuelcell:e.res_fuel_cell||'', solar:e.res_solar||'',
+    methanol:(e.res_methanol_pct==null||e.res_methanol_pct==='')?'':e.res_methanol_pct+' %',
+    o2crew:e.res_o2_crew||'', o2:e.res_o2||'', note:e.note||'',
     time:String(e.ts_utc||'').slice(11,16)+'Z',
     pos:e.gps_fix?(e.pos_lat+' '+e.pos_lon):'',
     posdm:e.gps_fix?(dm(e.lat,2)+(e.lat>=0?'N':'S')+' '+dm(e.lon,3)+(e.lon>=0?'E':'W')):'',
@@ -783,12 +907,12 @@ async function waSheet(e,list,compact){
   const enc=encodeURIComponent(txt);
   const rows=list.map(r=>`<a class="go sec sm" target="_blank" rel="noopener"
       href="https://wa.me/${String(r.p).replace(/\D/g,'')}?text=${enc}">${esc(r.n||r.p)}</a>`).join('');
-  await ask({title:compact?'Remaining recipients':'Send to WhatsApp',
+  await ask({title:compact?t('waRemaining'):t('waTitle'),
     text:'WhatsApp opens one chat at a time. Tap a name, press send, come back, tap the next.',
     html:(compact?'':'<div class="waPre">'+esc(txt)+'</div>')+'<div class="waList">'+rows+'</div>',
-    ok:'Copy text',cancel:'Done',
+    ok:t('copyText'),cancel:t('done'),
     onMount:m=>{m.querySelector('[data-a="1"]').onclick=async()=>{
-      try{await navigator.clipboard.writeText(txt);toast('Message copied')}catch(err){toast('Select the text to copy')}}}});
+      try{await navigator.clipboard.writeText(txt);toast(t('msgCopied'))}catch(err){toast('Select the text to copy')}}}});
 }
 
 /* ── GPS, wake lock, tone, clock ───────────────────────────────────── */
@@ -891,7 +1015,7 @@ async function followSetup(){
     const o=JSON.parse(g.text);
     if(applyShared(o)){
       save(K_CFG,CFG);applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paint();
-      toast('Setup updated from the master');
+      toast(t('setupFromMaster'));
     }
   }catch(e){}
 }
@@ -918,7 +1042,8 @@ const COLS=['flight_id','callsign','seq','device','device_mode','reporter','sour
   'pos_lat','pos_lon','alt_ft','tc_deg','speed_kt','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
   'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
-  'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar','note',
+  'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar',
+  'res_methanol_pct','res_o2_crew','res_o2','res_o2_bars','note',
   'whatsapp','whatsapp_to','attachments','attachment_paths','edited_at','edited_by','id'];
 const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
 const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
@@ -927,8 +1052,8 @@ let pollN=0;
 async function sync(silent,push,attempt){
   attempt=attempt||0;push=push!==false;
   if(SYNCING)return;
-  if(!configured()){if(!silent)toast('Add repository and token in Setup');return}
-  if(!navigator.onLine){if(!silent)toast('Offline — entries stay on this device');return}
+  if(!configured()){if(!silent)toast(t('addRepo'));return}
+  if(!navigator.onLine){if(!silent)toast(t('offlineKeep'));return}
   SYNCING=true;paintStatus();
   try{
     const p=paths();
@@ -967,11 +1092,12 @@ async function sync(silent,push,attempt){
     }else{
       ENT=all.map(e=>Object.assign({},e,{synced:!unsent.has(e.id)}));
     }
-    save(K_ENT,ENT);LASTSYNC=new Date();paint();
-    if(!silent)toast((push?'Synced ':'Reloaded ')+all.length+' rows');
+    LASTERR='';save(K_ENT,ENT);LASTSYNC=new Date();paint();
+    if(!silent)toast((push?t('synced'):t('reloaded'))+' '+all.length+' '+t('rows'));
   }catch(e){
     if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1)}
-    if(!silent)toast(String(e.message||e));
+    LASTERR=String(e.message||e);
+    if(!silent)toast(LASTERR);
   }finally{SYNCING=false;paintStatus()}
 }
 
@@ -981,7 +1107,7 @@ function paintStatus(){
   /* course, ground speed and accuracy sit under the flight, in the same type */
   if(GPS&&Date.now()-GPS.t<30000){
     const g=[];
-    if(GPS.tc!=null)g.push(pad(Math.round(GPS.tc)%360,3)+'\u00b0 TC');
+    if(GPS.tc!=null)g.push(pad(Math.round(GPS.tc)%360,3)+'\u00b0');
     if(GPS.sp!=null)g.push((GPS.sp*1.94384).toFixed(1)+' kn');
     g.push('\u00b1 '+Math.round(GPS.acc||0)+' m');
     $('#hGps').textContent=g.join(' \u00b7 ');
@@ -991,9 +1117,10 @@ function paintStatus(){
   const when=last?String(last.ts_utc).slice(11,19)+'Z':'--:--:--Z';
   const who=last?(last.reporter||last.device||'—'):'—';
   const up=!configured()?t('noRepo'):(SYNCING?'…':(un?'\u2717 '+un:'\u2713'));
-  $('#hSt').textContent=t('lastMsg')+' '+when+'/'+who+'  |  '+t('upload')+' '+up;
+  const cat=last?last.type:'\u2014';
+  $('#hSt').textContent=t('lastMsg')+' '+when+'/'+who+'/'+cat+'  |  '+t('upload')+' '+up;
   $('#syncNote').textContent=un?un+'/'+ENT.length+' '+t('queued')
-    :(LASTSYNC?'In sync, last at '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
+    :(LASTSYNC?t('inSync')+' '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
 }
 function paintReadout(){
   const v=onBoard();
@@ -1002,7 +1129,7 @@ function paintReadout(){
   $('#pNum').textContent=(Number.isInteger(v)?v:v.toFixed(1))+' kg';
   $('#pTitle').textContent=(CFG.call?CFG.call+' ':'')+'Reporting';
   $('#rOn').textContent=txt;
-  $('#rDrop').textContent=droppedTotal()+' kg';
+  $('#rDrop').textContent=droppedTotal().toFixed(1)+' kg';
   $$('[data-t="droppedSince"]').forEach(el=>el.textContent=firstInv()?t('droppedSince'):t('droppedStart'));
   $('#ballBox').classList.toggle('hide',UI.type!=='Ballast');
   $('#repName').textContent=reporter();
@@ -1014,27 +1141,34 @@ function line(e){
   let h='',s='';
   if(e.type==='Ballast'){
     if(e.ballast_action==='count'){
-      h='Inventory '+(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)+' kg';
+      h=t('lgInv')+' '+(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)+' kg';
       s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' · water '+(e.water_kg!=null?e.water_kg:'?')
         +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')+(e.inv_ready_pct!=null?' · ready '+e.inv_ready_pct+'%':'')
         +(e.tally_diff_kg!=null?' · diff '+(e.tally_diff_kg>0?'+':'')+e.tally_diff_kg+' kg':'')
         +(e.note?' · '+e.note:'');
-    }else{h=(e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg \u2192 '+e.ballast_abs_kg+' kg';s=e.note||''}
+    }else{
+      h=(e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg'
+        +(e.ballast_medium?' '+t(e.ballast_medium==='water'?'waterW':'sand').toLowerCase():'')
+        +' \u2192 '+e.ballast_abs_kg+' kg';
+      s=e.note||'';
+    }
   }else if(e.type==='ATC'){
     h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')
       +(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
     s=e.atc_msg||'';
   }else if(e.type==='Ressources'){
-    h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' resting':' \u00b7 both awake');
+    h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
     s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?'bat '+e.res_battery_pct+'%':'',
-       e.res_fuel_cell?'fuel cell '+e.res_fuel_cell:'',e.res_solar?'solar '+e.res_solar:'',e.note||'']
+       e.res_fuel_cell?'fuel '+e.res_fuel_cell:'',e.res_solar?'solar '+e.res_solar:'',
+       e.res_methanol_pct!=null&&e.res_methanol_pct!==''?'meth '+e.res_methanol_pct+'%':'',
+       e.res_o2_crew?'O2 crew '+e.res_o2_crew:'',e.res_o2||'',e.note||'']
        .filter(Boolean).join(' \u00b7 ');
-  }else{h=e.note||'Note';s=''}
+  }else{h=e.note||t('lgNote');s=''}
   return{h,s};
 }
 function paintLog(){
   const l=chrono(ENT).reverse(),box=$('#logList');
-  if(!l.length){box.innerHTML='<p class="none">No entries yet.</p>';return}
+  if(!l.length){box.innerHTML='<p class="none">'+esc(t('noEntries'))+'</p>';return}
   box.innerHTML=l.map(e=>{
     const {h,s}=line(e);
     const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'');
@@ -1071,12 +1205,18 @@ function paintCrew(){
   $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>${esc(t('nobody'))}</button>`
     +crew.map(([k,n])=>`<button data-v="${k}"${UI.rest===k?' class="on"':''}>${esc(n)}</button>`).join('');
 }
-const WABOX={'#waATC':'ATC','#waRes':'Ressources','#waOth':'Other'};
+const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waRes':'Ressources','#waOth':'Other'};
+/* on ATC the coordinator gets a line of its own above the rest of the list */
 function paintWaChecks(){
   for(const sel in WABOX){
-    const type=WABOX[sel],box=$(sel),list=waRoster(type);
-    if(!list.length){box.innerHTML='<span class="lab">'+t('noRecipients')+'</span>';continue}
-    box.innerHTML=list.map((r,i)=>`<button data-i="${i}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`).join('');
+    const type=WABOX[sel],box=$(sel);
+    let list=waRoster(type);
+    if(type==='ATC')list=sel==='#waATCco'?list.slice(0,1):list.slice(1);
+    if(!list.length){box.innerHTML=sel==='#waATCco'?'':'<span class="lab">'+esc(t('noRecipients'))+'</span>';continue}
+    box.innerHTML=list.map(r=>{
+      const i=waRoster(type).indexOf(r);
+      return `<button data-i="${i}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`;
+    }).join('');
   }
 }
 for(const sel in WABOX)$(sel).addEventListener('click',ev=>{
@@ -1095,7 +1235,7 @@ function paintInv(){
     +(ENT.some(e=>e.ballast_action==='count')||nz(CFG.init)>0
       ? `<br>Expected ${exp} kg · difference <b>${d>0?'+':''}${d} kg</b>` : '');
 }
-function paint(){paintReadout();paintLog();paintStatus();paintLastAtc()}
+function paint(){adoptLast();paintReadout();paintLog();paintStatus();paintLastBoxes()}
 
 /* ── Modal ─────────────────────────────────────────────────────────── */
 function ask(o){
@@ -1106,8 +1246,8 @@ function ask(o){
       ${o.html||''}
       ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
       <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
-        ${o.cancel===false?'':`<button class="go sec" data-a="0">${esc(o.cancel||'Cancel')}</button>`}
-        <button class="go ${o.danger?'warn':''}" data-a="1">${esc(o.ok||'OK')}</button>
+        ${o.cancel===false?'':`<button class="go sec" data-a="0">${esc(o.cancel||t('cancel'))}</button>`}
+        <button class="go ${o.danger?'warn':''}" data-a="1">${esc(o.ok||t('ok'))}</button>
       </div></div>`;
     m.classList.add('on');
     const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
@@ -1143,8 +1283,8 @@ async function exportSheet(){
     ? {text:toCsv(chrono(ENT)),name:(CFG.flight||'flightlog')+'.csv',mime:'text/csv'}
     : {text:JSON.stringify(chrono(ENT),null,1),name:(CFG.flight||'flightlog')+'.json',mime:'application/json'};
   const canShare=!!(navigator.canShare&&navigator.share);
-  await ask({title:t('export'),cancel:false,ok:'Close',
-    text:ENT.length+' rows',
+  await ask({title:t('export'),cancel:false,ok:t('close'),
+    text:ENT.length+' '+t('rows'),
     html:'<p class="lab">'+esc(t('format'))+'</p><div class="pnl" id="exFmt">'
       +'<button data-v="csv" class="on">CSV</button><button data-v="json">JSON</button></div>'
       +'<p class="lab" style="margin-top:14px">'+esc(t('destination'))+'</p>'
@@ -1176,7 +1316,7 @@ async function shareSheet(){
     m.querySelector('#shTok').classList.toggle('on',withToken);
     return link;
   };
-  await ask({title:'Share setup',cancel:false,ok:'Copy link',
+  await ask({title:t('shareTitle'),cancel:false,ok:t('copyLink'),
     text:'Open this link on the other device. It carries the flight, the pilots, the ballast '
       +'figures, the WhatsApp recipients and the message templates, and sets that device to '
       +'Follower. Its own reporter name, device mode and colours stay untouched.',
@@ -1188,7 +1328,7 @@ async function shareSheet(){
       render(m);
       m.querySelector('#shTok').onclick=()=>{withToken=!withToken;render(m)};
       m.querySelector('[data-a="1"]').onclick=async()=>{
-        try{await navigator.clipboard.writeText(shareLink(withToken));toast('Link copied')}
+        try{await navigator.clipboard.writeText(shareLink(withToken));toast(t('linkCopied'))}
         catch(e){toast('Select the link to copy')}
       };
     }});
@@ -1250,13 +1390,14 @@ async function openMenu(){
     sync:'<path d="M12 20V9"/><path d="M8 13l4-4 4 4"/><path d="M5 5h14"/>',
     share:'<circle cx="7" cy="12" r="2.6"/><circle cx="17" cy="6.5" r="2.6"/><circle cx="17" cy="17.5" r="2.6"/><path d="M9.3 10.8 14.7 7.7M9.3 13.2l5.4 3.1"/>',
     export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>',
-    about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>'
+    about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>',
+    license:'<path d="M6 4h9l4 4v12H6Z"/><path d="M9.5 12h6M9.5 16h4"/>'
   };
   const items=[['form',t('mReport')],['log',t('mLog')],['set',t('mSettings')],
                ['theme',isNight()?t('mDay'):t('mNight')],
                ['pull',t('mReload')],['sync',t('mSend')],['share',t('mShare')],
-               ['export',t('mExport')],['about',t('mAbout')]];
-  await ask({title:t('menu'),cancel:false,ok:'Close',
+               ['export',t('mExport')],['about',t('mAbout')],['license',t('mLicense')]];
+  await ask({title:t('menu'),cancel:false,ok:t('close'),
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go sec sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
@@ -1271,20 +1412,22 @@ async function openMenu(){
       else if(k==='export')exportSheet();
       else if(k==='share')shareSheet();
       else if(k==='about')window.open('readme.html','_blank','noopener');
+      else if(k==='license')window.open('license.html','_blank','noopener');
     })}});
 }
 $('#btnRep').onclick=()=>{if(!shared())return;
   UI.alt=UI.alt?0:1;save(K_UI,UI);paintReadout();
-  toast('Reporting as '+reporter()+(UI.alt?' — not the PIC':''))};
+  toast(t('reportingAs')+' '+reporter()+(UI.alt?' \u2014 '+t('notThePic'):''))};
 
-function setType(t){
-  UI.type=t;save(K_UI,UI);
-  $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
-  $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+t));
+function setType(ty){
+  UI.type=ty;save(K_UI,UI);
+  $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===ty));
+  $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+ty));
   paintReadout();
-  if(t==='ATC'){carryAtc();paintChips()}
-  if(t==='Ballast')setAct(UI.act);
-  if(t==='Ressources')carryRes();
+  if(ty==='ATC'){carryAtc();paintChips()}
+  if(ty==='Ballast'){UI.act='drop';UI.med='sand';save(K_UI,UI);
+    mark('#bAct','drop');mark('#bMed','sand');setAct('drop')}
+  if(ty==='Ressources'){carryRes();paintRes()}
 }
 $('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.t)});
 
@@ -1335,33 +1478,154 @@ $('#aChips').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(i>=0)parts.splice(i,1);else parts.push(b.dataset.v);
   $('#aMsg').value=parts.join(' \u00b7 ');paintChips()});
 $('#aMsg').addEventListener('input',paintChips);
-pills('#cPic',v=>{UI.pic=v;save(K_UI,UI);paintReadout()});
+/* changing the PIC puts the other pilot on rest, which is the normal case; Nobody stays
+   one tap away for the stretches when both are awake */
+pills('#cPic',v=>{
+  UI.pic=v;
+  const other=crewList().find(c=>c[0]!==v);
+  UI.rest=other?other[0]:'';
+  save(K_UI,UI);paintCrew();paintReadout();
+});
 pills('#cRest',v=>{UI.rest=v;save(K_UI,UI)});
 pills('#rFuel',v=>{UI.fuel=v;save(K_UI,UI)});
 pills('#rSolar',v=>{UI.solar=v;save(K_UI,UI)});
+pills('#rO2crew',v=>{UI.o2crew=v;save(K_UI,UI)});
 
-/* ── ATC carried-over values ───────────────────────────────────────── */
+/* the same list of levels the battery uses, opened from a button */
+const LEVELS=[100,95,90,85,80,75,70,60,50,40,30,20,10,0];
+async function levelSheet(title,current){
+  let picked=current;
+  await ask({title:title,cancel:t('cancel'),ok:t('ok'),
+    html:'<div class="lvlgrid" id="lvG">'+LEVELS.map(n=>
+      `<button data-v="${n}"${current===n?' class="on"':''}>${n}%</button>`).join('')
+      +`<button data-v=""${current==null?' class="on"':''}>&mdash;</button></div>`,
+    onMount:(m,close)=>{m.querySelector('#lvG').addEventListener('click',ev=>{
+      const b=ev.target.closest('button');if(!b)return;
+      picked=b.dataset.v===''?null:Number(b.dataset.v);
+      [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+      close();
+    })}});
+  return picked;
+}
+const o2Sizes=()=>String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x))
+  .filter(x=>isFinite(x)&&x>0).slice(0,4);
+function paintRes(){
+  $('#rMeth').textContent=UI.meth==null?'\u2014':UI.meth+'%';
+  $('#rMeth').classList.toggle('set',UI.meth!=null);
+  const sizes=o2Sizes(),bars=UI.o2bars||[];
+  const parts=sizes.map((l,i)=>bars[i]==null||bars[i]===''?null:bars[i]+' bar').filter(Boolean);
+  $('#rO2').textContent=!sizes.length?'\u2014':(parts.length?parts.join(' · '):'\u2014');
+  $('#rO2').classList.toggle('set',!!parts.length);
+}
+$('#rMeth').onclick=async()=>{UI.meth=await levelSheet(t('methanol'),UI.meth);save(K_UI,UI);paintRes()};
+$('#rO2').onclick=async()=>{
+  const sizes=o2Sizes();
+  if(!sizes.length){toast(t('o2none'));return}
+  const bars=(UI.o2bars||[]).slice();
+  const r=await ask({title:t('o2title'),ok:t('ok'),cancel:t('cancel'),
+    html:sizes.map((l,i)=>`<div class="o2row"><span>O2-cylinder ${i+1} &middot; ${l} ${esc(t('liters'))}</span>`
+      +`<input data-k="b${i}" type="number" inputmode="numeric" step="10" style="width:110px"`
+      +` value="${bars[i]==null?'':esc(bars[i])}" placeholder="${esc(t('bars'))}"></div>`).join('')});
+  if(r&&typeof r==='object'){
+    UI.o2bars=sizes.map((l,i)=>{const v=parseFloat(r['b'+i]);return isFinite(v)?Math.round(v):null});
+    save(K_UI,UI);paintRes();
+  }
+};
+const o2Text=()=>{
+  const sizes=o2Sizes(),bars=UI.o2bars||[];
+  return sizes.map((l,i)=>bars[i]==null?null:'#'+(i+1)+' '+l+' l '+bars[i]+' bar')
+    .filter(Boolean).join('; ');
+};
+
+/* ── values carried over from the last message of the same kind ─────
+   They arrive greyed. Touching any one of them accepts the whole set, so a changed
+   frequency never leaves a stale station behind a second confirmation. */
 const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
-function paintLastAtc(){
-  const last=chrono(ENT).filter(e=>e.type==='ATC').pop(),el=$('#aLast');
-  if(!last){el.classList.add('hide');return}
-  el.classList.remove('hide');
-  el.textContent='LAST MSG: '+String(last.ts_utc).slice(11,19)+'Z '
-    +(last.atc_dir==='TX'?'sent':'recvd')+' '
-    +[last.atc_station,last.atc_freq,last.atc_squawk,last.atc_msg].filter(Boolean).join(' ');
-}
-function carryAtc(){
-  setTimeout(syncVfr,0);paintLastAtc();
-  const l=UI.lastAtc||{};let any=false;
-  ATCF.forEach(([sel,k])=>{const el=$(sel);
-    if(!el.value&&l[k]){el.value=l[k];el.classList.add('pre');any=true}
+const DROPF=[['#bKg','kg']];
+const INVF=[['#iBags','bags'],['#iWater','water']];
+const RESF=[['#rBat','bat']];
+function preFill(pairs,store){
+  let any=false;
+  (pairs||[]).forEach(([sel,k])=>{const el=$(sel);if(!el)return;
+    if(!el.value&&store&&store[k]!=null&&store[k]!==''){el.value=store[k];el.classList.add('pre');any=true}
     else if(el.classList.contains('pre'))any=true});
-  $('#aCarry').classList.toggle('hide',!any);
+  return any;
 }
-ATCF.forEach(([sel])=>{const el=$(sel);
-  const clear=()=>{if(el.classList.contains('pre')){el.classList.remove('pre');
-    if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide')}};
-  el.addEventListener('focus',clear);el.addEventListener('input',clear)});
+function acceptPre(scope){
+  $$(scope+' .pre').forEach(el=>el.classList.remove('pre'));
+  if(scope==='#b-ATC')$('#aCarry').classList.add('hide');
+}
+/* Every kind of message shows the last one of its own kind, whoever filed it and from
+   whichever device, so the header names the reporter and the time. */
+const LASTBOX={Ballast:'#bLast',ATC:'#aLast',Ressources:'#cLast',Other:'#oLast'};
+function lastHead(e){
+  if(e.type!=='ATC')return line(e).h;
+  const b=[e.atc_dir==='TX'?'TRSMTD':'RCVD'];
+  if(e.atc_station)b.push(e.atc_station);
+  if(e.atc_freq)b.push('FREQ '+e.atc_freq+' MHz');
+  if(e.atc_squawk)b.push('SQ '+e.atc_squawk);
+  return b.join('  ');
+}
+const lastBody=e=>e.type==='ATC'?('Msg: '+(e.atc_msg||'-')):(line(e).s||'');
+function paintLastBoxes(){
+  for(const ty in LASTBOX){
+    const box=$(LASTBOX[ty]);if(!box)continue;
+    const e=lastOf(ty);
+    box.querySelector('.lm-top').textContent=t('lastMessage')+' | '
+      +(e?(e.reporter||e.device||'\u2014'):'\u2014')+' | '
+      +(e?String(e.ts_utc).slice(11,19)+'Z':'\u2014');
+    box.querySelector('.lm-head').textContent=e?lastHead(e):'-';
+    box.querySelector('.lm-msg').textContent=e?lastBody(e):'';
+  }
+}
+const paintLastAtc=paintLastBoxes;
+function carryAtc(){
+  adoptLast();setTimeout(syncVfr,0);paintLastAtc();
+  $('#aCarry').classList.toggle('hide',!preFill(ATCF,UI.lastAtc));
+}
+/* The defaults come from the last entry in the table, whoever made it and on whichever
+   device — a handover mid-flight must not reset what the other pilot last reported. */
+const lastOf=ty=>chrono(ENT).filter(e=>e.type===ty).pop();
+const crewKeyByName=n=>{const c=crewList().find(x=>x[1]===n);return c?c[0]:null};
+function adoptLast(){
+  const a=lastOf('ATC');
+  if(a)UI.lastAtc={station:a.atc_station||'',freq:a.atc_freq||'',squawk:a.atc_squawk||''};
+
+  const b=chrono(ENT).filter(e=>e.type==='Ballast');
+  const drop=b.filter(e=>e.ballast_action!=='count').pop();
+  if(drop){
+    UI.lastDrop={kg:String(Math.abs(Number(drop.ballast_delta_kg)||0)||'')};
+  }
+  const inv=b.filter(e=>e.ballast_action==='count').pop();
+  if(inv){
+    UI.lastInv={bags:inv.inv_bags==null?'':String(inv.inv_bags),
+                water:inv.water_kg==null?'':String(inv.water_kg)};
+    if(inv.inv_ready_pct!=null)UI.ready=Number(inv.inv_ready_pct);
+  }
+  const r=lastOf('Ressources');
+  if(r&&UI.adopted!==r.id){
+    UI.adopted=r.id;
+    if(r.res_fuel_cell)UI.fuel=r.res_fuel_cell;
+    if(r.res_solar)UI.solar=r.res_solar;
+    if(r.res_o2_crew)UI.o2crew=r.res_o2_crew;
+    if(r.res_methanol_pct!=null&&r.res_methanol_pct!=='')UI.meth=Number(r.res_methanol_pct);
+    if(r.res_o2_bars)UI.o2bars=String(r.res_o2_bars).split(';')
+      .map(x=>x===''?null:Number(x)).map(x=>isFinite(x)?x:null);
+    const kp=crewKeyByName(r.crew_pic),kr=crewKeyByName(r.crew_rest);
+    if(kp)UI.pic=kp;
+    UI.rest=kr||'';
+  }
+  if(r)UI.lastRes={bat:(r.res_battery_pct==null||r.res_battery_pct==='')?'':String(r.res_battery_pct)};
+  save(K_UI,UI);
+}
+const carryDrop=()=>{adoptLast();return preFill(DROPF,UI.lastDrop)};
+const carryInv=()=>{adoptLast();paintReady();return preFill(INVF,UI.lastInv)};
+const carryRes=()=>{adoptLast();mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);
+  mark('#rO2crew',UI.o2crew);paintCrew();paintRes();return preFill(RESF,UI.lastRes)};
+[['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Ressources',RESF]].forEach(([scope,pairs])=>{
+  pairs.forEach(([sel])=>{const el=$(sel);if(!el)return;
+    ['focus','input','change'].forEach(ev=>el.addEventListener(ev,()=>acceptPre(scope)))});
+});
 /* the point is placed after the third digit while typing; on leaving the field the
    kilohertz are padded out, so 12345 reads 123.450 */
 const freqDigits=v=>String(v||'').replace(/\D/g,'').slice(0,6);
@@ -1384,8 +1648,7 @@ $('#btnVfr').onclick=()=>{const el=$('#aSquawk');
   if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide');
   syncVfr()};
 
-$('#aConfirm').onclick=()=>{$$('#b-ATC input.pre').forEach(i=>i.classList.remove('pre'));
-  $('#aCarry').classList.add('hide');toast('Carried-over values confirmed')};
+$('#aConfirm').onclick=()=>{acceptPre('#b-ATC');toast(t('takenOver'))};
 
 /* ── Pictures on an Other entry ─────────────────────────────────────
    Photos are scaled down in the browser before anything is stored, because a queued
@@ -1413,6 +1676,51 @@ function paintPics(){
   $('#btnPic').textContent=PICS.length?t('addPictures')+' ('+PICS.length+'/'+MAXPIC+')':t('addPictures');
 }
 $('#btnPic').onclick=()=>$('#oFiles').click();
+
+/* A voice note is recorded in the browser, stored with the entry and uploaded like a
+   picture. It is not persisted across a reload, so it goes up with the next send. */
+let VOICE=null,REC=null,RECT=null,RECSEC=0;
+const MAXVOICE=120;
+function voiceMime(){
+  const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'];
+  return (window.MediaRecorder&&c.find(m=>MediaRecorder.isTypeSupported(m)))||'';
+}
+function paintVoice(){
+  const bar=$('#oVoice');
+  bar.classList.toggle('on',!!VOICE);
+  bar.innerHTML=VOICE?`<audio controls src="${VOICE.url}"></audio><span>${VOICE.sec}s</span><button id="vDel">\u00d7</button>`:'';
+  if(VOICE)bar.querySelector('#vDel').onclick=()=>{URL.revokeObjectURL(VOICE.url);VOICE=null;paintVoice()};
+  $('#btnVoice').classList.toggle('rec',!!REC);
+  $('#btnVoice').textContent=REC?t('stopRec')+' '+RECSEC+'s':t('addVoice');
+}
+async function startVoice(){
+  const mime=voiceMime();
+  if(!mime||!navigator.mediaDevices){toast(t('noRecorder'));return}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){toast(t('micDenied'));return}
+  const chunks=[];
+  REC=new MediaRecorder(stream,{mimeType:mime});
+  REC.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  REC.onstop=()=>{
+    stream.getTracks().forEach(t2=>t2.stop());
+    const blob=new Blob(chunks,{type:mime});
+    const fr=new FileReader();
+    fr.onload=()=>{
+      if(VOICE)URL.revokeObjectURL(VOICE.url);
+      VOICE={b64:String(fr.result).split(',')[1],mime:mime,sec:RECSEC,
+             ext:mime.indexOf('mp4')>=0||mime.indexOf('aac')>=0?'m4a':'webm',
+             url:URL.createObjectURL(blob)};
+      REC=null;clearInterval(RECT);paintVoice();
+    };
+    fr.readAsDataURL(blob);
+  };
+  RECSEC=0;REC.start();
+  RECT=setInterval(()=>{RECSEC++;paintVoice();if(RECSEC>=MAXVOICE)stopVoice()},1000);
+  paintVoice();
+}
+const stopVoice=()=>{if(REC&&REC.state!=='inactive')REC.stop()};
+$('#btnVoice').onclick=()=>REC?stopVoice():startVoice();
 $('#oThumbs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   PICS.splice(Number(b.dataset.i),1);paintPics()});
 $('#oFiles').addEventListener('change',async ev=>{
@@ -1421,25 +1729,24 @@ $('#oFiles').addEventListener('change',async ev=>{
   ev.target.value='';paintPics();
   if(PICS.length>=MAXPIC)toast(t('picMax'));
 });
-async function uploadPics(e){
-  if(!PICS.length)return[];
+async function uploadMedia(id,pics,voice){
   const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),out=[];
-  for(let i=0;i<PICS.length;i++){
-    const path=d+'/media/'+e.id+'-'+(i+1)+'.jpg';
-    const b64=PICS[i].split(',')[1];
+  const put=async(path,b64,what)=>{
     try{
       const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(path)}`,{method:'PUT',headers:hdr(),
-        body:JSON.stringify({message:'picture · '+reporter(),content:b64,branch:CFG.branch||'main'})});
+        body:JSON.stringify({message:what+' · '+reporter(),content:b64,branch:CFG.branch||'main'})});
       if(r.ok)out.push(path);
     }catch(err){}
-  }
+  };
+  for(let i=0;i<pics.length;i++)await put(d+'/media/'+id+'-'+(i+1)+'.jpg',pics[i].split(',')[1],'picture');
+  if(voice)await put(d+'/media/'+id+'-voice.'+voice.ext,voice.b64,'voice note');
   return out;
 }
 
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
-  const t=UI.type;let e=null;
-  if(t==='Ballast'){
+  const ty=UI.type;let e=null;
+  if(ty==='Ballast'){
     if(UI.act==='count'){
       const bags=$('#iBags').value,water=$('#iWater').value;
       if(bags===''&&water==='')return toast(t('enterInv'));
@@ -1447,23 +1754,21 @@ $('#btnPost').onclick=async()=>{
       add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
         sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
         inv_bags:bags===''?null:Math.round(nz(bags)),inv_ready_pct:UI.ready,note:$('#iNote').value.trim()});
-      UI.lastInv={bags:bags,water:water};save(K_UI,UI);
       $('#iNote').value='';acceptPre('#b-Ballast');paintInv();
       const last=chrono(ENT)[chrono(ENT).length-1];
-      toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
+      confirmPost(chrono(ENT)[ENT.length-1]);toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
     }else{
       const kg=parseFloat($('#bKg').value);
       if(!(kg>0))return toast(t('enterKg'));
       add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
         ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim()});
-      UI.lastDrop={kg:String(kg)};save(K_UI,UI);
       $('#bKg').value='';$('#bNote').value='';paintSum();
-      acceptPre('#b-Ballast');carryDrop();
+      acceptPre('#b-Ballast');carryDrop();confirmPost(chrono(ENT)[ENT.length-1]);
       toast('\u2212'+kg+' kg '+(UI.med||'sand'));
     }
     return;
   }
-  if(t==='ATC'){
+  if(ty==='ATC'){
     if($('#aFreq').value.trim())$('#aFreq').value=fmtFreq($('#aFreq').value);
     const sq=$('#aSquawk').value.replace(/[^0-7]/g,'').slice(0,4);
     $('#aSquawk').value=sq;syncVfr();
@@ -1480,32 +1785,33 @@ $('#btnPost').onclick=async()=>{
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:sq};
-    save(K_UI,UI);$('#aMsg').value='';paintChips();toast(t('atcPosted'));carryAtc();syncVfr();
-  }else if(t==='Ressources'){
+    $('#aMsg').value='';paintChips();toast(t('atcPosted'));carryAtc();syncVfr();
+  }else if(ty==='Ressources'){
     const bat=$('#rBat').value;const rc=recipients('Ressources');
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
+      res_methanol_pct:UI.meth,res_o2_crew:UI.o2crew,
+      res_o2:o2Text(),res_o2_bars:(UI.o2bars||[]).map(x=>x==null?'':x).join(';'),
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    UI.lastRes={bat:bat};save(K_UI,UI);
     $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
     if(!v)return toast(t('noteEmpty'));
     const rc=recipients('Other');
-    e=add({type:'Other',note:v,attachments:PICS.length?String(PICS.length):'',
+    const nAtt=PICS.length+(VOICE?1:0);
+    e=add({type:'Other',note:v,attachments:nAtt?String(nAtt):'',
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    if(PICS.length&&configured()){
-      const pending=PICS.slice();PICS=[];paintPics();
-      const saved=e;
-      (async()=>{const paths=await uploadPics(saved);
+    if(nAtt&&configured()){
+      const pics=PICS.slice(),voice=VOICE,saved=e;
+      PICS=[];if(VOICE)URL.revokeObjectURL(VOICE.url);VOICE=null;paintPics();paintVoice();
+      (async()=>{const paths=await uploadMedia(saved.id,pics,voice);
         if(paths.length){saved.attachment_paths=paths.join('; ');saved.synced=false;
           save(K_ENT,ENT);paint();sync(true,true)}})();
-    }else{PICS=[];paintPics()}
+    }else if(nAtt){toast(t('mediaLater'))}
     $('#oMsg').value='';toast(t('notePosted'));
   }
-  if(e){const rc=recipients(t);if(rc.length)waSend(e,rc)}
+  if(e){confirmPost(e);const rc=recipients(ty);if(rc.length)waSend(e,rc)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -1515,7 +1821,7 @@ function fieldsFor(e){
       ? [['inv_bags','Bags','number'],['water_kg','Water litres','number'],['inv_ready_pct','Ready ballast %','number'],['note','Remark','text']]
       : [['_kg','Kilograms dropped','number'],['note','Remark','text']];
   if(e.type==='ATC')
-    return [['atc_station','Station','text'],['atc_freq','Frq','text'],['atc_squawk','SQ','text'],['atc_msg','Message','area']];
+    return [['atc_station','Station','text'],['atc_freq','FREQ','text'],['atc_squawk','SQ','text'],['atc_msg','Message','area']];
   if(e.type==='Ressources')
     return [['crew_pic','Pilot in command','text'],['crew_rest','Resting','text'],
             ['res_battery_pct','Battery %','number'],['res_fuel_cell','Fuel cell on/off','text'],
@@ -1531,8 +1837,8 @@ async function editEntry(id){
       :`<input data-k="${k}" type="${t}" ${t==='number'?'inputmode="decimal" step="0.5"':''} value="${esc(val(k))}">`)+'</div>').join('')
     +`<p class="lab">${esc(e.type)}${e.ballast_action?' · '+esc(e.ballast_action):''} · ${esc(hm(e.ts_local||e.ts_utc))} · ${esc(e.reporter||e.device||'')}`
     +(e.pos_lat?` · ${esc(e.pos_lat)} ${esc(e.pos_lon)}${e.alt_ft!=null?' '+e.alt_ft+' ft':''}`:'')+`</p>`
-    +`<button class="go sec sm" id="mDel" style="margin-top:10px">Delete this entry</button>`;
-  const r=await ask({title:'Edit entry',html,ok:'Save',cancel:'Close',onMount:(m,close)=>{
+    +`<button class="go sec sm" id="mDel" style="margin-top:10px">'+esc(t('deleteEntry'))+'</button>`;
+  const r=await ask({title:t('editEntry'),html,ok:t('save'),cancel:t('close'),onMount:(m,close)=>{
     m.querySelector('#mDel').onclick=async()=>{
       close();
       if(await confirm2(
@@ -1540,7 +1846,7 @@ async function editEntry(id){
         {title:'Confirm deletion',text:'This removes the row from the table Notion reads. It cannot be undone.',ok:'Delete'})){
         TOMB.push({id:e.id,ts:new Date().toISOString(),by:reporter()});save(K_TOMB,TOMB);
         ENT=ENT.filter(x=>x.id!==e.id);recalc(ENT);save(K_ENT,ENT);paint();
-        toast('Entry deleted');if(configured())sync(true,true);
+        toast(t('entryDeleted'));if(configured())sync(true,true);
       }};
   }});
   if(r===null||typeof r!=='object')return;
@@ -1557,14 +1863,14 @@ function applyEdit(e,v){
     e.sand_kg=c.sand;e.water_kg=c.water;e.total_ballast_kg=c.total;e.ballast_abs_kg=c.total;
   }
   e.edited_at=new Date().toISOString();e.edited_by=reporter();e.synced=false;
-  recalc(ENT);save(K_ENT,ENT);paint();toast('Entry updated');
+  recalc(ENT);save(K_ENT,ENT);paint();toast(t('entryUpdated'));
   if(configured())sync(true,true);
 }
 
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',steps:'#sSteps',readySteps:'#sReady',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',steps:'#sSteps',readySteps:'#sReady',o2:'#sO2',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 function paintWaRows(){
   const w=CFG.wa||[];
@@ -1597,7 +1903,7 @@ function readTplRows(){
   const out={};for(const k in TPLF){const v=$(TPLF[k]).value;if(v.trim())out[k]=v}
   return out;
 }
-$('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast('Templates reset')};
+$('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast(t('tplReset'))};
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
@@ -1617,7 +1923,7 @@ function paintRepHint(){
 }
 $('#btnSaveRep').onclick=()=>{
   CFG.reporter=$('#sReporterOpen').value.trim();save(K_CFG,CFG);
-  paintReadout();paintStatus();toast('Reporter set to '+reporter());
+  paintReadout();paintStatus();toast(t('reporterSet')+' '+reporter());
 };
 $('#btnUnlock').onclick=async()=>{
   const v=await ask({title:'Settings password',text:'Enter the password to change the flight setup.',
@@ -1628,13 +1934,13 @@ $('#btnUnlock').onclick=async()=>{
   $('#setLocked').style.display='none';$('#setOpen').style.display='';
   $('#btnSave').disabled=false;$('#setNote').textContent=t('unlocked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
 };
-pills('#sBeep',v=>{CFG.beep=Number(v);beep()});
+pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
 pills('#sLang',v=>{CFG.lang=v;save(K_CFG,CFG);applyLang();paintCrew();paintWaChecks();paintReady();paintInv();paint()});
 pills('#sMode',()=>paintModeLab());
 $('#sRole').addEventListener('click',async ev=>{
   const b=ev.target.closest('button');
   if(!b||b.dataset.v!=='master')return;
-  const v=await ask({title:t('masterPassTitle'),text:t('masterPassText'),input:'password',ph:'••••',ok:'OK'});
+  const v=await ask({title:t('masterPassTitle'),text:t('masterPassText'),input:'password',ph:'••••',ok:t('ok')});
   if(v!==MASTER_PASS){mark('#sRole',CFG.role||'follower');if(v!==null)toast(t('wrongPass'))}
 });
 pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
@@ -1667,7 +1973,7 @@ $('#btnTest').onclick=async()=>{
   if(!repo||!tok)return toast('Enter repository and token first');
   try{const r=await fetch(`${API}/repos/${repo}`,{headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'}});
     if(!r.ok)throw new Error(r.status===404?'Repository not found, or the token has no access':'Response '+r.status);
-    const j=await r.json();toast('Connected to '+j.full_name);
+    const j=await r.json();toast(t('connectedTo')+' '+j.full_name);
   }catch(e){toast(String(e.message||e))}
 };
 $('#btnWipe').onclick=async()=>{
@@ -1675,7 +1981,7 @@ $('#btnWipe').onclick=async()=>{
   if(!await confirm2(
     {title:'Clear this device?',text:ENT.length+' rows are held locally, '+un+' of them not sent. Rows already on GitHub stay there and come back on the next reload.'},
     {title:'Confirm',text:'Clear the local copy?',ok:'Clear'}))return;
-  ENT=[];save(K_ENT,ENT);paint();toast('Local copy cleared');
+  ENT=[];save(K_ENT,ENT);paint();toast(t('cleared'));
 };
 
 /* ── Minimised pill ────────────────────────────────────────────────── */
@@ -1725,8 +2031,31 @@ puck.addEventListener('pointerup',()=>{if(!drag)return;
   if(!drag.m)document.body.classList.remove('min');else save('bsk.puck',pp);drag=null});
 addEventListener('resize',place);
 
+/* the post button itself reports what became of the entry, for three seconds */
+let ft=null;
+function flash(kind,msg){
+  const b=$('#btnPost');
+  b.classList.remove('ok','wait','fail');
+  clearTimeout(ft);
+  if(!kind){b.textContent=t('post');return}
+  b.classList.add(kind);b.textContent=msg;
+  ft=setTimeout(()=>flash('',''),3000);
+}
+const waitSync=async()=>{for(let i=0;i<50&&SYNCING;i++)await new Promise(r=>setTimeout(r,120))};
+/* every post says what actually became of it, not just that it was written down */
+async function confirmPost(e){
+  if(!configured()){flash('fail',t('fNoRepo'));return}
+  if(!navigator.onLine){flash('wait',t('fQueued'));return}
+  await waitSync();
+  if(!SYNCING&&ENT.some(x=>!x.synced))await sync(true,true);
+  await waitSync();
+  const row=ENT.find(x=>x.id===e.id);
+  if(row&&row.synced)flash('ok',t('fPosted'));
+  else if(!navigator.onLine)flash('wait',t('fQueued'));
+  else flash('fail',t('fFailed')+(LASTERR?': '+LASTERR:''));
+}
 let tt=null;
-function toast(m){const t=$('#toast');t.textContent=m;t.className='on';clearTimeout(tt);tt=setTimeout(()=>t.className='',2000)}
+function toast(m){const el=$('#toast');el.textContent=m;el.className='on';clearTimeout(tt);tt=setTimeout(()=>el.className='',2000)}
 
 /* ── Start ─────────────────────────────────────────────────────────── */
 $$('.ver').forEach(e=>e.textContent=APP_VERSION);
@@ -1734,8 +2063,8 @@ setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':
 applyLang();fillSetup();paintRepHint();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
-mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#bMed',UI.med||'sand');
-setAct(UI.act);syncVfr();carryAtc();carryRes();paintChips();paintPics();paintSum();
+mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#rO2crew',UI.o2crew);paintRes();mark('#bMed',UI.med||'sand');
+UI.act='drop';save(K_UI,UI);setAct('drop');mark('#bAct','drop');syncVfr();carryAtc();carryRes();paintChips();paintPics();paintVoice();paintSum();
 recalc(ENT);paint();wake();
 addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
