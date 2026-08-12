@@ -1,567 +1,117 @@
-# GB Notion Frontend — Basket Reporting
+# Gasballoon Cockpit
 
-An offline version of the Basket Reporting form for use in the basket during a gas balloon
-flight. Same four message types as the Tally form, same submit action, but it keeps working
-without signal, stamps every entry with time and GPS position, carries the ballast figure
-forward across all devices, and lets several people report in parallel.
+A single-file HTML web app for gas balloon flight planning and in-flight monitoring: live position tracking, wind-based landing predictions, staged descent planning, weather stations, air traffic, and offline map caching - built for use on a tablet in the basket.
 
-Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. The app reads the same files back every five seconds, so each device always shows the
-complete flight.
+**Current version: v260812.04-1320** (12.08.2026) - this number always matches the `APP_VERSION` constant near the top of the script in `index.html`. Versioning scheme: `vYYMMDD.zz-HHMM` (date of the last change, a 2-digit counter that resets to 01 each new day, and the build time), so multiple same-day builds are unambiguous at a glance - the version is shown in the bottom-left corner of the app itself, useful for confirming a deployment actually picked up the latest build rather than a stale cached one. `cors_test.html`'s own version marker is kept in sync with this.
 
-No build step, no dependencies, no external requests other than to the GitHub API.
+## What it is
 
----
+One HTML file, no build step, no server. Open it in a browser (or install it to a home screen as a PWA, with `apple-touch-icon.png`) and it runs entirely client-side, calling a handful of free public weather/mapping APIs directly from the browser. A service worker (`sw.js`) caches map *tile* requests only - deliberately not weather/elevation data, which needs to stay fresh - so previously-viewed map areas remain available if the connection drops.
 
-## 1. The screen
+Password gate on load (SHA-256 hashed, set in `GATE_HASH`).
 
-The whole app fits one phone screen without scrolling, and its outline is always visible.
-Only the log and the setup scroll.
+Built for genuine 24/7 unattended operation: the service worker checks for its own updates every 30 minutes (not just on page reload, which might never happen once the app is left running), and a screen wake lock keeps the display on with automatic re-acquisition if the browser ever releases it.
 
-Day mode is dark anthracite on a grey ground; unselected buttons carry a visible outline and a
-white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
-the header switches in one tap and the choice is remembered; on first launch the app follows
-the iPad's own appearance setting.
+The hamburger menu's last entry, "About - more info!", opens this README as a PDF in a small viewer page with always-visible Print/Close buttons (readme_viewer.html), rather than the browser's native PDF viewer directly.
 
-The header shows UTC to the second and, at its right, the ballast still on board in the same
-size, then the flight and callsign with the live navigation line beneath them — `293° TC · 12.3 kn · ± 8 m`, course over ground, ground speed
-and the accuracy of the current fix. Before a fix it reads `GPS searching`; with a fix but no
-movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
-board appear under them only on the Ballast tab, where they are relevant. There is no logo and
-no title inside the app — the home screen icon already says what this is, and the room is
-better spent on the form.
+Zoom-in/out buttons (and the very first automatic centring on GPS after boot) target the visually VISIBLE map area's centre, not the underlying map container's own geometric centre - relevant whenever the sidebar is open, since it overlays on top of the map rather than shrinking it.
 
-Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
-switch, Reload from GitHub, Send now, Save CSV, Save JSON and *About — more info*, which opens
-this README as a page in its own window. The switch is named for the mode it takes you to, so
-it reads *Night mode* by day and *Day mode* at night.
+## Main functions
 
-Keeping the header to two buttons leaves the whole width for the flight and the navigation
-line, and the three screens are always one tap apart through the menu.
+The app has two main functions, switched via a pill toggle at the top of the map.
 
-Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
-Red preserves dark adaptation best; the others are there for personal preference and for
-screens where red reads badly.
+### Landing Area (default)
 
-The app icon and the favicon are a sandbag beside four tally strokes, in club navy on white.
-The set covers all three platforms: `apple-touch-icon` in 120, 152, 167 and 180 pixels for
-iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
-with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
-`mask-icon.svg` for pinned tabs in desktop Safari, and a multi-resolution `favicon.ico`.
-The icons are opaque — iOS renders transparency in a home screen icon as black — and the
-manifest background is white to match, so the Android splash shows no seam. The 16 and 32 pixel
-favicons carry a simplified version with three uprights instead of four; at that size the
-narrower gaps of the full mark close up into a smudge.
+Shows the balloon's live predicted trajectory: a cruise segment (green) that transitions into a descent (yellow) at a configurable time ("Initiate descent in"), continuously recalculated as position, altitude, and wind data update. A Monte Carlo scatter of likely landing points is shown as a shaded polygon around the predicted landing point, with a black cross marking its actual centre (computed from the raw scatter itself, not the containing polygon's own vertices, which would skew it toward the edge). The map view gently follows this polygon as it shifts in response to slider changes - only actually panning/zooming if it would otherwise fall outside the visible area, debounced so dragging a slider doesn't cause the map to jump on every intermediate value.
 
-## 2. Set up
+The descent point (a yellow cross on the trajectory) can be adjusted two ways that stay in sync: the "Initiate descent in" slider (10-minute steps, defaults to 20min), or dragging the cross itself along the trajectory.
 
-The GitHub side — the data repository, the token and the Notion polling — is a separate
-document: **[Setup guide](setup.html)**. What follows is the short version.
+**Extended trajectory preview**: click anywhere within roughly 60° of the trajectory's own direction, beyond where the normal prediction/landing area already reaches, to see the trajectory extended further out (blue) - a frozen snapshot from the moment of the click, useful for comparing the real flown track against an earlier prediction.
 
-**Hosting**
+A one-time onboarding hint appears the first time this function is used.
 
-1. Put these files in the repository root.
-2. Settings → Pages → Source: `Deploy from a branch`, branch `main`, folder `/ (root)`.
-3. The app is served at `https://<owner>.github.io/<repo>/` after about a minute.
+### Plan Descent
 
-**Token**
+Two sub-functions, switched via a smaller toggle directly under the main "Plan Descent" button.
 
-Settings → Developer settings → Personal access tokens → Fine-grained tokens:
+**Quick Descent** (default): click any point on the map to find the nearest reachable landing area and the descent path to it - shown as an orange cross (the calculated descent point) and a yellow descent path, same visual language as Landing Area's own live prediction. The reference trajectory truncates at the descent point once a plan is active. The descent point can be dragged to explore alternatives, or a new point clicked anywhere to restart. The reference trajectory itself extends as far as the "Initiate descent in" slider is set to.
 
-- Repository access: the data repository only
-- Permissions → Repository permissions → **Contents: Read and write**
-- Short expiry, for example one week after the flight
+**Staged Descent**: drag a royal-blue cross marker along the trajectory to choose when descent begins, then click within the resulting reachable area to search for a staged descent plan - one that pauses at one or more intermediate altitudes (chosen automatically where wind conditions genuinely differ) rather than descending continuously. Opens a side panel with a chart of the planned stages: altitude, wind at each level, duration, an estimated ballast requirement for each transition, and markers for any wind shear, inversion, or isothermal layers encountered. Minimum stage separation and maximum intermediate stages live directly in this panel. Its own two sliders (max descent time - 10-minute steps, defaults to 20min; inter-stage rate) sit side by side in one row.
 
-**In the app**
+Both sub-functions show a one-time onboarding hint on first use. Switching back to Landing Area clears the descent path from the map but leaves the reachable area, Monte-Carlo landing area, and its centre marker in place, with a "Clear staged descent area" button to remove them explicitly.
 
-The *VFR squawk* field is the conspicuity code the VFR button writes; `7000` unless your
-airspace uses something else.
+### Flight data box
 
-The *Ballast on board at start* field is only needed before the first
-inventory: it seeds the running figure so that early drops count, and it gives the first
-inventory something to compare against in `tally_diff_kg`. Leave it empty and the ballast
-figure simply starts with the first Take Inventory.
+A small draggable panel showing course (always 3 digits, e.g. 065°), speed (km/h and kn), climb/sink rate, and altitude (m AMSL, ft, flight level above a configurable transition altitude, and AGL). Refreshes on a fixed 0.5s cadence, decoupled from the underlying GPS fix rate. Snaps flush against whichever map edge it's dragged past; defaults to the left edge just below the header button row. Dims along with the map in night mode.
 
-The reporter name for this device sits at the top of the setup and needs no password — it
-changes often enough, and getting it wrong only mislabels entries. Everything below it is
-locked: press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
-pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
-amounts. The GitHub connection and the WhatsApp recipients sit in collapsed sections at the
-bottom — open them once per device, then close them again. Saving asks twice before it
-applies, so a flight in progress cannot be overwritten by a stray tap. Leaving the setup
-screen locks it again.
-
-## 3. Install on the iPad
-
-Safari → Share → **Add to Home Screen**. It is saved as *Basket Reporting* and launches full
-screen without Safari's bars, and location and wake lock work as expected. Location permission is requested on the
-first entry; "While Using the App" is enough. Without it, entries are still recorded, with
-`gps_fix` set to `false`.
-
-## 4. Floating over other apps
-
-The minimise button collapses the app to a blue pill reading `HB-QWV Reporting` with the
-ballast still on board beneath it. Where that pill can float depends entirely on the platform,
-and it is worth being exact about it.
-
-**No web app can draw over other apps on iPadOS, iPhone or Android.** That capability is
-reserved for native apps — on Android it needs the `SYSTEM_ALERT_WINDOW` permission, on iOS it
-does not exist at all. A browser page, installed or not, cannot paint outside its own window.
-Anything claiming otherwise on a web page is drawing inside that page.
-
-So the pill floats inside the app window, and the app window is what the platform puts on top:
-
-| Platform | How to keep it above the other app |
-|---|---|
-| **iPad** | Install to the Home Screen, then drag it from the Dock onto the running app — **Slide Over** gives a narrow window floating over a map or Foreflight, swiped off the edge and back with one gesture. **Split View** and **Stage Manager** are the fixed and the free-floating variants. |
-| **Android, Samsung** | Install to the Home Screen, then open it in **Pop-up view** from the Edge panel or the recents menu. An installed web app counts as an app there and gets a real floating window. |
-| **Android, others** | **Split screen** from the recents menu. Free-floating windows exist only on Samsung and on devices in desktop mode. |
-| **Chrome on a laptop** | The minimise button opens a genuine always-on-top window through document picture-in-picture — the only browser feature that does this. It survives switching to any other application. Useful for the chase car. |
-
-The app detects the picture-in-picture case on its own: press minimise and you get the
-always-on-top window where the browser supports it, and the in-app pill everywhere else.
-Clicking either brings the app back.
-
-## 5. Who is reporting
-
-The setup asks whether this is a **personal device** or a **shared device**.
-
-On a personal device — the default, and what the two pilots' own phones should be set to —
-every entry is filed under the name entered there, whoever happens to be pilot in command. The
-reporter button is hidden; there is nothing to get wrong.
-
-On a shared device the reporter defaults to whoever is pilot in command, and the button at the
-top right of the readout switches to the other pilot for the exceptional case. It turns dark
-while the alternate is active, so the exception is visible, and every entry carries that name
-until it is switched back. Changing the PIC on the Ressources tab moves the default with it.
-
-Each row also records `device_mode`, so it is possible to tell afterwards which reporting
-regime a row came from.
-
-## 5a. Position
-
-The position on every row is the fix of the device that made the entry, taken at the moment of
-posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
-re-stamped. Three columns carry it in short notation: `pos_lat` as `484532N`, `pos_lon` as
-`0072345E`, and `alt_ft` as WGS84 altitude in feet. The decimal degrees and metres stay
-alongside for map links and for anything that needs the raw value.
-
-Track and ground speed come with every entry. iOS and Android supply both with the fix once the
-device is moving; when they do not, the app derives them from the previous fix, requiring at
-least three seconds and five metres between the two so that a stationary basket does not
-produce a random course. Both fields stay empty rather than guessing when neither source is
-available. The header carries the live values under the flight number.
-
-## 6. Ballast
-
-**Drop** subtracts the kilograms thrown and records whether it was sand or water; sand is the
-default. The quick amounts **add up**: tapping 10 three times gives 30, which is how ballast
-actually leaves a basket — sack by sack, counted as you go. A *Reset* button appears beside the
-total the moment there is something to undo. The `kg` at the right edge of the button row names
-the unit once, so the buttons themselves stay bare numbers. The quick buttons only fill the field; posting is
-always the one dark button, so a knock against the iPad cannot log a drop.
-
-**Take Inventory** records what is actually on board and resets the running figure. Three
-inputs:
-
-- *Bags* and *Water* on one line — bags counted in total including safety ballast and
-  multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.
-- *Ready ballast* — the steps come from the setup, `0,10,25,50,75,100` by default, as a
-  percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
-  selected.
-
-The running total under the fields shows the result before it is posted, and the entry lands
-in the table as three columns:
-
-| Column | Contents |
-|---|---|
-| `sand_kg` | bags × weight per bag, **plus** the ready ballast |
-| `water_kg` | litres |
-| `total_ballast_kg` | sand + water, and the new figure on board |
-
-Ready ballast is always sand, so sand + water = total. `inv_bags` and `inv_ready_pct` are
-carried alongside so an inventory can be reopened and corrected later.
-
-**`tally_diff_kg` records where the figures parted company.** Every inventory stores the
-counted total minus what the running calculation expected at that moment. A reading of −60
-means sixty kilograms left the basket without being logged; a positive figure means a drop was
-logged that did not happen, or a bag was miscounted. The first inventory has no predecessor to
-compare against and leaves the column empty unless a start ballast was entered in the setup.
-The figure is recalculated over the whole flight after every edit, deletion or merge, so it
-always reflects the current state of the table. The app also shows the expected value and the
-difference live, before an inventory is posted.
-
-**The dropped figure is measured from the first inventory**, not from the sum of the drops:
-`first inventory total − currently on board`. Throwing sand is not exact; counting sacks is.
-Every later inventory therefore feeds straight into the dropped figure, including whatever
-went overboard without being logged.
-
-## 7. ATC, Ressources, Other
-
-**ATC** puts the station on its own line, then frequency, squawk and a VFR button side by side,
-then the message.
-
-The **frequency** places its own point: after the third digit one appears as you type, so
-`12345` reads `123.45` on screen while you are still typing and settles to `123.450` when you
-leave the field. `1187` becomes `118.700`, `118` becomes `118.000`. A point or comma you type
-yourself is ignored — the field only ever counts digits — so both habits work.
-
-The **squawk** is four octal digits — 8 and 9 simply do not appear as you type, and a code of
-one to three digits is refused on posting. The emergency codes are listed in the setup, `7500`,
-`7600` and `7700` by default; entering one brings up a confirmation naming what it means before
-the entry goes out, because they are three keystrokes away from ordinary codes.
-
-The **VFR** button fills the squawk with the conspicuity code from the setup, `7000` by default,
-and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, Frq and SQ arrive filled in from the previous call, in grey with a dashed outline,
-under a *Confirm from last call* button. Touching any one of the three accepts the whole set —
-change the frequency and the station comes with it, with no second question when you post. A
-run of calls to the same station is one tap on Confirm; a changed call is simply typed over.
-
-The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
-it out, so QNH and Ops Normal are a toggle rather than something that accumulates.
-
-The remark field on Ballast and Ressources is the same size as the ATC message field, since a
-remark is often the more important part of the entry.
-
-**Ressources** puts current PIC and who is resting on the first line as panel switches, then
-battery, fuel cell and solar cell on the second. Only pilots the master actually named appear:
-leave the second name empty and the switches shrink to a single-handed flight — battery as a list in ten-percent steps with 75, 85 and 95 added,
-where the reading actually matters. The PIC and resting state stays active and is
-attached to every following entry of any type; battery, fuel cell and solar belong to the entry
-they were filed with.
-
-**Other** is a free note, and up to four pictures. They are scaled down to 1024 pixels and
-about 60 per cent JPEG quality in the browser before anything is stored, because a queued entry
-has to survive in the device's local storage until there is a link again. Each picture is
-written to `data/media/<entry-id>-<n>.jpg` in the repository and the row records how many were
-attached and where they landed. Without a connection the entry itself queues normally; the
-pictures go up with the next successful send.
-
-Above the ATC form the last ATC entry of the flight is shown as
-`LAST MSG: 21:04:37Z recvd ZURICH INFO 124.700 7000 QNH 1013`, so a follow-up call never has to
-be reconstructed from memory.
-
-## 8. WhatsApp
-
-ATC, Ressources and Other each list the recipients individually at the foot of the form, one
-chip per person, tapped on and off. Ballast entries never go to WhatsApp.
-
-The **ATC Coordinator** is listed first and only on ATC, and is the only one ticked there by
-default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
-Other the coordinator does not appear and everybody else is ticked by default. Each choice is
-remembered per message type, so the pattern you settle into is the one you keep.
-
-Recipients are defined in the setup, up to eight, each with a name and a number in
-international form with digits only, for example `41791234567`.
-
-Above them sits a ninth, separate entry: the **ATC Coordinator**. It is offered on ATC entries
-only, as its own checkbox above the general one, and it is ticked by default there — an ATC
-call normally goes to the coordinator whether or not the rest of the list is in play. The two
-checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
-to both, or to nobody. Ressources and Other never see the coordinator.
-
-With the box ticked, posting first writes the entry as usual, then opens a sheet with the
-finished message and one button per recipient. An ATC entry reads:
-
-```
-*ATC | HB-QWV*
-Station: ZURICH INFO
-Frq: 124.700  SQ: 7000
-Msg: QNH 1013, Ops Normal
-21:04Z 484532N 0072345E 2340 ft
-Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
-```
-
-The first line is bold in WhatsApp.
-
-**About that link.** WhatsApp messages are plain text: there is no way to put a label on a URL
-and hide the URL itself, the way an HTML link does. Any address in a message is shown in full
-and turned into a tappable link by WhatsApp. The nearest thing is what the template does — put
-the wording first, so the eye reads *Show in Google Maps* and the address trails behind it, and
-keep the link on the last line so WhatsApp's own map preview card sits under the message. If
-the raw address really must not appear, the only route is a shortener, which means an outside
-service and a network call at the moment of posting; in a basket over the Vosges that is the
-wrong trade.
-
-**Sending is immediate.** With a box ticked, pressing *Post to CC Notion* writes the entry and
-opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
-tick survives from one message to the next, so a run of ATC calls to the coordinator is one
-button each. Only the send button inside WhatsApp is still yours to press; no browser can press
-that one. With more than one recipient the first opens straight away and a short list of the
-rest appears behind it, since WhatsApp takes one chat at a time.
-
-### The layout is yours
-
-The setup holds one template per message type under *WhatsApp message layout*. Placeholders in
-braces are substituted, and lines behave in three ways:
-
-- `{key}` — a line whose placeholders are all empty is dropped, so a field nobody reported
-  costs nothing.
-- `{!key}` — the line is kept whatever happens, and an empty value prints as `-`. The Msg line
-  uses this, so every message shows what was said even when nothing was.
-- A line with no wording of its own, like `{time} {pos} {alt}`, simply loses the parts that are
-  missing rather than filling them with dashes. Without a fix it collapses to the time alone.
-
-*Reset to default* puts the three templates back.
-
-| Placeholder | Value |
-|---|---|
-| `{type}` `{callsign}` `{flight}` `{reporter}` | who and what |
-| `{dir}` `{station}` `{freq}` `{squawk}` `{msg}` | the ATC fields |
-| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Ressources fields |
-| `{note}` | the free remark |
-| `{time}` | UTC as `21:04Z` |
-| `{pos}` | degrees, minutes and seconds, `484532N 0072345E` |
-| `{posdm}` | degrees and minutes only, `4745N 00732E` |
-| `{alt}` | GPS altitude in feet, rounded to ten |
-| `{tc}` `{speed}` | track as `TC 235` and ground speed as `12.4 kn` |
-| `{maps}` | link to the position on Google Maps |
-
-Without a position fix `{pos}`, `{alt}` and `{maps}` are empty: the map line disappears and the
-time line keeps just the time.
-
-The row records `whatsapp` = `yes` and `whatsapp_to` with the names, so the table shows which
-entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
-cannot be recorded here.
-
-## 8a. Master and followers
-
-**The master is whoever knows the master password.** There is no other rule and no default.
-
-Two passwords, doing two different jobs:
-
-| Password | What it does | Who has it |
+### Descent Parameters
+
+"Initiate descent in" and "Descent rate" sit side by side. Descent rate's own track is a wedge shape that grows taller toward higher values, visualizing the accelerating descent speed - the draggable point itself still runs along a flat baseline; only the fill behind it changes shape. Below each slider: the computed distance/effective rate, plus (for Descent rate specifically) the adiabatic lift bonus as a weight-equivalent ballast figure - the actual extra lift the adiabatic cooling effect provides during descent, typically a few kg. Intercept AGL, Rate below, and Scatter sit in a second row, each with its own computed time-to-reach badge.
+
+## Landing Area sidebar card
+
+Shown for whichever landing-point marker is currently the relevant one (Landing Area's live prediction, Quick Descent's planned point, or Staged Descent's), with these fields:
+
+- **Ground wind** at the predicted landing time, with wind gusts (when the model supports them) shown as a second line below it.
+- **Terrain near landing point**: elevation-based roughness (flat / moderate slope / steep), nearby tagged buildings or forest, the specific land cover at the exact point (meadow, farmland, forest, residential, water, etc.), and a red "CAUTION WATER!" override if the point falls inside a mapped lake, river, or reservoir - checked via genuine polygon containment, not just proximity. This check runs on its own independent request queue, separate from the app's other Overpass-based features, so a failure elsewhere (airports, roads, place names) can't block it.
+- **Sun at estimated landing**: azimuth (always 3 digits) and elevation, with a direction arrow that rotates to point at the sun's actual position, plus remaining time until evening civil twilight (HH:MM) - the more relevant cutoff than sunset itself for whether there's still enough light to see the terrain.
+- **Moon phase**: a filled SVG silhouette (not an emoji, for consistent rendering across devices) with illumination percentage and a small waxing/waning trend arrow, plus rise/set times.
+
+## Weather modeling
+
+Wind is fetched per-altitude across 19 pressure levels (18 for the two Météo-France models below, which don't publish 975hPa) from the auto-selected model for the current location (ICON-D2 for DACH, ICON-EU for wider Europe, GFS globally), refreshed on a timer (default 15min, configurable). CAPE and wind gusts are fetched as separate, independent requests on a reduced schedule (every 3rd wind refresh) so an unsupported variable on a given model can never take down the core wind fetch.
+
+Besides the auto-selected models, ARPEGE Europe (Météo-France, 11km, all of Europe) and AROME France (Météo-France, 2.5km, France and immediate neighbours) can be picked manually for model comparison - both publish the pressure-level data this app needs. MeteoSwiss's own ICON-CH1/CH2 (1-2km, Switzerland) and the UK Met Office's models were deliberately not added: as of this writing neither publishes pressure-level/wind-at-altitude data through Open-Meteo, which the wind profile this app relies on requires.
+
+**Ensemble modeling**: with a commercial Open-Meteo API key set (see below), the Monte-Carlo landing-area scatter in all three functions draws on real ensemble model members (ICON-D2-EPS / ICON-EU-EPS / GEFS, ~20-40 members depending on model) instead of an artificial age-based heuristic - each Monte-Carlo sample uses an actual member's own wind profile, genuine forecast uncertainty rather than a random perturbation. A small badge next to the model name in the header ("E" green / "H" gray) shows which mode is currently active. Falls back to the heuristic automatically without a key or if the ensemble fetch fails.
+
+## Power lines
+
+Overhead line towers and transformers are rendered as small, muted markers rather than bright coloured circles, so they don't visually compete with the lines themselves (able to be followed continuously) - spotting the wires is what actually matters for flight safety, not each individual mast along the route. Towers (neutral grey) and transformers (muted blue-grey) use distinct tones, not identical ones, so toggling one category's checkbox in Settings while leaving the other on stays visually verifiable rather than looking like filtering stopped working. Category checkboxes and the "overhead only" toggle now discard and fully rebuild the power-lines layer instance from scratch (not just remove/re-add the same one) - a first fix relied on VectorGrid's own redraw() (documented upstream as unreliable), a second removed and re-added the same instance, and even that turned out insufficient, very likely because VectorGrid keeps its own internal tile cache tied to the instance itself regardless of map attachment. Rebuilding the instance entirely cannot carry over any stale internal state.
+
+## License
+
+Custom, source-available license in `LICENSE` (Wicki Aero GmbH) - permits running/hosting an unmodified copy, but not modification or redistribution without prior written permission. See that file for the full terms and third-party component licenses.
+
+## Airspace
+
+The ✈️ airspace layer draws real, class-filtered airspace boundaries from openAIP's Core API (confirmed working via a live CORS test - it was previously believed CORS-blocked) on top of the combined raster tile as a visual base (still the only way to show airports/navaids/reporting points, since openAIP retired separate per-category tile endpoints in 2023). The Settings checkboxes (Class A-G, Restricted, Prohibited, TMZ, RMZ) now genuinely filter which boundaries are drawn, refetched as the map moves or the selection changes. An airspace whose type/class isn't recognized by the mapping used here is shown regardless of checkbox state, rather than silently hidden.
+
+**Commercial Open-Meteo API key**: optional field in Settings. When set, every Open-Meteo request in the app (wind, CAPE, gusts, elevation, ensemble) automatically switches to the dedicated `customer-api.open-meteo.com` endpoint, which has no daily call limit, instead of the free tier's 10,000/day cap - needed for genuine 24/7 unattended operation, since a single wind-profile request already counts as several calls toward that quota (any request covering more than 10 variables does). A running "Open-Meteo calls today" counter is shown in the weather model popover regardless of which tier is active.
+
+## Data sources
+
+| Source | Used for | Status |
 |---|---|---|
-| **1234** | opens the settings screen | everybody in the crew |
-| **5678** | makes a device the master | one person, normally the PIC |
+| Open-Meteo | Wind profiles, elevation, CAPE, wind gusts, precipitation, ensemble members | Working. Optional commercial API key removes the free tier's daily quota. |
+| SondeHub | Radiosonde launches, for using real sounding data instead of the model | Working |
+| api.existenz.ch (SwissMetNet) | Swiss weather stations | Working |
+| Bright Sky | German weather stations | Working |
+| MeteoGate/E-SOH | Weather stations across the rest of Europe (33 countries) | Station list loads; per-station value parsing not fully confirmed against a live response |
+| ADSBExchange (via RapidAPI) + OGN/glidernet.org | Air traffic, deduplicated where both sources report the same aircraft | Working |
+| RainViewer | Rain radar | Working |
+| Overpass API | Airspace, terrain/land-cover, roads, region names, airports (multiple mirror fallbacks) | Working. The terrain check runs on its own independent queue; other features share a separate queue, so a failure in one can't block the other. |
+| Nominatim | Reverse geocoding for landing-area place names | Working |
+| openAIP | Airspace tiles | Working |
+| MetarCentral | Airport METARs | Working. Airport lookup uses a curated list of major European airports first, falling back to a live Overpass query (any OSM-tagged aerodrome with an ICAO code) elsewhere. |
+| aprs.fi | APRS station tracking | **Not functional** - CORS-blocked from the browser, confirmed with a live key. Settings clearly label this. |
+| Xweather | Lightning (only polls when rain is detected nearby) | Implemented but not yet confirmed against real credentials |
 
-The first time the app starts on a fresh device it asks the question outright: *Is this the
-master device?* Entering **5678** makes it the master. Choosing *Join as follower* — or getting
-the password wrong three times — makes it a follower. A device that was set up through an
-invitation link is a follower without being asked, because the link came from a master.
+## Settings
 
-Nothing is assumed. A device that has not answered the question is not yet either, and the
-question comes back on the next start until it is answered.
+Organized into color-coded groups: General (cache radius, transition altitude, units), Weather (model selection, sonde data, METAR/station sources, lightning), Air Traffic & Airspace, Terrain & Ground Features, Descent Planning (adiabatic model), Safety & Positioning (external GPS, emergency contact), and Data & Backup.
 
-Later changes go the same way: in the settings the role can be switched to Follower freely, but
-switching to Master asks for **5678** again. And because two masters would overwrite each
-other's setup, each published setup carries the identity of the device that wrote it; a master
-that sees a different one in the file says so on screen.
+**Tokens and keys**: every external service credential the app uses, gathered in one place and individually editable - Open-Meteo (commercial), openAIP, RapidAPI (air traffic), aprs.fi, Xweather, EmailJS, Dropbox, GitHub. As with any client-side app, these are visible in the page source to anyone who views it; changing one asks for confirmation first.
 
-One device owns the flight setup and is the **Master** — normally the PIC's iPad. The others
-are **Followers**.
+**Profile backup**: export/import as a JSON file (native share sheet on mobile), or back up encrypted to a GitHub Gist (AES-GCM + PBKDF2, password-protected).
 
-Menu → *Share setup with another device* produces a link carrying the flight, the pilots, the
-ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
-device shows what is about to be applied and asks for a yes; on yes that device takes the whole
-setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
-link — with it the other device can send at once, without it the token has to be typed there.
-Send a link containing a token the way you would send a password.
+**Emergency contact**: pilot name, aircraft registration, mobile number, and email, with prepared-message sending over WhatsApp, SMS, or email (via mailto, or silently via EmailJS if configured).
 
-What the link deliberately leaves alone: the reporter name, the personal-or-shared device mode,
-the colour scheme and the confirmation tone. Those belong to the device.
+## Known limitations
 
-Every time the master saves settings it publishes them to `data/_setup.json`, and followers
-apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
-new flight on the master and the crew follows without anyone opening a setup screen. Exactly
-one device may be the master; two would overwrite each other's publication.
-
-## 8b. What carries over
-
-Every form arrives holding what was entered last time, greyed and dashed: the station,
-frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
-the last inventory, the last battery reading. Selections — sand or water, drop or inventory,
-PIC and resting, fuel cell and solar cell, ready-ballast percentage, the WhatsApp ticks — simply
-stay where they were.
-
-Touching any greyed field in a form accepts all of them at once, and nothing is asked again at
-posting. Notes and messages are never carried over: repeating yesterday's wording verbatim is
-worse than typing it again.
-
-The footer names the last entry and the state of the upload — `last Msg 21:04:37Z/AW | upload ✓`
-when everything has reached GitHub, `✗ 3` when three are still queued.
-
-## 9. Sending, and what happens without a link
-
-There is nothing to switch on. Pressing **Post to CC Notion** writes the entry to the device and
-sends it straight away. If there is no connection the entry is held in a queue — the header
-shows how many are waiting — and the queue goes out on its own as soon as the link returns,
-either on the browser's online event or on the next five-second cycle, whichever comes first.
-
-Order is never in doubt: the file is always written as the complete set of rows sorted by
-`ts_utc`, so a queued entry lands in its correct place in the sequence rather than at the end.
-An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.
-
-*Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
-writing. Neither is needed in normal use. *Export the table* asks for the format first — CSV or
-JSON — and then for the destination: *Download* puts the file in the browser's downloads,
-*Share…* hands it to the system share sheet, which on an iPad is the way into Files, Mail or a
-chat. Share only appears where the browser supports handing over files.
-
-## 10. Several devices at once
-
-Every row carries `reporter` (who entered it), `device` (which iPad) and `source` (`app` for
-this tool).
-
-Sending is a merge, never an overwrite: the app reads the file on GitHub, merges it with what
-is held locally by `id`, recalculates the ballast column over the whole set, and writes the
-result back. If another device wrote in the meantime, GitHub rejects the write and the app
-retries with the fresh version, up to three times.
-
-**The table is played back every five seconds.** A drop made on one iPad shows up on the other
-within a few seconds, and the ballast figure accounts for both. A device that joins mid-flight,
-or whose local copy was cleared, gets the whole flight back with *Reload* in the log screen.
-
-Polling that often is affordable because the app sends a conditional request: when nothing has
-changed, GitHub answers 304 with no body, and a 304 does not count against the hourly limit of
-5000 requests. Only an actual change costs a request. Polling pauses while the app is in the
-background.
-
-**Tally rows.** Anything appended to the same JSON file appears in the app and in the ballast
-calculation, provided it carries at least `id`, `ts_utc` and `type`. Give Tally-sourced rows
-`reporter: "Tally"` and `source: "tally"` so it is visible where they came from. A ballast row
-may be relative (`ballast_delta_kg`, negative for a drop) or an inventory
-(`ballast_action: "count"` with `total_ballast_kg`, which resets the running total).
-
-**Deletions** are shared through `data/<flight-id>.deleted.json`, holding the ids that were
-removed with the time and the person who removed them. Every device applies that list, so a
-deleted row does not reappear from another iPad's copy, and the main table stays clean.
-
-## 11. The log
-
-*Log* in the menu opens it: the whole flight, newest first, with time,
-content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
-export moved into the menu.
-
-Tapping an entry opens it for editing. The editable fields depend on the type — kilograms and
-remark for a drop, bags, water and ready ballast for an inventory, station through message for
-ATC. Saving stamps `edited_at` and `edited_by`. The ballast column is recalculated over the
-whole flight after every edit and every deletion, so the figures stay consistent wherever in
-the sequence the change was made.
-
-Deleting asks twice, states what is being removed and who recorded it, and warns that the
-deletion is shared with the other devices.
-
-## 12. What the app writes
-
-```
-data/<flight-id>.json          the table
-data/<flight-id>.csv           the same rows as CSV
-data/<flight-id>.deleted.json  ids that were removed
-```
-
-| Field | Content |
-|---|---|
-| `flight_id`, `callsign` | from the setup |
-| `seq` | running number on the capturing device |
-| `device` | device tag |
-| `reporter` | who made the entry |
-| `source` | `app`, or whatever an external writer sets, e.g. `tally` |
-| `ts_utc`, `ts_local` | the same instant in UTC and with local offset |
-| `type` | `Ballast`, `ATC`, `Ressources`, `Other` — the values used on the Tally form |
-| `pos_lat`, `pos_lon`, `alt_ft` | position of the reporting device in short notation, `484532N` / `0072345E`, and altitude in feet |
-| `tc_deg`, `speed_kt` | track over ground in degrees and ground speed in knots, one decimal |
-| `lat`, `lon`, `alt_gps_m` | the same fix in decimal degrees and metres, for map links |
-| `gps_acc_m`, `gps_age_s`, `gps_fix` | quality of the position at the moment of the entry |
-| `device_mode` | `personal` or `shared` |
-| `ballast_action` | `drop` or `count` |
-| `ballast_medium` | `sand` or `water` on a drop |
-| `ballast_delta_kg` | kilograms thrown, negative |
-| `ballast_abs_kg` | on board after this entry, recalculated across all devices |
-| `sand_kg`, `water_kg`, `total_ballast_kg` | inventory result |
-| `tally_diff_kg` | counted total minus what was expected at that moment |
-| `inv_bags`, `inv_ready_pct` | what the inventory was built from |
-| `atc_dir` | `RX` received, `TX` sent |
-| `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
-| `crew_pic`, `crew_rest` | crew state at the moment of the entry |
-| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Ressources entry |
-| `note` | free remark |
-| `whatsapp`, `whatsapp_to` | set when the entry was marked for WhatsApp, and to whom |
-| `attachments`, `attachment_paths` | how many pictures an Other entry carries, and where they were written |
-| `edited_at`, `edited_by` | set when a row was changed after the fact |
-| `id` | UUID, the stable key for Notion |
-
-`type` deliberately uses the spelling from the Tally form, including `Ressources`, so the
-existing Notion select options match without editing. To change it, edit the four `data-t`
-attributes in `index.html` and the matching strings in the post handler.
-
-## 13. Polling from Notion
-
-**GitHub API — immediate, recommended**
-
-```
-GET https://api.github.com/repos/<owner>/<repo>/contents/data/<flight-id>.json
-Authorization: Bearer <token>
-Accept: application/vnd.github.raw
-```
-
-Poll `<flight-id>.deleted.json` the same way and archive the matching rows in Notion. Use `id`
-as the unique key and upsert; the file always holds the complete set of rows, so appending
-produces duplicates.
-
-**raw.githubusercontent.com — public repositories only, delayed**
-
-```
-GET https://raw.githubusercontent.com/<owner>/<repo>/main/data/<flight-id>.csv
-```
-
-Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.
-
-## 14. Limits worth knowing before takeoff
-
-- **GPS in the background:** once the app is not in the foreground and the display locks,
-  iPadOS suspends location updates. The app holds a wake lock while it is active. This records
-  events, not a track — use a dedicated logger for a gapless trace.
-- **Altitude:** `alt_gps_m` is GPS altitude above the WGS84 ellipsoid, not the altimeter
-  reading. The altimeter governs what is reported to ATC.
-- **Rate limit:** with two iPads and a Notion poll on the same token, the hourly budget is
-  comfortable as long as the conditional requests keep returning 304. Frequent writes are what
-  cost — each post is roughly four requests.
-- **The passwords are 1234 and 5678 and both live in the source.** They guard against a mistaken
-  tap in the basket and against a second device declaring itself master, not against anyone who
-  reads the file. Change `PASS` and `MASTER_PASS` in `index.html` for different ones — and if
-  you do, tell the crew, because a device that cannot answer the master question ends up a
-  follower.
-- **Token on the device:** stored unencrypted in the browser. If the iPad is lost, revoking the
-  token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
-  server side and point the API host in the code at the Worker.
-- **The pill floats inside the app only** on phones and tablets — see section 4. Slide Over on
-  iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
-  picture-in-picture on a laptop is the only true always-on-top.
-
-## 14a. Language
-
-The setup switches the interface between English and German, above the password, because it is
-a personal preference rather than a flight setting and every crew member may want a different
-one.
-
-**Only the interface changes.** Everything written to GitHub and everything sent to WhatsApp
-stays English: the column names, the values in `type`, the message templates. A table that
-changed language depending on who happened to make the entry would be unusable, and the ATC
-coordinator should not have to guess which language the next message arrives in.
-
-## 15. Version
-
-The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
-the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-16` is the sixteenth build of 12 August 2026.
-
-It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
-the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are
-generated from `README.md` and `SETUP.md` and have to be regenerated whenever those change. Bumping the cache name is what
-forces the service worker to fetch the new files rather than serve the old ones, so a build
-with an unchanged cache name may not reach a device that already has the app installed.
-
-## 16. Files
-
-```
-index.html                  the complete app
-manifest.webmanifest        Home Screen installation
-sw.js                       offline cache
-readme.html                 this document, opened from the menu
-SETUP.md / setup.html       the GitHub and Notion setup guide
-favicon.ico                 multi-resolution favicon
-icons/                      app icons and favicons
-data/                       destination folder for flight files
-```
+- Adiabatic braking and Monte-Carlo scatter (without a commercial API key/real ensemble data) are approximations, not calibrated against real flight data - a planning aid, not a certified instrument.
+- The landing-point terrain check is an approximation, not a true line-of-sight/obstacle-clearance calculation - ring-sampled elevation plus OSM tags, since actual obstacle heights aren't available from any free source used here.
+- aprs.fi is confirmed non-functional (browser CORS restriction on their end, not fixable from this app).
+- MeteoGate/E-SOH per-station value parsing and Xweather lightning are implemented but not yet confirmed against live credentials/responses.
+- This is a static file with no server: after any change, it has to be re-uploaded to wherever it's hosted before the live site reflects it. On iOS specifically, both the page itself and the service worker can be cached persistently enough that a hard reload or removing/re-adding the home-screen icon may be needed to pick up a new version.
+- Cloud file pickers (Dropbox, Google Drive, etc.) shown when uploading a file are controlled by iOS/the browser based on installed provider apps, not by this page.
