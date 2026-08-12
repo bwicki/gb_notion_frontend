@@ -23,8 +23,11 @@ white face. Night mode is red on black and preserves dark adaptation. The sun/mo
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.
 
-The header shows UTC to the second, the flight, and four buttons: log, day/night, menu,
-minimise. Below it, flush against the header, sit the four message types; the kilograms on
+The header shows UTC to the second, then the flight and callsign with the live navigation
+line beneath it in the same type — `293° TC · 12.3 kn · ± 8 m`, course over ground, ground speed
+and the accuracy of the current fix. Before a fix it reads `GPS searching`; with a fix but no
+movement the course and speed fall away and only the accuracy remains. Then four buttons: log,
+day/night, menu, minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.
@@ -68,7 +71,10 @@ Settings → Developer settings → Personal access tokens → Fine-grained toke
 
 **In the app**
 
-The *Ballast on board at start* field beside the flight ID is only needed before the first
+The *VFR squawk* field is the conspicuity code the VFR button writes; `7000` unless your
+airspace uses something else.
+
+The *Ballast on board at start* field is only needed before the first
 inventory: it seeds the running figure so that early drops count, and it gives the first
 inventory something to compare against in `tally_diff_kg`. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.
@@ -131,7 +137,7 @@ Track and ground speed come with every entry. iOS and Android supply both with t
 device is moving; when they do not, the app derives them from the previous fix, requiring at
 least three seconds and five metres between the two so that a stationary basket does not
 produce a random course. Both fields stay empty rather than guessing when neither source is
-available. The header shows the current values live beside the GPS accuracy.
+available. The header carries the live values under the flight number.
 
 ## 6. Ballast
 
@@ -174,8 +180,22 @@ went overboard without being logged.
 
 ## 7. ATC, Ressources, Other
 
-**ATC** puts the station on its own line, frequency and squawk side by side beneath it, then
-the message. Station, Frq and SQ are carried over from the previous call and shown in grey
+**ATC** puts the station on its own line, then frequency, squawk and a VFR button side by side,
+then the message.
+
+The **frequency** is completed for you when you leave the field: digits alone are enough, the
+first three read as megahertz and the rest is padded out to kilohertz. `12345` becomes
+`123.450`, `1187` becomes `118.700`, `118005` stays `118.005`. A decimal point or comma you
+type yourself is ignored, so both habits work.
+
+The **squawk** is four octal digits — 8 and 9 simply do not appear as you type, and a code of
+one to three digits is refused on posting. `7500`, `7600` and `7700` are the emergency codes;
+entering one of them brings up a confirmation naming what it means before the entry goes out,
+because they are three keystrokes away from ordinary codes.
+
+The **VFR** button fills the squawk with the conspicuity code from the setup, `7000` by default,
+and lights up while that code is set. Tapping it again clears the field; typing anything else
+turns the light off. Station, Frq and SQ are carried over from the previous call and shown in grey
 with a dashed outline; they have to be confirmed before the entry can be posted, either by
 tapping into a field to change it or with the *Confirm* button. A long sequence of calls to
 the same station costs one tap, without any risk of an unnoticed stale frequency. The dashed
@@ -395,7 +415,7 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-06` is the sixth build of 12 August 2026.
+build released that day. `v260812-08` is the eighth build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` is generated from

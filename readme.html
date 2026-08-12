@@ -45,8 +45,11 @@ Only the log and the setup scroll.</p>
 white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.</p>
-<p>The header shows UTC to the second, the flight, and four buttons: log, day/night, menu,
-minimise. Below it, flush against the header, sit the four message types; the kilograms on
+<p>The header shows UTC to the second, then the flight and callsign with the live navigation
+line beneath it in the same type — <code>293° TC · 12.3 kn · ± 8 m</code>, course over ground, ground speed
+and the accuracy of the current fix. Before a fix it reads <code>GPS searching</code>; with a fix but no
+movement the course and speed fall away and only the accuracy remains. Then four buttons: log,
+day/night, menu, minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.</p>
@@ -82,7 +85,9 @@ narrower gaps of the full mark close up into a smudge.</p>
 <li>Short expiry, for example one week after the flight</li>
 </ul>
 <p><strong>In the app</strong></p>
-<p>The <em>Ballast on board at start</em> field beside the flight ID is only needed before the first
+<p>The <em>VFR squawk</em> field is the conspicuity code the VFR button writes; <code>7000</code> unless your
+airspace uses something else.</p>
+<p>The <em>Ballast on board at start</em> field is only needed before the first
 inventory: it seeds the running figure so that early drops count, and it gives the first
 inventory something to compare against in <code>tally_diff_kg</code>. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.</p>
@@ -147,7 +152,7 @@ alongside for map links and for anything that needs the raw value.</p>
 device is moving; when they do not, the app derives them from the previous fix, requiring at
 least three seconds and five metres between the two so that a stationary basket does not
 produce a random course. Both fields stay empty rather than guessing when neither source is
-available. The header shows the current values live beside the GPS accuracy.</p>
+available. The header carries the live values under the flight number.</p>
 <h2>6. Ballast</h2>
 <p><strong>Drop</strong> subtracts the kilograms thrown. The quick buttons only fill the field; posting is
 always the one dark button, so a knock against the iPad cannot log a drop.</p>
@@ -198,8 +203,19 @@ difference live, before an inventory is posted.</p>
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.</p>
 <h2>7. ATC, Ressources, Other</h2>
-<p><strong>ATC</strong> puts the station on its own line, frequency and squawk side by side beneath it, then
-the message. Station, Frq and SQ are carried over from the previous call and shown in grey
+<p><strong>ATC</strong> puts the station on its own line, then frequency, squawk and a VFR button side by side,
+then the message.</p>
+<p>The <strong>frequency</strong> is completed for you when you leave the field: digits alone are enough, the
+first three read as megahertz and the rest is padded out to kilohertz. <code>12345</code> becomes
+<code>123.450</code>, <code>1187</code> becomes <code>118.700</code>, <code>118005</code> stays <code>118.005</code>. A decimal point or comma you
+type yourself is ignored, so both habits work.</p>
+<p>The <strong>squawk</strong> is four octal digits — 8 and 9 simply do not appear as you type, and a code of
+one to three digits is refused on posting. <code>7500</code>, <code>7600</code> and <code>7700</code> are the emergency codes;
+entering one of them brings up a confirmation naming what it means before the entry goes out,
+because they are three keystrokes away from ordinary codes.</p>
+<p>The <strong>VFR</strong> button fills the squawk with the conspicuity code from the setup, <code>7000</code> by default,
+and lights up while that code is set. Tapping it again clears the field; typing anything else
+turns the light off. Station, Frq and SQ are carried over from the previous call and shown in grey
 with a dashed outline; they have to be confirmed before the entry can be posted, either by
 tapping into a field to change it or with the <em>Confirm</em> button. A long sequence of calls to
 the same station costs one tap, without any risk of an unnoticed stale frequency. The dashed
@@ -496,7 +512,7 @@ produces duplicates.</p>
 <h2>15. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. <code>v260812-06</code> is the sixth build of 12 August 2026.</p>
+build released that day. <code>v260812-08</code> is the eighth build of 12 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> is generated from
 this file and has to be regenerated whenever it changes. Bumping the cache name is what

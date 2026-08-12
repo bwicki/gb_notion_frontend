@@ -64,10 +64,11 @@ a{color:inherit}
   .app{height:calc(100dvh - 36px);border:1px solid var(--line);border-radius:16px}
 }
 
-header{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:46px;
+header{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:52px;
   padding:0 8px 0 var(--pad);border-bottom:1px solid var(--line-soft)}
 header .clock{font-size:15px;flex:0 0 auto}
-header .id{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:8px}
+.hinfo{flex:1;min-width:0;padding-left:9px;display:flex;flex-direction:column;justify-content:center;gap:1px}
+header .id{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
 header button.on{background:var(--sel);color:var(--sel-ink)}
 header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -110,6 +111,10 @@ input:focus,textarea:focus{outline:0;border-color:var(--sel)}
 input.pre{color:var(--carry);border-style:dashed}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.atcrow{display:grid;grid-template-columns:1.15fr 1fr 60px;gap:8px}
+.vfr{min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+  font-size:13px;letter-spacing:.04em}
+.vfr.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 select{width:100%;min-height:44px;padding:10px 12px;background:var(--field);
   border:1px solid var(--line);border-radius:9px;color:var(--ink);font:inherit;appearance:none}
 select:focus{outline:0;border-color:var(--sel)}
@@ -218,7 +223,7 @@ body.min #puck{display:block}
 <div class="app">
 <header>
   <span class="clock num" id="hClock">--:--:--Z</span>
-  <span class="id" id="hId">—</span>
+  <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
   <button id="btnLog" aria-label="Log"><svg viewBox="0 0 24 24"><path d="M5 7h0M5 12h0M5 17h0" stroke-width="2.3"/><path d="M10 7h9M10 12h9M10 17h6"/></svg></button>
   <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -274,9 +279,10 @@ body.min #puck{display:block}
           <button data-v="RX">Received</button><button data-v="TX">Sent</button>
         </div></div>
         <div class="f"><input type="text" id="aStation" placeholder="Station" autocapitalize="characters"></div>
-        <div class="f two">
+        <div class="f atcrow">
           <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div>
           <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" placeholder="SQ">
+          <button class="vfr" id="btnVfr">VFR</button>
         </div>
         <div class="carry hide" id="aCarry"><span>Carried over from the last call</span><button id="aConfirm">Confirm</button></div>
         <div class="f"><textarea id="aMsg" placeholder="Message"></textarea></div>
@@ -357,7 +363,8 @@ body.min #puck{display:block}
         <h3>Flight</h3>
         <div class="f two"><input type="text" id="sFlight" placeholder="Flight ID">
           <input type="text" id="sCall" placeholder="Callsign" autocapitalize="characters"></div>
-        <div class="f"><input type="number" id="sInit" inputmode="decimal" placeholder="Ballast on board at start, kg"></div>
+        <div class="f two"><input type="number" id="sInit" inputmode="decimal" placeholder="Ballast on board at start, kg">
+          <input type="text" id="sVfr" inputmode="numeric" maxlength="4" placeholder="VFR squawk"></div>
         <p class="hint">Only needed before the first inventory. Leave empty and the ballast figure
           starts with the first Take Inventory.</p>
         <div class="f two"><input type="text" id="sP1" placeholder="Pilot 1"><input type="text" id="sP2" placeholder="Pilot 2"></div>
@@ -434,11 +441,11 @@ body.min #puck{display:block}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-06';
+const APP_VERSION='v260812-08';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
+           bagKg:15,readyKg:30,vfr:'7000',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
@@ -734,13 +741,15 @@ async function sync(silent,push,attempt){
 /* ── Painting ──────────────────────────────────────────────────────── */
 function paintStatus(){
   $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' · '+CFG.call:'');
-  const b=[];
+  /* course, ground speed and accuracy sit under the flight, in the same type */
   if(GPS&&Date.now()-GPS.t<30000){
-    let g='GPS ±'+Math.round(GPS.acc||0)+' m';
-    if(GPS.tc!=null)g+=' · TC '+pad(Math.round(GPS.tc)%360,3);
-    if(GPS.sp!=null)g+=' · '+(GPS.sp*1.94384).toFixed(1)+' kn';
-    b.push(g);
-  }else b.push(GPS?'GPS stale':(GPSERR||'GPS searching'));
+    const g=[];
+    if(GPS.tc!=null)g.push(pad(Math.round(GPS.tc)%360,3)+'\u00b0 TC');
+    if(GPS.sp!=null)g.push((GPS.sp*1.94384).toFixed(1)+' kn');
+    g.push('\u00b1 '+Math.round(GPS.acc||0)+' m');
+    $('#hGps').textContent=g.join(' \u00b7 ');
+  }else $('#hGps').textContent=GPS?'GPS stale':(GPSERR||'GPS searching');
+  const b=[];
   const un=ENT.filter(e=>!e.synced).length;
   b.push(SYNCING?'syncing':un?un+' queued':(configured()?'synced':'no repository'));
   b.push(ENT.length+' rows');
@@ -947,6 +956,7 @@ $$('.check').forEach(c=>c.onclick=()=>{
 /* ── ATC carried-over values ───────────────────────────────────────── */
 const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
 function carryAtc(){
+  setTimeout(syncVfr,0);
   const l=UI.lastAtc||{};let any=false;
   ATCF.forEach(([sel,k])=>{const el=$(sel);
     if(!el.value&&l[k]){el.value=l[k];el.classList.add('pre');any=true}
@@ -957,6 +967,25 @@ ATCF.forEach(([sel])=>{const el=$(sel);
   const clear=()=>{if(el.classList.contains('pre')){el.classList.remove('pre');
     if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide')}};
   el.addEventListener('focus',clear);el.addEventListener('input',clear)});
+/* 12345 becomes 123.450 — three digits of megahertz, the rest padded to kilohertz */
+function fmtFreq(v){
+  const d=String(v||'').replace(/\D/g,'');
+  if(d.length<3)return String(v||'').trim();
+  return d.slice(0,3)+'.'+d.slice(3,6).padEnd(3,'0');
+}
+$('#aFreq').addEventListener('blur',()=>{const el=$('#aFreq');if(el.value.trim())el.value=fmtFreq(el.value)});
+
+/* a squawk is four octal digits, so 8 and 9 never occur */
+const VFR=()=>{const v=String(CFG.vfr||'7000').replace(/[^0-7]/g,'').slice(0,4);return v.length===4?v:'7000'};
+const EMERG={'7500':'hijack','7600':'radio failure','7700':'general emergency'};
+function syncVfr(){$('#btnVfr').classList.toggle('on',$('#aSquawk').value===VFR())}
+$('#aSquawk').addEventListener('input',()=>{const el=$('#aSquawk');
+  const c=el.value.replace(/[^0-7]/g,'').slice(0,4);if(c!==el.value)el.value=c;syncVfr()});
+$('#btnVfr').onclick=()=>{const el=$('#aSquawk');
+  el.value=el.value===VFR()?'':VFR();el.classList.remove('pre');
+  if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide');
+  syncVfr()};
+
 $('#aConfirm').onclick=()=>{$$('#b-ATC input.pre').forEach(i=>i.classList.remove('pre'));
   $('#aCarry').classList.add('hide');toast('Carried-over values confirmed')};
 
@@ -985,14 +1014,23 @@ $('#btnPost').onclick=async()=>{
   }
   if(t==='ATC'){
     if($$('#b-ATC input.pre').length)return toast('Confirm the carried-over station, Frq and SQ');
+    if($('#aFreq').value.trim())$('#aFreq').value=fmtFreq($('#aFreq').value);
+    const sq=$('#aSquawk').value.replace(/[^0-7]/g,'').slice(0,4);
+    $('#aSquawk').value=sq;syncVfr();
+    if(sq&&sq.length!==4)return toast('A squawk is four digits, each 0 to 7');
+    if(EMERG[sq]){
+      const go=await ask({title:'Confirm Emergency SQ',danger:true,ok:'Confirm Emergency SQ',
+        text:sq+' is the code for '+EMERG[sq]+'. Post it only if that is what was set.'});
+      if(!go)return;
+    }
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
     if(!st&&!msg)return toast('Enter a station or a message');
     const rc=recipients('ATC');
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
-      atc_squawk:$('#aSquawk').value.trim(),atc_msg:msg,
+      atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:$('#aSquawk').value.trim()};
-    save(K_UI,UI);$('#aMsg').value='';toast('ATC posted');carryAtc();
+    UI.lastAtc={station:$('#aStation').value.trim(),freq:$('#aFreq').value.trim(),squawk:sq};
+    save(K_UI,UI);$('#aMsg').value='';toast('ATC posted');carryAtc();syncVfr();
   }else if(t==='Ressources'){
     const bat=$('#rBat').value;const rc=recipients('Ressources');
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
@@ -1066,7 +1104,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',steps:'#sSteps',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',steps:'#sSteps',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 function paintWaRows(){
   const w=CFG.wa||[];
@@ -1195,7 +1233,7 @@ setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':
 fillSetup();paintRepHint();paintQuick();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
-mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);setAct(UI.act);
+mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);setAct(UI.act);syncVfr();
 recalc(ENT);paint();wake();
 addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
