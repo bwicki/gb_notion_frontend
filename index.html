@@ -224,8 +224,6 @@ body.min #puck{display:block}
 <header>
   <span class="clock num" id="hClock">--:--:--Z</span>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
-  <button id="btnLog" aria-label="Log"><svg viewBox="0 0 24 24"><path d="M5 7h0M5 12h0M5 17h0" stroke-width="2.3"/><path d="M10 7h9M10 12h9M10 17h6"/></svg></button>
-  <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -355,6 +353,11 @@ body.min #puck{display:block}
 
       <div id="setOpen" style="display:none">
         <h3>This device</h3>
+        <div class="f"><p class="lab">Setup role</p><div class="pills" id="sRole">
+          <button data-v="master">Master</button><button data-v="follower">Follower</button>
+        </div></div>
+        <p class="hint">The master owns the flight setup and publishes it. Followers pick up
+          every change the master saves, so the crew never drifts apart mid-flight.</p>
         <div class="f"><div class="pills" id="sMode">
           <button data-v="personal">Personal device</button><button data-v="shared">Shared device</button>
         </div></div>
@@ -441,17 +444,17 @@ body.min #puck{display:block}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-08';
+const APP_VERSION='v260812-11';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,vfr:'7000',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
+           bagKg:15,readyKg:30,vfr:'7000',role:'master',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
-  ATC:'*{type} | {callsign}*\nStation: {station}\nFrq: {freq}  SQ: {squawk}\nMsg: {msg}\n{time} {pos} {alt}\n{maps}',
-  Ressources:'*{type} | {callsign}*\nPIC: {pic}  Resting: {resting}\nBattery: {battery}\nFuel cell: {fuelcell}  Solar: {solar}\nMsg: {note}\n{time} {pos} {alt}\n{maps}',
-  Other:'*{type} | {callsign}*\nMsg: {note}\n{time} {pos} {alt}\n{maps}'};
+  ATC:'*{type} | {callsign}*\nStation: {station}\nFrq: {freq}  SQ: {squawk}\nMsg: {!msg}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
+  Ressources:'*{type} | {callsign}*\nPIC: {pic}  Resting: {resting}\nBattery: {battery}\nFuel cell: {fuelcell}  Solar: {solar}\nMsg: {!note}\n{time} {pos} {alt}\nShow in Google Maps: {maps}',
+  Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} {pos} {alt}\nShow in Google Maps: {maps}'};
 const TPL_KEYS=['type','callsign','dir','station','freq','squawk','msg','pic','resting',
   'battery','fuelcell','solar','note','time','pos','posdm','alt','tc','speed','maps','reporter','flight'];
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
@@ -581,17 +584,41 @@ function waVals(e){
     maps:e.gps_fix?('https://maps.google.com/?q='+e.lat.toFixed(5)+','+e.lon.toFixed(5)):''
   };
 }
-/* a line whose placeholders are all empty is dropped, so optional fields cost nothing */
+/* {key} drops its line when everything on it is empty; {!key} keeps the line and prints -
+   so a message with nothing to say still shows the field */
 function fillTpl(tpl,v){
   return tpl.split('\n').map(line=>{
-    const keys=[...line.matchAll(/\{(\w+)\}/g)].map(m=>m[1]);
-    if(keys.length&&keys.every(k=>!v[k]))return null;
-    return line.replace(/\{(\w+)\}/g,(_,k)=>v[k]||'\u2013').replace(/\s+$/,'');
+    const found=[...line.matchAll(/\{(!?)(\w+)\}/g)];
+    if(!found.length)return line;
+    const required=found.some(f=>f[1]==='!');
+    if(!required&&found.every(f=>!v[f[2]]))return null;
+    /* a line without wording of its own — like time, position and altitude — simply loses
+       the parts that are missing; a line carrying labels keeps them and prints - instead */
+    const bare=!/[A-Za-z0-9]/.test(line.replace(/\{!?\w+\}/g,''));
+    let out=line.replace(/\{(!?)(\w+)\}/g,(_,b,k)=>v[k]?v[k]:(b==='!'?'-':(bare?'':'-')));
+    if(bare)out=out.replace(/\s{2,}/g,' ').trim();
+    return out.replace(/\s+$/,'');
   }).filter(l=>l!==null).join('\n');
 }
 const waText=e=>fillTpl(tplFor(e.type),waVals(e));
 
-async function waSheet(e,list){
+function waUrl(r,enc){return 'https://wa.me/'+String(r.p).replace(/\D/g,'')+'?text='+enc}
+function openLink(url){
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();a.remove();
+}
+/* the first recipient opens on the spot, inside the tap that posted the entry;
+   WhatsApp takes one chat at a time, so any others are offered afterwards */
+function waSend(e,list){
+  if(!list||!list.length)return;
+  const enc=encodeURIComponent(waText(e));
+  openLink(waUrl(list[0],enc));
+  if(list.length>1){
+    toast(list.length-1+' more recipient'+(list.length>2?'s':'')+' to go');
+    setTimeout(()=>waSheet(e,list.slice(1),true),400);
+  }else toast('WhatsApp: '+(list[0].n||list[0].p));
+}
+async function waSheet(e,list,compact){
   list=list||waList();const txt=waText(e);
   if(!list.length){await ask({title:'No recipients',cancel:false,ok:'Close',
     text:'Add WhatsApp recipients in the setup first. The entry has been posted regardless.',
@@ -599,9 +626,9 @@ async function waSheet(e,list){
   const enc=encodeURIComponent(txt);
   const rows=list.map(r=>`<a class="go sec sm" target="_blank" rel="noopener"
       href="https://wa.me/${String(r.p).replace(/\D/g,'')}?text=${enc}">${esc(r.n||r.p)}</a>`).join('');
-  await ask({title:'Send to WhatsApp',
+  await ask({title:compact?'Remaining recipients':'Send to WhatsApp',
     text:'WhatsApp opens one chat at a time. Tap a name, press send, come back, tap the next.',
-    html:'<div class="waPre">'+esc(txt)+'</div><div class="waList">'+rows+'</div>',
+    html:(compact?'':'<div class="waPre">'+esc(txt)+'</div>')+'<div class="waList">'+rows+'</div>',
     ok:'Copy text',cancel:'Done',
     onMount:m=>{m.querySelector('[data-a="1"]').onclick=async()=>{
       try{await navigator.clipboard.writeText(txt);toast('Message copied')}catch(err){toast('Select the text to copy')}}}});
@@ -660,6 +687,47 @@ const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob((s||'').replace(/\s/
 const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
   return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`,del:`${d}/${b}.deleted.json`}};
 const configured=()=>!!(CFG.repo&&CFG.token);
+
+/* everything a second device needs; per-device choices are deliberately left out */
+const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','bagKg','readyKg',
+  'vfr','atcName','atcNum','wa','tpl'];
+function setupPayload(withToken){
+  const o={v:1};SHARED.forEach(k=>o[k]=CFG[k]);
+  if(withToken&&CFG.token)o.token=CFG.token;
+  return o;
+}
+const setupPath=()=>(CFG.dir||'data').replace(/^\/|\/$/g,'')+'/_setup.json';
+const b64u=t=>b64e(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64u=t=>b64d(t.replace(/-/g,'+').replace(/_/g,'/'));
+const shareLink=withToken=>location.origin+location.pathname+'#cfg='+b64u(JSON.stringify(setupPayload(withToken)));
+
+async function publishSetup(){
+  if(CFG.role!=='master'||!configured()||!navigator.onLine)return;
+  try{
+    let sha=null;try{sha=(await ghGet(setupPath())).sha}catch(e){}
+    await ghPut(setupPath(),JSON.stringify(setupPayload(false),null,1),sha,'setup · '+reporter());
+  }catch(e){}
+}
+function applyShared(o){
+  let changed=false;
+  SHARED.forEach(k=>{
+    if(o[k]===undefined)return;
+    if(JSON.stringify(o[k])!==JSON.stringify(CFG[k])){CFG[k]=o[k];changed=true}
+  });
+  return changed;
+}
+async function followSetup(){
+  if(CFG.role!=='follower')return;
+  try{
+    const g=await ghGet(setupPath(),true);
+    if(g.notModified||!g.text)return;
+    const o=JSON.parse(g.text);
+    if(applyShared(o)){
+      save(K_CFG,CFG);paintQuick();paintCrew();paintWaChecks();paintInv();paint();
+      toast('Setup updated from the master');
+    }
+  }catch(e){}
+}
 async function ghGet(p,cond){
   const h=hdr();
   if(cond&&ETAG[p])h['If-None-Match']=ETAG[p];
@@ -699,6 +767,8 @@ async function sync(silent,push,attempt){
     const p=paths();
     const g=await ghGet(p.json,!push);
     if(g.notModified&&!push&&!ENT.some(e=>!e.synced)){LASTSYNC=new Date();return}
+
+    if(push||pollN%6===0)await followSetup();
 
     let rt=null;
     if(push||pollN%6===0){try{rt=parse((await ghGet(p.del)).text)}catch(e){rt=null}}
@@ -860,35 +930,79 @@ async function confirm2(a,b){
 }
 
 /* ── Theme ─────────────────────────────────────────────────────────── */
-const SUN='<circle cx="12" cy="12" r="4"/><path d="M12 2.8v2.1M12 19.1v2.1M21.2 12h-2.1M4.9 12H2.8M18.4 5.6 16.9 7.1M7.1 16.9 5.6 18.4M18.4 18.4 16.9 16.9M7.1 7.1 5.6 5.6"/>';
-const MOON='<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>';
 const NIGHT_BG={red:'#000000',amber:'#000000',green:'#000000',white:'#000000'};
 function setTheme(t,persist){
   document.documentElement.dataset.theme=t;
   document.documentElement.dataset.night=CFG.night||'red';
-  $('#icTheme').innerHTML=t==='night'?SUN:MOON;
   const m=document.querySelector('meta[name=theme-color]');
   if(m)m.content=t==='night'?NIGHT_BG[CFG.night||'red']:'#E4E7EA';
   if(persist){CFG.theme=t;save(K_CFG,CFG)}
 }
-$('#btnTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='night'?'day':'night',true);
+const isNight=()=>document.documentElement.dataset.theme==='night';
 
 /* ── Navigation and menu ───────────────────────────────────────────── */
+async function shareSheet(){
+  let withToken=true;
+  const render=m=>{
+    const link=shareLink(withToken);
+    m.querySelector('#shLink').textContent=link;
+    m.querySelector('#shTok').classList.toggle('on',withToken);
+    return link;
+  };
+  await ask({title:'Share setup',cancel:false,ok:'Copy link',
+    text:'Open this link on the other device. It carries the flight, the pilots, the ballast '
+      +'figures, the WhatsApp recipients and the message templates, and sets that device to '
+      +'Follower. Its own reporter name, device mode and colours stay untouched.',
+    html:'<button class="check on" id="shTok"><span class="box"><svg viewBox="0 0 24 24">'
+      +'<path d="M5 12.5 10 17.5 19 7"/></svg></span><span>Include the GitHub token'
+      +'<em>Without it the other device cannot send, and the token has to be typed there by hand.</em>'
+      +'</span></button><div class="waPre" id="shLink"></div>',
+    onMount:m=>{
+      render(m);
+      m.querySelector('#shTok').onclick=()=>{withToken=!withToken;render(m)};
+      m.querySelector('[data-a="1"]').onclick=async()=>{
+        try{await navigator.clipboard.writeText(shareLink(withToken));toast('Link copied')}
+        catch(e){toast('Select the link to copy')}
+      };
+    }});
+}
+
+/* an invitation link is applied only after the person on the other device says so */
+async function importFromHash(){
+  const m=String(location.hash||'').match(/^#cfg=(.+)$/);
+  if(!m)return false;
+  let o=null;
+  try{o=JSON.parse(unb64u(m[1]))}catch(e){}
+  history.replaceState(null,'',location.pathname+location.search);
+  if(!o){toast('That invitation link is damaged');return false}
+  const ok=await ask({title:'Apply this setup?',ok:'Apply',cancel:'Discard',
+    text:'Flight '+(o.flight||'—')+' · '+(o.call||'—')+' · repository '+(o.repo||'—')+' · '
+      +((o.wa||[]).length)+' WhatsApp recipient(s) · '
+      +(o.token?'a GitHub token is included':'no token — it has to be entered on this device')
+      +'. Your reporter name, device mode and colours are left as they are.'});
+  if(!ok)return false;
+  applyShared(o);
+  if(o.token)CFG.token=o.token;
+  CFG.role='follower';
+  save(K_CFG,CFG);
+  return true;
+}
 const dl=(txt,name,mime)=>{const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:mime+';charset=utf-8'}));a.download=name;
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 function setView(v){
   UI.view=v;save(K_UI,UI);
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#btnLog').classList.toggle('on',v==='log');
-  $('#btnMenu').classList.toggle('on',v==='set');
+  $('#btnMenu').classList.toggle('on',v!=='form');
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
-$('#btnLog').onclick=()=>setView(UI.view==='log'?'form':'log');
 $('#btnMenu').onclick=()=>openMenu();
 async function openMenu(){
-  const items=[['set','Settings'],['pull','Reload from GitHub'],['sync','Send now'],
+  const items=[['form','Report'],['log','Log'],['set','Settings'],
+               ['theme',isNight()?'Day mode':'Night mode'],
+               ['pull','Reload from GitHub'],['sync','Send now'],
+               ['share','Share setup with another device'],
                ['csv','Save CSV'],['json','Save JSON'],['about','About — more info']];
   await ask({title:'Menu',cancel:false,ok:'Close',
     text:ENT.length+' rows on this device · '+APP_VERSION,
@@ -897,11 +1011,13 @@ async function openMenu(){
     onMount:(m,close)=>{m.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
       close();
       const k=b.dataset.m;
-      if(k==='set')setView('set');
+      if(k==='form'||k==='log'||k==='set')setView(k);
+      else if(k==='theme')setTheme(isNight()?'day':'night',true);
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
       else if(k==='csv')dl(toCsv(chrono(ENT)),(CFG.flight||'flightlog')+'.csv','text/csv');
       else if(k==='json')dl(JSON.stringify(chrono(ENT),null,1),(CFG.flight||'flightlog')+'.json','application/json');
+      else if(k==='share')shareSheet();
       else if(k==='about')window.open('readme.html','_blank','noopener');
     })}});
 }
@@ -1045,7 +1161,7 @@ $('#btnPost').onclick=async()=>{
     e=add({type:'Other',note:v,whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     $('#oMsg').value='';toast('Note posted');
   }
-  if(e){const rc=recipients(t);if(rc.length)waSheet(e,rc)}
+  if(e){const rc=recipients(t);if(rc.length)waSend(e,rc)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -1130,7 +1246,8 @@ function paintModeLab(){
 const TPLF={ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
 function fillTplRows(){
   for(const k in TPLF)$(TPLF[k]).value=tplFor(k);
-  $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ');
+  $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ')
+    +'  ·  {!key} keeps its line and prints - when the value is missing.';
 }
 function readTplRows(){
   const out={};for(const k in TPLF){const v=$(TPLF[k]).value;if(v.trim())out[k]=v}
@@ -1140,7 +1257,7 @@ $('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
-  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sNight',CFG.night);
+  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sNight',CFG.night);mark('#sRole',CFG.role);
   paintWaRows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
@@ -1176,6 +1293,7 @@ $('#btnSave').onclick=async()=>{
   const next={};for(const k in SF)next[k]=$(SF[k]).value.trim();
   const wa=readWaRows();
   const mode=($('#sMode button.on')||{dataset:{v:'personal'}}).dataset.v;
+  const role=($('#sRole button.on')||{dataset:{v:'master'}}).dataset.v;
   const night=($('#sNight button.on')||{dataset:{v:'red'}}).dataset.v;
   const flightChanged=next.flight!==CFG.flight;
   if(!await confirm2(
@@ -1183,14 +1301,14 @@ $('#btnSave').onclick=async()=>{
       ?'The flight ID changes from "'+(CFG.flight||'none')+'" to "'+(next.flight||'none')+'". Entries are written to a different file from now on.'
       :'These settings apply to every entry made on this device from now on. '+mode+' device, '+wa.length+' WhatsApp recipient(s).'},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
-  Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.night=night;CFG.tpl=readTplRows();
+  Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.alt=0;save(K_UI,UI);
   save(K_CFG,CFG);paintQuick();paintCrew();paintWaChecks();paintInv();paintRepHint();
   setTheme(document.documentElement.dataset.theme,false);
   recalc(ENT);save(K_ENT,ENT);paint();
-  toast('Settings saved');lockSettings();setView('form');
+  toast('Settings saved');lockSettings();setView('form');publishSetup();
 };
 $('#btnTest').onclick=async()=>{
   const repo=$('#sRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
@@ -1245,6 +1363,12 @@ setInterval(()=>{
   else sync(true,false);
 },5000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+importFromHash().then(applied=>{
+  if(!applied)return;
+  fillSetup();paintQuick();paintCrew();paintWaChecks();paintInv();paintRepHint();paint();
+  toast('Setup applied — this device is a Follower');
+  if(configured())sync(true,false);
+});
 </script>
 </body>
 </html>

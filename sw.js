@@ -1,11 +1,12 @@
 /* GB Notion Frontend — keeps the app shell available offline.
    The GitHub API is never served from cache. */
-const V = 'basket-reporting-v260812-08';
+const V = 'basket-reporting-v260812-11';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './readme.html',
+  './setup.html',
   './favicon.ico',
   './icons/favicon-16.png',
   './icons/favicon-32.png',

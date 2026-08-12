@@ -27,7 +27,10 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);verti
 th{font-weight:500;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
 hr{border:0;border-top:1px solid var(--line);margin:30px 0}
 a{color:inherit}
-</style></head><body><main>
+
+.nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
+.nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
+<p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="index.html">Back to the app</a></p>
 <h1>GB Notion Frontend — Basket Reporting</h1>
 <p>An offline version of the Basket Reporting form for use in the basket during a gas balloon
 flight. Same four message types as the Tally form, same submit action, but it keeps working
@@ -48,16 +51,16 @@ the iPad's own appearance setting.</p>
 <p>The header shows UTC to the second, then the flight and callsign with the live navigation
 line beneath it in the same type — <code>293° TC · 12.3 kn · ± 8 m</code>, course over ground, ground speed
 and the accuracy of the current fix. Before a fix it reads <code>GPS searching</code>; with a fix but no
-movement the course and speed fall away and only the accuracy remains. Then four buttons: log,
-day/night, menu, minimise. Below it, flush against the header, sit the four message types; the kilograms on
+movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.</p>
-<p>The day/night button always shows the mode you are <em>not</em> in: a moon by day, a sun at night.
-Tapping it is the switch.</p>
-<p>Settings, transfer, export and this document live behind the menu button between day/night and
-minimise. The log screen is therefore nothing but the log. <em>About — more info</em> opens this
-README as a page in its own window.</p>
+<p>Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
+switch, Reload from GitHub, Send now, Save CSV, Save JSON and <em>About — more info</em>, which opens
+this README as a page in its own window. The switch is named for the mode it takes you to, so
+it reads <em>Night mode</em> by day and <em>Day mode</em> at night.</p>
+<p>Keeping the header to two buttons leaves the whole width for the flight and the navigation
+line, and the three screens are always one tap apart through the menu.</p>
 <p>Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
 Red preserves dark adaptation best; the others are there for personal preference and for
 screens where red reads badly.</p>
@@ -71,6 +74,8 @@ manifest background is white to match, so the Android splash shows no seam. The 
 favicons carry a simplified version with three uprights instead of four; at that size the
 narrower gaps of the full mark close up into a smudge.</p>
 <h2>2. Set up</h2>
+<p>The GitHub side — the data repository, the token and the Notion polling — is a separate
+document: <strong><a href="setup.html">Setup guide</a></strong>. What follows is the short version.</p>
 <p><strong>Hosting</strong></p>
 <ol>
 <li>Put these files in the repository root.</li>
@@ -244,14 +249,35 @@ Station: ZURICH INFO
 Frq: 124.700  SQ: 7000
 Msg: QNH 1013, Ops Normal
 21:04Z 484532N 0072345E 2340 ft
-https://maps.google.com/?q=48.75890,7.39580
+Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
 </code></pre>
 <p>The first line is bold in WhatsApp.</p>
+<p><strong>About that link.</strong> WhatsApp messages are plain text: there is no way to put a label on a URL
+and hide the URL itself, the way an HTML link does. Any address in a message is shown in full
+and turned into a tappable link by WhatsApp. The nearest thing is what the template does — put
+the wording first, so the eye reads <em>Show in Google Maps</em> and the address trails behind it, and
+keep the link on the last line so WhatsApp's own map preview card sits under the message. If
+the raw address really must not appear, the only route is a shortener, which means an outside
+service and a network call at the moment of posting; in a basket over the Vosges that is the
+wrong trade.</p>
+<p><strong>Sending is immediate.</strong> With a box ticked, pressing <em>Post to CC Notion</em> writes the entry and
+opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
+tick survives from one message to the next, so a run of ATC calls to the coordinator is one
+button each. Only the send button inside WhatsApp is still yours to press; no browser can press
+that one. With more than one recipient the first opens straight away and a short list of the
+rest appears behind it, since WhatsApp takes one chat at a time.</p>
 <h3>The layout is yours</h3>
 <p>The setup holds one template per message type under <em>WhatsApp message layout</em>. Placeholders in
-braces are substituted; <strong>a line whose placeholders are all empty is dropped</strong>, so optional
-fields cost nothing when they were not reported, and a single empty placeholder among filled
-ones becomes an en dash. <em>Reset to default</em> puts the three back.</p>
+braces are substituted, and lines behave in three ways:</p>
+<ul>
+<li><code>{key}</code> — a line whose placeholders are all empty is dropped, so a field nobody reported
+  costs nothing.</li>
+<li><code>{!key}</code> — the line is kept whatever happens, and an empty value prints as <code>-</code>. The Msg line
+  uses this, so every message shows what was said even when nothing was.</li>
+<li>A line with no wording of its own, like <code>{time} {pos} {alt}</code>, simply loses the parts that are
+  missing rather than filling them with dashes. Without a fix it collapses to the time alone.</li>
+</ul>
+<p><em>Reset to default</em> puts the three templates back.</p>
 <table>
 <thead>
 <tr>
@@ -302,16 +328,26 @@ ones becomes an en dash. <em>Reset to default</em> puts the three back.</p>
 </tr>
 </tbody>
 </table>
-<p>Without a position fix, <code>{pos}</code>, <code>{alt}</code> and <code>{maps}</code> are empty, which drops their lines
-entirely rather than sending a placeholder.</p>
-<p><strong>One chat at a time.</strong> No browser can push a message into several WhatsApp chats at once —
-<code>wa.me</code> opens a single conversation with the text prefilled, and the send button still has to
-be pressed by hand. The sheet lists the recipients; tap a name, send, come back, tap the next.
-<em>Copy text</em> puts the message on the clipboard for pasting into a group, which is faster when
-one exists.</p>
+<p>Without a position fix <code>{pos}</code>, <code>{alt}</code> and <code>{maps}</code> are empty: the map line disappears and the
+time line keeps just the time.</p>
 <p>The row records <code>whatsapp</code> = <code>yes</code> and <code>whatsapp_to</code> with the names, so the table shows which
 entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
 cannot be recorded here.</p>
+<h2>8a. Master and followers</h2>
+<p>One device owns the flight setup and is set to <strong>Master</strong> — normally the PIC's iPad. The others
+are <strong>Followers</strong>.</p>
+<p>Menu → <em>Share setup with another device</em> produces a link carrying the flight, the pilots, the
+ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
+device shows what is about to be applied and asks for a yes; on yes that device takes the whole
+setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
+link — with it the other device can send at once, without it the token has to be typed there.
+Send a link containing a token the way you would send a password.</p>
+<p>What the link deliberately leaves alone: the reporter name, the personal-or-shared device mode,
+the colour scheme and the confirmation tone. Those belong to the device.</p>
+<p>Every time the master saves settings it publishes them to <code>data/_setup.json</code>, and followers
+apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
+new flight on the master and the crew follows without anyone opening a setup screen. Exactly
+one device may be the master; two would overwrite each other's publication.</p>
 <h2>9. Sending, and what happens without a link</h2>
 <p>There is nothing to switch on. Pressing <strong>Post to CC Notion</strong> writes the entry to the device and
 sends it straight away. If there is no connection the entry is held in a queue — the header
@@ -345,7 +381,7 @@ may be relative (<code>ballast_delta_kg</code>, negative for a drop) or an inven
 removed with the time and the person who removed them. Every device applies that list, so a
 deleted row does not reappear from another iPad's copy, and the main table stays clean.</p>
 <h2>11. The log</h2>
-<p>The list button in the header opens the log: the whole flight, newest first, with time,
+<p><em>Log</em> in the menu opens it: the whole flight, newest first, with time,
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
 export moved into the menu.</p>
 <p>Tapping an entry opens it for editing. The editable fields depend on the type — kilograms and
@@ -512,10 +548,10 @@ produces duplicates.</p>
 <h2>15. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. <code>v260812-08</code> is the eighth build of 12 August 2026.</p>
+build released that day. <code>v260812-11</code> is the eleventh build of 12 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
-the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> is generated from
-this file and has to be regenerated whenever it changes. Bumping the cache name is what
+the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> and <code>setup.html</code> are
+generated from <code>README.md</code> and <code>SETUP.md</code> and have to be regenerated whenever those change. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
 <h2>16. Files</h2>
@@ -523,6 +559,7 @@ with an unchanged cache name may not reach a device that already has the app ins
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
 readme.html                 this document, opened from the menu
+SETUP.md / setup.html       the GitHub and Notion setup guide
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
 data/                       destination folder for flight files

@@ -26,18 +26,18 @@ the iPad's own appearance setting.
 The header shows UTC to the second, then the flight and callsign with the live navigation
 line beneath it in the same type — `293° TC · 12.3 kn · ± 8 m`, course over ground, ground speed
 and the accuracy of the current fix. Before a fix it reads `GPS searching`; with a fix but no
-movement the course and speed fall away and only the accuracy remains. Then four buttons: log,
-day/night, menu, minimise. Below it, flush against the header, sit the four message types; the kilograms on
+movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.
 
-The day/night button always shows the mode you are *not* in: a moon by day, a sun at night.
-Tapping it is the switch.
+Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
+switch, Reload from GitHub, Send now, Save CSV, Save JSON and *About — more info*, which opens
+this README as a page in its own window. The switch is named for the mode it takes you to, so
+it reads *Night mode* by day and *Day mode* at night.
 
-Settings, transfer, export and this document live behind the menu button between day/night and
-minimise. The log screen is therefore nothing but the log. *About — more info* opens this
-README as a page in its own window.
+Keeping the header to two buttons leaves the whole width for the flight and the navigation
+line, and the three screens are always one tap apart through the menu.
 
 Night mode comes in four colours — red, amber, green or dimmed white — chosen in the setup.
 Red preserves dark adaptation best; the others are there for personal preference and for
@@ -54,6 +54,9 @@ favicons carry a simplified version with three uprights instead of four; at that
 narrower gaps of the full mark close up into a smudge.
 
 ## 2. Set up
+
+The GitHub side — the data repository, the token and the Notion polling — is a separate
+document: **[Setup guide](setup.html)**. What follows is the short version.
 
 **Hosting**
 
@@ -233,17 +236,40 @@ Station: ZURICH INFO
 Frq: 124.700  SQ: 7000
 Msg: QNH 1013, Ops Normal
 21:04Z 484532N 0072345E 2340 ft
-https://maps.google.com/?q=48.75890,7.39580
+Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
 ```
 
 The first line is bold in WhatsApp.
 
+**About that link.** WhatsApp messages are plain text: there is no way to put a label on a URL
+and hide the URL itself, the way an HTML link does. Any address in a message is shown in full
+and turned into a tappable link by WhatsApp. The nearest thing is what the template does — put
+the wording first, so the eye reads *Show in Google Maps* and the address trails behind it, and
+keep the link on the last line so WhatsApp's own map preview card sits under the message. If
+the raw address really must not appear, the only route is a shortener, which means an outside
+service and a network call at the moment of posting; in a basket over the Vosges that is the
+wrong trade.
+
+**Sending is immediate.** With a box ticked, pressing *Post to CC Notion* writes the entry and
+opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
+tick survives from one message to the next, so a run of ATC calls to the coordinator is one
+button each. Only the send button inside WhatsApp is still yours to press; no browser can press
+that one. With more than one recipient the first opens straight away and a short list of the
+rest appears behind it, since WhatsApp takes one chat at a time.
+
 ### The layout is yours
 
 The setup holds one template per message type under *WhatsApp message layout*. Placeholders in
-braces are substituted; **a line whose placeholders are all empty is dropped**, so optional
-fields cost nothing when they were not reported, and a single empty placeholder among filled
-ones becomes an en dash. *Reset to default* puts the three back.
+braces are substituted, and lines behave in three ways:
+
+- `{key}` — a line whose placeholders are all empty is dropped, so a field nobody reported
+  costs nothing.
+- `{!key}` — the line is kept whatever happens, and an empty value prints as `-`. The Msg line
+  uses this, so every message shows what was said even when nothing was.
+- A line with no wording of its own, like `{time} {pos} {alt}`, simply loses the parts that are
+  missing rather than filling them with dashes. Without a fix it collapses to the time alone.
+
+*Reset to default* puts the three templates back.
 
 | Placeholder | Value |
 |---|---|
@@ -258,18 +284,32 @@ ones becomes an en dash. *Reset to default* puts the three back.
 | `{tc}` `{speed}` | track as `TC 235` and ground speed as `12.4 kn` |
 | `{maps}` | link to the position on Google Maps |
 
-Without a position fix, `{pos}`, `{alt}` and `{maps}` are empty, which drops their lines
-entirely rather than sending a placeholder.
-
-**One chat at a time.** No browser can push a message into several WhatsApp chats at once —
-`wa.me` opens a single conversation with the text prefilled, and the send button still has to
-be pressed by hand. The sheet lists the recipients; tap a name, send, come back, tap the next.
-*Copy text* puts the message on the clipboard for pasting into a group, which is faster when
-one exists.
+Without a position fix `{pos}`, `{alt}` and `{maps}` are empty: the map line disappears and the
+time line keeps just the time.
 
 The row records `whatsapp` = `yes` and `whatsapp_to` with the names, so the table shows which
 entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
 cannot be recorded here.
+
+## 8a. Master and followers
+
+One device owns the flight setup and is set to **Master** — normally the PIC's iPad. The others
+are **Followers**.
+
+Menu → *Share setup with another device* produces a link carrying the flight, the pilots, the
+ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
+device shows what is about to be applied and asks for a yes; on yes that device takes the whole
+setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
+link — with it the other device can send at once, without it the token has to be typed there.
+Send a link containing a token the way you would send a password.
+
+What the link deliberately leaves alone: the reporter name, the personal-or-shared device mode,
+the colour scheme and the confirmation tone. Those belong to the device.
+
+Every time the master saves settings it publishes them to `data/_setup.json`, and followers
+apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
+new flight on the master and the crew follows without anyone opening a setup screen. Exactly
+one device may be the master; two would overwrite each other's publication.
 
 ## 9. Sending, and what happens without a link
 
@@ -316,7 +356,7 @@ deleted row does not reappear from another iPad's copy, and the main table stays
 
 ## 11. The log
 
-The list button in the header opens the log: the whole flight, newest first, with time,
+*Log* in the menu opens it: the whole flight, newest first, with time,
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
 export moved into the menu.
 
@@ -415,11 +455,11 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-08` is the eighth build of 12 August 2026.
+build released that day. `v260812-11` is the eleventh build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
-the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` is generated from
-this file and has to be regenerated whenever it changes. Bumping the cache name is what
+the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are
+generated from `README.md` and `SETUP.md` and have to be regenerated whenever those change. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
@@ -430,6 +470,7 @@ index.html                  the complete app
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
 readme.html                 this document, opened from the menu
+SETUP.md / setup.html       the GitHub and Notion setup guide
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
 data/                       destination folder for flight files
