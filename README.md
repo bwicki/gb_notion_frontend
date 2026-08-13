@@ -453,10 +453,15 @@ An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in t
 
 **Print the log** builds an A4 portrait printout in its own window: you pick which of the four
 kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
-chronologically and numbered, each with its time, kind, content, reporter, position and track;
-every page carries the flight in its heading with the mark on the right, and a numbered footer.
-Pagination is measured against the real page height rather than estimated, so no entry is split
-across a break.
+chronologically and numbered, each with its time, kind, content, reporter, position and track,
+one under the other as a table. Every page carries the flight in its heading with the mark on
+the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260813-03` on the left
+and `Page 2 / 3` on the right. After the last entry the table closes with
+`[no further log entries]`, so a printout can be seen to be complete.
+
+Pagination is measured: the app takes the real height of a sheet, subtracts the heading, the
+footer and the margins, and fills each page with as many rows as actually fit. Where a browser
+gives no measurements it falls back to a fixed count rather than putting one entry per page.
 
 *Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
 writing. Neither is needed in normal use. *Export the table* asks for the format first — CSV or
@@ -650,7 +655,7 @@ few seconds every device in the crew is on the new flight with an empty table.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260813-01` is the first build of 13 August 2026.
+smaller counter. `v260813-03` is the third build of 13 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are

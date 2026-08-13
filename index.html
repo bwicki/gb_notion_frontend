@@ -461,6 +461,11 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
   <!-- SETUP -->
   <section class="view" id="v-set">
     <div class="scroll">
+      <div id="syncBox" style="display:none">
+        <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
+        <p class="hint" data-t="syncHint">Sends what is waiting and reads the table back.</p>
+      </div>
+
       <h3 data-t="hLanguage">Language</h3>
       <div class="f"><div class="pills g2" id="sLang">
         <button data-v="en">English</button><button data-v="de">Deutsch</button>
@@ -575,13 +580,13 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-01';
+const APP_VERSION='v260813-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
            bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           repo:'',branch:'main',dir:'data',token:'',beep:1,theme:'',night:'red',wa:[],
+           repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{maps}',
@@ -632,13 +637,25 @@ const L={en:{
  mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
  mExport:'Export the table', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
- page:'Page', logHeadPrint:'Flight log', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
+ page:'Page', logHeadPrint:'Flight log',
+ printedBy:'printed {when} by {who}', noFurther:'[no further log entries]', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
  enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
  sqDigits:'A squawk is four digits, each 0 to 7', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
- wrongPass:'Wrong password',
+ wrongPass:'Wrong password', checking:'Checking\u2026',
+ syncNow:'Synchronize data', syncHint:'Sends what is waiting and reads the whole table back.',
+ syncDone:'Everything is in step. {r} rows on this device.',
+ syncPartly:'{n} rows could not be sent. {e}',
+ connFailed:'No connection to the repository.', privateRepo:'private', publicRepo:'public',
+ branch:'branch', branchOk:'branch exists', errBranch:'branch {b} does not exist yet — add a README to the repository',
+ errToken:'The token is not valid, or it has expired.',
+ errPerm:'The token has no Contents permission for this repository.',
+ errRepo:'Repository not found, or the token has no access to it.',
+ clearedInfo:'The local table is empty. Rows already on GitHub come back with the next reload.',
+ newFlightInfo:'Flight {new} has started. Every device in the crew follows within a few seconds.',
+ enterRepoToken:'Enter repository and token first',
  newFlight:'Begin new flight', newFlightPass:'Closing a flight and opening the next one needs the master password.',
  newFlightAsk:'Name the new flight. The old one keeps its own files; nothing is overwritten.',
  newFlightNeedsId:'The new flight needs an ID', newFlightSameId:'That is the flight you are already on',
@@ -710,13 +727,25 @@ const L={en:{
  mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
  mExport:'Tabelle exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
- page:'Seite', logHeadPrint:'Bordbuch', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
+ page:'Seite', logHeadPrint:'Bordbuch',
+ printedBy:'gedruckt {when} von {who}', noFurther:'[keine weiteren Einträge]', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
  enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
- wrongPass:'Falsches Passwort',
+ wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
+ syncNow:'Daten abgleichen', syncHint:'Sendet, was wartet, und liest die ganze Tabelle zurück.',
+ syncDone:'Alles im Gleichstand. {r} Zeilen auf diesem Gerät.',
+ syncPartly:'{n} Zeilen liessen sich nicht senden. {e}',
+ connFailed:'Keine Verbindung zum Repository.', privateRepo:'privat', publicRepo:'öffentlich',
+ branch:'Branch', branchOk:'Branch vorhanden', errBranch:'Branch {b} existiert noch nicht — im Repository ein README anlegen',
+ errToken:'Der Token ist ungültig oder abgelaufen.',
+ errPerm:'Der Token hat keine Contents-Berechtigung für dieses Repository.',
+ errRepo:'Repository nicht gefunden, oder der Token hat keinen Zugriff darauf.',
+ clearedInfo:'Die lokale Tabelle ist leer. Bereits auf GitHub liegende Zeilen kommen beim nächsten Laden zurück.',
+ newFlightInfo:'Fahrt {new} ist eröffnet. Jedes Gerät der Crew zieht binnen Sekunden nach.',
+ enterRepoToken:'Zuerst Repository und Token eintragen',
  newFlight:'Neue Fahrt beginnen', newFlightPass:'Eine Fahrt zu schliessen und die nächste zu öffnen verlangt das Master-Passwort.',
  newFlightAsk:'Kennung der neuen Fahrt. Die alte behält ihre eigenen Dateien, nichts wird überschrieben.',
  newFlightNeedsId:'Die neue Fahrt braucht eine Kennung', newFlightSameId:'Auf dieser Fahrt bist du bereits',
@@ -1343,6 +1372,8 @@ function ask(o){
     const i=m.querySelector('#mIn');if(i)setTimeout(()=>i.focus(),60);
   });
 }
+/* a plain result window, used wherever an action needs to say how it went */
+const info=(title,text)=>ask({title:title,text:text,cancel:false,ok:t('close')});
 async function confirm2(a,b){
   if(!await ask({title:a.title,text:a.text,ok:a.ok||'Continue',danger:true}))return false;
   if(!await ask({title:b.title,text:b.text,ok:b.ok||'Yes, do it',danger:true}))return false;
@@ -1385,66 +1416,90 @@ function buildPrint(pick){
   if(!w){toast(t('popupBlocked'));return}
   const esc2=x=>String(x==null?'':x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const title=(CFG.flight||'Flight')+(CFG.call?' \u00b7 '+CFG.call:'');
+  const now=new Date();
+  const stamp=now.toISOString().slice(0,10)+' '+now.toISOString().slice(11,16)+'Z';
+  const printedBy=t('printedBy').replace('{when}',stamp).replace('{who}',reporter());
+  const kinds=Object.keys(pick).filter(k=>pick[k]).join(', ');
+
   const body=rows.map((e,i)=>{
     const pos=e.pos_lat?e.pos_lat+' '+e.pos_lon+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':''):'';
-    const nav=[e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':'']
-      .filter(Boolean).join(' \u00b7 ');
+    const nav=[e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',
+               e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':''].filter(Boolean).join(' \u00b7 ');
     return '<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
       +'<td class="ty">'+esc2(e.type)+'</td><td class="tx">'+esc2(lastText(e))
       +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span></td></tr>';
-  }).join('');
+  }).join('')
+  +'<tr class="endrow"><td class="n"></td><td colspan="3">'+esc2(t('noFurther'))+'</td></tr>';
+
   w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc2(title)+'</title>'
    +'<style>'
    +'@page{size:A4 portrait;margin:0}'
    +'*{box-sizing:border-box}'
    +'body{margin:0;background:#eceff1;font:11px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#16181A}'
-   +'.page{position:relative;width:210mm;min-height:297mm;padding:14mm 14mm 18mm;margin:8mm auto;background:#fff;'
-   +'box-shadow:0 1px 6px rgba(0,0,0,.2);page-break-after:always;display:flex;flex-direction:column}'
+   +'.page{width:210mm;height:297mm;padding:14mm 14mm 12mm;margin:8mm auto;background:#fff;'
+   +'box-shadow:0 1px 6px rgba(0,0,0,.2);page-break-after:always;display:flex;flex-direction:column;overflow:hidden}'
    +'.page:last-child{page-break-after:auto}'
-   +'header{display:flex;align-items:flex-start;border-bottom:1.2px solid #16181A;padding-bottom:6px;margin-bottom:10px}'
+   +'header{display:flex;align-items:flex-start;border-bottom:1.2px solid #16181A;padding-bottom:6px;margin-bottom:8px;flex:0 0 auto}'
    +'header h1{font-size:15px;font-weight:600;margin:0}'
-   +'header .sub{font-size:10px;color:#5b6166;margin-top:2px}'
-   +'header img{height:34px;margin-left:auto}'
-   +'table{width:100%;border-collapse:collapse}'
-   +'td{padding:4px 5px;border-bottom:.5px solid #d6dade;vertical-align:top}'
+   +'header .sub{font-size:9.5px;color:#5b6166;margin-top:2px}'
+   +'header img{height:32px;margin-left:auto}'
+   +'.tw{flex:1 1 auto;overflow:hidden}'
+   +'table{width:100%;border-collapse:collapse;table-layout:fixed}'
+   +'td{padding:3.5px 5px;border-bottom:.5px solid #d6dade;vertical-align:top;'
+   +'word-wrap:break-word;overflow-wrap:break-word}'
    +'td.n{width:9mm;color:#7a8085;text-align:right;font-variant-numeric:tabular-nums}'
    +'td.ts{width:19mm;font-variant-numeric:tabular-nums;white-space:nowrap}'
    +'td.ty{width:24mm;color:#5b6166}'
    +'.meta{display:block;color:#7a8085;font-size:9.5px;margin-top:1px}'
-   +'footer{margin-top:auto;padding-top:6px;border-top:.5px solid #d6dade;display:flex;'
-   +'justify-content:space-between;font-size:9.5px;color:#7a8085}'
+   +'.endrow td{color:#7a8085;font-style:italic;border-bottom:none;padding-top:8px}'
+   +'footer{flex:0 0 auto;margin-top:6px;padding-top:5px;border-top:.5px solid #d6dade;'
+   +'display:flex;justify-content:space-between;gap:10px;font-size:9px;color:#7a8085}'
    +'@media print{body{background:#fff}.page{margin:0;box-shadow:none}}'
-   +'</style></head><body><div id="src"><table><tbody>'+body+'</tbody></table></div>'
+   +'</style></head><body>'
+   +'<div id="src" style="position:absolute;visibility:hidden;width:182mm"><table><tbody>'+body+'</tbody></table></div>'
    +'<div id="out"></div></body></html>');
   w.document.close();
+
   const go=()=>{
     const doc=w.document,src=doc.getElementById('src'),out=doc.getElementById('out');
     const all=[...src.querySelectorAll('tr')];
-    const head=(n,tot)=>'<header><div><h1>'+esc2(title)+'</h1>'
-      +'<div class="sub">'+esc2(t('logHeadPrint'))+' \u00b7 '
-      +esc2(Object.keys(pick).filter(k=>pick[k]).join(', '))+' \u00b7 '
-      +esc2(new Date().toISOString().slice(0,16).replace('T',' '))+'Z</div></div>'
+    const headHtml='<header><div><h1>'+esc2(title)+'</h1>'
+      +'<div class="sub">'+esc2(t('logHeadPrint'))+' \u00b7 '+esc2(kinds)+'</div></div>'
       +'<img src="icons/icon-192.png" alt=""></header>';
-    const foot=(n,tot)=>'<footer><span>'+esc2(APP_VERSION)+'</span>'
-      +'<span>'+esc2(t('page'))+' '+n+' / '+tot+'</span></footer>';
-    const mk=()=>{const d=doc.createElement('div');d.className='page';
-      d.innerHTML=head()+'<table><tbody></tbody></table>'+foot(1,1);out.appendChild(d);return d};
-    let page=mk(),tb=page.querySelector('tbody'),limit=0;
-    const fits=()=>page.scrollHeight<=page.clientHeight;
+    const footHtml='<footer><span>'+esc2(printedBy)+' \u00b7 '+esc2(APP_VERSION)
+      +'</span><span class="pg"></span></footer>';
+    const mk=()=>{const d2=doc.createElement('div');d2.className='page';
+      d2.innerHTML=headHtml+'<div class="tw"><table><tbody></tbody></table></div>'+footHtml;
+      out.appendChild(d2);return d2};
+
+    let page=mk();
+    /* how much room a page really has for rows: the sheet, less its padding, less the
+       heading and the footer. Measured once, because a heading can wrap. */
+    const PAGE_H=297/25.4*96, PAD=(14+12)/25.4*96;
+    const hH=page.querySelector('header').offsetHeight;
+    const fH=page.querySelector('footer').offsetHeight;
+    /* a heading of zero height means nothing has been laid out; then count rows instead */
+    const measured=hH>0&&fH>0;
+    const budget=PAGE_H-PAD-hH-fH-6;
+    const MAXROWS=26;
+
+    let tw=page.querySelector('.tw'),tb=page.querySelector('tbody'),n=0;
     for(const tr of all){
-      tb.appendChild(tr);
-      if(page.getBoundingClientRect().height>1122&&tb.children.length>1){
-        tb.removeChild(tr);page=mk();tb=page.querySelector('tbody');tb.appendChild(tr);
+      tb.appendChild(tr);n++;
+      const over=measured?(tw.firstChild.offsetHeight>budget||n>60):(n>MAXROWS);
+      if(over&&tb.children.length>1){
+        tb.removeChild(tr);
+        page=mk();tw=page.querySelector('.tw');tb=page.querySelector('tbody');
+        tb.appendChild(tr);n=1;
       }
-      if(++limit>4000)break;
     }
     src.remove();
     const pages=[...out.children];
-    pages.forEach((p2,i)=>{p2.querySelector('footer').innerHTML=
-      '<span>'+esc2(APP_VERSION)+'</span><span>'+esc2(t('page'))+' '+(i+1)+' / '+pages.length+'</span>'});
-    setTimeout(()=>w.print(),300);
+    pages.forEach((p2,i)=>{p2.querySelector('.pg').textContent=
+      t('page')+' '+(i+1)+' / '+pages.length});
+    setTimeout(()=>w.print(),350);
   };
-  setTimeout(go,120);
+  setTimeout(go,150);
 }
 
 async function exportSheet(){
@@ -1533,7 +1588,7 @@ async function importFromHash(){
   if(!ok)return false;
   applyShared(o);
   if(o.token)CFG.token=o.token;
-  CFG.role='follower';
+  CFG.role='follower';CFG.provisioned=1;
   save(K_CFG,CFG);
   return true;
 }
@@ -2128,6 +2183,11 @@ function lockSettings(){
   $('#btnSave').disabled=true;$('#setNote').textContent=t('locked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
   $('#foldGit').open=false;$('#foldWa').open=false;$('#foldTpl').open=false;
 }
+/* The button belongs to the master and to whoever the master invited. A device that was
+   typed up by hand is not part of that chain and would only cause confusion here. */
+function paintSyncBox(){
+  $('#syncBox').style.display=(CFG.role==='master'||Number(CFG.provisioned))?'':'none';
+}
 function paintRepHint(){
   $('#sReporterOpen').value=CFG.reporter||'';
   $('#repHint').textContent=shared()
@@ -2143,7 +2203,7 @@ $('#btnUnlock').onclick=async()=>{
     input:'password',ph:'••••',ok:'Unlock'});
   if(v===null)return;
   if(v!==PASS)return toast(t('wrongPass'));
-  UNLOCKED=true;fillSetup();paintRepHint();
+  UNLOCKED=true;fillSetup();paintRepHint();paintSyncBox();
   $('#setLocked').style.display='none';$('#setOpen').style.display='';
   $('#btnSave').disabled=false;$('#setNote').textContent=t('unlocked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
 };
@@ -2175,7 +2235,7 @@ $('#btnSave').onclick=async()=>{
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.alt=0;save(K_UI,UI);
-  save(K_CFG,CFG);applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();
+  save(K_CFG,CFG);applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();paintSyncBox();
   setTheme(document.documentElement.dataset.theme,false);
   recalc(ENT);save(K_ENT,ENT);paint();
   toast(t('settingsSaved'));lockSettings();setView('form');publishSetup();
@@ -2234,7 +2294,7 @@ $('#btnNewFlight').onclick=async()=>{
   for(const k in ETAG)delete ETAG[k];
   fillSetup();applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintRes();paint();
   publishSetup();
-  toast(t('newFlightDone')+' '+next);
+  await info(t('newFlight'),t('newFlightInfo').replace('{new}',next));
   lockSettings();setView('form');
 };
 $('#btnWipe').onclick=async()=>{
@@ -2242,7 +2302,8 @@ $('#btnWipe').onclick=async()=>{
   if(!await confirm2(
     {title:'Clear this device?',text:ENT.length+' rows are held locally, '+un+' of them not sent. Rows already on GitHub stay there and come back on the next reload.'},
     {title:'Confirm',text:'Clear the local copy?',ok:'Clear'}))return;
-  ENT=[];save(K_ENT,ENT);paint();toast(t('cleared'));
+  ENT=[];save(K_ENT,ENT);paint();
+  await info(t('clearDevice'),t('clearedInfo').replace('{n}',String(ENT.length)));
 };
 
 /* ── Minimised pill ────────────────────────────────────────────────── */
@@ -2321,7 +2382,7 @@ function toast(m){const el=$('#toast');el.textContent=m;el.className='on';clearT
 /* ── Start ─────────────────────────────────────────────────────────── */
 $$('.ver').forEach(e=>e.textContent=APP_VERSION);
 setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
-applyLang();fillSetup();paintRepHint();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
+applyLang();fillSetup();paintRepHint();paintSyncBox();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
 mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#rO2crew',UI.o2crew);paintRes();mark('#bMed',UI.med||'sand');
@@ -2341,7 +2402,7 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch((
   const applied=await importFromHash();
   if(applied){
     applyLang();fillSetup();paintQuick();paintReady();paintCrew();paintWaChecks();
-    paintInv();paintRepHint();paint();
+    paintInv();paintRepHint();paintSyncBox();paint();
     toast(t('roleIsFollower'));
     if(configured())sync(true,false);
   }
