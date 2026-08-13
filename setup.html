@@ -107,6 +107,8 @@ and leaves only the repository to pick:</p>
    <em>Organization permissions</em> and <em>Account permissions</em>; you want the first. In the newer
    interface the list starts empty and you click <strong>Add permissions</strong> and search for the one you
    need, in the older one every permission is listed with a dropdown beside it.</p>
+<p>The list is alphabetical, so it opens on <strong>Actions</strong>. That is not the one — keep going down
+   to <strong>Contents</strong>, three rows further.</p>
 <table>
 <thead>
 <tr>
@@ -117,8 +119,13 @@ and leaves only the repository to pick:</p>
 </thead>
 <tbody>
 <tr>
+<td>Actions</td>
+<td>No access</td>
+<td>The first row in the list, and the wrong one. A token with <em>Actions: Read and write</em> can start and stop workflow runs and still cannot write a log row; the app answers with a 403.</td>
+</tr>
+<tr>
 <td><strong>Contents</strong></td>
-<td>Read and write</td>
+<td><strong>Read and write</strong></td>
 <td>The one you need. It covers creating, reading, updating and deleting files, which is exactly what the app does through the Contents API.</td>
 </tr>
 <tr>

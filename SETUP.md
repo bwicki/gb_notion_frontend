@@ -74,9 +74,13 @@ https://github.com/settings/personal-access-tokens/new?name=basket-write-2026&ex
    interface the list starts empty and you click **Add permissions** and search for the one you
    need, in the older one every permission is listed with a dropdown beside it.
 
+   The list is alphabetical, so it opens on **Actions**. That is not the one — keep going down
+   to **Contents**, three rows further.
+
    | Permission | Level | Note |
    |---|---|---|
-   | **Contents** | Read and write | The one you need. It covers creating, reading, updating and deleting files, which is exactly what the app does through the Contents API. |
+   | Actions | No access | The first row in the list, and the wrong one. A token with *Actions: Read and write* can start and stop workflow runs and still cannot write a log row; the app answers with a 403. |
+   | **Contents** | **Read and write** | The one you need. It covers creating, reading, updating and deleting files, which is exactly what the app does through the Contents API. |
    | Metadata | Read-only | Added automatically as soon as any other permission is set, cannot be switched off, and grants nothing beyond the repository's name and description. |
    | everything else | No access | Not Administration, not Actions, not Workflows. Contents alone is enough. |
 8. **Generate token**, then copy it. GitHub shows it once. If you lose it, revoke it and make a
