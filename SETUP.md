@@ -1,6 +1,8 @@
 # Setup — data repository, token and Notion polling
 
-Everything the app needs on the GitHub side, and how Notion reads the result. Do this once per
+Everything the app needs on the GitHub side, and how Notion reads the result. The same material,
+laid out for printing and handing to whoever built the Notion integration, is in
+**Setup-data-repository.pdf** in the repository. Do this once per
 season, not once per flight. Twenty minutes, no command line.
 
 The app itself is documented separately in [the manual](readme.html).
@@ -45,17 +47,38 @@ Nothing else. The app creates the `data/` folder and the files inside it on its 
 Fine-grained tokens are scoped to single repositories, which is what you want here: a token
 that can write flight logs and nothing else.
 
-1. github.com → your avatar → **Settings**
-2. Left column, bottom: **Developer settings**
-3. **Personal access tokens → Fine-grained tokens → Generate new token**
+**Go straight to the page.** GitHub has been renaming this corner of the settings — where the
+documentation still says *Developer settings*, newer accounts show *Credentials* — but the
+address has not moved:
+
+```
+https://github.com/settings/personal-access-tokens
+```
+
+Then **Generate new token**. Or open a pre-filled link, which sets the name and the permission
+and leaves only the repository to pick:
+
+```
+https://github.com/settings/personal-access-tokens/new?name=basket-write-2026&expires_in=180&contents=write
+```
 4. **Token name**: something you will recognise later, e.g. `basket-reporting-2026`
 5. **Expiration**: set it to shortly after the season, not "no expiration". A token that
    expires is a token you cannot forget about.
 6. **Repository access**: *Only select repositories* → pick `gb_flight_data` alone
 7. **Permissions → Repository permissions → Contents → Read and write**
 
-   This is the only permission needed. Leave everything else on *No access*. Metadata will
-   switch itself to read-only automatically; that is normal and required.
+   **There is no single "read & write" switch on a fine-grained token** — that is the classic
+   token with its coarse `repo` scope. Here you pick one named permission at a time and give
+   each its own level. Under *Permissions* there are three groups: *Repository permissions*,
+   *Organization permissions* and *Account permissions*; you want the first. In the newer
+   interface the list starts empty and you click **Add permissions** and search for the one you
+   need, in the older one every permission is listed with a dropdown beside it.
+
+   | Permission | Level | Note |
+   |---|---|---|
+   | **Contents** | Read and write | The one you need. It covers creating, reading, updating and deleting files, which is exactly what the app does through the Contents API. |
+   | Metadata | Read-only | Added automatically as soon as any other permission is set, cannot be switched off, and grants nothing beyond the repository's name and description. |
+   | everything else | No access | Not Administration, not Actions, not Workflows. Contents alone is enough. |
 8. **Generate token**, then copy it. GitHub shows it once. If you lose it, revoke it and make a
    new one — there is no way to read it back.
 

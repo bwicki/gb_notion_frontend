@@ -85,20 +85,64 @@ followable, make it private.</p>
 <h2>3. Create the token</h2>
 <p>Fine-grained tokens are scoped to single repositories, which is what you want here: a token
 that can write flight logs and nothing else.</p>
+<p><strong>Go straight to the page.</strong> GitHub has been renaming this corner of the settings — where the
+documentation still says <em>Developer settings</em>, newer accounts show <em>Credentials</em> — but the
+address has not moved:</p>
+<pre><code>https://github.com/settings/personal-access-tokens
+</code></pre>
+<p>Then <strong>Generate new token</strong>. Or open a pre-filled link, which sets the name and the permission
+and leaves only the repository to pick:</p>
+<pre><code>https://github.com/settings/personal-access-tokens/new?name=basket-write-2026&amp;expires_in=180&amp;contents=write
+</code></pre>
 <ol>
-<li>github.com → your avatar → <strong>Settings</strong></li>
-<li>Left column, bottom: <strong>Developer settings</strong></li>
-<li><strong>Personal access tokens → Fine-grained tokens → Generate new token</strong></li>
 <li><strong>Token name</strong>: something you will recognise later, e.g. <code>basket-reporting-2026</code></li>
 <li><strong>Expiration</strong>: set it to shortly after the season, not "no expiration". A token that
    expires is a token you cannot forget about.</li>
 <li><strong>Repository access</strong>: <em>Only select repositories</em> → pick <code>gb_flight_data</code> alone</li>
 <li><strong>Permissions → Repository permissions → Contents → Read and write</strong></li>
 </ol>
-<p>This is the only permission needed. Leave everything else on <em>No access</em>. Metadata will
-   switch itself to read-only automatically; that is normal and required.
-8. <strong>Generate token</strong>, then copy it. GitHub shows it once. If you lose it, revoke it and make a
-   new one — there is no way to read it back.</p>
+<p><strong>There is no single "read &amp; write" switch on a fine-grained token</strong> — that is the classic
+   token with its coarse <code>repo</code> scope. Here you pick one named permission at a time and give
+   each its own level. Under <em>Permissions</em> there are three groups: <em>Repository permissions</em>,
+   <em>Organization permissions</em> and <em>Account permissions</em>; you want the first. In the newer
+   interface the list starts empty and you click <strong>Add permissions</strong> and search for the one you
+   need, in the older one every permission is listed with a dropdown beside it.</p>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Level</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Contents</strong></td>
+<td>Read and write</td>
+<td>The one you need. It covers creating, reading, updating and deleting files, which is exactly what the app does through the Contents API.</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Read-only</td>
+<td>Added automatically as soon as any other permission is set, cannot be switched off, and grants nothing beyond the repository's name and description.</td>
+</tr>
+<tr>
+<td>everything else</td>
+<td>No access</td>
+<td>Not Administration, not Actions, not Workflows. Contents alone is enough.</td>
+</tr>
+<tr>
+<td>8. <strong>Generate token</strong>, then copy it. GitHub shows it once. If you lose it, revoke it and make a</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>new one — there is no way to read it back.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p>The token looks like <code>github_pat_</code> followed by about eighty characters.</p>
 <h3>Where the token ends up</h3>
 <p>On each device, in the browser's local storage, unencrypted. That is a deliberate trade: no
