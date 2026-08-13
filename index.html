@@ -153,8 +153,11 @@ select:focus{outline:0;border-color:var(--sel)}
   font-size:12px;color:var(--muted);pointer-events:none}
 .unit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
 .unit span{font-size:13px;color:var(--muted)}
-.carry{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:11.5px;color:var(--muted)}
-.carry.hide{display:none}
+.dirrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
+.copylast{min-height:44px;padding:0 12px;border:1px dashed var(--line);border-radius:9px;
+  background:var(--soft);color:var(--carry);font-size:12px;max-width:38vw;line-height:1.2}
+.copylast:active{background:var(--field);color:var(--ink)}
+.copylast.hide{display:none}
 .carry button{padding:9px 14px;border:1px dashed var(--line);border-radius:9px;font-size:13px;
   flex:1;background:var(--soft);color:var(--carry)}
 .carry button:active{background:var(--field);color:var(--ink)}
@@ -178,10 +181,15 @@ select:focus{outline:0;border-color:var(--sel)}
 .lvl{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
   font-size:13px;padding:0 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .lvl.set{border-color:var(--sel)}
+.cyl{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;
+  border:1px solid var(--sel);font-size:10.5px;line-height:1;vertical-align:-3px;margin-left:3px}
 .lvlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .lvlgrid button{min-height:46px;border:1px solid var(--line);border-radius:9px;
   background:var(--field);font-size:14px}
 .lvlgrid button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.o2head{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;font-size:10px;color:var(--muted);margin-bottom:3px}
+.o2set{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px}
+.o2set>span{font-size:12px;color:var(--muted)}
 .o2row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:8px}
 .o2row label{display:flex;align-items:center;gap:9px;min-width:0}
 .o2row input[type=radio]{width:20px;height:20px;flex:0 0 auto;accent-color:var(--sel);margin:0}
@@ -224,6 +232,8 @@ select.pre{color:var(--carry);border-style:dashed}
 .ftline{display:flex;align-items:baseline;gap:8px;margin-top:8px}
 .legal{font-size:10px;color:var(--muted);text-align:center;margin:0 0 6px}
 .legal a{text-decoration:underline;text-underline-offset:2px}
+.upmark{display:inline-block;width:14px;height:14px;vertical-align:-3px}
+.upmark svg{width:14px;height:14px;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .tiny{flex:1;min-width:0;font-size:11px;color:var(--muted);text-align:left;margin:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ver{flex:0 0 auto;font-size:9px;letter-spacing:.02em;color:var(--muted);opacity:.65;
@@ -286,16 +296,18 @@ body.min .app{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
 
+#btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #btnPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #btnPost.wait{background:#FBF1D2;border:1px solid #E5CE86;color:#5A4306}
 #btnPost.fail{background:#F9DFDB;border:1px solid #E3ADA4;color:#6C2016;font-size:14px}
-html[data-theme="night"] #btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
+html[data-theme="night"] #btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+#btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 html[data-theme="night"] #btnPost.wait{background:#211803;border-color:#5E4708;color:#D8AC33}
 html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;color:#E2705F}
-#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);
+#toast{position:fixed;right:14px;bottom:calc(104px + var(--safe-b));transform:translateY(10px);
   background:var(--sel);color:var(--sel-ink);border-radius:9px;padding:11px 17px;font-size:14px;
-  opacity:0;pointer-events:none;transition:.18s;z-index:120;max-width:86vw;text-align:center}
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  opacity:0;pointer-events:none;transition:.18s;z-index:120;max-width:70vw;text-align:right}
+#toast.on{opacity:1;transform:translateY(0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -366,10 +378,12 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <div class="lastmsg" id="aLast">
           <div class="lm-top"></div><div class="lm-body"></div>
         </div>
-        <div class="f"><div class="pills" id="aDir">
-          <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="transmitted">Transmitted</button>
-        </div></div>
-        <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last msg</button></div>
+        <div class="f dirrow">
+          <div class="pills g2" id="aDir">
+            <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="transmitted">Transmitted</button>
+          </div>
+          <button id="aConfirm" class="copylast hide" data-t="copyLast">Copy from last call</button>
+        </div>
         <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
         <div class="f"><div class="links small" id="aStaChips"></div></div>
         <div class="f atcrow">
@@ -381,7 +395,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         </div>
         <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
         <div class="f"><div class="links small" id="aChips"></div></div>
-        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
           <div class="links wa" id="waATCco" style="margin-bottom:7px"></div>
           <div class="links wa" id="waATC"></div></div>
       </div>
@@ -411,7 +425,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button class="lvl" id="rO2">—</button></div>
         </div>
         <div class="f"><textarea id="cNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
-        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
           <div class="links wa" id="waRes"></div></div>
       </div>
 
@@ -429,7 +443,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div class="thumbs" id="oThumbs"></div>
           <div class="voicebar" id="oVoice"></div>
         </div>
-        <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
+        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
           <div class="links wa" id="waOth"></div></div>
       </div>
     </div>
@@ -462,7 +476,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
     <div class="scroll">
       <div id="syncBox" style="display:none">
         <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
-        <p class="hint" data-t="syncHint">Sends what is waiting and reads the table back.</p>
+        <p class="hint" data-t="syncHint" style="margin-top:12px">Sends what is waiting and reads the table back.</p>
       </div>
 
       <h3 data-t="hLanguage">Language</h3>
@@ -502,28 +516,51 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <p class="hint" id="sReporterLab"></p>
 
         <h3 data-t="hFlight">Flight</h3>
-        <div class="f two"><input type="text" id="sFlight" data-tp="pFlight" placeholder="Flight ID">
-          <input type="text" id="sCall" data-tp="pCall" placeholder="Callsign" autocapitalize="characters"></div>
-        <div class="f two"><input type="number" id="sInit" inputmode="decimal" data-tp="pInit" placeholder="Ballast on board at start, kg">
-          <input type="text" id="sVfr" inputmode="numeric" maxlength="4" data-tp="pVfr" placeholder="VFR squawk"></div>
-        <div class="f"><input type="text" id="sEmerg" data-tp="pEmerg" placeholder="Emergency squawks, e.g. 7500,7600,7700"></div>
+        <div class="f two">
+          <div><p class="lab" data-t="lFlight">Flight ID</p>
+            <input type="text" id="sFlight" placeholder="GB-2026-01"></div>
+          <div><p class="lab" data-t="lCall">Callsign</p>
+            <input type="text" id="sCall" placeholder="HB-QWV" autocapitalize="characters"></div>
+        </div>
+        <div class="f two">
+          <div><p class="lab" data-t="lP1">Pilot 1</p><input type="text" id="sP1" placeholder="–"></div>
+          <div><p class="lab" data-t="lP2">Pilot 2</p><input type="text" id="sP2" placeholder="–"></div>
+        </div>
+        <div class="f"><p class="lab" data-t="lInit">Ballast on board at start</p>
+          <div class="sfx"><input type="number" id="sInit" inputmode="decimal" placeholder="–"><span>kg</span></div></div>
         <p class="hint" data-t="hintInit">Only needed before the first inventory.</p>
-        <div class="f two"><input type="text" id="sP1" data-tp="pP1" placeholder="Pilot 1"><input type="text" id="sP2" data-tp="pP2" placeholder="Pilot 2"></div>
 
         <h3 data-t="hBallast">Ballast</h3>
-        <div class="f two"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" data-tp="pBagKg" placeholder="Weight per bag kg">
-          <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" data-tp="pReadyKg" placeholder="Full ready ballast kg"></div>
-        <div class="f"><input type="text" id="sSteps" data-tp="pSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
-        <div class="f"><input type="text" id="sReady" data-tp="pReadySteps" placeholder="Ready ballast steps, e.g. 0,10,25,50,75,100"></div>
+        <div class="f two">
+          <div><p class="lab" data-t="lBagKg">Bag standard weight</p>
+            <div class="sfx"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="15"><span>kg</span></div></div>
+          <div><p class="lab" data-t="lReadyKg">Weight full standby ballast (Sch&#252;tte)</p>
+            <div class="sfx"><input type="number" id="sReadyKg" inputmode="decimal" step="0.5" placeholder="30"><span>kg</span></div></div>
+        </div>
+        <div class="f"><p class="lab" data-t="lSteps">Standard dispense buttons</p>
+          <div class="sfx"><input type="text" id="sSteps" placeholder="5,10,15,25"><span>kg</span></div></div>
+        <div class="f"><p class="lab" data-t="lReadySteps">Standard standby (Sch&#252;tte) reporting units</p>
+          <input type="text" id="sReady" placeholder="0,10,25,50,75,100"></div>
         <h3 data-t="hAtc">ATC</h3>
+        <div class="f two">
+          <div><p class="lab" data-t="lVfr">VFR squawk</p>
+            <input type="text" id="sVfr" inputmode="numeric" maxlength="4" placeholder="7000"></div>
+          <div><p class="lab" data-t="lEmerg">Emergency squawks</p>
+            <input type="text" id="sEmerg" placeholder="7500,7600,7700"></div>
+        </div>
         <div class="f"><p class="lab" data-t="lStations">Station presets</p>
           <input type="text" id="sStations" data-tp="pStations" placeholder="Info,Radar,Tower"></div>
         <div class="f"><p class="lab" data-t="lMsgRx">Message presets — received</p>
           <input type="text" id="sMsgRx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
-        <div class="f two"><input type="text" id="sO2" data-tp="pO2" placeholder="O2 cylinders in liters, e.g. 2,2,10">
-          <input type="number" id="sO2bar" inputmode="numeric" data-tp="pO2bar" placeholder="Full pressure bar"></div>
+        <h3 data-t="hRessources">Ressources</h3>
+        <div class="f"><p class="lab" data-t="lMethInit">Methanol level at start</p>
+          <div class="sfx"><input type="number" id="sMethInit" inputmode="numeric" step="5" placeholder="100"><span>%</span></div></div>
+        <p class="lab" data-t="lO2">O2 cylinders</p>
+        <p class="hint" data-t="lO2hint">The bottles carried.</p>
+        <div id="o2Rows"></div>
+        <input type="hidden" id="sO2"><input type="hidden" id="sO2bar">
 
         <p class="hint" data-t="hintAuto">Entries are posted automatically.</p>
 
@@ -562,7 +599,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         </details>
 
         <div style="height:14px"></div>
-        <button class="go" id="btnNewFlight" data-t="newFlight">Begin new flight</button>
+        <button class="go" id="btnNewFlight" data-t="newFlight" style="display:none">Begin new flight</button>
         <button class="go warn" id="btnWipe" data-t="clearDevice">Clear entries on this device</button>
       </div>
     </div>
@@ -586,15 +623,15 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-05';
+const APP_VERSION='v260813-08';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
+           bagKg:15,readyKg:30,methInit:100,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{maps}',
@@ -630,9 +667,9 @@ const L={en:{
  onBoard:'on board', stillAvail:'still available', dropped:'dropped', takenOn:'taken on',
  remaining:'remaining', totalBallast:'total ballast', methanolShort:'methanol', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop', takeInv:'Take Inventory', sand:'Sand', waterW:'Water',
- kgDropped:'Kilograms dropped', bags:'sand bags', water:'water', remark:'Remark (optional)',
+ kgDropped:'Ballast (in kg) dropped since last ballast report', bags:'sand bags', water:'water', remark:'Remark (optional)',
  readyBallast:'Ready ballast (\u201eSch\u00fctte\u201c)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
- message:'Message', confirmLast:'Confirm from last call', sendWa:'Send to WhatsApp',
+ message:'Message', confirmLast:'Confirm from last call', copyLast:'Copy from last call', sendWa:'Also send to WhatsApp',
  noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
  nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
  export:'Export', format:'Format', destination:'Destination', download:'Download', share:'Share…', battery:'Battery', fuelCell:'Fuel cell', solarCell:'Solar Panel',
@@ -652,7 +689,8 @@ const L={en:{
  printedBy:'printed {when} by {who}', noFurther:'[no further log entries]', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
  enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
- sqDigits:'A squawk is four digits, each 0 to 7', atcPosted:'ATC posted',
+ sqDigits:'A squawk is four digits, each 0 to 7',
+ freqRange:'A frequency runs from 118.000 to 136.975 MHz', freqStep:'Not a channel: names end in 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password', checking:'Checking\u2026',
@@ -667,6 +705,7 @@ const L={en:{
  clearedInfo:'The local table is empty. Rows already on GitHub come back with the next reload.',
  newFlightInfo:'Flight {new} has started. Every device in the crew follows within a few seconds.',
  enterRepoToken:'Enter repository and token first',
+ sureChange:'Do you really want to change these settings?',
  newFlight:'Begin new flight', newFlightPass:'Closing a flight and opening the next one needs the master password.',
  newFlightAsk:'Name the new flight. The old one keeps its own files; nothing is overwritten.',
  newFlightNeedsId:'The new flight needs an ID', newFlightSameId:'That is the flight you are already on',
@@ -674,7 +713,9 @@ const L={en:{
  newFlightWarn2:'The old files stay on GitHub and are listed in the flight index. This device clears its local table.',
  newFlightOffline:'{q} entries have not reached GitHub and there is no connection. Starting a new flight now loses them.',
  newFlightDone:'New flight',
- fPosted:'Posted to CC Notion', fQueued:'Queued for later delivery (no internet connection currently)',
+ firstByMaster:'New flight must be initiated by the master device.',
+ verifySettings:'New flight initiated. Please verify that all settings are accurate.',
+ waitConfirm:'\u2026 wait for confirmation', fPosted:'Posted to CC Notion', fQueued:'Queued for later delivery (no internet connection currently)',
  fFailed:'Failed', fNoRepo:'Failed: no repository configured',
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
  addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
@@ -686,6 +727,12 @@ const L={en:{
  pBagKg:'Weight per bag kg', pReadyKg:'Full ready ballast kg',
  pSteps:'Quick drop amounts, e.g. 5,10,15,25', pReadySteps:'Ready ballast steps, e.g. 0,10,25,50,75,100',
  pO2:'O\u2082 cylinders in liters, e.g. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
+ lFlight:'Flight ID', lCall:'Callsign', lP1:'Pilot 1', lP2:'Pilot 2', lInit:'Ballast on board at start',
+ lVfr:'VFR squawk', lEmerg:'Emergency squawks', lBagKg:'Bag standard weight',
+ lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
+ lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
+ hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The bottles carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of gas at one bar.',
+ lMethInit:'Methanol level at start', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
  lStations:'Station presets', lMsgRx:'Message presets \u2014 received', lMsgTx:'Message presets \u2014 transmitted', pO2bar:'Full pressure bar', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
  pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'xxxx',
  hintRole:'The master owns the flight setup and publishes it. Followers pick up every change the master saves.',
@@ -720,9 +767,9 @@ const L={en:{
  onBoard:'an Bord', stillAvail:'noch verfügbar', dropped:'abgeworfen', takenOn:'aufgenommen',
  remaining:'verbleibend', totalBallast:'Gesamtballast', methanolShort:'Methanol', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
  drop:'Abwurf', takeInv:'Inventar', sand:'Sand', waterW:'Wasser',
- kgDropped:'Kilogramm abgeworfen', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
+ kgDropped:'Ballast (in kg) seit der letzten Ballastmeldung', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
  readyBallast:'Ready Ballast (\u201eSch\u00fctte\u201c)', schuette:'Sch\u00fctte', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
- message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', sendWa:'An WhatsApp senden',
+ message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', copyLast:'Vom letzten Ruf kopieren', sendWa:'Auch an WhatsApp senden',
  noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
  nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
  export:'Export', format:'Format', destination:'Ziel', download:'Herunterladen', share:'Teilen…', battery:'Batterie', fuelCell:'Brennstoffzelle', solarCell:'Solarpanel',
@@ -743,7 +790,8 @@ const L={en:{
  printedBy:'gedruckt {when} von {who}', noFurther:'[keine weiteren Einträge]', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
  enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
- sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7', atcPosted:'ATC gesendet',
+ sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7',
+ freqRange:'Eine Frequenz liegt zwischen 118.000 und 136.975 MHz', freqStep:'Kein Kanal: Endungen sind 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
@@ -758,6 +806,7 @@ const L={en:{
  clearedInfo:'Die lokale Tabelle ist leer. Bereits auf GitHub liegende Zeilen kommen beim nächsten Laden zurück.',
  newFlightInfo:'Fahrt {new} ist eröffnet. Jedes Gerät der Crew zieht binnen Sekunden nach.',
  enterRepoToken:'Zuerst Repository und Token eintragen',
+ sureChange:'Diese Einstellungen wirklich ändern?',
  newFlight:'Neue Fahrt beginnen', newFlightPass:'Eine Fahrt zu schliessen und die nächste zu öffnen verlangt das Master-Passwort.',
  newFlightAsk:'Kennung der neuen Fahrt. Die alte behält ihre eigenen Dateien, nichts wird überschrieben.',
  newFlightNeedsId:'Die neue Fahrt braucht eine Kennung', newFlightSameId:'Auf dieser Fahrt bist du bereits',
@@ -765,7 +814,9 @@ const L={en:{
  newFlightWarn2:'Die alten Dateien bleiben auf GitHub und werden im Fahrtenverzeichnis eingetragen. Dieses Gerät leert seine lokale Tabelle.',
  newFlightOffline:'{q} Einträge haben GitHub nicht erreicht und es besteht keine Verbindung. Eine neue Fahrt jetzt verliert sie.',
  newFlightDone:'Neue Fahrt',
- fPosted:'An CC Notion gesendet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
+ firstByMaster:'Eine neue Fahrt muss vom Master-Gerät eröffnet werden.',
+ verifySettings:'Neue Fahrt eröffnet. Bitte alle Einstellungen prüfen.',
+ waitConfirm:'\u2026 warte auf Bestätigung', fPosted:'An CC Notion gesendet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
  fFailed:'Fehlgeschlagen', fNoRepo:'Fehlgeschlagen: kein Repository eingerichtet',
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
  addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
@@ -777,6 +828,12 @@ const L={en:{
  pBagKg:'Gewicht pro Sack, kg', pReadyKg:'Voller Ready Ballast, kg',
  pSteps:'Schnellmengen, z. B. 5,10,15,25', pReadySteps:'Ready-Ballast-Stufen, z. B. 0,10,25,50,75,100',
  pO2:'O\u2082-Flaschen in Liter, z. B. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
+ lFlight:'Fahrtkennung', lCall:'Rufzeichen', lP1:'Pilot 1', lP2:'Pilot 2', lInit:'Ballast an Bord beim Start',
+ lVfr:'VFR-Squawk', lEmerg:'Notfall-Squawks', lBagKg:'Standardgewicht pro Sack',
+ lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
+ lReadySteps:'Standard-Meldeschritte Schütte',
+ hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter Gas bei einem bar.',
+ lMethInit:'Methanolstand beim Start', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
  lStations:'Stellen-Vorschläge', lMsgRx:'Textbausteine \u2014 empfangen', lMsgTx:'Textbausteine \u2014 gesendet', pO2bar:'Fülldruck bar', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
  pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'xxxx',
  hintRole:'Der Master besitzt die Einrichtung der Fahrt und gibt sie weiter. Follower übernehmen jede Änderung.',
@@ -1072,7 +1129,7 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps',
-  'bagKg','readyKg','vfr','emerg','stations','msgRx','msgTx','o2','o2bar',
+  'bagKg','readyKg','methInit','vfr','emerg','stations','msgRx','msgTx','o2','o2bar',
   'atcName','atcNum','wa','tpl'];
 function setupPayload(withToken){
   const o={v:1,master_device:DEV,updated_at:new Date().toISOString(),by:reporter()};
@@ -1101,8 +1158,27 @@ async function publishSetup(){
     await ghPut(setupPath(),JSON.stringify(setupPayload(false),null,1),sha,'setup · '+reporter());
   }catch(e){}
 }
+/* the table of the flight just closed is kept on the device, so a follower can still look
+   something up after the master has moved on */
+function archiveLocal(flight){
+  if(!ENT.length)return;
+  try{
+    const key='bsk.archive.'+String(flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
+    localStorage.setItem(key,JSON.stringify({flight:flight,closed_at:new Date().toISOString(),
+      rows:ENT.length,entries:ENT}));
+  }catch(e){}
+}
 function applyShared(o){
   let changed=false;
+  /* a follower that learns of a new flight starts empty, or it would show the old flight's
+     entries under the new name */
+  if(o.flight!==undefined&&CFG.flight&&o.flight!==CFG.flight){
+    archiveLocal(CFG.flight);
+    ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
+    UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};save(K_UI,UI);
+    for(const k in ETAG)delete ETAG[k];
+    CFG.fresh=1;
+  }
   SHARED.forEach(k=>{
     if(o[k]===undefined)return;
     if(JSON.stringify(o[k])!==JSON.stringify(CFG[k])){CFG[k]=o[k];changed=true}
@@ -1219,8 +1295,7 @@ async function sync(silent,push,attempt){
 /* ── Painting ──────────────────────────────────────────────────────── */
 let LASTPEND=-1;
 function paintStatus(){
-  $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' \u00b7 '+CFG.call:'')
-    +' \u00b7 '+reporter()+(shared()&&UI.alt?' *':'');
+  $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' \u00b7 '+CFG.call:'');
   /* course, ground speed and accuracy sit under the flight, in the same type */
   if(GPS&&Date.now()-GPS.t<30000){
     const g=[];
@@ -1233,9 +1308,13 @@ function paintStatus(){
   const last=chrono(ENT)[ENT.length-1];
   const when=last?String(last.ts_utc).slice(11,19)+'Z':'--:--:--Z';
   const who=last?(last.reporter||last.device||'—'):'—';
-  const up=!configured()?t('noRepo'):(SYNCING?'…':(un?'\u2717 '+un:'\u2713'));
   const cat=last?last.type:'\u2014';
-  $('#hSt').textContent=t('lastMsg')+' '+when+'/'+who+'/'+cat+'  |  '+t('upload')+' '+up;
+  /* the mark stands still: it says where the queue is, not whether a poll happens to be
+     running at this instant */
+  const anyFail=ENT.some(e=>e.failed&&!e.synced);
+  const mk2=!configured()?'':(un?(anyFail?ST_FAIL:ST_WAIT):ST_OK);
+  $('#hSt').innerHTML=esc(t('lastMsg')+' '+when+'/'+who+'/'+cat+'  |  '+t('upload')+' ')
+    +(mk2?'<span class="upmark">'+mk2+'</span>'+(un?' '+un:''):esc(t('noRepo')));
   /* the ticks in the log follow the queue on their own, without a redraw on every tick */
   const failed=ENT.filter(e=>e.failed&&!e.synced).length;
   const sig=un*1000+failed;
@@ -1348,19 +1427,22 @@ const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waRes':'Ressources','#waOth':'Oth
 /* on ATC the coordinator gets a line of its own above the rest of the list */
 function paintWaChecks(){
   for(const sel in WABOX){
-    const type=WABOX[sel],box=$(sel);
-    let list=waRoster(type);
-    if(type==='ATC')list=sel==='#waATCco'?list.slice(0,1):list.slice(1);
+    const type=WABOX[sel],box=$(sel),roster=waRoster(type),co=atcCo();
+    let list=roster;
+    if(type==='ATC'){
+      const isCo=r=>co&&r.p===co.p;
+      list=sel==='#waATCco'?roster.filter(isCo):roster.filter(r=>!isCo(r));
+    }
     if(!list.length){box.innerHTML=sel==='#waATCco'?'':'<span class="lab">'+esc(t('noRecipients'))+'</span>';continue}
-    box.innerHTML=list.map(r=>{
-      const i=waRoster(type).indexOf(r);
-      return `<button data-i="${i}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`;
-    }).join('');
+    /* one pill per person, matched by number rather than by position — the coordinator is
+       rebuilt on every call and would never match an index */
+    box.innerHTML=list.map(r=>
+      `<button data-p="${esc(r.p)}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`).join('');
   }
 }
 for(const sel in WABOX)$(sel).addEventListener('click',ev=>{
-  const b=ev.target.closest('button');if(!b)return;
-  const type=WABOX[sel],r=waRoster(type)[Number(b.dataset.i)];
+  const b=ev.target.closest('button');if(!b||!b.dataset.p)return;
+  const type=WABOX[sel],r=waRoster(type).find(x=>x.p===b.dataset.p);
   if(r){waToggle(type,r);paintWaChecks()}
 });
 function paintInv(){
@@ -1447,11 +1529,30 @@ function buildPrint(pick){
   const printedBy=t('printedBy').replace('{when}',stamp).replace('{who}',reporter());
   const kinds=Object.keys(pick).filter(k=>pick[k]).join(', ');
 
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DSH=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MON=['January','February','March','April','May','June','July',
+             'August','September','October','November','December'];
+  const MSH=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dOf=e=>new Date(e.ts_utc);
+  const dayKey=e=>String(e.ts_utc).slice(0,10);
+  const dayLong=e=>{const x=dOf(e);
+    return DAYS[x.getUTCDay()]+', '+x.getUTCDate()+' '+MON[x.getUTCMonth()]+' '+x.getUTCFullYear()};
+  const dayShort=e=>{const x=dOf(e);
+    return DSH[x.getUTCDay()]+' '+x.getUTCDate()+' '+MSH[x.getUTCMonth()]+' '+x.getUTCFullYear()};
+  /* a flight can run past midnight, so the printout is broken by day while the numbering
+     runs straight through */
+  const span=dayKey(rows[0])===dayKey(rows[rows.length-1])
+    ? dayShort(rows[0]) : dayShort(rows[0])+' - '+dayShort(rows[rows.length-1]);
+  const title2=title+' \u00b7 '+span;
+
   const body=rows.map((e,i)=>{
     const pos=e.pos_lat?e.pos_lat+' '+e.pos_lon+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':''):'';
     const nav=[e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',
                e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':''].filter(Boolean).join(' \u00b7 ');
-    return '<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
+    const newDay=(i===0||dayKey(rows[i-1])!==dayKey(e))
+      ? '<tr class="dayrow"><td colspan="4">'+esc2(dayLong(e))+'</td></tr>' : '';
+    return newDay+'<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
       +'<td class="ty">'+esc2(e.type)+'</td><td class="tx">'+esc2(lastText(e))
       +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span></td></tr>';
   }).join('')
@@ -1478,6 +1579,7 @@ function buildPrint(pick){
    +'td.ty{width:24mm;color:#5b6166}'
    +'.meta{display:block;color:#7a8085;font-size:9.5px;margin-top:1px}'
    +'.endrow td{color:#7a8085;font-style:italic;border-bottom:none;padding-top:8px}'
+   +'.dayrow td{font-weight:700;font-size:11.5px;padding:9px 0 4px;border-bottom:1px solid #16181A}'
    +'footer{flex:0 0 auto;margin-top:6px;padding-top:5px;border-top:.5px solid #d6dade;'
    +'display:flex;justify-content:space-between;gap:10px;font-size:9px;color:#7a8085}'
    +'@media print{body{background:#fff}.page{margin:0;box-shadow:none}}'
@@ -1489,7 +1591,7 @@ function buildPrint(pick){
   const go=()=>{
     const doc=w.document,src=doc.getElementById('src'),out=doc.getElementById('out');
     const all=[...src.querySelectorAll('tr')];
-    const headHtml='<header><div><h1>'+esc2(title)+'</h1>'
+    const headHtml='<header><div><h1>'+esc2(title2)+'</h1>'
       +'<div class="sub">'+esc2(t('logHeadPrint'))+' \u00b7 '+esc2(kinds)+'</div></div>'
       +'<img src="icons/icon-192.png" alt=""></header>';
     const footHtml='<footer><span>'+esc2(printedBy)+' \u00b7 '+esc2(APP_VERSION)
@@ -1509,14 +1611,21 @@ function buildPrint(pick){
     const budget=PAGE_H-PAD-hH-fH-6;
     const MAXROWS=26;
 
+    /* a day heading and the first entry under it travel together, so a heading never ends
+       up alone at the foot of a page */
+    const units=[];
+    for(let i=0;i<all.length;i++){
+      if(all[i].classList.contains('dayrow')&&all[i+1]){units.push([all[i],all[i+1]]);i++}
+      else units.push([all[i]]);
+    }
     let tw=page.querySelector('.tw'),tb=page.querySelector('tbody'),n=0;
-    for(const tr of all){
-      tb.appendChild(tr);n++;
+    for(const unit of units){
+      unit.forEach(tr=>tb.appendChild(tr));n+=unit.length;
       const over=measured?(tw.firstChild.offsetHeight>budget||n>60):(n>MAXROWS);
-      if(over&&tb.children.length>1){
-        tb.removeChild(tr);
+      if(over&&tb.children.length>unit.length){
+        unit.forEach(tr=>tb.removeChild(tr));
         page=mk();tw=page.querySelector('.tw');tb=page.querySelector('tbody');
-        tb.appendChild(tr);n=1;
+        unit.forEach(tr=>tb.appendChild(tr));n=unit.length;
       }
     }
     src.remove();
@@ -1648,9 +1757,9 @@ async function openMenu(){
   };
   const items=[['form',t('mReport')],['log',t('mLog')],['set',t('mSettings')],
                ['theme',isNight()?t('mDay'):t('mNight')],
-               ['pull',t('mReload')],['sync',t('mSend')],['share',t('mShare')],
-               ['print',t('mPrint')],['export',t('mExport')],
-               ['about',t('mAbout')]];
+               ['pull',t('mReload')],['sync',t('mSend')]]
+    .concat(CFG.role==='master'?[['share',t('mShare')]]:[]).concat([
+               ['print',t('mPrint')],['export',t('mExport')],['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
@@ -1702,6 +1811,9 @@ pills('#bMed',v=>{UI.med=v;save(K_UI,UI)});
 function paintSum(){
   const v=$('#bKg').value.trim();
   $('#bReset').classList.toggle('hide',!v);
+  const last=lastOf('Ballast');
+  $$('[data-t="kgDropped"]').forEach(el=>el.textContent=t('kgDropped')
+    +(last?' '+String(last.ts_utc).slice(11,16)+'Z':''));
 }
 $('#bQuick').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
@@ -1735,7 +1847,12 @@ function paintChips(){
 $('#aChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   const parts=msgParts(),i=parts.indexOf(b.dataset.v);
   if(i>=0)parts.splice(i,1);else parts.push(b.dataset.v);
-  $('#aMsg').value=parts.join(' \u00b7 ');paintChips()});
+  /* a trailing space, so the next word can simply be typed on */
+  const el=$('#aMsg');
+  el.value=parts.join(' \u00b7 ')+(parts.length?' ':'');
+  paintChips();el.focus();
+  try{el.setSelectionRange(el.value.length,el.value.length)}catch(err){}
+});
 $('#aMsg').addEventListener('input',paintChips);
 /* changing the PIC puts the other pilot on rest, which is the normal case; Nobody stays
    one tap away for the stretches when both are awake */
@@ -1772,7 +1889,7 @@ const o2Sizes=()=>String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x))
 const o2Litres=()=>{const sz=o2Sizes(),b=UI.o2bars||[];
   return Math.round(sz.reduce((a,l,i)=>a+(b[i]>0?l*b[i]:0),0))};
 const o2Full=()=>Math.round(o2Sizes().reduce((a,l)=>a+l*(nz(CFG.o2bar)||200),0));
-const o2Pct=()=>{const f=o2Full();return f?Math.round(o2Litres()/f*100):null};
+const o2Pct=()=>{const f=o2Full();return f?Math.min(100,Math.round(o2Litres()/f*100)):null};
 const o2Summary=()=>{
   if(!o2Sizes().length||!(UI.o2bars||[]).some(x=>x>0))return '';
   const p=o2Pct();return o2Litres()+' l'+(p==null?'':' ('+p+'%)');
@@ -1782,10 +1899,14 @@ function paintRes(){
   $('#rBat').classList.toggle('set',UI.bat!=null);
   $('#rMeth').textContent=UI.meth==null?'\u2014':UI.meth+'%';
   $('#rMeth').classList.toggle('set',UI.meth!=null);
-  const sizes=o2Sizes(),bars=UI.o2bars||[];
-  const parts=sizes.map((l,i)=>bars[i]==null||bars[i]===''?null:bars[i]+' bar').filter(Boolean);
-  $('#rO2').textContent=!sizes.length?'\u2014':(parts.length?parts.join(' · '):'\u2014');
-  $('#rO2').classList.toggle('set',!!parts.length);
+  /* the reserve is what matters in flight: litres, the share of a full load, and which
+     bottle is being breathed from. The pressures belong in the input window. */
+  const sum=o2Summary();
+  const cyl=(UI.o2use==null?0:UI.o2use)+1;
+  $('#rO2').innerHTML=sum?esc(sum)+' <span class="cyl">'+cyl+'</span>':'\u2014';
+  $('#rO2').classList.toggle('set',!!sum);
+  $('#rO2').disabled=UI.o2crew!=='on';
+  $('#rO2').style.opacity=UI.o2crew==='on'?'':'.45';
 }
 $('#rBat').onclick=async()=>{UI.bat=await levelSheet(t('battery'),UI.bat);save(K_UI,UI);paintRes()};
 $('#rMeth').onclick=async()=>{UI.meth=await levelSheet(t('methanol'),UI.meth);save(K_UI,UI);paintRes()};
@@ -1832,7 +1953,7 @@ function preFill(pairs,store){
 }
 function acceptPre(scope){
   $$(scope+' .pre').forEach(el=>el.classList.remove('pre'));
-  if(scope==='#b-ATC')$('#aCarry').classList.add('hide');
+
 }
 /* Every kind of message shows the last one of its own kind, whoever filed it and from
    whichever device, so the header names the reporter and the time. */
@@ -1878,7 +1999,7 @@ function carryAtc(){
   adoptLast();paintLastBoxes();paintStaChips();
   const l=UI.lastAtc||{};
   const has=!!(l.station||l.freq||l.squawk);
-  $('#aCarry').classList.toggle('hide',!has);
+  $('#aConfirm').classList.toggle('hide',!has);
   if(has&&!$('#aStation').value&&!$('#aFreq').value&&!$('#aSquawk').value)fillAtcFromLast(true);
   else setTimeout(syncVfr,0);
 }
@@ -1916,6 +2037,7 @@ function adoptLast(){
     if(kp)UI.pic=kp;
     UI.rest=kr||'';
   }
+  if(UI.meth==null&&nz(CFG.methInit))UI.meth=nz(CFG.methInit);
   if(r&&r.res_battery_pct!=null&&r.res_battery_pct!==''&&UI.bat==null)UI.bat=Number(r.res_battery_pct);
   save(K_UI,UI);
 }
@@ -1936,6 +2058,18 @@ function fmtFreq(v){const d=freqDigits(v);return d.length<3?d:d.slice(0,3)+'.'+d
 $('#aFreq').addEventListener('input',()=>{const el=$('#aFreq'),f=freqLive(el.value);
   if(f!==el.value)el.value=f});
 $('#aFreq').addEventListener('blur',()=>{const el=$('#aFreq');if(el.value.trim())el.value=fmtFreq(el.value)});
+/* The airband runs from 118.000 to 136.975. Beyond the range, the last two digits of a
+   channel name are also fixed: 25 kHz channels end in 00/25/50/75, and the 8.33 kHz channels
+   inserted between them end in 05/10/15, 30/35/40, 55/60/65, 80/85/90. Endings 20, 45, 70
+   and 95 exist in neither scheme and are a typing slip, not a channel. */
+const FREQ_END=[0,5,10,15,25,30,35,40,50,55,60,65,75,80,85,90];
+function freqBad(v){
+  const n=parseFloat(v);
+  if(!isFinite(n))return 'form';
+  if(n<118||n>136.975)return 'range';
+  const khz=Math.round(n*1000);
+  return FREQ_END.includes(khz%100)?'':'step';
+}
 
 /* a squawk is four octal digits, so 8 and 9 never occur */
 const VFR=()=>{const v=String(CFG.vfr||'7000').replace(/[^0-7]/g,'').slice(0,4);return v.length===4?v:'7000'};
@@ -1947,7 +2081,6 @@ $('#aSquawk').addEventListener('input',()=>{const el=$('#aSquawk');
   const c=el.value.replace(/[^0-7]/g,'').slice(0,4);if(c!==el.value)el.value=c;syncVfr()});
 $('#btnVfr').onclick=()=>{const el=$('#aSquawk');
   el.value=el.value===VFR()?'':VFR();el.classList.remove('pre');
-  if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide');
   syncVfr()};
 
 $('#aConfirm').onclick=()=>{
@@ -1957,7 +2090,9 @@ $('#aConfirm').onclick=()=>{
   toast(t('takenOver'));
 };
 /* tapping into one of the three means a new value, so the old one gets out of the way */
+let SKIPCLR=false;
 ['#aStation','#aFreq','#aSquawk'].forEach(sel=>$(sel).addEventListener('focus',()=>{
+  if(SKIPCLR)return;
   const el=$(sel);
   if(el.value){el.value='';el.classList.remove('pre');if(sel==='#aSquawk')syncVfr()}
 }));
@@ -1967,9 +2102,22 @@ function paintStaChips(){
   const list=String(CFG.stations||DEF.stations).split(',').map(x=>x.trim()).filter(Boolean).slice(0,8);
   $('#aStaChips').innerHTML=list.map(x=>`<button data-v="${esc(x)}">${esc(x)}</button>`).join('');
 }
+/* inserted where the cursor stands, with exactly one space on either side and never two */
+function insertAt(el,txt){
+  if(el.classList.contains('pre')){el.value='';el.classList.remove('pre')}
+  const v=el.value;
+  let a=(el.selectionStart==null?v.length:el.selectionStart);
+  let b=(el.selectionEnd==null?v.length:el.selectionEnd);
+  let left=v.slice(0,a).replace(/\s+$/,''), right=v.slice(b).replace(/^\s+/,'');
+  const out=(left?left+' ':'')+txt+(right?' '+right:'');
+  el.value=out;
+  const pos=(left?left.length+1:0)+txt.length;
+  el.focus();
+  try{el.setSelectionRange(pos,pos)}catch(e2){}
+}
 $('#aStaChips').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
-  const el=$('#aStation');el.value=b.dataset.v;el.classList.remove('pre');
+  SKIPCLR=true;insertAt($('#aStation'),b.dataset.v);setTimeout(()=>SKIPCLR=false,120);
 });
 
 /* ── Pictures on an Other entry ─────────────────────────────────────
@@ -2068,10 +2216,19 @@ async function uploadMedia(id,pics,voice){
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const ty=UI.type;let e=null;
+  /* the first row of a flight belongs to the master: it is what tells the followers the
+     flight is really running, and it is the moment to look at the setup once */
+  if(Number(CFG.fresh)&&!ENT.length){
+    if(CFG.role!=='master'){await info(t('newFlight'),t('firstByMaster'));return}
+    CFG.fresh=0;save(K_CFG,CFG);
+    await info(t('newFlight'),t('verifySettings'));
+    setView('set');return;
+  }
+  flash('busy');
   if(ty==='Ballast'){
     if(UI.act==='count'){
       const bags=$('#iBags').value,water=$('#iWater').value;
-      if(bags===''&&water==='')return toast(t('enterInv'));
+      if(bags===''&&water===''){flash('','');return toast(t('enterInv'))}
       const c=invCalc(bags,water,UI.ready);
       add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
         sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
@@ -2081,7 +2238,7 @@ $('#btnPost').onclick=async()=>{
       confirmPost(chrono(ENT)[ENT.length-1]);toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
     }else{
       const kg=parseFloat($('#bKg').value);
-      if(!(kg>0))return toast(t('enterKg'));
+      if(!(kg>0)){flash('','');return toast(t('enterKg'))}
       add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
         ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim()});
       $('#bKg').value='';$('#bNote').value='';paintSum();
@@ -2091,18 +2248,22 @@ $('#btnPost').onclick=async()=>{
     return;
   }
   if(ty==='ATC'){
-    if($('#aFreq').value.trim())$('#aFreq').value=fmtFreq($('#aFreq').value);
+    if($('#aFreq').value.trim()){
+      $('#aFreq').value=fmtFreq($('#aFreq').value);
+      const bad=freqBad($('#aFreq').value);
+      if(bad){flash('','');return toast(bad==='range'?t('freqRange'):t('freqStep'))}
+    }
     const sq=$('#aSquawk').value.replace(/[^0-7]/g,'').slice(0,4);
     $('#aSquawk').value=sq;syncVfr();
-    if(sq&&sq.length!==4)return toast(t('sqDigits'));
+    if(sq&&sq.length!==4){flash('','');return toast(t('sqDigits'))}
     if(sq&&emergList().includes(sq)){
       const go=await ask({title:'Confirm Emergency SQ',danger:true,ok:'Confirm Emergency SQ',
         cancel:'Go back',text:sq+' is '+emergName(sq)+'. Post it only if that code is actually set.'});
-      if(!go)return;
+      if(!go){flash('','');return}
     }
     acceptPre('#b-ATC');
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
-    if(!st&&!msg)return toast(t('enterStation'));
+    if(!st&&!msg){flash('','');return toast(t('enterStation'))}
     const rc=recipients('ATC');
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
@@ -2122,7 +2283,7 @@ $('#btnPost').onclick=async()=>{
     $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
-    if(!v)return toast(t('noteEmpty'));
+    if(!v){flash('','');return toast(t('noteEmpty'))}
     const rc=recipients('Other');
     const nAtt=PICS.length+(VOICE?1:0);
     e=add({type:'Other',note:v,attachments:nAtt?String(nAtt):'',
@@ -2136,7 +2297,7 @@ $('#btnPost').onclick=async()=>{
     }else if(nAtt){toast(t('mediaLater'))}
     $('#oMsg').value='';toast(t('notePosted'));
   }
-  if(e){confirmPost(e);const rc=recipients(ty);if(rc.length)waSend(e,rc)}
+  if(e){const rc=recipients(ty);confirmPost(e,rc.length?()=>waSend(e,rc):null)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -2195,8 +2356,30 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
+/* up to four cylinders, each with its volume and the pressure when full */
+function paintO2Rows(){
+  const vols=String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
+  const bar=nz(CFG.o2bar)||200;
+  $('#o2Rows').innerHTML='<div class="o2head"><span></span><span>'+esc(t('lVol'))+'</span>'
+    +'<span>'+esc(t('lFullBar'))+'</span></div>'
+    +Array.from({length:4},(_,i)=>
+      `<div class="o2set"><span>${esc(t('lCyl'))} ${i+1}</span>`
+      +`<div class="sfx"><input type="number" data-ov="${i}" inputmode="decimal" step="0.5" `
+      +`value="${vols[i]==null?'':esc(vols[i])}" placeholder="–"><span>l</span></div>`
+      +`<div class="sfx"><input type="number" data-ob="${i}" inputmode="numeric" step="10" `
+      +`value="${vols[i]==null?'':esc(bar)}" placeholder="–"><span>bar</span></div></div>`).join('');
+}
+function readO2Rows(){
+  const vols=[],bars=[];
+  for(let i=0;i<4;i++){
+    const v=parseFloat(($('[data-ov="'+i+'"]')||{}).value);
+    const b=parseFloat(($('[data-ob="'+i+'"]')||{}).value);
+    if(isFinite(v)&&v>0){vols.push(v);if(isFinite(b)&&b>0)bars.push(b)}
+  }
+  return {o2:vols.join(','), o2bar:bars.length?Math.round(bars.reduce((a,b)=>a+b,0)/bars.length):200};
+}
 function paintWaRows(){
   const w=CFG.wa||[];
   $('#waRows').innerHTML=Array.from({length:8},(_,i)=>{
@@ -2228,22 +2411,33 @@ function readTplRows(){
   const out={};for(const k in TPLF){const v=$(TPLF[k]).value;if(v.trim())out[k]=v}
   return out;
 }
+/* the message layout and the connection are the two places where a slip is expensive */
+[['#foldTpl',null],['#foldGit',null]].forEach(([sel])=>{
+  const d2=$(sel);
+  d2.addEventListener('toggle',async()=>{
+    if(!d2.open||d2.dataset.ack)return;
+    d2.open=false;
+    if(await ask({title:d2.querySelector('summary').textContent,text:t('sureChange'),
+      ok:t('ok'),cancel:t('cancel'),danger:true})){d2.dataset.ack='1';d2.open=true}
+  });
+});
 $('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast(t('tplReset'))};
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
   mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sNight',CFG.night);mark('#sRole',CFG.role);
-  paintWaRows();paintModeLab();fillTplRows();
+  paintWaRows();paintO2Rows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
   UNLOCKED=false;$('#setLocked').style.display='';$('#setOpen').style.display='none';
   $('#btnSave').disabled=true;$('#setNote').textContent=t('locked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
-  $('#foldGit').open=false;$('#foldWa').open=false;$('#foldTpl').open=false;
+  ['#foldGit','#foldWa','#foldTpl'].forEach(x=>{$(x).open=false;delete $(x).dataset.ack});
 }
 /* The button belongs to the master and to whoever the master invited. A device that was
    typed up by hand is not part of that chain and would only cause confusion here. */
 function paintSyncBox(){
   $('#syncBox').style.display=(CFG.role==='master'||Number(CFG.provisioned))?'':'none';
+  $('#btnNewFlight').style.display=CFG.role==='master'?'':'none';
 }
 function paintRepHint(){
   $('#sReporterOpen').value=CFG.reporter||'';
@@ -2289,6 +2483,7 @@ $('#btnSave').onclick=async()=>{
       :'These settings apply to every entry made on this device from now on. '+mode+' device, '+wa.length+' WhatsApp recipient(s).'},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
   Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
+  const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bar=o2.o2bar;
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.alt=0;save(K_UI,UI);
@@ -2344,7 +2539,8 @@ $('#btnNewFlight').onclick=async()=>{
       ok:t('newFlight'),cancel:t('cancel'),danger:true}))return;
   }
 
-  CFG.flight=next;save(K_CFG,CFG);
+  archiveLocal(CFG.flight);
+  CFG.flight=next;CFG.fresh=1;save(K_CFG,CFG);
   ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
   UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};UI.lastDrop={};UI.lastInv={};UI.lastRes={};
   UI.o2bars=[];UI.meth=null;UI.rest='';save(K_UI,UI);
@@ -2411,27 +2607,36 @@ puck.addEventListener('pointerup',()=>{if(!drag)return;
 addEventListener('resize',place);
 
 /* the post button itself reports what became of the entry, for three seconds */
-let ft=null;
-function flash(kind,msg){
+/* The button is the whole feedback loop: it locks while the entry is on its way, so a second
+   tap cannot double-post, then shows what became of it, and only once it is back to normal do
+   the WhatsApp messages go out — otherwise leaving for WhatsApp would hide the answer. */
+let ft=null,fAfter=null;
+function flash(kind,msg,after){
   const b=$('#btnPost');
-  b.classList.remove('ok','wait','fail');
+  b.classList.remove('ok','wait','fail','busy');
   clearTimeout(ft);
-  if(!kind){b.textContent=t('post');return}
-  b.classList.add(kind);b.textContent=msg;
+  if(!kind){
+    b.disabled=false;b.textContent=t('post');
+    const cb=fAfter;fAfter=null;if(cb)setTimeout(cb,60);
+    return;
+  }
+  if(kind==='busy'){b.disabled=true;b.classList.add('busy');b.textContent=t('waitConfirm');return}
+  b.disabled=true;b.classList.add(kind);b.textContent=msg;
+  fAfter=after||null;
   ft=setTimeout(()=>flash('',''),3000);
 }
 const waitSync=async()=>{for(let i=0;i<50&&SYNCING;i++)await new Promise(r=>setTimeout(r,120))};
 /* every post says what actually became of it, not just that it was written down */
-async function confirmPost(e){
-  if(!configured()){flash('fail',t('fNoRepo'));return}
-  if(!navigator.onLine){flash('wait',t('fQueued'));return}
+async function confirmPost(e,after){
+  if(!configured()){flash('fail',t('fNoRepo'),after);return}
+  if(!navigator.onLine){flash('wait',t('fQueued'),after);return}
   await waitSync();
   if(!SYNCING&&ENT.some(x=>!x.synced))await sync(true,true);
   await waitSync();
   const row=ENT.find(x=>x.id===e.id);
-  if(row&&row.synced)flash('ok',t('fPosted'));
-  else if(!navigator.onLine)flash('wait',t('fQueued'));
-  else flash('fail',t('fFailed')+(LASTERR?': '+LASTERR:''));
+  if(row&&row.synced)flash('ok',t('fPosted'),after);
+  else if(!navigator.onLine)flash('wait',t('fQueued'),after);
+  else flash('fail',t('fFailed')+(LASTERR?': '+LASTERR:''),after);
 }
 let tt=null;
 function toast(m){const el=$('#toast');el.textContent=m;el.className='on';clearTimeout(tt);tt=setTimeout(()=>el.className='',2000)}

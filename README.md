@@ -91,7 +91,18 @@ The reporter name for this device sits at the top of the setup and needs no pass
 changes often enough, and getting it wrong only mislabels entries. Everything below it is
 locked: press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
 pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
-amounts. The GitHub connection and the WhatsApp recipients sit in collapsed sections at the
+amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
+full when the balloon leaves — and it is what the methanol button shows until the first
+Ressources entry says otherwise.
+
+The oxygen cylinders are a table of up to four, each with its volume and its pressure when
+full. Every input has its name above it and its unit inside it.
+
+Opening the **WhatsApp message layout** or the **GitHub connection** asks first — *Do you really
+want to change these settings?* Those two are where a slip costs a flight rather than a
+keystroke.
+
+The GitHub connection and the WhatsApp recipients sit in collapsed sections at the
 bottom — open them once per device, then close them again. Saving asks twice before it
 applies, so a flight in progress cannot be overwritten by a stray tap. Leaving the setup
 screen locks it again.
@@ -221,6 +232,13 @@ went overboard without being logged.
 **ATC** puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.
 
+A frequency must lie between **118.000 and 136.975 MHz** and be a real channel name. Both
+spacings are accepted: the 25 kHz channels ending in `00`, `25`, `50`, `75`, and the 8.33 kHz
+channels inserted between them, ending in `05 10 15`, `30 35 40`, `55 60 65`, `80 85 90`. The
+four endings `20`, `45`, `70` and `95` exist in neither scheme — `118.020` is neither a
+frequency nor a channel number — so they are refused as what they almost always are, a
+mistyped digit.
+
 The **frequency** places its own point: after the third digit one appears as you type, so
 `12345` reads `123.45` on screen while you are still typing and settles to `123.450` when you
 leave the field. `1187` becomes `118.700`, `118` becomes `118.000`. A point or comma you type
@@ -237,12 +255,16 @@ turns the light off. Station, FREQ and SQ open holding the last call in grey. Ta
 field at once — those three are replaced rather than edited, and deleting four digits by hand in
 turbulence is a waste of a hand. Typing turns the text dark.
 
-Under the Rx/Tx selection sits **Confirm from last msg**, greyed and dashed, and it stays there.
+Beside *Transmitted* sits **Copy from last call**, greyed and dashed, and it stays there.
 One tap puts all three values back in dark type and drops the cursor into the message, so a
 mistaken clear costs one tap to undo, however many times it happens.
 
 Beneath the station field are the station presets — *Info, Radar, Tower, Control, Approach* by
-default, and whatever you put in the setup instead. One tap writes the name into the field.
+default, and whatever you put in the setup instead. A tap inserts the word **where the cursor
+stands** rather than replacing the field, with exactly one space between it and what is already
+there, so `ZURICH` + *Info* + *Radar* becomes `ZURICH Info Radar` and never `ZURICH  Info`.
+
+A message preset is inserted with a trailing space, so the next word can simply be typed on.
 
 The message presets sit under the message field and **differ by direction**: one list for calls
 received, another for calls transmitted, both in the setup under *ATC*. What you note down when
@@ -267,10 +289,11 @@ normally means. *Nobody* is still one tap away for the stretches when both are a
 a dropdown, so the two read alike and both are one tap away in gloves.
 
 **O₂ Reserve** is calculated rather than typed: volume × pressure, summed over the cylinders,
-which gives the litres of gas at one bar. The button shows `560 l (70%)` — the reserve and what
-is left of the full supply, that being the sum of every cylinder at the full pressure from the
-setup, 200 bar unless you say otherwise. Tapping it opens one row per cylinder with its size,
-a field for the pressure, and a radio button marking which cylinder is **in use**.
+which gives the litres of gas at one bar. The button reads `600 l (21%) ②` — the reserve, its
+share of a full load, and the number of the bottle in use in a circle. It never shows more than
+100 per cent, and it never shows pressures: those belong in the input window, which is where you
+report them. Tapping it opens one row per cylinder with its size, a field for the pressure, and
+a radio button marking which cylinder is **in use**.
 
 The button only responds while **Crew on O₂** is on. Reporting a pressure while nobody is
 breathing from the bottle records a number that means nothing, and the reserve figure is only
@@ -311,11 +334,16 @@ never has to be reconstructed from memory, and never depends on who made the las
 
 ## 8. WhatsApp
 
-ATC, Ressources and Other each list the recipients individually at the foot of the form, one
+ATC, Ressources and Other each list the recipients individually at the foot of the form, under
+*Also send to WhatsApp* — the entry always goes to the table, and WhatsApp is the addition, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.
 
 On ATC the coordinator sits on a line of its own above the rest of the list, so the one
 recipient that matters is never lost among the others.
+
+Each recipient has a pill of its own, matched by number rather than by position — an earlier
+version matched by index and silently dropped the coordinator, which is the sort of thing that
+is only noticed when a message does not arrive.
 
 The **ATC Coordinator** is listed first and only on ATC, and is the only one ticked there by
 default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
@@ -346,7 +374,14 @@ https://maps.google.com/?q=48.75890,7.39580
 The first line is bold in WhatsApp, and the last is the position, which WhatsApp turns into a
 tappable link with a map preview card of its own.
 
-**Every post says what became of it.** The post button itself becomes the answer for three
+The small confirmation that follows a post now sits at the right edge above the button instead
+of on top of it, and the mark in the footer holds still: it says where the queue stands, not
+whether a poll happens to be running this second. Green double check for sent, straw single
+check with the count for waiting, red cross when an attempt was refused.
+
+**The post button carries the whole exchange.** The moment it is pressed it greys out, locks
+and reads *… wait for confirmation*, so a second tap cannot post the same entry twice. The entry
+appears in *Last Message* as soon as it is written. Then the button becomes the answer for three
 seconds — pale green *Posted to CC Notion* when the row reached GitHub, pale yellow *Queued for
 later delivery (no internet connection currently)* when it is waiting, pale red *Failed* with
 the reason when something else went wrong — an expired token, a repository that is not there. The entry itself
@@ -472,7 +507,15 @@ An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in t
 **Print the log** builds an A4 portrait printout in its own window: you pick which of the four
 kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
 chronologically and numbered, each with its time, kind, content, reporter, position and track,
-one under the other as a table. Every page carries the flight in its heading with the mark on
+one under the other as a table.
+
+**A gas balloon flight can run for days, so the printout is broken by date.** Each day opens
+with its own heading, in bold against the left edge of the table — `Wednesday, 20 May 2026` —
+and the numbering runs straight on across the break, because the entries are one flight and not
+three. The heading beside the callsign carries the span: `Wed 20 May 2026` for a single day,
+`Wed 20 May 2026 - Fri 22 May 2026` when it went further. Dates follow the UTC clock, like every
+time in the log, so a launch at 23:40 local does not appear to belong to the wrong day. A day
+heading never stands alone at the foot of a page — it travels with the first entry under it. Every page carries the flight in its heading with the mark on
 the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260813-03` on the left
 and `Page 2 / 3` on the right. After the last entry the table closes with
 `[no further log entries]`, so a printout can be seen to be complete.
@@ -654,7 +697,8 @@ coordinator should not have to guess which language the next message arrives in.
 
 ## 14b. Beginning a new flight
 
-*Begin new flight* sits at the foot of the unlocked settings and asks for the master password
+*Begin new flight* appears **only on the master**, at the foot of the unlocked settings, and asks
+for the master password
 `5678`, then for the name of the new flight, then twice for confirmation — naming how many
 entries the old flight holds and how many of them are still queued.
 
@@ -665,15 +709,22 @@ Before closing, whatever is still queued is sent one last time. If there is no c
 rows are still waiting, the app says so and asks again before going on — those rows would be
 lost, because clearing the local table is what makes the new flight start empty.
 
-The new flight ID is published to the followers along with the rest of the setup, so within a
-few seconds every device in the crew is on the new flight with an empty table.
+The new flight ID is published to the followers along with the rest of the setup. A follower
+that sees the flight change files its own table away under `bsk.archive.<flight>` on the device
+and then clears it, so nobody carries yesterday's entries
+into today's flight under the new name.
+
+**The first entry of a flight belongs to the master.** A follower trying to make it is told
+*New flight must be initiated by the master device*; the master is reminded once that the flight
+has been opened and asked to look over the settings, and the setup screen opens for that. From
+the second entry on, anyone reports.
 
 ## 15. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260813-05` is the fifth build of 13 August 2026.
+smaller counter. `v260813-08` is the eighth build of 13 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
