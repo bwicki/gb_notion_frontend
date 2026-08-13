@@ -234,10 +234,18 @@ and the switches shrink to a single-handed flight.
 Changing the PIC puts the other pilot on rest automatically, because that is what a handover
 normally means. *Nobody* is still one tap away for the stretches when both are awake.
 
-*Methanol level* opens the same list of percentages the battery uses. *O2 level* opens a row per
-cylinder — as many as the setup defines, up to four — each naming its size in liters and asking
-for the pressure in bars. The row is recorded readably in `res_o2` (`#1 2 l 180 bar; #2 2 l 120
-bar`) and machine-readably in `res_o2_bars` (`180;120`) — battery as a list in ten-percent steps with 75, 85 and 95 added,
+*Methanol level* sits right after the fuel cell and opens the same list of percentages the
+battery uses.
+
+**O₂ Reserve** is calculated rather than typed: volume × pressure, summed over the cylinders,
+which gives the litres of gas at one bar. The button shows `560 l (70%)` — the reserve and what
+is left of the full supply, that being the sum of every cylinder at the full pressure from the
+setup, 200 bar unless you say otherwise. Tapping it opens one row per cylinder with its size,
+a field for the pressure, and a radio button marking which cylinder is **in use**.
+
+The button only responds while **Crew on O₂** is on. Reporting a pressure while nobody is
+breathing from the bottle records a number that means nothing, and the reserve figure is only
+of interest once it is being consumed — battery as a list in ten-percent steps with 75, 85 and 95 added,
 where the reading actually matters. The PIC and resting state stays active and is
 attached to every following entry of any type; battery, fuel cell and solar belong to the entry
 they were filed with.
@@ -300,22 +308,14 @@ finished message and one button per recipient. An ATC entry reads:
 ```
 *ATC | HB-QWV*
 Station: ZURICH INFO
-FREQ: 124.700  SQ: 7000
+FREQ: 124.700 · SQ: 7000
 Msg: QNH 1013, Ops Normal
-21:04Z 484532N 0072345E 2340 ft
-Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
+21:04Z · 484532N 0072345E · 2340 ft · TC 293 · 12.3 kn
+https://maps.google.com/?q=48.75890,7.39580
 ```
 
-The first line is bold in WhatsApp.
-
-**About that link.** WhatsApp messages are plain text: there is no way to put a label on a URL
-and hide the URL itself, the way an HTML link does. Any address in a message is shown in full
-and turned into a tappable link by WhatsApp. The nearest thing is what the template does — put
-the wording first, so the eye reads *Show in Google Maps* and the address trails behind it, and
-keep the link on the last line so WhatsApp's own map preview card sits under the message. If
-the raw address really must not appear, the only route is a shortener, which means an outside
-service and a network call at the moment of posting; in a basket over the Vosges that is the
-wrong trade.
+The first line is bold in WhatsApp, and the last is the position, which WhatsApp turns into a
+tappable link with a map preview card of its own.
 
 **Every post says what became of it.** The post button itself becomes the answer for three
 seconds — pale green *Posted to CC Notion* when the row reached GitHub, pale yellow *Queued for
@@ -339,8 +339,9 @@ braces are substituted, and lines behave in three ways:
   costs nothing.
 - `{!key}` — the line is kept whatever happens, and an empty value prints as `-`. The Msg line
   uses this, so every message shows what was said even when nothing was.
-- A line with no wording of its own, like `{time} {pos} {alt}`, simply loses the parts that are
-  missing rather than filling them with dashes. Without a fix it collapses to the time alone.
+- A line made of nothing but values and separators, like `{time} · {pos} · {alt} · {tc} ·
+  {speed}`, keeps its own separator and simply loses the parts that are missing. Without a fix
+  it collapses to the time alone, with no stray dots left behind.
 
 *Reset to default* puts the three templates back.
 
@@ -523,7 +524,10 @@ data/<flight-id>.deleted.json  ids that were removed
 | `crew_pic`, `crew_rest` | crew state at the moment of the entry |
 | `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Ressources entry |
 | `res_methanol_pct` | methanol level in per cent |
-| `res_o2_crew`, `res_o2`, `res_o2_bars` | whether the crew is on oxygen, and the cylinder pressures |
+| `res_o2_crew` | whether the crew is on oxygen |
+| `res_o2` | reserve as `560 l (70%)` |
+| `res_o2_liters`, `res_o2_pct` | the same two figures on their own |
+| `res_o2_detail`, `res_o2_bars`, `res_o2_inuse` | per cylinder, and which one is in use |
 | `note` | free remark |
 | `whatsapp`, `whatsapp_to` | set when the entry was marked for WhatsApp, and to whom |
 | `attachments`, `attachment_paths` | how many pictures an Other entry carries, and where they were written |
@@ -600,7 +604,7 @@ coordinator should not have to guess which language the next message arrives in.
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-23` is the twenty-third build of 12 August 2026.
+build released that day. `v260812-24` is the twenty-fourth build of 12 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are

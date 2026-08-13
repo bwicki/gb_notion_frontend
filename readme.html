@@ -252,10 +252,16 @@ level on the third. Only pilots the master actually named appear: leave the seco
 and the switches shrink to a single-handed flight.</p>
 <p>Changing the PIC puts the other pilot on rest automatically, because that is what a handover
 normally means. <em>Nobody</em> is still one tap away for the stretches when both are awake.</p>
-<p><em>Methanol level</em> opens the same list of percentages the battery uses. <em>O2 level</em> opens a row per
-cylinder — as many as the setup defines, up to four — each naming its size in liters and asking
-for the pressure in bars. The row is recorded readably in <code>res_o2</code> (<code>#1 2 l 180 bar; #2 2 l 120
-bar</code>) and machine-readably in <code>res_o2_bars</code> (<code>180;120</code>) — battery as a list in ten-percent steps with 75, 85 and 95 added,
+<p><em>Methanol level</em> sits right after the fuel cell and opens the same list of percentages the
+battery uses.</p>
+<p><strong>O₂ Reserve</strong> is calculated rather than typed: volume × pressure, summed over the cylinders,
+which gives the litres of gas at one bar. The button shows <code>560 l (70%)</code> — the reserve and what
+is left of the full supply, that being the sum of every cylinder at the full pressure from the
+setup, 200 bar unless you say otherwise. Tapping it opens one row per cylinder with its size,
+a field for the pressure, and a radio button marking which cylinder is <strong>in use</strong>.</p>
+<p>The button only responds while <strong>Crew on O₂</strong> is on. Reporting a pressure while nobody is
+breathing from the bottle records a number that means nothing, and the reserve figure is only
+of interest once it is being consumed — battery as a list in ten-percent steps with 75, 85 and 95 added,
 where the reading actually matters. The PIC and resting state stays active and is
 attached to every following entry of any type; battery, fuel cell and solar belong to the entry
 they were filed with.</p>
@@ -303,20 +309,13 @@ to both, or to nobody. Ressources and Other never see the coordinator.</p>
 finished message and one button per recipient. An ATC entry reads:</p>
 <pre><code>*ATC | HB-QWV*
 Station: ZURICH INFO
-FREQ: 124.700  SQ: 7000
+FREQ: 124.700 · SQ: 7000
 Msg: QNH 1013, Ops Normal
-21:04Z 484532N 0072345E 2340 ft
-Show in Google Maps: https://maps.google.com/?q=48.75890,7.39580
+21:04Z · 484532N 0072345E · 2340 ft · TC 293 · 12.3 kn
+https://maps.google.com/?q=48.75890,7.39580
 </code></pre>
-<p>The first line is bold in WhatsApp.</p>
-<p><strong>About that link.</strong> WhatsApp messages are plain text: there is no way to put a label on a URL
-and hide the URL itself, the way an HTML link does. Any address in a message is shown in full
-and turned into a tappable link by WhatsApp. The nearest thing is what the template does — put
-the wording first, so the eye reads <em>Show in Google Maps</em> and the address trails behind it, and
-keep the link on the last line so WhatsApp's own map preview card sits under the message. If
-the raw address really must not appear, the only route is a shortener, which means an outside
-service and a network call at the moment of posting; in a basket over the Vosges that is the
-wrong trade.</p>
+<p>The first line is bold in WhatsApp, and the last is the position, which WhatsApp turns into a
+tappable link with a map preview card of its own.</p>
 <p><strong>Every post says what became of it.</strong> The post button itself becomes the answer for three
 seconds — pale green <em>Posted to CC Notion</em> when the row reached GitHub, pale yellow <em>Queued for
 later delivery (no internet connection currently)</em> when it is waiting, pale red <em>Failed</em> with
@@ -336,8 +335,9 @@ braces are substituted, and lines behave in three ways:</p>
   costs nothing.</li>
 <li><code>{!key}</code> — the line is kept whatever happens, and an empty value prints as <code>-</code>. The Msg line
   uses this, so every message shows what was said even when nothing was.</li>
-<li>A line with no wording of its own, like <code>{time} {pos} {alt}</code>, simply loses the parts that are
-  missing rather than filling them with dashes. Without a fix it collapses to the time alone.</li>
+<li>A line made of nothing but values and separators, like <code>{time} · {pos} · {alt} · {tc} ·
+  {speed}</code>, keeps its own separator and simply loses the parts that are missing. Without a fix
+  it collapses to the time alone, with no stray dots left behind.</li>
 </ul>
 <p><em>Reset to default</em> puts the three templates back.</p>
 <table>
@@ -616,8 +616,20 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <td>methanol level in per cent</td>
 </tr>
 <tr>
-<td><code>res_o2_crew</code>, <code>res_o2</code>, <code>res_o2_bars</code></td>
-<td>whether the crew is on oxygen, and the cylinder pressures</td>
+<td><code>res_o2_crew</code></td>
+<td>whether the crew is on oxygen</td>
+</tr>
+<tr>
+<td><code>res_o2</code></td>
+<td>reserve as <code>560 l (70%)</code></td>
+</tr>
+<tr>
+<td><code>res_o2_liters</code>, <code>res_o2_pct</code></td>
+<td>the same two figures on their own</td>
+</tr>
+<tr>
+<td><code>res_o2_detail</code>, <code>res_o2_bars</code>, <code>res_o2_inuse</code></td>
+<td>per cylinder, and which one is in use</td>
 </tr>
 <tr>
 <td><code>note</code></td>
@@ -696,7 +708,7 @@ coordinator should not have to guess which language the next message arrives in.
 <h2>15. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. <code>v260812-23</code> is the twenty-third build of 12 August 2026.</p>
+build released that day. <code>v260812-24</code> is the twenty-fourth build of 12 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> and <code>setup.html</code> are
 generated from <code>README.md</code> and <code>SETUP.md</code> and have to be regenerated whenever those change. Bumping the cache name is what
