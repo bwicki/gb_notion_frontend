@@ -658,8 +658,9 @@ build released that day. The date leads, so `v260813-01` is newer than `v260812-
 smaller counter. `v260813-03` is the third build of 13 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
-the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are
-generated from `README.md` and `SETUP.md` and have to be regenerated whenever those change. Bumping the cache name is what
+the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
+PDFs are generated from `README.md` and `SETUP.md` and are regenerated on every build, so the
+printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
@@ -698,7 +699,9 @@ index.html                  the complete app
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
 readme.html                 this document, opened from the menu
+Basket-Reporting-Manual.pdf this document, for printing
 SETUP.md / setup.html       the GitHub and Notion setup guide
+Setup-data-repository.pdf   the setup guide, laid out for printing and handing over
 LICENSE / license.html      the licence
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons

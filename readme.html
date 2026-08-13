@@ -755,8 +755,9 @@ the date written backwards, then a counter that restarts at 01 each day and goes
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
 smaller counter. <code>v260813-03</code> is the third build of 13 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
-the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code> and <code>setup.html</code> are
-generated from <code>README.md</code> and <code>SETUP.md</code> and have to be regenerated whenever those change. Bumping the cache name is what
+the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
+PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the
+printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
 <h2>16. License</h2>
@@ -784,7 +785,9 @@ no signal and why there is nothing to keep up to date but the app itself.</p>
 manifest.webmanifest        Home Screen installation
 sw.js                       offline cache
 readme.html                 this document, opened from the menu
+Basket-Reporting-Manual.pdf this document, for printing
 SETUP.md / setup.html       the GitHub and Notion setup guide
+Setup-data-repository.pdf   the setup guide, laid out for printing and handing over
 LICENSE / license.html      the licence
 favicon.ico                 multi-resolution favicon
 icons/                      app icons and favicons
