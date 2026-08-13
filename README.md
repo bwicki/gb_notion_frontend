@@ -256,8 +256,11 @@ field at once — those three are replaced rather than edited, and deleting four
 turbulence is a waste of a hand. Typing turns the text dark.
 
 Beside *Transmitted* sits **Copy from last call**, greyed and dashed, and it stays there.
-One tap puts all three values back in dark type and drops the cursor into the message, so a
-mistaken clear costs one tap to undo, however many times it happens.
+One tap puts all three values back in dark type and drops the cursor into the message, without
+any message of its own — the fields having filled is the confirmation. The station comes back
+with a trailing space and is then left alone: tapping into it keeps what was copied, so
+`ZURICH INFO ` can be turned into `ZURICH INFO ARRIVAL` without retyping the first two words.
+FREQ and SQ still clear on a tap, because those two are replaced rather than extended.
 
 Beneath the station field are the station presets — *Info, Radar, Tower, Control, Approach* by
 default, and whatever you put in the setup instead. A tap inserts the word **where the cursor
@@ -341,7 +344,11 @@ chip per person, tapped on and off. Ballast entries never go to WhatsApp.
 On ATC the coordinator sits on a line of its own above the rest of the list, so the one
 recipient that matters is never lost among the others.
 
-Each recipient has a pill of its own, matched by number rather than by position — an earlier
+Each recipient has a pill of its own with a check circle in front of it, filled when it is on
+and clearly outlined when it is off — an earlier version drew the off state so faintly that a
+list of three looked like a list of one. The label counts them, *Also send to WhatsApp · 3*, so
+an empty list is visible as an empty list rather than as a bug. Pills are matched by number
+rather than by position — an earlier
 version matched by index and silently dropped the coordinator, which is the sort of thing that
 is only noticed when a message does not arrive.
 
@@ -508,6 +515,9 @@ An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in t
 kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
 chronologically and numbered, each with its time, kind, content, reporter, position and track,
 one under the other as a table.
+
+Column widths come from a colgroup rather than from the first row, so a page that opens with a
+full-width date heading lays itself out exactly like every other page.
 
 **A gas balloon flight can run for days, so the printout is broken by date.** Each day opens
 with its own heading, in bold against the left edge of the table — `Wednesday, 20 May 2026` —
@@ -677,6 +687,21 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
 
+## 13c. Place names
+
+Off by default, and a setting of its own under *Ressources*. Switched on, each entry's position
+is turned once into something a reader can place — `near Szeged/HU` — which then appears under
+the position in the WhatsApp message, in the log, in the printout and in a `place` column.
+
+**Two things to weigh before switching it on.** The lookup goes to OpenStreetMap's public
+service, so the coordinates of the entry leave the device; and it only works with a link. There
+is no offline place database that would fit in a web app. Failures are silent by design: the
+entry is written immediately and the place is filled in afterwards if an answer arrives, so a
+lost lookup costs nothing but an empty field.
+
+Answers are cached on a coarse grid — about a kilometre — so a long flight costs a few dozen
+requests rather than one per entry, which keeps well inside what the service asks of its users.
+
 ## 14a. Language
 
 Night colour, confirmation tone and language sit above the password, because they are personal
@@ -724,7 +749,7 @@ the second entry on, anyone reports.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260813-08` is the eighth build of 13 August 2026.
+smaller counter. `v260813-09` is the ninth build of 13 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

@@ -81,6 +81,10 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 .foot{flex:0 0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));border-top:1px solid var(--line-soft)}
 
 
+.warn{font-size:11.5px;line-height:1.35;color:#B5442F;margin:-4px 0 10px}
+.warn.hide{display:none}
+html[data-theme="night"] .warn{color:#E2705F}
+input.bad{border-color:#B5442F}
 .lastmsg{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:0 0 10px;
   background:var(--field)}
 .lastmsg.hide{display:none}
@@ -99,7 +103,13 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 #btnVoice.rec{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:11px;
   background:var(--sel);color:var(--sel-ink);font-size:13px;line-height:1}
-.links.wa button{padding:7px 11px;font-size:12.5px;border-style:solid}
+.links.wa button{padding:8px 12px;font-size:12.5px;border:1.5px solid var(--line);
+  border-style:solid;color:var(--ink);background:var(--field);display:inline-flex;
+  align-items:center;gap:7px}
+.links.wa button::before{content:"";width:13px;height:13px;border-radius:50%;
+  border:1.5px solid var(--line);flex:0 0 auto}
+.links.wa button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.links.wa button.on::before{background:var(--sel-ink);border-color:var(--sel-ink)}
 .ball{display:flex;gap:34px;margin:10px 0 14px}
 .stat b{display:block;font-size:23px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
 .stat i{display:block;font-style:normal;font-size:9.5px;color:var(--muted);margin-top:3px;
@@ -393,6 +403,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="xxxx"></div>
           <button class="vfr" id="btnVfr">VFR</button>
         </div>
+        <p class="warn hide" id="aFreqWarn"></p>
         <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
         <div class="f"><div class="links small" id="aChips"></div></div>
         <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
@@ -555,6 +566,11 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <h3 data-t="hRessources">Ressources</h3>
+        <div class="f"><p class="lab" data-t="lGeo">Place name with each position</p>
+          <div class="pnl" id="sGeo">
+            <button data-v="0" data-t="off">Off</button><button data-v="1" data-t="on">On</button>
+          </div></div>
+        <p class="hint" data-t="lGeoHint">Off by default.</p>
         <div class="f"><p class="lab" data-t="lMethInit">Methanol level at start</p>
           <div class="sfx"><input type="number" id="sMethInit" inputmode="numeric" step="5" placeholder="100"><span>%</span></div></div>
         <p class="lab" data-t="lO2">O2 cylinders</p>
@@ -623,22 +639,22 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-08';
+const APP_VERSION='v260813-09';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,methInit:100,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
+           bagKg:15,readyKg:30,methInit:100,geo:0,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            fresh:0,repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
-  ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{maps}',
-  Ressources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{maps}',
-  Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{maps}'};
+  ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}',
+  Ressources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}',
+  Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}'};
 const TPL_KEYS=['type','callsign','dir','station','freq','squawk','msg','pic','resting',
-  'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','alt','tc','speed','maps','reporter','flight'];
+  'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','place','alt','tc','speed','maps','reporter','flight'];
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
@@ -732,7 +748,9 @@ const L={en:{
  lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
  hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The bottles carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of gas at one bar.',
- lMethInit:'Methanol level at start', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
+ lGeo:'Place name with each position', lMethInit:'Methanol level at start',
+ lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
+ place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
  lStations:'Station presets', lMsgRx:'Message presets \u2014 received', lMsgTx:'Message presets \u2014 transmitted', pO2bar:'Full pressure bar', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
  pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'xxxx',
  hintRole:'The master owns the flight setup and publishes it. Followers pick up every change the master saves.',
@@ -833,7 +851,9 @@ const L={en:{
  lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
  lReadySteps:'Standard-Meldeschritte Schütte',
  hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter Gas bei einem bar.',
- lMethInit:'Methanolstand beim Start', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
+ lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
+ lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
+ place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
  lStations:'Stellen-Vorschläge', lMsgRx:'Textbausteine \u2014 empfangen', lMsgTx:'Textbausteine \u2014 gesendet', pO2bar:'Fülldruck bar', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
  pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'xxxx',
  hintRole:'Der Master besitzt die Einrichtung der Fahrt und gibt sie weiter. Follower übernehmen jede Änderung.',
@@ -872,7 +892,7 @@ function applyLang(){
   document.documentElement.lang=CFG.lang||'en';
   $$('[data-t]').forEach(el=>{if(el.id==='btnPost'&&el.className.match(/ok|wait|fail/))return;el.textContent=t(el.dataset.t)});
   $$('[data-tp]').forEach(el=>{el.placeholder=t(el.dataset.tp)});
-  mark('#sLang',CFG.lang||'en');
+  mark('#sLang',CFG.lang||'en');mark('#sGeo',String(Number(CFG.geo)||0));
 }
 
 /* ── Ballast maths ─────────────────────────────────────────────────── */
@@ -989,7 +1009,7 @@ function add(part){
     whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',
     synced:false,failed:false
   },gpsSnap(),part);
-  ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();
+  ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();addPlace(e);
   if(configured())sync(true,true);
   return e;
 }
@@ -1227,7 +1247,7 @@ async function ghPut(p,text,sha,msg){
 }
 const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
-  'pos_lat','pos_lon','alt_ft','tc_deg','speed_kt','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
+  'pos_lat','pos_lon','alt_ft','place','tc_deg','speed_kt','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
   'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','sand_left_kg','water_left_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
   'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar',
@@ -1389,7 +1409,8 @@ function paintLog(){
   if(!l.length){box.innerHTML='<p class="none">'+esc(t('noEntries'))+'</p>';return}
   box.innerHTML=l.map(e=>{
     const {h,s}=line(e);
-    const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'');
+    const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'')
+      +(e.place?' \u00b7 '+e.place:'');
     return `<button class="entry" data-id="${esc(e.id)}"><span class="t num">${hm(e.ts_local||e.ts_utc)}</span>
       <span class="c">${esc(h)}<i>${esc(who)}${s?' \u00b7 '+esc(s):''}</i></span>
       <span class="p">${stIcon(e)}</span></button>`;
@@ -1426,6 +1447,8 @@ function paintCrew(){
 const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waRes':'Ressources','#waOth':'Other'};
 /* on ATC the coordinator gets a line of its own above the rest of the list */
 function paintWaChecks(){
+  const n=waRoster('Other').length;
+  $$('[data-t="sendWa"]').forEach(el=>{el.textContent=t('sendWa')+(n?' \u00b7 '+n:'')});
   for(const sel in WABOX){
     const type=WABOX[sel],box=$(sel),roster=waRoster(type),co=atcCo();
     let list=roster;
@@ -1554,7 +1577,8 @@ function buildPrint(pick){
       ? '<tr class="dayrow"><td colspan="4">'+esc2(dayLong(e))+'</td></tr>' : '';
     return newDay+'<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
       +'<td class="ty">'+esc2(e.type)+'</td><td class="tx">'+esc2(lastText(e))
-      +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span></td></tr>';
+      +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span>'
+      +(e.place?'<span class="meta">'+esc2(e.place)+'</span>':'')+'</td></tr>';
   }).join('')
   +'<tr class="endrow"><td class="n"></td><td colspan="3">'+esc2(t('noFurther'))+'</td></tr>';
 
@@ -1584,7 +1608,9 @@ function buildPrint(pick){
    +'display:flex;justify-content:space-between;gap:10px;font-size:9px;color:#7a8085}'
    +'@media print{body{background:#fff}.page{margin:0;box-shadow:none}}'
    +'</style></head><body>'
-   +'<div id="src" style="position:absolute;visibility:hidden;width:182mm"><table><tbody>'+body+'</tbody></table></div>'
+   +'<div id="src" style="position:absolute;visibility:hidden;width:182mm"><table>'
+   +'<colgroup><col style="width:9mm"><col style="width:19mm"><col style="width:24mm"><col></colgroup>'
+   +'<tbody>'+body+'</tbody></table></div>'
    +'<div id="out"></div></body></html>');
   w.document.close();
 
@@ -1596,8 +1622,12 @@ function buildPrint(pick){
       +'<img src="icons/icon-192.png" alt=""></header>';
     const footHtml='<footer><span>'+esc2(printedBy)+' \u00b7 '+esc2(APP_VERSION)
       +'</span><span class="pg"></span></footer>';
+    /* the column widths come from a colgroup, not from the first row — a page that opens
+       with a full-width date heading would otherwise lay itself out differently */
+    const COLS='<colgroup><col style="width:9mm"><col style="width:19mm">'
+      +'<col style="width:24mm"><col></colgroup>';
     const mk=()=>{const d2=doc.createElement('div');d2.className='page';
-      d2.innerHTML=headHtml+'<div class="tw"><table><tbody></tbody></table></div>'+footHtml;
+      d2.innerHTML=headHtml+'<div class="tw"><table>'+COLS+'<tbody></tbody></table></div>'+footHtml;
       out.appendChild(d2);return d2};
 
     let page=mk();
@@ -1992,8 +2022,12 @@ function fillAtcFromLast(grey){
   [['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']].forEach(([sel,k])=>{
     const el=$(sel);el.value=l[k]||'';
     el.classList.toggle('pre',!!grey&&!!l[k]);
+    delete el.dataset.keep;
   });
-  syncVfr();
+  /* a copied station is meant to be extended — a trailing space, and tapping into it
+     no longer wipes what was copied */
+  if(!grey&&l.station){const st=$('#aStation');st.value=l.station+' ';st.dataset.keep='1'}
+  syncVfr();paintFreqWarn();
 }
 function carryAtc(){
   adoptLast();paintLastBoxes();paintStaChips();
@@ -2056,8 +2090,19 @@ const freqDigits=v=>String(v||'').replace(/\D/g,'').slice(0,6);
 function freqLive(v){const d=freqDigits(v);return d.length<=3?d:d.slice(0,3)+'.'+d.slice(3)}
 function fmtFreq(v){const d=freqDigits(v);return d.length<3?d:d.slice(0,3)+'.'+d.slice(3,6).padEnd(3,'0')}
 $('#aFreq').addEventListener('input',()=>{const el=$('#aFreq'),f=freqLive(el.value);
-  if(f!==el.value)el.value=f});
-$('#aFreq').addEventListener('blur',()=>{const el=$('#aFreq');if(el.value.trim())el.value=fmtFreq(el.value)});
+  if(f!==el.value)el.value=f;paintFreqWarn()});
+$('#aFreq').addEventListener('blur',()=>{const el=$('#aFreq');
+  if(el.value.trim())el.value=fmtFreq(el.value);paintFreqWarn()});
+/* the field says so while it is being typed, not only when the entry is refused */
+function paintFreqWarn(){
+  const el=$('#aFreq'),w=$('#aFreqWarn'),v=el.value.trim();
+  const digits=freqDigits(v);
+  if(!v||digits.length<6){el.classList.remove('bad');w.classList.add('hide');return}
+  const bad=freqBad(fmtFreq(v));
+  el.classList.toggle('bad',!!bad);
+  w.classList.toggle('hide',!bad);
+  if(bad)w.textContent=bad==='range'?t('freqRange'):t('freqStep');
+}
 /* The airband runs from 118.000 to 136.975. Beyond the range, the last two digits of a
    channel name are also fixed: 25 kHz channels end in 00/25/50/75, and the 8.33 kHz channels
    inserted between them end in 05/10/15, 30/35/40, 55/60/65, 80/85/90. Endings 20, 45, 70
@@ -2087,14 +2132,15 @@ $('#aConfirm').onclick=()=>{
   fillAtcFromLast(false);
   const m=$('#aMsg');m.focus();
   try{m.setSelectionRange(m.value.length,m.value.length)}catch(e){}
-  toast(t('takenOver'));
 };
 /* tapping into one of the three means a new value, so the old one gets out of the way */
 let SKIPCLR=false;
 ['#aStation','#aFreq','#aSquawk'].forEach(sel=>$(sel).addEventListener('focus',()=>{
   if(SKIPCLR)return;
   const el=$(sel);
-  if(el.value){el.value='';el.classList.remove('pre');if(sel==='#aSquawk')syncVfr()}
+  if(el.dataset.keep)return;
+  if(el.value){el.value='';el.classList.remove('pre');if(sel==='#aSquawk')syncVfr();
+    if(sel==='#aFreq')paintFreqWarn()}
 }));
 
 /* stations that come up again and again, straight from the setup */
@@ -2213,6 +2259,45 @@ async function uploadMedia(id,pics,voice){
   return out;
 }
 
+/* ── Place names ────────────────────────────────────────────────────
+   Optional, off by default. When it is on, the coordinates of an entry are looked up once
+   and turned into something a reader can place — "near Szeged/HU". Answers are cached by
+   a coarse grid, so a whole flight costs a handful of requests, and a failure or a missing
+   link simply leaves the field empty. */
+const GEOC={};
+const geoKey=(la,lo)=>la.toFixed(2)+','+lo.toFixed(2);
+let GEOBUSY=false;
+async function placeFor(la,lo){
+  if(!Number(CFG.geo)||!navigator.onLine||la==null||lo==null)return '';
+  const k=geoKey(la,lo);
+  if(GEOC[k]!==undefined)return GEOC[k];
+  if(GEOBUSY)return '';
+  GEOBUSY=true;
+  try{
+    const u='https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&addressdetails=1'
+      +'&lat='+encodeURIComponent(la.toFixed(4))+'&lon='+encodeURIComponent(lo.toFixed(4));
+    const r=await fetch(u,{headers:{Accept:'application/json'}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json(),a=j.address||{};
+    const town=a.city||a.town||a.village||a.hamlet||a.municipality||a.county||a.state||'';
+    const cc=(a.country_code||'').toUpperCase();
+    const out=town?('near '+town+(cc?'/'+cc:'')):(cc||'');
+    GEOC[k]=out;
+    return out;
+  }catch(e){GEOC[k]='';return ''}
+  finally{GEOBUSY=false}
+}
+/* the entry is written at once and the place is filled in when the answer arrives */
+function addPlace(e){
+  if(!Number(CFG.geo)||e.lat==null||e.lon==null)return;
+  placeFor(Number(e.lat),Number(e.lon)).then(pl=>{
+    if(!pl)return;
+    const row=ENT.find(x=>x.id===e.id);
+    if(!row||row.place)return;
+    row.place=pl;row.synced=false;save(K_ENT,ENT);paint();sync(true,true);
+  });
+}
+
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const ty=UI.type;let e=null;
@@ -2268,7 +2353,8 @@ $('#btnPost').onclick=async()=>{
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#aStation').value='';$('#aFreq').value='';$('#aSquawk').value='';
+    ['#aStation','#aFreq','#aSquawk'].forEach(x=>{$(x).value='';delete $(x).dataset.keep});
+    paintFreqWarn();
     $('#aMsg').value='';paintMsgChips();toast(t('atcPosted'));carryAtc();
   }else if(ty==='Ressources'){
     const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Ressources');
@@ -2425,7 +2511,7 @@ $('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
-  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sNight',CFG.night);mark('#sRole',CFG.role);
+  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sGeo',String(Number(CFG.geo)||0));mark('#sNight',CFG.night);mark('#sRole',CFG.role);
   paintWaRows();paintO2Rows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
@@ -2459,6 +2545,7 @@ $('#btnUnlock').onclick=async()=>{
   $('#btnSave').disabled=false;$('#setNote').textContent=t('unlocked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
 };
 pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
+pills('#sGeo',v=>{CFG.geo=Number(v);save(K_CFG,CFG)});
 pills('#sLang',v=>{CFG.lang=v;save(K_CFG,CFG);applyLang();paintCrew();paintWaChecks();paintReady();paintInv();paint()});
 pills('#sMode',()=>paintModeLab());
 $('#sRole').addEventListener('click',async ev=>{
