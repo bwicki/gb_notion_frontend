@@ -157,8 +157,10 @@ Clicking either brings the app back.</p>
 <p>On a personal device — the default, and what the two pilots' own phones should be set to —
 every entry is filed under the name entered there, whoever happens to be pilot in command. The
 reporter button is hidden; there is nothing to get wrong.</p>
-<p>On a shared device the reporter defaults to whoever is pilot in command, and the button at the
-top right of the readout switches to the other pilot for the exceptional case. It turns dark
+<p>On a shared device the reporter defaults to whoever is pilot in command, and a button beside
+<em>Post to CC Notion</em> — about a third of the width — switches to the other pilot for the
+exceptional case. It reads <em>reporting as</em> with the name below, and appends <em>(PIC)</em> when the two
+are the same person, so a glance tells you both facts at once. It turns dark
 while the alternate is active, so the exception is visible, and every entry carries that name
 until it is switched back. Changing the PIC on the Ressources tab moves the default with it.</p>
 <p>Each row also records <code>device_mode</code>, so it is possible to tell afterwards which reporting
@@ -175,9 +177,14 @@ least three seconds and five metres between the two so that a stationary basket 
 produce a random course. Both fields stay empty rather than guessing when neither source is
 available. The header carries the live values under the flight number.</p>
 <h2>6. Ballast</h2>
+<p>The kilogram field starts empty every time the Ballast tab is opened. A running total that
+carried over from ten minutes ago would be added to by mistake far more often than it would
+save a keystroke.</p>
 <p><strong>Sand and water are carried forward separately.</strong> An inventory sets both, a drop reduces the
 one it was made of, and every entry therefore knows what is left of each — recorded as
-<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. The log reads
+<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. An inventory reads <code>sand 390 kg („Schütte" 100%) · water 20 kg · 24 bags</code> — the Schütte named
+separately as a percentage and counted inside the sand figure, since that is where it physically
+is. A drop reads
 <code>dropped 40 kg sand · remaining 370.0 kg total ballast (350.0 kg sand, 20.0 kg water)</code>, and a
 water drop is stated in litres, <code>dropped 20 l water</code>, because that is how it is measured in the
 basket.</p>
@@ -192,7 +199,7 @@ inputs:</p>
 <ul>
 <li><em>Bags</em> and <em>Water</em> on one line — bags counted in total including safety ballast and
   multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
-<li><em>Ready ballast</em> — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
+<li><em>Ready ballast</em> („Schütte") — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
   percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
   selected.</li>
 </ul>
@@ -247,11 +254,18 @@ one to three digits is refused on posting. The emergency codes are listed in the
 the entry goes out, because they are three keystrokes away from ordinary codes.</p>
 <p>The <strong>VFR</strong> button fills the squawk with the conspicuity code from the setup, <code>7000</code> by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Under the Rx/Tx selection sits <strong>Confirm from last msg</strong>. One tap fills station, FREQ and SQ
-from the previous call and puts the cursor straight into the message — the only field that
-always has to be typed. Nothing is pre-filled otherwise, so a form that opens is a form that is
-empty, and tapping into FREQ or SQ clears whatever was there: those two are always replaced
-rather than edited, and deleting four digits by hand in turbulence is a waste of a hand.</p>
+turns the light off. Station, FREQ and SQ open holding the last call in grey. Tapping into any of them clears that
+field at once — those three are replaced rather than edited, and deleting four digits by hand in
+turbulence is a waste of a hand. Typing turns the text dark.</p>
+<p>Under the Rx/Tx selection sits <strong>Confirm from last msg</strong>, greyed and dashed, and it stays there.
+One tap puts all three values back in dark type and drops the cursor into the message, so a
+mistaken clear costs one tap to undo, however many times it happens.</p>
+<p>Beneath the station field are the station presets — <em>Info, Radar, Tower, Control, Approach</em> by
+default, and whatever you put in the setup instead. One tap writes the name into the field.</p>
+<p>The message presets sit under the message field and <strong>differ by direction</strong>: one list for calls
+received, another for calls transmitted, both in the setup under <em>ATC</em>. What you note down when
+a station calls you is rarely what you note down when you call it. Both start with the same list
+until you change them.</p>
 <p>The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.</p>
 <p>The remark field on Ballast and Ressources is the same size as the ATC message field, since a
@@ -262,8 +276,8 @@ level on the third. Only pilots the master actually named appear: leave the seco
 and the switches shrink to a single-handed flight.</p>
 <p>Changing the PIC puts the other pilot on rest automatically, because that is what a handover
 normally means. <em>Nobody</em> is still one tap away for the stretches when both are awake.</p>
-<p><em>Methanol level</em> sits right after the fuel cell and opens the same list of percentages the
-battery uses.</p>
+<p><em>Battery</em> and <em>Methanol level</em> both open the same list of percentages in a window, rather than
+a dropdown, so the two read alike and both are one tap away in gloves.</p>
 <p><strong>O₂ Reserve</strong> is calculated rather than typed: volume × pressure, summed over the cylinders,
 which gives the litres of gas at one bar. The button shows <code>560 l (70%)</code> — the reserve and what
 is left of the full supply, that being the sum of every cylinder at the full pressure from the
@@ -753,7 +767,7 @@ few seconds every device in the crew is on the new flight with an empty table.</
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v260813-03</code> is the third build of 13 August 2026.</p>
+smaller counter. <code>v260813-05</code> is the fifth build of 13 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

@@ -24,7 +24,7 @@
 :root{
   --bg:#E4E7EA; --card:#F4F6F7; --field:#FFFFFF;
   --ink:#22262A; --muted:#6D757B; --carry:#5A6268;
-  --line:#C9D0D5; --line-soft:#DDE2E6;
+  --line:#C9D0D5; --line-soft:#DDE2E6; --soft:#E9ECEE;
   --sel:#464D53; --sel-ink:#F7F8F9;
   --pad:16px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
@@ -32,7 +32,7 @@
 /* night palettes — chosen in the setup */
 html[data-theme="night"]{
   --bg:#000000; --card:#0A0403; --field:#150705; --ink:#FF4E2A; --muted:#9A3A20; --carry:#B0442A;
-  --line:#4A1A10; --line-soft:#2A0D07; --sel:#FF4E2A; --sel-ink:#000000;
+  --line:#4A1A10; --line-soft:#2A0D07; --soft:#160705; --sel:#FF4E2A; --sel-ink:#000000;
 }
 html[data-theme="night"][data-night="amber"]{
   --card:#0A0603; --field:#140D04; --ink:#FFA82E; --muted:#96601A; --carry:#B8781F;
@@ -107,7 +107,7 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
 
 
 .postrow{display:grid;grid-template-columns:1fr;gap:8px}
-.postrow.shared{grid-template-columns:20% 1fr}
+.postrow.shared{grid-template-columns:30% 1fr}
 .rep{display:none;border:1px solid var(--line);background:var(--field);border-radius:10px;
   padding:4px 6px;min-height:52px;text-align:center;overflow:hidden}
 .postrow.shared .rep{display:block}
@@ -139,8 +139,8 @@ input.pre{color:var(--carry);border-style:dashed}
 .four .lab{font-size:10px}
 .four select,.four .lvl{font-size:12px;padding:0 4px}
 .four .pnl button{font-size:11.5px}
-.atcrow{display:grid;grid-template-columns:1fr .82fr 100px;gap:8px;align-items:end}
-.vfr{min-height:66px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+.atcrow{display:grid;grid-template-columns:1fr .82fr 96px;gap:8px;align-items:end}
+.vfr{min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
   font-size:13px;letter-spacing:.04em}
 .vfr.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 select{width:100%;min-height:44px;padding:10px 12px;background:var(--field);
@@ -155,8 +155,9 @@ select:focus{outline:0;border-color:var(--sel)}
 .unit span{font-size:13px;color:var(--muted)}
 .carry{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:11.5px;color:var(--muted)}
 .carry.hide{display:none}
-.carry button{padding:9px 14px;border:1px solid var(--line);border-radius:9px;font-size:13px;
-  flex:1;background:var(--field)}
+.carry button{padding:9px 14px;border:1px dashed var(--line);border-radius:9px;font-size:13px;
+  flex:1;background:var(--soft);color:var(--carry)}
+.carry button:active{background:var(--field);color:var(--ink)}
 .calc{border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px;font-size:13px;
   color:var(--muted);margin-bottom:10px;line-height:1.5}
 .calc b{color:var(--ink);font-weight:400}
@@ -338,8 +339,9 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button data-v="sand" data-t="sand">Sand</button><button data-v="water" data-t="waterW">Water</button>
           </div></div>
           <div class="f qrow"><div class="pills" id="bQuick"></div><span class="unitlab">kg</span></div>
+          <p class="lab" data-t="kgDropped">Kilograms dropped</p>
           <div class="f sumrow">
-            <input type="number" id="bKg" inputmode="decimal" step="0.5" data-tp="kgDropped" placeholder="Kilograms dropped">
+            <input type="number" id="bKg" inputmode="decimal" step="0.5" placeholder="–">
             <button id="bReset" class="hide" data-t="reset">Reset</button>
           </div>
           <div class="f"><textarea id="bNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
@@ -347,11 +349,13 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
         <div class="sub" id="s-count">
           <div class="f two">
-            <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" data-tp="bags" placeholder="sand bags"><span>bags</span></div>
-            <div class="sfx wide"><input type="number" id="iWater" inputmode="decimal" step="1" data-tp="water" placeholder="Water"><span>liter</span></div>
+            <div><p class="lab" data-t="sand">Sand</p>
+              <div class="sfx"><input type="number" id="iBags" inputmode="numeric" step="1" placeholder="–"><span>bags</span></div></div>
+            <div><p class="lab" data-t="waterW">Water</p>
+              <div class="sfx wide"><input type="number" id="iWater" inputmode="decimal" step="1" placeholder="–"><span>liter</span></div></div>
           </div>
           <p class="hint" id="iHint">Count total incl. safety ballast</p>
-          <div class="f"><p class="lab"><span data-t="readyBallast">Ready ballast</span> <span id="iReadyFull"></span></p>
+          <div class="f"><p class="lab"><span data-t="readyBallast">Ready ballast (&#8222;Sch&#252;tte&#8220;)</span> <span id="iReadyFull"></span></p>
             <div class="pills" id="iReady"></div></div>
           <div class="calc" id="iCalc"></div>
           <div class="f"><textarea id="iNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
@@ -367,6 +371,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         </div></div>
         <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last msg</button></div>
         <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
+        <div class="f"><div class="links small" id="aStaChips"></div></div>
         <div class="f atcrow">
           <div><p class="lab">FREQ</p>
             <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div></div>
@@ -374,9 +379,8 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="xxxx"></div>
           <button class="vfr" id="btnVfr">VFR</button>
         </div>
-        <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last call</button></div>
-        <div class="f"><div class="links small" id="aChips"></div></div>
         <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
+        <div class="f"><div class="links small" id="aChips"></div></div>
         <div class="f"><p class="lab" data-t="sendWa">Send to WhatsApp</p>
           <div class="links wa" id="waATCco" style="margin-bottom:7px"></div>
           <div class="links wa" id="waATC"></div></div>
@@ -391,13 +395,8 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div><p class="lab" data-t="resting">Resting</p><div class="pnl pnl3" id="cRest"></div></div>
         </div>
         <div class="f four">
-          <div><p class="lab" data-t="battery">Battery</p><select id="rBat">
-            <option value="">—</option><option value="100">100%</option><option value="95">95%</option>
-            <option value="90">90%</option><option value="85">85%</option><option value="80">80%</option>
-            <option value="75">75%</option><option value="70">70%</option><option value="60">60%</option>
-            <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option>
-            <option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
-          </select></div>
+          <div><p class="lab" data-t="battery">Battery</p>
+            <button class="lvl" id="rBat">—</button></div>
           <div><p class="lab" data-t="fuelCell">Fuel cell</p><div class="pnl" id="rFuel">
             <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
           <div><p class="lab" data-t="methanol">Methanol level</p>
@@ -437,7 +436,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
     <div class="foot">
       <div class="postrow" id="postRow">
-        <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
+        <button class="rep" id="btnRep"><em data-t="reportingAsLbl">reporting as</em><b id="repName">—</b></button>
         <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
       </div>
       <div class="ftline"><p class="tiny" id="hSt"></p><span class="ver"></span></div>
@@ -516,6 +515,13 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <input type="number" id="sReadyKg" inputmode="decimal" step="0.5" data-tp="pReadyKg" placeholder="Full ready ballast kg"></div>
         <div class="f"><input type="text" id="sSteps" data-tp="pSteps" placeholder="Quick drop amounts, e.g. 5,10,15,25"></div>
         <div class="f"><input type="text" id="sReady" data-tp="pReadySteps" placeholder="Ready ballast steps, e.g. 0,10,25,50,75,100"></div>
+        <h3 data-t="hAtc">ATC</h3>
+        <div class="f"><p class="lab" data-t="lStations">Station presets</p>
+          <input type="text" id="sStations" data-tp="pStations" placeholder="Info,Radar,Tower"></div>
+        <div class="f"><p class="lab" data-t="lMsgRx">Message presets — received</p>
+          <input type="text" id="sMsgRx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
+        <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
+          <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <div class="f two"><input type="text" id="sO2" data-tp="pO2" placeholder="O2 cylinders in liters, e.g. 2,2,10">
           <input type="number" id="sO2bar" inputmode="numeric" data-tp="pO2bar" placeholder="Full pressure bar"></div>
 
@@ -580,12 +586,14 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-03';
+const APP_VERSION='v260813-05';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
+           bagKg:15,readyKg:30,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
+           msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
+           msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
@@ -598,13 +606,16 @@ let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',meth:null,o2bars:[],o2use:0,med:'sand',
+                      waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false,LASTERR='';
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
 function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast(t('storageFull'))}}
+function save(k,v){
+  try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast(t('storageFull'))}
+  if(k===K_CFG&&typeof publishSoon==='function')publishSoon();
+}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const r1=n=>Math.round(n*10)/10;
 const pad=(n,w)=>String(n).padStart(w,'0');
@@ -620,7 +631,7 @@ const L={en:{
  remaining:'remaining', totalBallast:'total ballast', methanolShort:'methanol', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop', takeInv:'Take Inventory', sand:'Sand', waterW:'Water',
  kgDropped:'Kilograms dropped', bags:'sand bags', water:'water', remark:'Remark (optional)',
- readyBallast:'Ready ballast', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
+ readyBallast:'Ready ballast (\u201eSch\u00fctte\u201c)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
  message:'Message', confirmLast:'Confirm from last call', sendWa:'Send to WhatsApp',
  noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
  nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
@@ -674,7 +685,8 @@ const L={en:{
  pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
  pBagKg:'Weight per bag kg', pReadyKg:'Full ready ballast kg',
  pSteps:'Quick drop amounts, e.g. 5,10,15,25', pReadySteps:'Ready ballast steps, e.g. 0,10,25,50,75,100',
- pO2:'O\u2082 cylinders in liters, e.g. 2,2,10', pO2bar:'Full pressure bar', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
+ pO2:'O\u2082 cylinders in liters, e.g. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
+ lStations:'Station presets', lMsgRx:'Message presets \u2014 received', lMsgTx:'Message presets \u2014 transmitted', pO2bar:'Full pressure bar', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
  pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'xxxx',
  hintRole:'The master owns the flight setup and publishes it. Followers pick up every change the master saves.',
  hintInit:'Only needed before the first inventory. Leave it empty and the ballast figure starts with the first Take Inventory.',
@@ -690,7 +702,7 @@ const L={en:{
  offlineKeep:'Offline — entries stay on this device', addRepo:'Add repository and token in Setup',
  setupFromMaster:'Setup updated from the master', synced:'Synced', reloaded:'Reloaded',
  connectedTo:'Connected to', storageFull:'Storage full', cleared:'Local copy cleared',
- inSync:'In sync, last at', reportingAs:'Reporting as', notThePic:'not the PIC',
+ inSync:'In sync, last at', reportingAs:'Reporting as', reportingAsLbl:'reporting as', notThePic:'not the PIC',
  shareTitle:'Share setup', copyLink:'Copy link', done:'Done',
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
  lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note'
@@ -709,7 +721,7 @@ const L={en:{
  remaining:'verbleibend', totalBallast:'Gesamtballast', methanolShort:'Methanol', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
  drop:'Abwurf', takeInv:'Inventar', sand:'Sand', waterW:'Wasser',
  kgDropped:'Kilogramm abgeworfen', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
- readyBallast:'Ready Ballast', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
+ readyBallast:'Ready Ballast (\u201eSch\u00fctte\u201c)', schuette:'Sch\u00fctte', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
  message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', sendWa:'An WhatsApp senden',
  noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
  nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
@@ -764,7 +776,8 @@ const L={en:{
  pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
  pBagKg:'Gewicht pro Sack, kg', pReadyKg:'Voller Ready Ballast, kg',
  pSteps:'Schnellmengen, z. B. 5,10,15,25', pReadySteps:'Ready-Ballast-Stufen, z. B. 0,10,25,50,75,100',
- pO2:'O\u2082-Flaschen in Liter, z. B. 2,2,10', pO2bar:'Fülldruck bar', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
+ pO2:'O\u2082-Flaschen in Liter, z. B. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
+ lStations:'Stellen-Vorschläge', lMsgRx:'Textbausteine \u2014 empfangen', lMsgTx:'Textbausteine \u2014 gesendet', pO2bar:'Fülldruck bar', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
  pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'xxxx',
  hintRole:'Der Master besitzt die Einrichtung der Fahrt und gibt sie weiter. Follower übernehmen jede Änderung.',
  hintInit:'Nur vor dem ersten Inventar nötig. Leer lassen, dann beginnt die Ballastzahl mit dem ersten Inventar.',
@@ -781,7 +794,7 @@ const L={en:{
  offlineKeep:'Offline — Einträge bleiben auf dem Gerät', addRepo:'Repository und Token in den Einstellungen eintragen',
  setupFromMaster:'Einrichtung vom Master übernommen', synced:'Gesendet', reloaded:'Geladen',
  connectedTo:'Verbunden mit', storageFull:'Speicher voll', cleared:'Lokale Kopie geleert',
- inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', notThePic:'nicht der PIC',
+ inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', reportingAsLbl:'meldet als', notThePic:'nicht der PIC',
  shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', done:'Fertig',
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
  lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz'
@@ -1058,10 +1071,12 @@ const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight|
 const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
-const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','bagKg','readyKg',
-  'vfr','atcName','atcNum','wa','tpl'];
+const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps',
+  'bagKg','readyKg','vfr','emerg','stations','msgRx','msgTx','o2','o2bar',
+  'atcName','atcNum','wa','tpl'];
 function setupPayload(withToken){
-  const o={v:1,master_device:DEV};SHARED.forEach(k=>o[k]=CFG[k]);
+  const o={v:1,master_device:DEV,updated_at:new Date().toISOString(),by:reporter()};
+  SHARED.forEach(k=>o[k]=CFG[k]);
   if(withToken&&CFG.token)o.token=CFG.token;
   return o;
 }
@@ -1070,6 +1085,15 @@ const b64u=t=>b64e(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64u=t=>b64d(t.replace(/-/g,'+').replace(/_/g,'/'));
 const shareLink=withToken=>location.origin+location.pathname+'#cfg='+b64u(JSON.stringify(setupPayload(withToken)));
 
+/* The setup lives in the repository, not only on the master's iPad. Every change is written
+   there within a few seconds, so a lost or replaced device costs nothing and a new flight
+   starts with everything already in place. */
+let PUBT=null;
+function publishSoon(){
+  if(CFG.role!=='master')return;
+  clearTimeout(PUBT);
+  PUBT=setTimeout(()=>{publishSetup()},4000);
+}
 async function publishSetup(){
   if(CFG.role!=='master'||!configured()||!navigator.onLine)return;
   try{
@@ -1228,8 +1252,8 @@ function paintReadout(){
   $('#rOn').textContent=txt;
   $('#rDrop').textContent=droppedTotal().toFixed(1)+' kg';
   $$('[data-t="droppedSince"]').forEach(el=>el.textContent=firstInv()?t('droppedSince'):t('droppedStart'));
-  $('#repName').textContent=reporter();
-  $('#repRole').textContent=shared()?(UI.alt?'Not the PIC':'Reporter — PIC'):'Reporter';
+  const who=reporter();
+  $('#repName').textContent=who+(who===picName()?' (PIC)':'');
   $('#btnRep').classList.toggle('on',shared()&&!!UI.alt);
   $('#postRow').classList.toggle('shared',shared());
 }
@@ -1246,8 +1270,10 @@ function line(e){
   if(e.type==='Ballast'){
     if(e.ballast_action==='count'){
       h=t('lgInv')+' \u00b7 '+remainText(e);
-      s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' · water '+(e.water_kg!=null?e.water_kg:'?')
-        +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')+(e.inv_ready_pct!=null?' · ready '+e.inv_ready_pct+'%':'')
+      s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' kg'
+        +(e.inv_ready_pct!=null?' („'+t('schuette')+'“ '+e.inv_ready_pct+'%)':'')
+        +' · water '+(e.water_kg!=null?e.water_kg:'?')+' kg'
+        +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')
         +(e.tally_diff_kg!=null?' · diff '+(e.tally_diff_kg>0?'+':'')+e.tally_diff_kg+' kg':'')
         +(e.note?' · '+e.note:'');
     }else{
@@ -1652,7 +1678,7 @@ function setType(ty){
   $$('#types button').forEach(b=>b.classList.toggle('on',b.dataset.t===ty));
   $$('.blk').forEach(b=>b.classList.toggle('on',b.id==='b-'+ty));
   paintReadout();
-  if(ty==='ATC'){carryAtc();paintChips()}
+  if(ty==='ATC'){carryAtc();paintMsgChips()}
   if(ty==='Ballast'){UI.act='drop';UI.med='sand';save(K_UI,UI);
     mark('#bAct','drop');mark('#bMed','sand');setAct('drop')}
   if(ty==='Ressources'){carryRes();paintRes()}
@@ -1692,9 +1718,14 @@ $('#iReady').addEventListener('click',e=>{const b=e.target.closest('button');if(
 $('#iBags').addEventListener('input',paintInv);
 $('#iWater').addEventListener('input',paintInv);
 
-pills('#aDir',v=>{UI.adir=v;save(K_UI,UI)});
-const MSGS=['Initial call','Position report','QNH','Ops Normal','Level clearance','Squawk','Freq change','Leaving freq'];
-$('#aChips').innerHTML=MSGS.map(m=>`<button data-v="${m}">${m}</button>`).join('');
+pills('#aDir',v=>{UI.adir=v;save(K_UI,UI);paintMsgChips()});
+/* one list for calls received, one for calls transmitted — they rarely say the same thing */
+function paintMsgChips(){
+  const raw=(UI.adir==='TX'?CFG.msgTx:CFG.msgRx)||DEF.msgRx;
+  const list=String(raw).split(',').map(x=>x.trim()).filter(Boolean).slice(0,10);
+  $('#aChips').innerHTML=list.map(m=>`<button data-v="${esc(m)}">${esc(m)}</button>`).join('');
+  paintChips();
+}
 /* a phrase goes in on the first tap and comes out again on the second */
 const msgParts=()=>$('#aMsg').value.split('\u00b7').map(x=>x.trim()).filter(Boolean);
 function paintChips(){
@@ -1747,6 +1778,8 @@ const o2Summary=()=>{
   const p=o2Pct();return o2Litres()+' l'+(p==null?'':' ('+p+'%)');
 };
 function paintRes(){
+  $('#rBat').textContent=UI.bat==null?'\u2014':UI.bat+'%';
+  $('#rBat').classList.toggle('set',UI.bat!=null);
   $('#rMeth').textContent=UI.meth==null?'\u2014':UI.meth+'%';
   $('#rMeth').classList.toggle('set',UI.meth!=null);
   const sizes=o2Sizes(),bars=UI.o2bars||[];
@@ -1754,6 +1787,7 @@ function paintRes(){
   $('#rO2').textContent=!sizes.length?'\u2014':(parts.length?parts.join(' · '):'\u2014');
   $('#rO2').classList.toggle('set',!!parts.length);
 }
+$('#rBat').onclick=async()=>{UI.bat=await levelSheet(t('battery'),UI.bat);save(K_UI,UI);paintRes()};
 $('#rMeth').onclick=async()=>{UI.meth=await levelSheet(t('methanol'),UI.meth);save(K_UI,UI);paintRes()};
 $('#rO2').onclick=async()=>{
   if(UI.o2crew!=='on'){toast(t('o2crewOff'));return}
@@ -1785,10 +1819,10 @@ const o2Detail=()=>{
 /* ── values carried over from the last message of the same kind ─────
    They arrive greyed. Touching any one of them accepts the whole set, so a changed
    frequency never leaves a stale station behind a second confirmation. */
-const ATCF=[];  /* ATC values arrive through the Confirm button, not as grey prefills */
-const DROPF=[['#bKg','kg']];
+const ATCF=[];
+const DROPF=[];
 const INVF=[['#iBags','bags'],['#iWater','water']];
-const RESF=[['#rBat','bat']];
+const RESF=[];
 function preFill(pairs,store){
   let any=false;
   (pairs||[]).forEach(([sel,k])=>{const el=$(sel);if(!el)return;
@@ -1830,10 +1864,23 @@ function paintLastBoxes(){
 const paintLastAtc=paintLastBoxes;
 /* nothing is pre-filled: the button below Rx/Tx fills all three at once and drops the
    cursor into the message, the only field that always needs typing */
-function carryAtc(){
-  adoptLast();setTimeout(syncVfr,0);paintLastBoxes();
+/* The three fields arrive holding the last call in grey. Touching one clears it, so nothing
+   has to be deleted by hand; the button below Rx/Tx stays put and puts them all back. */
+function fillAtcFromLast(grey){
   const l=UI.lastAtc||{};
-  $('#aCarry').classList.toggle('hide',!(l.station||l.freq||l.squawk));
+  [['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']].forEach(([sel,k])=>{
+    const el=$(sel);el.value=l[k]||'';
+    el.classList.toggle('pre',!!grey&&!!l[k]);
+  });
+  syncVfr();
+}
+function carryAtc(){
+  adoptLast();paintLastBoxes();paintStaChips();
+  const l=UI.lastAtc||{};
+  const has=!!(l.station||l.freq||l.squawk);
+  $('#aCarry').classList.toggle('hide',!has);
+  if(has&&!$('#aStation').value&&!$('#aFreq').value&&!$('#aSquawk').value)fillAtcFromLast(true);
+  else setTimeout(syncVfr,0);
 }
 /* The defaults come from the last entry in the table, whoever made it and on whichever
    device — a handover mid-flight must not reset what the other pilot last reported. */
@@ -1861,6 +1908,7 @@ function adoptLast(){
     if(r.res_solar)UI.solar=r.res_solar;
     if(r.res_o2_crew)UI.o2crew=r.res_o2_crew;
     if(r.res_methanol_pct!=null&&r.res_methanol_pct!=='')UI.meth=Number(r.res_methanol_pct);
+    if(r.res_battery_pct!=null&&r.res_battery_pct!=='')UI.bat=Number(r.res_battery_pct);
     if(r.res_o2_inuse!=null&&r.res_o2_inuse!=='')UI.o2use=Number(r.res_o2_inuse)-1;
     if(r.res_o2_bars)UI.o2bars=String(r.res_o2_bars).split(';')
       .map(x=>x===''?null:Number(x)).map(x=>isFinite(x)?x:null);
@@ -1868,13 +1916,14 @@ function adoptLast(){
     if(kp)UI.pic=kp;
     UI.rest=kr||'';
   }
-  if(r)UI.lastRes={bat:(r.res_battery_pct==null||r.res_battery_pct==='')?'':String(r.res_battery_pct)};
+  if(r&&r.res_battery_pct!=null&&r.res_battery_pct!==''&&UI.bat==null)UI.bat=Number(r.res_battery_pct);
   save(K_UI,UI);
 }
-const carryDrop=()=>{adoptLast();return preFill(DROPF,UI.lastDrop)};
+/* the running total starts empty every time the tab is opened */
+const carryDrop=()=>{adoptLast();$('#bKg').value='';paintSum()};
 const carryInv=()=>{adoptLast();paintReady();return preFill(INVF,UI.lastInv)};
 const carryRes=()=>{adoptLast();mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);
-  mark('#rO2crew',UI.o2crew);paintCrew();paintRes();return preFill(RESF,UI.lastRes)};
+  mark('#rO2crew',UI.o2crew);paintCrew();paintRes()};
 [['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Ressources',RESF]].forEach(([scope,pairs])=>{
   pairs.forEach(([sel])=>{const el=$(sel);if(!el)return;
     ['focus','input','change'].forEach(ev=>el.addEventListener(ev,()=>acceptPre(scope)))});
@@ -1902,19 +1951,26 @@ $('#btnVfr').onclick=()=>{const el=$('#aSquawk');
   syncVfr()};
 
 $('#aConfirm').onclick=()=>{
-  const l=UI.lastAtc||{};
-  $('#aStation').value=l.station||'';
-  $('#aFreq').value=l.freq||'';
-  $('#aSquawk').value=l.squawk||'';
-  acceptPre('#b-ATC');syncVfr();
+  fillAtcFromLast(false);
   const m=$('#aMsg');m.focus();
   try{m.setSelectionRange(m.value.length,m.value.length)}catch(e){}
   toast(t('takenOver'));
 };
-/* tapping into a frequency or a squawk means a new value, so the old one gets out of the way */
-[['#aFreq'],['#aSquawk']].forEach(([sel])=>$(sel).addEventListener('focus',()=>{
-  const el=$(sel);if(el.value){el.value='';if(sel==='#aSquawk')syncVfr()}
+/* tapping into one of the three means a new value, so the old one gets out of the way */
+['#aStation','#aFreq','#aSquawk'].forEach(sel=>$(sel).addEventListener('focus',()=>{
+  const el=$(sel);
+  if(el.value){el.value='';el.classList.remove('pre');if(sel==='#aSquawk')syncVfr()}
 }));
+
+/* stations that come up again and again, straight from the setup */
+function paintStaChips(){
+  const list=String(CFG.stations||DEF.stations).split(',').map(x=>x.trim()).filter(Boolean).slice(0,8);
+  $('#aStaChips').innerHTML=list.map(x=>`<button data-v="${esc(x)}">${esc(x)}</button>`).join('');
+}
+$('#aStaChips').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const el=$('#aStation');el.value=b.dataset.v;el.classList.remove('pre');
+});
 
 /* ── Pictures on an Other entry ─────────────────────────────────────
    Photos are scaled down in the browser before anything is stored, because a queued
@@ -2051,9 +2107,10 @@ $('#btnPost').onclick=async()=>{
     e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#aMsg').value='';paintChips();toast(t('atcPosted'));carryAtc();syncVfr();
+    $('#aStation').value='';$('#aFreq').value='';$('#aSquawk').value='';
+    $('#aMsg').value='';paintMsgChips();toast(t('atcPosted'));carryAtc();
   }else if(ty==='Ressources'){
-    const bat=$('#rBat').value;const rc=recipients('Ressources');
+    const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Ressources');
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
@@ -2138,7 +2195,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',steps:'#sSteps',readySteps:'#sReady',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 function paintWaRows(){
   const w=CFG.wa||[];
