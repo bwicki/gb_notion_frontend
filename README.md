@@ -32,8 +32,10 @@ no title inside the app — the home screen icon already says what this is, and 
 better spent on the form.
 
 Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
-switch, Reload from GitHub, Send now, Save CSV, Save JSON and *About — more info*, which opens
-this README as a page in its own window. The switch is named for the mode it takes you to, so
+switch, Reload from GitHub, Send now, Print the log, Export the table, and *About — more info*,
+which opens this manual as a page in its own window; the licence is linked from its last
+section. *Report* is the filled button at the top, because reporting is what the app is for and
+the menu should not make you hunt for the way back. The switch is named for the mode it takes you to, so
 it reads *Night mode* by day and *Day mode* at night.
 
 Keeping the header to two buttons leaves the whole width for the flight and the navigation
@@ -43,7 +45,8 @@ Night mode comes in four colours — red, amber, green or dimmed white — chose
 Red preserves dark adaptation best; the others are there for personal preference and for
 screens where red reads badly.
 
-The app icon and the favicon are a sandbag beside four tally strokes, in club navy. The
+The app icon and the favicon are the tally itself — four navy strokes struck through in red,
+drawn slightly out of true so it reads as counted by hand rather than printed. The
 favicons have a transparent ground so they sit in a browser tab of any colour; the home screen
 icons stay opaque, since iOS renders transparency in an app icon as black.
 The set covers all three platforms: `apple-touch-icon` in 120, 152, 167 and 180 pixels for
@@ -156,7 +159,14 @@ available. The header carries the live values under the flight number.
 
 ## 6. Ballast
 
-**Drop** subtracts the kilograms thrown and records whether it was sand or water; sand is the
+**Sand and water are carried forward separately.** An inventory sets both, a drop reduces the
+one it was made of, and every entry therefore knows what is left of each — recorded as
+`sand_left_kg` and `water_left_kg` beside the total. The log reads
+`dropped 40 kg sand · remaining 370.0 kg total ballast (350.0 kg sand, 20.0 kg water)`, and a
+water drop is stated in litres, `dropped 20 l water`, because that is how it is measured in the
+basket.
+
+**Drop** subtracts what was thrown and records whether it was sand or water; sand is the
 default. The quick amounts **add up**: tapping 10 three times gives 30, which is how ballast
 actually leaves a basket — sack by sack, counted as you go. A *Reset* button appears beside the
 total the moment there is something to undo. The `kg` at the right edge of the button row names
@@ -215,10 +225,11 @@ the entry goes out, because they are three keystrokes away from ordinary codes.
 
 The **VFR** button fills the squawk with the conspicuity code from the setup, `7000` by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, FREQ and SQ arrive filled in from the previous call, in grey with a dashed outline,
-under a *Confirm from last call* button. Touching any one of the three accepts the whole set —
-change the frequency and the station comes with it, with no second question when you post. A
-run of calls to the same station is one tap on Confirm; a changed call is simply typed over.
+turns the light off. Under the Rx/Tx selection sits **Confirm from last msg**. One tap fills station, FREQ and SQ
+from the previous call and puts the cursor straight into the message — the only field that
+always has to be typed. Nothing is pre-filled otherwise, so a form that opens is a form that is
+empty, and tapping into FREQ or SQ clears whatever was there: those two are always replaced
+rather than edited, and deleting four digits by hand in turbulence is a waste of a hand.
 
 The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.
@@ -440,6 +451,13 @@ Order is never in doubt: the file is always written as the complete set of rows 
 `ts_utc`, so a queued entry lands in its correct place in the sequence rather than at the end.
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.
 
+**Print the log** builds an A4 portrait printout in its own window: you pick which of the four
+kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
+chronologically and numbered, each with its time, kind, content, reporter, position and track;
+every page carries the flight in its heading with the mark on the right, and a numbered footer.
+Pagination is measured against the real page height rather than estimated, so no entry is split
+across a break.
+
 *Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
 writing. Neither is needed in normal use. *Export the table* asks for the format first — CSV or
 JSON — and then for the destination: *Download* puts the file in the browser's downloads,
@@ -481,6 +499,16 @@ deleted row does not reappear from another iPad's copy, and the main table stays
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
 export moved into the menu.
 
+Each row carries its transmission state at the right edge: a green double check when it has
+reached GitHub, a straw single check while it is waiting for a connection, and a red cross when
+an attempt was refused — an expired token, a repository that is not there. A cross is worth
+acting on; a single check only means the link is not up yet.
+
+The ticks follow the queue on their own. When a batch finally goes out, every straw check in the
+list turns green within the second, without leaving the log or pulling to refresh. The list is
+only redrawn when the count of waiting or failed rows actually changes, so it does not fight
+your scrolling.
+
 Tapping an entry opens it for editing. The editable fields depend on the type — kilograms and
 remark for a drop, bags, water and ready ballast for an inventory, station through message for
 ATC. Saving stamps `edited_at` and `edited_by`. The ballast column is recalculated over the
@@ -517,6 +545,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `ballast_delta_kg` | kilograms thrown, negative |
 | `ballast_abs_kg` | on board after this entry, recalculated across all devices |
 | `sand_kg`, `water_kg`, `total_ballast_kg` | inventory result |
+| `sand_left_kg`, `water_left_kg` | what is left of each after this entry |
 | `tally_diff_kg` | counted total minus what was expected at that moment |
 | `inv_bags`, `inv_ready_pct` | what the inventory was built from |
 | `atc_dir` | `RX` received, `TX` sent |
@@ -600,11 +629,28 @@ stays English: the column names, the values in `type`, the message templates. A 
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.
 
+## 14b. Beginning a new flight
+
+*Begin new flight* sits at the foot of the unlocked settings and asks for the master password
+`5678`, then for the name of the new flight, then twice for confirmation — naming how many
+entries the old flight holds and how many of them are still queued.
+
+**Nothing is moved and nothing is overwritten.** The old flight's files are named after it, so
+they simply stay where they are; they are recorded in `data/_flights.json` with the time they
+were closed, the number of rows and who closed them, which gives you an index of the season.
+Before closing, whatever is still queued is sent one last time. If there is no connection and
+rows are still waiting, the app says so and asks again before going on — those rows would be
+lost, because clearing the local table is what makes the new flight start empty.
+
+The new flight ID is published to the followers along with the rest of the setup, so within a
+few seconds every device in the crew is on the new flight with an empty table.
+
 ## 15. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
-build released that day. `v260812-24` is the twenty-fourth build of 12 August 2026.
+build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
+smaller counter. `v260813-01` is the first build of 13 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html` and `setup.html` are
@@ -614,8 +660,10 @@ with an unchanged cache name may not reach a device that already has the app ins
 
 ## 16. License
 
-Custom license, © 2026 Wicki Aero GmbH — the full text is in
-[LICENSE](license.html), reachable from the menu inside the app.
+Custom license, © 2026 Wicki Aero GmbH.
+
+**[Read the full licence](license.html)** — it opens in a window of its own, and the same text
+sits in `LICENSE` in the repository.
 
 In short: use it and host it as it is, for yourself, your club or your school, free of charge.
 Do not modify it, translate it, republish a changed version of it, strip the attribution from

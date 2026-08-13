@@ -106,11 +106,13 @@ header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6
   line-height:1.2;white-space:nowrap}
 
 
-.rep{flex:0 0 auto;border:1px solid var(--line);background:var(--field);
-  border-radius:8px;padding:3px 9px;min-height:36px;text-align:right;max-width:38%}
-.rep.hide{display:none}
+.postrow{display:grid;grid-template-columns:1fr;gap:8px}
+.postrow.shared{grid-template-columns:20% 1fr}
+.rep{display:none;border:1px solid var(--line);background:var(--field);border-radius:10px;
+  padding:4px 6px;min-height:52px;text-align:center;overflow:hidden}
+.postrow.shared .rep{display:block}
 .rep em{font-style:normal;display:block;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.rep b{display:block;font-size:12.5px;font-weight:400;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep b{display:block;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rep.on{background:var(--sel);border-color:var(--sel);color:var(--sel-ink)}
 .rep.on em{color:var(--sel-ink);opacity:.75}
 
@@ -133,8 +135,12 @@ input:focus,textarea:focus{outline:0;border-color:var(--sel)}
 input.pre{color:var(--carry);border-style:dashed}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.atcrow{display:grid;grid-template-columns:1.15fr 1fr 60px;gap:8px}
-.vfr{min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+.four{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.four .lab{font-size:10px}
+.four select,.four .lvl{font-size:12px;padding:0 4px}
+.four .pnl button{font-size:11.5px}
+.atcrow{display:grid;grid-template-columns:1fr .82fr 100px;gap:8px;align-items:end}
+.vfr{min-height:66px;border:1px solid var(--line);border-radius:9px;background:var(--field);
   font-size:13px;letter-spacing:.04em}
 .vfr.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 select{width:100%;min-height:44px;padding:10px 12px;background:var(--field);
@@ -149,7 +155,8 @@ select:focus{outline:0;border-color:var(--sel)}
 .unit span{font-size:13px;color:var(--muted)}
 .carry{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:11.5px;color:var(--muted)}
 .carry.hide{display:none}
-.carry button{padding:5px 11px;border:1px solid var(--line);border-radius:14px;font-size:12px;flex:0 0 auto}
+.carry button{padding:9px 14px;border:1px solid var(--line);border-radius:9px;font-size:13px;
+  flex:1;background:var(--field)}
 .calc{border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px;font-size:13px;
   color:var(--muted);margin-bottom:10px;line-height:1.5}
 .calc b{color:var(--ink);font-weight:400}
@@ -227,11 +234,21 @@ select.pre{color:var(--carry);border-style:dashed}
 .entry .c{flex:1;min-width:0;font-size:14.5px}
 .entry .c i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.entry .p{width:7px;height:7px;border-radius:50%;border:1px solid var(--muted);flex:0 0 auto}
-.entry .p.done{background:var(--muted)}
+.entry .p{width:18px;height:18px;flex:0 0 auto;margin-top:2px}
+.entry .p svg{width:18px;height:18px;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.st-ok{stroke:#2E7D4F}.st-wait{stroke:#C9A227}.st-fail{stroke:#B5442F}
+html[data-theme="night"] .st-ok{stroke:#4FAF74}
+html[data-theme="night"] .st-wait{stroke:#D8AC33}
+html[data-theme="night"] .st-fail{stroke:#E2705F}
 .none{color:var(--muted);font-size:14px;padding:20px 0}
 h3{font-size:11.5px;color:var(--muted);font-weight:400;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.08em}
 h3:first-child{margin-top:14px}
+.loghead{display:flex;align-items:center;gap:10px}
+.loghead h3{flex:1}
+.loghead button{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:9px;margin-top:8px}
+.loghead svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
 
 .fold{border:1px solid var(--line);border-radius:10px;margin-top:14px;overflow:hidden}
 .fold>summary{list-style:none;padding:14px;font-size:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
@@ -287,7 +304,6 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 <header>
   <span class="clock num" id="hClock">--:--:--Z</span>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
-  <button class="rep hide" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
   <span class="clock num" id="hBal"></span>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
@@ -349,13 +365,14 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <div class="f"><div class="pills" id="aDir">
           <button data-v="RX" data-t="received">Received</button><button data-v="TX" data-t="transmitted">Transmitted</button>
         </div></div>
+        <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last msg</button></div>
         <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
         <div class="f atcrow">
           <div><p class="lab">FREQ</p>
             <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div></div>
           <div><p class="lab">SQ</p>
             <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="xxxx"></div>
-          <div><p class="lab">&nbsp;</p><button class="vfr" id="btnVfr">VFR</button></div>
+          <button class="vfr" id="btnVfr">VFR</button>
         </div>
         <div class="carry hide" id="aCarry"><button id="aConfirm" data-t="confirmLast">Confirm from last call</button></div>
         <div class="f"><div class="links small" id="aChips"></div></div>
@@ -373,7 +390,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div><p class="lab" data-t="currentPic">Current PIC</p><div class="pnl" id="cPic"></div></div>
           <div><p class="lab" data-t="resting">Resting</p><div class="pnl pnl3" id="cRest"></div></div>
         </div>
-        <div class="f three">
+        <div class="f four">
           <div><p class="lab" data-t="battery">Battery</p><select id="rBat">
             <option value="">—</option><option value="100">100%</option><option value="95">95%</option>
             <option value="90">90%</option><option value="85">85%</option><option value="80">80%</option>
@@ -385,10 +402,10 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
           <div><p class="lab" data-t="methanol">Methanol level</p>
             <button class="lvl" id="rMeth">—</button></div>
-        </div>
-        <div class="f three">
           <div><p class="lab" data-t="solarCell">Solar Panel</p><div class="pnl" id="rSolar">
             <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
+        </div>
+        <div class="f two">
           <div><p class="lab" data-t="crewO2">Crew on O₂</p><div class="pnl" id="rO2crew">
             <button data-v="off" data-t="off">Off</button><button data-v="on" data-t="on">On</button></div></div>
           <div><p class="lab" data-t="o2level">O₂ Reserve</p>
@@ -419,7 +436,10 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
     </div>
 
     <div class="foot">
-      <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
+      <div class="postrow" id="postRow">
+        <button class="rep" id="btnRep"><em id="repRole">Reporter</em><b id="repName">—</b></button>
+        <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
+      </div>
       <div class="ftline"><p class="tiny" id="hSt"></p><span class="ver"></span></div>
     </div>
   </section>
@@ -427,7 +447,10 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
   <!-- LOG -->
   <section class="view" id="v-log">
     <div class="scroll">
-      <h3 data-t="logHead">Log — tap an entry to edit</h3>
+      <div class="loghead">
+        <h3 data-t="logHead">Log — tap an entry to edit</h3>
+        <button id="btnLogBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></svg></button>
+      </div>
       <div id="logList"></div>
     </div>
     <div class="foot">
@@ -528,6 +551,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         </details>
 
         <div style="height:14px"></div>
+        <button class="go" id="btnNewFlight" data-t="newFlight">Begin new flight</button>
         <button class="go warn" id="btnWipe" data-t="clearDevice">Clear entries on this device</button>
       </div>
     </div>
@@ -551,7 +575,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260812-24';
+const APP_VERSION='v260813-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -587,7 +611,8 @@ const nz=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
    The interface only. Everything written to GitHub or sent to WhatsApp stays English,
    so the table and the coordinator never depend on who set which device to what. */
 const L={en:{
- onBoard:'on board', stillAvail:'still available', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
+ onBoard:'on board', stillAvail:'still available', dropped:'dropped', takenOn:'taken on',
+ remaining:'remaining', totalBallast:'total ballast', methanolShort:'methanol', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop', takeInv:'Take Inventory', sand:'Sand', waterW:'Water',
  kgDropped:'Kilograms dropped', bags:'sand bags', water:'water', remark:'Remark (optional)',
  readyBallast:'Ready ballast', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
@@ -606,13 +631,21 @@ const L={en:{
  waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
  mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
- mExport:'Export the table', mAbout:'About — more info', mLicense:'License', menu:'Menu',
+ mExport:'Export the table', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
+ page:'Page', logHeadPrint:'Flight log', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
  enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
  sqDigits:'A squawk is four digits, each 0 to 7', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password',
+ newFlight:'Begin new flight', newFlightPass:'Closing a flight and opening the next one needs the master password.',
+ newFlightAsk:'Name the new flight. The old one keeps its own files; nothing is overwritten.',
+ newFlightNeedsId:'The new flight needs an ID', newFlightSameId:'That is the flight you are already on',
+ newFlightWarn1:'Flight {old} closes with {n} entries, {q} of them still queued, and {new} starts empty on every device.',
+ newFlightWarn2:'The old files stay on GitHub and are listed in the flight index. This device clears its local table.',
+ newFlightOffline:'{q} entries have not reached GitHub and there is no connection. Starting a new flight now loses them.',
+ newFlightDone:'New flight',
  fPosted:'Posted to CC Notion', fQueued:'Queued for later delivery (no internet connection currently)',
  fFailed:'Failed', fNoRepo:'Failed: no repository configured',
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
@@ -655,7 +688,8 @@ const L={en:{
  unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', lastMsg:'last msg',
  upload:'upload', nothingSent:'Not sent yet', queued:'entries queued, going out as soon as there is a link.'
 },de:{
- onBoard:'an Bord', stillAvail:'noch verfügbar', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
+ onBoard:'an Bord', stillAvail:'noch verfügbar', dropped:'abgeworfen', takenOn:'aufgenommen',
+ remaining:'verbleibend', totalBallast:'Gesamtballast', methanolShort:'Methanol', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
  drop:'Abwurf', takeInv:'Inventar', sand:'Sand', waterW:'Wasser',
  kgDropped:'Kilogramm abgeworfen', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
  readyBallast:'Ready Ballast', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
@@ -675,13 +709,21 @@ const L={en:{
  waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
  mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
- mExport:'Tabelle exportieren', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
+ mExport:'Tabelle exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
+ page:'Seite', logHeadPrint:'Bordbuch', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
  enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort',
+ newFlight:'Neue Fahrt beginnen', newFlightPass:'Eine Fahrt zu schliessen und die nächste zu öffnen verlangt das Master-Passwort.',
+ newFlightAsk:'Kennung der neuen Fahrt. Die alte behält ihre eigenen Dateien, nichts wird überschrieben.',
+ newFlightNeedsId:'Die neue Fahrt braucht eine Kennung', newFlightSameId:'Auf dieser Fahrt bist du bereits',
+ newFlightWarn1:'Fahrt {old} wird mit {n} Einträgen geschlossen, {q} davon noch in der Warteschlange, und {new} beginnt auf allen Geräten leer.',
+ newFlightWarn2:'Die alten Dateien bleiben auf GitHub und werden im Fahrtenverzeichnis eingetragen. Dieses Gerät leert seine lokale Tabelle.',
+ newFlightOffline:'{q} Einträge haben GitHub nicht erreicht und es besteht keine Verbindung. Eine neue Fahrt jetzt verliert sie.',
+ newFlightDone:'Neue Fahrt',
  fPosted:'An CC Notion gesendet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
  fFailed:'Fehlgeschlagen', fNoRepo:'Fehlgeschlagen: kein Repository eingerichtet',
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
@@ -742,18 +784,27 @@ function invCalc(bags,litres,pct){
   const water=r1(nz(litres));
   return{sand,water,total:r1(sand+water)};
 }
+/* sand and water are carried forward separately, so what is left of each is known
+   and not only the total */
+let SAND=0,WATER=0;
 function recalc(list){
-  let a=Number(CFG.init)||0, base=(Number(CFG.init)||0)>0;
+  let sand=Number(CFG.init)||0, water=0, base=(Number(CFG.init)||0)>0;
   for(const e of chrono(list)){
     if(e.type!=='Ballast')continue;
     if(e.ballast_action==='count'){
       const tot=r1(Number(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)||0);
-      e.tally_diff_kg=base?r1(tot-a):null;   /* counted minus expected */
-      a=tot;e.ballast_abs_kg=a;base=true;
-    }else if(e.ballast_delta_kg!=null){a=r1(a+Number(e.ballast_delta_kg));e.ballast_abs_kg=a}
-    else if(e.ballast_abs_kg!=null){a=r1(Number(e.ballast_abs_kg))}
+      e.tally_diff_kg=base?r1(tot-r1(sand+water)):null;   /* counted minus expected */
+      sand=e.sand_kg!=null?r1(Number(e.sand_kg)):tot;
+      water=e.water_kg!=null?r1(Number(e.water_kg)):0;
+      base=true;
+    }else if(e.ballast_delta_kg!=null){
+      const d=Number(e.ballast_delta_kg);
+      if(e.ballast_medium==='water')water=r1(water+d); else sand=r1(sand+d);
+    }
+    e.sand_left_kg=sand;e.water_left_kg=water;e.ballast_abs_kg=r1(sand+water);
   }
-  return a;
+  SAND=sand;WATER=water;
+  return r1(sand+water);
 }
 const onBoard=()=>recalc(ENT);
 const firstInv=()=>chrono(ENT).find(e=>e.type==='Ballast'&&e.ballast_action==='count');
@@ -831,12 +882,13 @@ function add(part){
     ts_utc:now.toISOString(),ts_local:localISO(now),
     type:'Other',ballast_action:'',ballast_delta_kg:null,ballast_abs_kg:null,
     tc_deg:null,speed_kt:null,ballast_medium:'',
-    sand_kg:null,water_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
+    sand_kg:null,water_kg:null,sand_left_kg:null,water_left_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
     crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',
     res_methanol_pct:null,res_o2_crew:'',res_o2:'',res_o2_liters:null,res_o2_pct:null,
     res_o2_detail:'',res_o2_inuse:null,res_o2_bars:'',note:'',
-    whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',synced:false
+    whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',
+    synced:false,failed:false
   },gpsSnap(),part);
   ENT.push(e);recalc(ENT);save(K_ENT,ENT);paint();beep();
   if(configured())sync(true,true);
@@ -1047,7 +1099,7 @@ async function ghPut(p,text,sha,msg){
 const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
   'pos_lat','pos_lon','alt_ft','tc_deg','speed_kt','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
-  'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','total_ballast_kg','tally_diff_kg',
+  'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','sand_left_kg','water_left_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
   'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar',
   'res_methanol_pct','res_o2_crew','res_o2','res_o2_liters','res_o2_pct','res_o2_detail',
@@ -1083,8 +1135,8 @@ async function sync(silent,push,attempt){
     const unsent=new Set(ENT.filter(e=>!e.synced).map(e=>e.id));
     const m=new Map();
     if(remote)remote.forEach(e=>{if(e&&e.id)m.set(e.id,e)});
-    else ENT.forEach(e=>{if(e&&e.id&&e.synced)m.set(e.id,Object.assign({},e))});
-    ENT.forEach(e=>{if(!e||!e.id)return;const c=Object.assign({},e);delete c.synced;m.set(c.id,c)});
+    else ENT.forEach(e=>{if(e&&e.id&&e.synced){const c=Object.assign({},e);delete c.synced;delete c.failed;m.set(e.id,c)}});
+    ENT.forEach(e=>{if(!e||!e.id)return;const c=Object.assign({},e);delete c.synced;delete c.failed;m.set(c.id,c)});
     tid.forEach(id=>m.delete(id));
     const all=chrono([...m.values()]);
     recalc(all);
@@ -1096,20 +1148,23 @@ async function sync(silent,push,attempt){
       await ghPut(p.csv,toCsv(all),cs,msg);
       if(newTombs.length){let ds=null;try{ds=(await ghGet(p.del)).sha}catch(e){}
         await ghPut(p.del,JSON.stringify(TOMB,null,1),ds,'deletions · '+reporter())}
-      ENT=all.map(e=>Object.assign({},e,{synced:true}));
+      ENT=all.map(e=>Object.assign({},e,{synced:true,failed:false}));
     }else{
-      ENT=all.map(e=>Object.assign({},e,{synced:!unsent.has(e.id)}));
+      ENT=all.map(e=>Object.assign({},e,{synced:!unsent.has(e.id),failed:false}));
     }
     LASTERR='';save(K_ENT,ENT);LASTSYNC=new Date();paint();
     if(!silent)toast((push?t('synced'):t('reloaded'))+' '+all.length+' '+t('rows'));
   }catch(e){
     if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1)}
     LASTERR=String(e.message||e);
+    /* a transport error marks the rows that did not make it, so the log says why */
+    ENT.forEach(x=>{if(!x.synced)x.failed=true});save(K_ENT,ENT);paintLog();
     if(!silent)toast(LASTERR);
   }finally{SYNCING=false;paintStatus()}
 }
 
 /* ── Painting ──────────────────────────────────────────────────────── */
+let LASTPEND=-1;
 function paintStatus(){
   $('#hId').textContent=(CFG.flight||'No flight ID')+(CFG.call?' \u00b7 '+CFG.call:'')
     +' \u00b7 '+reporter()+(shared()&&UI.alt?' *':'');
@@ -1128,6 +1183,10 @@ function paintStatus(){
   const up=!configured()?t('noRepo'):(SYNCING?'…':(un?'\u2717 '+un:'\u2713'));
   const cat=last?last.type:'\u2014';
   $('#hSt').textContent=t('lastMsg')+' '+when+'/'+who+'/'+cat+'  |  '+t('upload')+' '+up;
+  /* the ticks in the log follow the queue on their own, without a redraw on every tick */
+  const failed=ENT.filter(e=>e.failed&&!e.synced).length;
+  const sig=un*1000+failed;
+  if(sig!==LASTPEND){LASTPEND=sig;paintLog();paintLastBoxes()}
   $('#syncNote').textContent=un?un+'/'+ENT.length+' '+t('queued')
     :(LASTSYNC?t('inSync')+' '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
 }
@@ -1143,21 +1202,31 @@ function paintReadout(){
   $('#repName').textContent=reporter();
   $('#repRole').textContent=shared()?(UI.alt?'Not the PIC':'Reporter — PIC'):'Reporter';
   $('#btnRep').classList.toggle('on',shared()&&!!UI.alt);
-  $('#btnRep').classList.toggle('hide',!shared());
+  $('#postRow').classList.toggle('shared',shared());
+}
+const f1=n=>(Number(n)||0).toFixed(1);
+function remainText(e){
+  const tot=e.ballast_abs_kg,sd=e.sand_left_kg,wt=e.water_left_kg;
+  if(tot==null)return '';
+  const det=(sd!=null&&wt!=null)?' ('+f1(sd)+' kg '+t('sand').toLowerCase()
+    +', '+f1(wt)+' kg '+t('waterW').toLowerCase()+')':'';
+  return t('remaining')+' '+f1(tot)+' kg '+t('totalBallast')+det;
 }
 function line(e){
   let h='',s='';
   if(e.type==='Ballast'){
     if(e.ballast_action==='count'){
-      h=t('lgInv')+' '+(e.total_ballast_kg!=null?e.total_ballast_kg:e.ballast_abs_kg)+' kg';
+      h=t('lgInv')+' \u00b7 '+remainText(e);
       s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' · water '+(e.water_kg!=null?e.water_kg:'?')
         +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')+(e.inv_ready_pct!=null?' · ready '+e.inv_ready_pct+'%':'')
         +(e.tally_diff_kg!=null?' · diff '+(e.tally_diff_kg>0?'+':'')+e.tally_diff_kg+' kg':'')
         +(e.note?' · '+e.note:'');
     }else{
-      h=(e.ballast_delta_kg>0?'+':'')+e.ballast_delta_kg+' kg'
-        +(e.ballast_medium?' '+t(e.ballast_medium==='water'?'waterW':'sand').toLowerCase():'')
-        +' \u2192 '+e.ballast_abs_kg+' kg';
+      const kg=Math.abs(Number(e.ballast_delta_kg)||0);
+      const water=e.ballast_medium==='water';
+      h=(e.ballast_delta_kg>0?t('takenOn'):t('dropped'))+' '
+        +(water?kg+' l '+t('waterW').toLowerCase():kg+' kg '+t('sand').toLowerCase())
+        +' \u00b7 '+remainText(e);
       s=e.note||'';
     }
   }else if(e.type==='ATC'){
@@ -1168,7 +1237,7 @@ function line(e){
     h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
     s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?'bat '+e.res_battery_pct+'%':'',
        e.res_fuel_cell?'fuel '+e.res_fuel_cell:'',
-       e.res_methanol_pct!=null&&e.res_methanol_pct!==''?'meth '+e.res_methanol_pct+'%':'',
+       e.res_methanol_pct!=null&&e.res_methanol_pct!==''?t('methanolShort')+' '+e.res_methanol_pct+'%':'',
        e.res_solar?'solar '+e.res_solar:'',
        e.res_o2_crew?'O\u2082 crew '+e.res_o2_crew:'',
        e.res_o2?'O\u2082 '+e.res_o2:'',e.note||'']
@@ -1176,6 +1245,11 @@ function line(e){
   }else{h=e.note||t('lgNote');s=''}
   return{h,s};
 }
+/* three states, told apart at a glance: sent, waiting, refused */
+const ST_OK='<svg viewBox="0 0 24 24" class="st-ok"><path d="M1 13l4.5 4.5L14 8"/><path d="M8.5 13l4.5 4.5L22 8"/></svg>';
+const ST_WAIT='<svg viewBox="0 0 24 24" class="st-wait"><path d="M4 13l5 5L20 6"/></svg>';
+const ST_FAIL='<svg viewBox="0 0 24 24" class="st-fail"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const stIcon=e=>e.synced?ST_OK:(e.failed?ST_FAIL:ST_WAIT);
 function paintLog(){
   const l=chrono(ENT).reverse(),box=$('#logList');
   if(!l.length){box.innerHTML='<p class="none">'+esc(t('noEntries'))+'</p>';return}
@@ -1184,7 +1258,7 @@ function paintLog(){
     const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'');
     return `<button class="entry" data-id="${esc(e.id)}"><span class="t num">${hm(e.ts_local||e.ts_utc)}</span>
       <span class="c">${esc(h)}<i>${esc(who)}${s?' \u00b7 '+esc(s):''}</i></span>
-      <span class="p ${e.synced?'done':''}"></span></button>`;
+      <span class="p">${stIcon(e)}</span></button>`;
   }).join('');
 }
 function paintReady(){
@@ -1287,6 +1361,92 @@ function setTheme(t,persist){
 const isNight=()=>document.documentElement.dataset.theme==='night';
 
 /* ── Navigation and menu ───────────────────────────────────────────── */
+/* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
+   Pagination is measured rather than guessed, so no entry is ever cut in half. */
+async function printSheet(){
+  const kinds=['Ballast','ATC','Ressources','Other'];
+  let pick={Ballast:true,ATC:true,Ressources:true,Other:true};
+  await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
+    text:t('printPick'),
+    html:'<div class="links wa" id="prK">'+kinds.map(k=>
+      `<button data-k="${k}" class="on">${esc(k)}</button>`).join('')+'</div>',
+    onMount:(m,close)=>{
+      m.querySelector('#prK').addEventListener('click',ev=>{
+        const b=ev.target.closest('button');if(!b)return;
+        pick[b.dataset.k]=!pick[b.dataset.k];b.classList.toggle('on',pick[b.dataset.k]);
+      });
+      m.querySelector('[data-a="1"]').onclick=()=>{close();buildPrint(pick)};
+    }});
+}
+function buildPrint(pick){
+  const rows=chrono(ENT).filter(e=>pick[e.type]);
+  if(!rows.length){toast(t('noEntries'));return}
+  const w=window.open('','_blank');
+  if(!w){toast(t('popupBlocked'));return}
+  const esc2=x=>String(x==null?'':x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const title=(CFG.flight||'Flight')+(CFG.call?' \u00b7 '+CFG.call:'');
+  const body=rows.map((e,i)=>{
+    const pos=e.pos_lat?e.pos_lat+' '+e.pos_lon+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':''):'';
+    const nav=[e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':'']
+      .filter(Boolean).join(' \u00b7 ');
+    return '<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
+      +'<td class="ty">'+esc2(e.type)+'</td><td class="tx">'+esc2(lastText(e))
+      +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span></td></tr>';
+  }).join('');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc2(title)+'</title>'
+   +'<style>'
+   +'@page{size:A4 portrait;margin:0}'
+   +'*{box-sizing:border-box}'
+   +'body{margin:0;background:#eceff1;font:11px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#16181A}'
+   +'.page{position:relative;width:210mm;min-height:297mm;padding:14mm 14mm 18mm;margin:8mm auto;background:#fff;'
+   +'box-shadow:0 1px 6px rgba(0,0,0,.2);page-break-after:always;display:flex;flex-direction:column}'
+   +'.page:last-child{page-break-after:auto}'
+   +'header{display:flex;align-items:flex-start;border-bottom:1.2px solid #16181A;padding-bottom:6px;margin-bottom:10px}'
+   +'header h1{font-size:15px;font-weight:600;margin:0}'
+   +'header .sub{font-size:10px;color:#5b6166;margin-top:2px}'
+   +'header img{height:34px;margin-left:auto}'
+   +'table{width:100%;border-collapse:collapse}'
+   +'td{padding:4px 5px;border-bottom:.5px solid #d6dade;vertical-align:top}'
+   +'td.n{width:9mm;color:#7a8085;text-align:right;font-variant-numeric:tabular-nums}'
+   +'td.ts{width:19mm;font-variant-numeric:tabular-nums;white-space:nowrap}'
+   +'td.ty{width:24mm;color:#5b6166}'
+   +'.meta{display:block;color:#7a8085;font-size:9.5px;margin-top:1px}'
+   +'footer{margin-top:auto;padding-top:6px;border-top:.5px solid #d6dade;display:flex;'
+   +'justify-content:space-between;font-size:9.5px;color:#7a8085}'
+   +'@media print{body{background:#fff}.page{margin:0;box-shadow:none}}'
+   +'</style></head><body><div id="src"><table><tbody>'+body+'</tbody></table></div>'
+   +'<div id="out"></div></body></html>');
+  w.document.close();
+  const go=()=>{
+    const doc=w.document,src=doc.getElementById('src'),out=doc.getElementById('out');
+    const all=[...src.querySelectorAll('tr')];
+    const head=(n,tot)=>'<header><div><h1>'+esc2(title)+'</h1>'
+      +'<div class="sub">'+esc2(t('logHeadPrint'))+' \u00b7 '
+      +esc2(Object.keys(pick).filter(k=>pick[k]).join(', '))+' \u00b7 '
+      +esc2(new Date().toISOString().slice(0,16).replace('T',' '))+'Z</div></div>'
+      +'<img src="icons/icon-192.png" alt=""></header>';
+    const foot=(n,tot)=>'<footer><span>'+esc2(APP_VERSION)+'</span>'
+      +'<span>'+esc2(t('page'))+' '+n+' / '+tot+'</span></footer>';
+    const mk=()=>{const d=doc.createElement('div');d.className='page';
+      d.innerHTML=head()+'<table><tbody></tbody></table>'+foot(1,1);out.appendChild(d);return d};
+    let page=mk(),tb=page.querySelector('tbody'),limit=0;
+    const fits=()=>page.scrollHeight<=page.clientHeight;
+    for(const tr of all){
+      tb.appendChild(tr);
+      if(page.getBoundingClientRect().height>1122&&tb.children.length>1){
+        tb.removeChild(tr);page=mk();tb=page.querySelector('tbody');tb.appendChild(tr);
+      }
+      if(++limit>4000)break;
+    }
+    src.remove();
+    const pages=[...out.children];
+    pages.forEach((p2,i)=>{p2.querySelector('footer').innerHTML=
+      '<span>'+esc2(APP_VERSION)+'</span><span>'+esc2(t('page'))+' '+(i+1)+' / '+pages.length+'</span>'});
+    setTimeout(()=>w.print(),300);
+  };
+  setTimeout(go,120);
+}
+
 async function exportSheet(){
   let fmt='csv';
   const build=()=>fmt==='csv'
@@ -1388,6 +1548,7 @@ function setView(v){
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
 $('#btnMenu').onclick=()=>openMenu();
+$('#btnLogBack').onclick=()=>setView('form');
 async function openMenu(){
   const IC={
     form:'<path d="M4 5h13l3 3v11H4Z"/><path d="M8 10h8M8 14h5"/>',
@@ -1400,17 +1561,19 @@ async function openMenu(){
     sync:'<path d="M12 20V9"/><path d="M8 13l4-4 4 4"/><path d="M5 5h14"/>',
     share:'<circle cx="7" cy="12" r="2.6"/><circle cx="17" cy="6.5" r="2.6"/><circle cx="17" cy="17.5" r="2.6"/><path d="M9.3 10.8 14.7 7.7M9.3 13.2l5.4 3.1"/>',
     export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>',
+    print:'<path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6H7Z"/>',
     about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>',
-    license:'<path d="M6 4h9l4 4v12H6Z"/><path d="M9.5 12h6M9.5 16h4"/>'
+    license:''
   };
   const items=[['form',t('mReport')],['log',t('mLog')],['set',t('mSettings')],
                ['theme',isNight()?t('mDay'):t('mNight')],
                ['pull',t('mReload')],['sync',t('mSend')],['share',t('mShare')],
-               ['export',t('mExport')],['about',t('mAbout')],['license',t('mLicense')]];
+               ['print',t('mPrint')],['export',t('mExport')],
+               ['about',t('mAbout')]];
   await ask({title:t('menu'),cancel:false,ok:t('close'),
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
-      `<button class="go sec sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
+      `<button class="go ${k==='form'?'':'sec'} sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
       ).join('')+'</div>',
     onMount:(m,close)=>{m.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
       close();
@@ -1420,9 +1583,9 @@ async function openMenu(){
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
       else if(k==='export')exportSheet();
+      else if(k==='print')printSheet();
       else if(k==='share')shareSheet();
       else if(k==='about')window.open('readme.html','_blank','noopener');
-      else if(k==='license')window.open('license.html','_blank','noopener');
     })}});
 }
 $('#btnRep').onclick=()=>{if(!shared())return;
@@ -1567,7 +1730,7 @@ const o2Detail=()=>{
 /* ── values carried over from the last message of the same kind ─────
    They arrive greyed. Touching any one of them accepts the whole set, so a changed
    frequency never leaves a stale station behind a second confirmation. */
-const ATCF=[['#aStation','station'],['#aFreq','freq'],['#aSquawk','squawk']];
+const ATCF=[];  /* ATC values arrive through the Confirm button, not as grey prefills */
 const DROPF=[['#bKg','kg']];
 const INVF=[['#iBags','bags'],['#iWater','water']];
 const RESF=[['#rBat','bat']];
@@ -1610,9 +1773,12 @@ function paintLastBoxes(){
   }
 }
 const paintLastAtc=paintLastBoxes;
+/* nothing is pre-filled: the button below Rx/Tx fills all three at once and drops the
+   cursor into the message, the only field that always needs typing */
 function carryAtc(){
-  adoptLast();setTimeout(syncVfr,0);paintLastAtc();
-  $('#aCarry').classList.toggle('hide',!preFill(ATCF,UI.lastAtc));
+  adoptLast();setTimeout(syncVfr,0);paintLastBoxes();
+  const l=UI.lastAtc||{};
+  $('#aCarry').classList.toggle('hide',!(l.station||l.freq||l.squawk));
 }
 /* The defaults come from the last entry in the table, whoever made it and on whichever
    device — a handover mid-flight must not reset what the other pilot last reported. */
@@ -1680,7 +1846,20 @@ $('#btnVfr').onclick=()=>{const el=$('#aSquawk');
   if(!$$('#b-ATC input.pre').length)$('#aCarry').classList.add('hide');
   syncVfr()};
 
-$('#aConfirm').onclick=()=>{acceptPre('#b-ATC');toast(t('takenOver'))};
+$('#aConfirm').onclick=()=>{
+  const l=UI.lastAtc||{};
+  $('#aStation').value=l.station||'';
+  $('#aFreq').value=l.freq||'';
+  $('#aSquawk').value=l.squawk||'';
+  acceptPre('#b-ATC');syncVfr();
+  const m=$('#aMsg');m.focus();
+  try{m.setSelectionRange(m.value.length,m.value.length)}catch(e){}
+  toast(t('takenOver'));
+};
+/* tapping into a frequency or a squawk means a new value, so the old one gets out of the way */
+[['#aFreq'],['#aSquawk']].forEach(([sel])=>$(sel).addEventListener('focus',()=>{
+  const el=$(sel);if(el.value){el.value='';if(sel==='#aSquawk')syncVfr()}
+}));
 
 /* ── Pictures on an Other entry ─────────────────────────────────────
    Photos are scaled down in the browser before anything is stored, because a queued
@@ -2009,6 +2188,54 @@ $('#btnTest').onclick=async()=>{
     if(!r.ok)throw new Error(r.status===404?'Repository not found, or the token has no access':'Response '+r.status);
     const j=await r.json();toast(t('connectedTo')+' '+j.full_name);
   }catch(e){toast(String(e.message||e))}
+};
+/* Closing a flight and opening the next one. The files of the old flight stay exactly where
+   they are — they are named after it — and are listed in an index, so nothing is moved and
+   nothing that Notion already polls can break. */
+$('#btnNewFlight').onclick=async()=>{
+  if(!UNLOCKED)return;
+  const pw=await ask({title:t('masterPassTitle'),text:t('newFlightPass'),
+    input:'password',ph:'••••',ok:t('ok')});
+  if(pw===null)return;
+  if(pw!==MASTER_PASS)return toast(t('wrongPass'));
+  const suggested=(CFG.flight||'FLIGHT').replace(/(\d+)$/,(m2)=>String(Number(m2)+1).padStart(m2.length,'0'));
+  const id=await ask({title:t('newFlight'),text:t('newFlightAsk'),input:'text',
+    value:suggested===CFG.flight?'':suggested,ph:'GB-2026-02',ok:t('ok')});
+  if(id===null)return;
+  const next=String(id).trim();
+  if(!next)return toast(t('newFlightNeedsId'));
+  if(next===CFG.flight)return toast(t('newFlightSameId'));
+  const un=ENT.filter(e=>!e.synced).length;
+  if(!await confirm2(
+    {title:t('newFlight'),text:t('newFlightWarn1')
+      .replace('{old}',CFG.flight||'—').replace('{new}',next)
+      .replace('{n}',String(ENT.length)).replace('{q}',String(un))},
+    {title:t('newFlight'),text:t('newFlightWarn2'),ok:t('newFlight')}))return;
+
+  if(configured()&&navigator.onLine){
+    if(un)await sync(true,true);
+    try{
+      const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),p2=paths(),idx=d+'/_flights.json';
+      let list=[];let sha=null;
+      try{const g=await ghGet(idx);sha=g.sha;list=parse(g.text)}catch(e){}
+      list.push({flight:CFG.flight||'',closed_at:new Date().toISOString(),rows:ENT.length,
+        closed_by:reporter(),json:p2.json,csv:p2.csv,deleted:p2.del});
+      await ghPut(idx,JSON.stringify(list,null,1),sha,'flight closed \u00b7 '+(CFG.flight||''));
+    }catch(e){toast(String(e.message||e))}
+  }else if(un){
+    if(!await ask({title:t('newFlight'),text:t('newFlightOffline').replace('{q}',String(un)),
+      ok:t('newFlight'),cancel:t('cancel'),danger:true}))return;
+  }
+
+  CFG.flight=next;save(K_CFG,CFG);
+  ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
+  UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};UI.lastDrop={};UI.lastInv={};UI.lastRes={};
+  UI.o2bars=[];UI.meth=null;UI.rest='';save(K_UI,UI);
+  for(const k in ETAG)delete ETAG[k];
+  fillSetup();applyLang();paintQuick();paintReady();paintCrew();paintWaChecks();paintRes();paint();
+  publishSetup();
+  toast(t('newFlightDone')+' '+next);
+  lockSettings();setView('form');
 };
 $('#btnWipe').onclick=async()=>{
   const un=ENT.filter(e=>!e.synced).length;
