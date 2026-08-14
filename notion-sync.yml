@@ -1,0 +1,36 @@
+name: Notion sync
+
+# The app commits every entry into this repository. Each of those commits starts this
+# workflow, so Notion has the row a few seconds later and nothing has to poll anything.
+# The schedule is a safety net for the case where a run failed or was skipped.
+
+on:
+  push:
+    paths:
+      - 'data/**.json'
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+# One run at a time, and a newer commit supersedes a queued one — the file always holds
+# the complete table, so the latest run brings everything with it.
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Push the flight table into Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE: ${{ secrets.NOTION_DATABASE }}
+        run: node notion-sync/sync.mjs
