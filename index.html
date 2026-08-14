@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Basket Reporting">
 <meta name="theme-color" content="#E4E7EA">
+<link rel="apple-touch-icon" href="icons/apple-touch-180.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-180.png">
 <link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-167.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-152.png">
@@ -68,10 +69,10 @@ a{color:inherit}
   .app{height:calc(100dvh - 36px);border:1px solid var(--line);border-radius:16px}
 }
 
-header{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:52px;
+header{flex:0 0 auto;display:flex;align-items:center;gap:8px;height:56px;
   padding:0 8px 0 var(--pad);border-bottom:1px solid var(--line-soft)}
-header .clock{font-size:15px;flex:0 0 auto}
-#hBal{padding-right:4px;white-space:nowrap}
+.hleft{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+header .clock{font-size:15px;line-height:1.15;white-space:nowrap}
 .hinfo{flex:1;min-width:0;padding-left:9px;display:flex;flex-direction:column;justify-content:center;gap:1px}
 header .id{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
@@ -92,8 +93,8 @@ input.bad{border-color:#B5442F}
 .lastmsg{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:0 0 10px;
   background:var(--field)}
 .lastmsg.hide{display:none}
-.lm-top{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
-  margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm-top{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lm-body{font-size:12.5px;line-height:1.35;font-variant-numeric:tabular-nums}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .thumbs figure{position:relative;margin:0}
@@ -107,10 +108,15 @@ input.bad{border-color:#B5442F}
 #btnVoice.rec{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:11px;
   background:var(--sel);color:var(--sel-ink);font-size:13px;line-height:1}
-.links.wa{display:grid;grid-template-columns:1fr;gap:6px}
-.links.wa button{padding:9px 12px;font-size:13px;border:1.5px solid var(--line);
-  border-style:solid;border-radius:9px;color:var(--ink);background:var(--field);
-  display:flex;align-items:center;gap:9px;text-align:left;width:100%}
+.links.wa{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.links.wa button{padding:0 7px;min-height:36px;font-size:11px;line-height:1.15;
+  border:1.5px solid var(--line);border-radius:8px;color:var(--ink);background:var(--field);
+  display:flex;align-items:center;gap:4px;text-align:left;width:100%;min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.links.wa button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.links.wa button::before{content:"\2713";font-size:11px;opacity:.22;flex:0 0 auto}
+.links.wa button.on::before{opacity:1}
+.links.wa button.wide{grid-column:1 / -1}
 .links.wa button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .ball{display:flex;gap:34px;margin:10px 0 14px}
 .stat b{display:block;font-size:23px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
@@ -250,6 +256,13 @@ select.pre{color:var(--carry);border-style:dashed}
 .ftline{display:flex;align-items:baseline;gap:8px;margin-top:8px}
 .legal{font-size:10px;color:var(--muted);text-align:center;margin:0 0 6px}
 .legal a{text-decoration:underline;text-underline-offset:2px}
+.gpsq{flex:0 0 auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;
+  white-space:nowrap;padding-right:8px}
+.gpsq i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.gpsq i.good{background:#2E7D4F}.gpsq i.fair{background:#C9A227}.gpsq i.poor{background:#B5442F}
+html[data-theme="night"] .gpsq i.good{background:#4FAF74}
+html[data-theme="night"] .gpsq i.fair{background:#D8AC33}
+html[data-theme="night"] .gpsq i.poor{background:#E2705F}
 .upmark{display:inline-block;width:14px;height:14px;vertical-align:-3px}
 .upmark svg{width:14px;height:14px;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .tiny{flex:1;min-width:0;font-size:11px;color:var(--muted);text-align:left;margin:0;
@@ -272,6 +285,8 @@ html[data-theme="night"] .st-fail{stroke:#E2705F}
 .none{color:var(--muted);font-size:14px;padding:20px 0}
 h3{font-size:11.5px;color:var(--muted);font-weight:400;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.08em}
 h3:first-child{margin-top:14px}
+.namerow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.namerow button{width:auto;padding:0 16px;min-height:44px}
 .loghead{display:flex;align-items:center;gap:10px}
 .loghead h3{flex:1}
 .loghead button{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);
@@ -315,10 +330,14 @@ body.min{background:transparent}
 body.min #puck{display:block}
 
 #btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+#modal .go.okflash{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
+html[data-theme="night"] #modal .go.okflash{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 #btnPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #btnPost.wait{background:#FBF1D2;border:1px solid #E5CE86;color:#5A4306}
 #btnPost.fail{background:#F9DFDB;border:1px solid #E3ADA4;color:#6C2016;font-size:14px}
 html[data-theme="night"] #btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+#modal .go.okflash{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
+html[data-theme="night"] #modal .go.okflash{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 #btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 html[data-theme="night"] #btnPost.wait{background:#211803;border-color:#5E4708;color:#D8AC33}
 html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;color:#E2705F}
@@ -333,9 +352,9 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
 <div class="app">
 <header>
-  <span class="clock num" id="hClock">--:--:--Z</span>
+  <div class="hleft"><span class="clock num" id="hClock">--:--:--Z</span>
+    <span class="clock num" id="hBal"></span></div>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
-  <span class="clock num" id="hBal"></span>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -404,7 +423,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           </div>
           <button id="aConfirm" class="copylast hide" data-t="copyLast">Copy from last call</button>
         </div>
-        <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="characters"></div>
+        <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="words"></div>
         <div class="f"><div class="links small" id="aStaChips"></div></div>
         <div class="f atcrow">
           <div><p class="lab">FREQ</p>
@@ -474,7 +493,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <button class="rep" id="btnRep"><em data-t="reportingAsLbl">reporting as</em><b id="repName">—</b></button>
         <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
       </div>
-      <div class="ftline"><p class="tiny" id="hSt"></p><span class="ver"></span></div>
+      <div class="ftline"><p class="tiny" id="hSt"></p><span class="gpsq" id="fGps"></span><span class="ver"></span></div>
     </div>
   </section>
 
@@ -498,14 +517,15 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
       <div id="syncBox" style="display:none">
         <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
         <p class="hint" data-t="syncHint" style="margin-top:12px">Sends what is waiting and reads the table back.</p>
+        <p class="hint" id="quotaNote"></p>
       </div>
 
       <h3 data-t="hDevice">This device</h3>
-      <div class="f"><p class="lab" data-t="devMode">Device mode</p><div class="pnl" id="sMode">
+      <div class="f"><div class="pnl" id="sMode">
         <button data-v="personal" data-t="personalDev">Personal device</button>
         <button data-v="shared" data-t="sharedDev">Shared device</button>
       </div></div>
-      <p class="hint" id="sReporterLab"></p>
+      <p class="hint" data-t="modeHint">On a shared device the reporting person may be chosen between the two pilots at any time.</p>
 
       <h3 data-t="hLanguage">Language</h3>
       <div class="f"><div class="pills g2" id="sLang">
@@ -513,9 +533,11 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
       </div></div>
       <p class="hint" data-t="langHint">The interface only. Everything written to GitHub and to WhatsApp stays English.</p>
 
-      <div class="loghead"><h3 data-t="hReporter">Reporter on this device</h3>
-        <button class="go sec sm" id="btnSaveRep" data-t="saveName" style="width:auto;padding:0 14px">Save name</button></div>
-      <div class="f"><input type="text" id="sReporterOpen" data-tp="pName" maxlength="10" placeholder="Name"></div>
+      <h3 data-t="hReporter">Reporter on this device</h3>
+      <div class="f namerow">
+        <input type="text" id="sReporterOpen" data-tp="pName" maxlength="10" placeholder="Name">
+        <button class="go sec sm" id="btnSaveRep" data-t="saveName">Save</button>
+      </div>
       <p class="hint" id="repHint" style="margin-top:12px"></p>
 
       <h3 data-t="hApp">App</h3>
@@ -604,10 +626,13 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <summary data-t="waRecipients">WhatsApp recipients</summary>
           <div class="in">
             <p class="lab" data-t="hintWaNums">Numbers in international form, digits only, e.g. 41791234567.</p>
-        <p class="lab" id="waCount"></p>
             <div class="f two"><input type="text" id="sAtcName" data-tp="pAtcName" placeholder="ATC Coordinator">
               <input type="tel" id="sAtcNum" inputmode="numeric" data-tp="pNumber" placeholder="Number"></div>
             <p class="hint" data-t="hintAtcCo">Offered on ATC entries only, and ticked by default there.</p>
+        <div class="f"><p class="lab" data-t="lGroup">WhatsApp group</p>
+          <input type="text" id="sGroupName" maxlength="18" placeholder="Crew"></div>
+        <p class="hint" data-t="hintGroup">A name for the group entry.</p>
+            <p class="lab" id="waCount"></p>
             <div id="waRows"></div>
           </div>
         </details>
@@ -616,6 +641,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <summary data-t="waLayout">WhatsApp message layout</summary>
           <div class="in">
             <p class="lab" data-t="hintTpl">One template per message type.</p>
+            <div class="f"><p class="lab">Ballast</p><textarea id="tplBal" style="min-height:104px"></textarea></div>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
@@ -666,22 +692,22 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-13';
+const APP_VERSION='v260813-20';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,methInit:100,geo:1,posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
+           bagKg:15,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            fresh:0,blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
-  ATC:'*{type} | {callsign}*\nStation: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {vs} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}',
-  Ressources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {vs} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}',
-  Ballast:'*{type} | {callsign}*\n{ballast}\nMsg: {note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {vs} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}',
-  Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {vs} \u00b7 {tc} \u00b7 {speed}\n{place}\n{maps}'};
-const TPL_KEYS=['type','callsign','ballast','dir','station','freq','squawk','msg','pic','resting',
+  ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  Ressources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  Ballast:'*{type} | {callsign}*\n{ballast}\nMsg: {note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}'};
+const TPL_KEYS=['type','callsign','ballast','atcmsgtype','dir','station','freq','squawk','msg','pic','resting',
   'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','place','location','alt','vs','tc','speed','maps','reporter','flight'];
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
@@ -708,10 +734,10 @@ const nz=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
    The interface only. Everything written to GitHub or sent to WhatsApp stays English,
    so the table and the coordinator never depend on who set which device to what. */
 const L={en:{
- onBoard:'on board', stillAvail:'still available', dropped:'dropped', takenOn:'taken on',
+ onBoard:'on board', stillAvail:'still available', dropped:'dropped', droppedShort:'dropped', takenOn:'taken on',
  remaining:'remaining', totalBallast:'total ballast', methanolShort:'methanol', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop Report', takeInv:'Inventory Report', sand:'Sand', waterW:'Water',
- kgDropped:'Ballast (in kg) dropped since last ballast report', bags:'sand bags', water:'water', remark:'Remark (optional)',
+ kgDropped:'Ballast (in kg) dropped since last ballast drop report', bags:'sand bags', water:'water', remark:'Remark (optional)',
  readyBallast:'Ready ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
  message:'Message', confirmLast:'Confirm from last call', copyLast:'Copy from last call', sendWa:'Also send to WhatsApp',
  hDevices:'Devices on this flight', hintDevices:'Seen through the entries they wrote. A device that has not reported for 36 hours is shown as quiet; the master is never counted out.',
@@ -729,7 +755,7 @@ const L={en:{
  hApp:'App', hLanguage:'Language', hReporter:'Reporter on this device',
  langHint:'The interface only. Everything written to GitHub and to WhatsApp stays English.',
  master:'Master', follower:'Follower', personalDev:'Personal device', sharedDev:'Shared device',
- setupRole:'Setup role', nightColour:'Night colour', tone:'Confirmation tone',
+ setupRole:'Setup role', modeHint:'On a shared device the reporting person may be chosen between the two pilots at any time.', nightColour:'Night colour', tone:'Confirmation tone',
  waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
  mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
@@ -743,6 +769,9 @@ const L={en:{
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password', checking:'Checking\u2026',
+ quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
+ quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
+ quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
  syncNow:'Synchronize data', syncHint:'Sends what is waiting and reads the whole table back.',
  syncDone:'Everything is in step. {r} rows on this device.',
  syncPartly:'{n} rows could not be sent. {e}',
@@ -769,7 +798,7 @@ const L={en:{
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
  addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
  noRecorder:'This browser cannot record audio', mediaLater:'Attachments go up with the next connection', sharedWithMedia:'Shared with the attachment — pick the chat in WhatsApp',
- o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', liters:'liters', bars:'bars',
+ o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', liters:'lit', bars:'bars',
  levelTitle:'Level', notSet:'not set',
  pName:'Name', pFlight:'Flight ID', pCall:'Callsign', pInit:'Ballast on board at start, kg',
  pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
@@ -791,6 +820,8 @@ const L={en:{
  hintAuto:'Entries are posted automatically. Without a connection they are held on the device and go out in order as soon as the link is back.',
  hintWaNums:'Numbers in international form, digits only, e.g. 41791234567.',
  hintAtcCo:'Offered on ATC entries only, and ticked by default there.',
+ lGroup:'WhatsApp group', groupPick:'pick the chat',
+ hintGroup:'A name for the group entry in the recipient list. WhatsApp has no address for a group that an app may call, so this entry opens WhatsApp with the message ready and the chat list open — you pick the group there. Leave the field empty to hide the entry.',
  hintTpl:'One template per message type. A line whose placeholders are all empty is dropped; {!key} keeps its line and prints -.',
  lockText:'The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.',
  resetDefault:'Reset to default', close:'Close', cancel:'Cancel', ok:'OK', save:'Save', del:'Delete',
@@ -807,24 +838,25 @@ const L={en:{
  lPosMin:'Automatic position report every', lOpsMin:'Ops Normal reminder after',
  lPosHint:'0 turns the automatic report off. With a number, a POS row is written at that interval with position, altitude and rate of climb — the track of the flight survives even when nobody has a hand free.',
  opsTitle:'Ops Normal', opsText:'Remind of the next Ops Normal in how many minutes?',
- opsSet:'Remind me', opsNo:'No reminder', opsArmed:'Reminder set for {n} min',
+ opsSet:'Remind me', opsConfirmed:'Confirmed', opsNo:'No reminder', opsArmed:'Reminder set for {n} min',
  opsDue:'Ops Normal is due — {n} minutes since the last one.'
 ,
  roleTitle:'Is this the master device?',
  roleText:'One device in the crew owns the flight setup and publishes it to the others. If this is that device, enter the master password. If you are joining someone else\'s flight, choose Join as follower — you will be sent the setup.',
  roleOk:'I am the master', roleCancel:'Join as follower',
  roleIsMaster:'This device is the master', roleIsFollower:'This device is a follower',
+ editMasterOnly:'Entries can only be changed or deleted on the master device. Post a correction from here and the master can tidy the row afterwards.',
  masterOnly:'The flight setup belongs to the master device. Everything personal — your name, the language, the night colour, the tone — is above and open to you.',
  masterPassTitle:'Master password', masterPassText:'Only the device that owns the flight setup may be the master.',
  twoMasters:'Another device is also set as master — only one may be', picFailed:'That picture could not be read',
  picMax:'Four pictures is the limit', locked:'Locked',
- unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', lastMsg:'last msg',
+ unlocked:'Unlocked — changes need two confirmations', noRepo:'no repo', gpsStale:'GPS stale', gpsSearch:'GPS searching', lastMsg:'last msg',
  upload:'upload', nothingSent:'Not sent yet', queued:'entries queued, going out as soon as there is a link.'
 },de:{
- onBoard:'an Bord', stillAvail:'noch verfügbar', dropped:'abgeworfen', takenOn:'aufgenommen',
+ onBoard:'an Bord', stillAvail:'noch verfügbar', dropped:'abgeworfen', droppedShort:'abgeworfen', takenOn:'aufgenommen',
  remaining:'verbleibend', totalBallast:'Gesamtballast', methanolShort:'Methanol', droppedSince:'abgeworfen seit 1. Inventar', droppedStart:'abgeworfen seit Start',
  drop:'Abwurfmeldung', takeInv:'Inventarmeldung', sand:'Sand', waterW:'Wasser',
- kgDropped:'Ballast (in kg) seit der letzten Ballastmeldung', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
+ kgDropped:'Ballast (in kg) seit der letzten Abwurfmeldung', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
  readyBallast:'Ready Ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
  message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', copyLast:'Vom letzten Ruf kopieren', sendWa:'Auch an WhatsApp senden',
  hDevices:'Geräte auf dieser Fahrt', hintDevices:'Erkannt an den Einträgen, die sie geschrieben haben. Ein Gerät, das 36 Stunden nichts gemeldet hat, gilt als still; der Master nie.',
@@ -843,7 +875,7 @@ const L={en:{
  hReporter:'Melder auf diesem Gerät',
  langHint:'Nur die Oberfläche. Alles, was nach GitHub und WhatsApp geht, bleibt englisch.',
  master:'Master', follower:'Follower', personalDev:'Persönliches Gerät', sharedDev:'Gemeinsames Gerät',
- setupRole:'Rolle', nightColour:'Nachtfarbe', tone:'Quittungston',
+ setupRole:'Rolle', modeHint:'Auf einem gemeinsamen Gerät kann jederzeit zwischen den beiden Piloten gewählt werden, wer meldet.', nightColour:'Nachtfarbe', tone:'Quittungston',
  waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
  mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
@@ -857,6 +889,9 @@ const L={en:{
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
+ quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
+ quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
+ quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
  syncNow:'Daten abgleichen', syncHint:'Sendet, was wartet, und liest die ganze Tabelle zurück.',
  syncDone:'Alles im Gleichstand. {r} Zeilen auf diesem Gerät.',
  syncPartly:'{n} Zeilen liessen sich nicht senden. {e}',
@@ -884,7 +919,7 @@ const L={en:{
  addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
  noRecorder:'Dieser Browser kann keinen Ton aufnehmen', mediaLater:'Anhänge gehen mit der nächsten Verbindung raus', sharedWithMedia:'Mit Anhang geteilt — Chat in WhatsApp wählen',
  o2title:'O\u2082-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt', o2crewOff:'Nur solange die Crew an O\u2082 ist', inUse:'in Gebrauch',
- liters:'Liter', bars:'bar', levelTitle:'Stand', notSet:'nicht gesetzt',
+ liters:'lit', bars:'bar', levelTitle:'Stand', notSet:'nicht gesetzt',
  pName:'Name', pFlight:'Fahrtkennung', pCall:'Rufzeichen', pInit:'Ballast an Bord beim Start, kg',
  pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
  pBagKg:'Gewicht pro Sack, kg', pReadyKg:'Voller Ready Ballast, kg',
@@ -905,6 +940,8 @@ const L={en:{
  hintAuto:'Einträge gehen automatisch raus. Ohne Verbindung bleiben sie auf dem Gerät und werden der Reihe nach gesendet, sobald die Leitung steht.',
  hintWaNums:'Nummern international, nur Ziffern, z. B. 41791234567.',
  hintAtcCo:'Erscheint nur bei ATC-Meldungen und ist dort standardmässig angewählt.',
+ lGroup:'WhatsApp-Gruppe', groupPick:'Chat wählen',
+ hintGroup:'Ein Name für den Gruppeneintrag in der Empfängerliste. WhatsApp kennt keine Adresse für eine Gruppe, die eine App aufrufen dürfte; dieser Eintrag öffnet WhatsApp deshalb mit fertiger Nachricht und offener Chatliste — die Gruppe wählst du dort. Feld leer lassen blendet den Eintrag aus.',
  hintTpl:'Eine Vorlage je Nachrichtentyp. Eine Zeile, deren Platzhalter alle leer sind, fällt weg; {!key} behält die Zeile und schreibt -.',
  lockText:'Der übrige Teil der Einrichtung ist geschützt, damit eine laufende Fahrt nicht versehentlich überschrieben wird. Melden geht ohne Entsperren.',
  resetDefault:'Auf Vorgabe zurücksetzen', close:'Schliessen', cancel:'Abbrechen', ok:'OK',
@@ -922,18 +959,19 @@ const L={en:{
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
- opsSet:'Erinnern', opsNo:'Keine Erinnerung', opsArmed:'Erinnerung in {n} min',
+ opsSet:'Erinnern', opsConfirmed:'Bestätigt', opsNo:'Keine Erinnerung', opsArmed:'Erinnerung in {n} min',
  opsDue:'Ops Normal ist fällig — {n} Minuten seit der letzten Meldung.'
 ,
  roleTitle:'Ist dies das Master-Gerät?',
  roleText:'Ein Gerät der Crew besitzt die Einrichtung der Fahrt und gibt sie an die anderen weiter. Ist dies dieses Gerät, gib das Master-Passwort ein. Steigst du in die Fahrt eines anderen ein, wähle Als Follower beitreten — die Einrichtung wird dir zugeschickt.',
  roleOk:'Ich bin der Master', roleCancel:'Als Follower beitreten',
  roleIsMaster:'Dieses Gerät ist der Master', roleIsFollower:'Dieses Gerät ist ein Follower',
+ editMasterOnly:'Einträge lassen sich nur auf dem Master-Gerät ändern oder löschen. Melde die Korrektur von hier aus, der Master bereinigt die Zeile danach.',
  masterOnly:'Die Einrichtung der Fahrt gehört dem Master-Gerät. Alles Persönliche — Name, Sprache, Nachtfarbe, Ton — steht oben und ist für dich offen.',
  masterPassTitle:'Master-Passwort', masterPassText:'Nur das Gerät, dem die Einrichtung gehört, darf Master sein.',
  twoMasters:'Ein zweites Gerät ist ebenfalls Master — es darf nur eines geben', picFailed:'Dieses Bild liess sich nicht lesen',
  picMax:'Mehr als vier Bilder gehen nicht', locked:'Gesperrt',
- unlocked:'Entsperrt — Änderungen brauchen zwei Bestätigungen', noRepo:'kein Repo',
+ unlocked:'Entsperrt — Änderungen brauchen zwei Bestätigungen', noRepo:'kein Repo', gpsStale:'GPS veraltet', gpsSearch:'GPS sucht',
  lastMsg:'letzte Msg', upload:'Upload', nothingSent:'Noch nichts gesendet',
  queued:'Einträge warten, sie gehen raus sobald wieder Verbindung besteht.'
 }};
@@ -995,14 +1033,20 @@ const atcCo=()=>String(CFG.atcNum||'').replace(/\D/g,'').length>5
   ? {n:CFG.atcName||'ATC Coordinator',p:String(CFG.atcNum).replace(/\D/g,'')} : null;
 /* every recipient is listed on its own. On ATC the coordinator leads and is the only one
    ticked; elsewhere the coordinator does not appear and everybody else is ticked. */
+/* WhatsApp has no callable address for a group, so the group entry opens the app with the
+   message ready and the chat list open; the group is picked there, once per message. */
+const waGroup=()=>{const n=String(CFG.groupName||'').trim();
+  return n?{n:n,p:'group',group:true}:null};
 function waRoster(type){
-  const out=[],co=atcCo();
+  const out=[],co=atcCo(),g=waGroup();
   if(type==='ATC'&&co)out.push(co);
   waList().forEach(r=>{if(!out.some(x=>x.p===r.p))out.push(r)});
+  if(g)out.push(g);
   return out;
 }
 function waDefault(type,r){
   const co=atcCo();
+  if(r.group)return false;
   if(type==='ATC')return !!(co&&r.p===co.p);
   /* ballast goes out many times an hour; sending every drop by default would be noise */
   if(type==='Ballast')return false;
@@ -1072,6 +1116,8 @@ function tplFor(t){const c=(CFG.tpl||{});return (c[t]!=null&&c[t]!=='')?c[t]:(TP
 function waVals(e){
   return {
     type:e.type||'', callsign:CFG.call||'', flight:e.flight_id||'', reporter:e.reporter||'',
+    ballast:e.type==='Ballast'?line(e).h:'',
+    atcmsgtype:e.type==='ATC'?(e.atc_dir==='TX'?'Tx':'Rx'):'',
     dir:e.atc_dir==='TX'?'Sent':e.atc_dir==='RX'?'Received':'',
     station:e.atc_station||'', freq:e.atc_freq||'', squawk:e.atc_squawk||'', msg:e.atc_msg||'',
     pic:e.crew_pic||'', resting:e.crew_rest||'',
@@ -1116,11 +1162,11 @@ function fillTpl(tpl,v){
 const waText=e=>fillTpl(tplFor(e.type),waVals(e));
 
 const waNum=r=>String(r.p).replace(/\D/g,'');
-function waUrl(r,enc){return 'https://wa.me/'+waNum(r)+'?text='+enc}
+function waUrl(r,enc){return r.group?('https://wa.me/?text='+enc):('https://wa.me/'+waNum(r)+'?text='+enc)}
 /* the app scheme opens WhatsApp itself; wa.me first shows a web page offering the download.
    If the scheme goes nowhere, the page is still here a moment later and we fall back. */
 function waOpenChat(r,enc){
-  const app='whatsapp://send?phone='+waNum(r)+'&text='+enc;
+  const app=r.group?('whatsapp://send?text='+enc):('whatsapp://send?phone='+waNum(r)+'&text='+enc);
   let left=false;
   const mark=()=>{left=true};
   document.addEventListener('visibilitychange',mark,{once:true});
@@ -1173,7 +1219,7 @@ async function waSheet(e,list,compact){
     html:'<div class="waPre">'+esc(txt)+'</div>'});return}
   const enc=encodeURIComponent(txt);
   const rows=list.map(r=>`<a class="go sec sm" target="_blank" rel="noopener"
-      href="whatsapp://send?phone=${waNum(r)}&text=${enc}">${esc(r.n||r.p)}</a>`).join('');
+      href="${r.group?'whatsapp://send?text='+enc:'whatsapp://send?phone='+waNum(r)+'&text='+enc}">${esc(r.n||r.p)}</a>`).join('');
   await ask({title:compact?t('waRemaining'):t('waTitle'),
     text:'WhatsApp opens one chat at a time. Tap a name, press send, come back, tap the next.',
     html:(compact?'':'<div class="waPre">'+esc(txt)+'</div>')+'<div class="waList">'+rows+'</div>',
@@ -1249,8 +1295,8 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked',
-  'bagKg','readyKg','methInit','posMin','opsMin','vfr','emerg','stations','msgRx','msgTx','o2','o2bar',
-  'atcName','atcNum','wa','tpl'];
+  'bagKg','readyKg','methInit','posMin','opsMin','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
+  'atcName','atcNum','groupName','wa','tpl'];
 function setupPayload(withToken){
   const o={v:1,master_device:DEV,updated_at:new Date().toISOString(),by:reporter()};
   SHARED.forEach(k=>o[k]=CFG[k]);
@@ -1343,9 +1389,40 @@ async function ghGet(p,cond){
   const et=r.headers.get('etag');if(et)ETAG[p]=et;
   const j=await r.json();return{sha:j.sha,text:j.content?b64d(j.content):''};
 }
+/* GitHub's own numbers, and what they mean here:
+   5000 requests an hour on the token, but conditional GETs that answer 304 cost nothing,
+   so polling is cheap. The binding limit is the secondary one on writing: 80 write requests
+   a minute and 500 an hour. GitHub also asks for at least a second between writes.
+   So the app spaces its writes, counts them over a rolling hour, and backs off when told to. */
+const WRITE_HOUR=440, WRITE_MIN=60;
+let PUTLOG=load('bsk.putlog',[]), LASTPUT=0, LASTCSV=0, BACKOFF=0, RATE=null;
+const writesIn=ms=>{const t=Date.now()-ms;return PUTLOG.filter(x=>x>t).length};
+function notePut(){
+  PUTLOG.push(Date.now());
+  PUTLOG=PUTLOG.filter(x=>x>Date.now()-3600000);
+  save('bsk.putlog',PUTLOG);
+}
+const writeBudgetLeft=()=>Math.max(0,WRITE_HOUR-writesIn(3600000));
+function budgetOk(){
+  return Date.now()>=BACKOFF && writesIn(3600000)<WRITE_HOUR && writesIn(60000)<WRITE_MIN;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function ghPut(p,text,sha,msg){
+  if(!budgetOk())throw Object.assign(new Error(t('quotaHold')),{hold:true});
+  const wait=1100-(Date.now()-LASTPUT);
+  if(wait>0)await sleep(wait);            /* one second between writes, as GitHub asks */
+  LASTPUT=Date.now();
   const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}`,{method:'PUT',headers:hdr(),
     body:JSON.stringify({message:msg,content:b64e(text),sha:sha||undefined,branch:CFG.branch||'main'})});
+  notePut();
+  const rem=r.headers&&r.headers.get&&r.headers.get('x-ratelimit-remaining');
+  if(rem!=null)RATE=Number(rem);
+  if(r.status===403||r.status===429){
+    const ra=(r.headers&&r.headers.get&&r.headers.get('retry-after'))||60;
+    BACKOFF=Date.now()+Math.max(60,Number(ra)||60)*1000;
+    delete ETAG[p];
+    throw Object.assign(new Error(t('quotaHit')),{hold:true});
+  }
   if(r.status===409||r.status===422){delete ETAG[p];throw Object.assign(new Error('conflict'),{conflict:true})}
   if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,90));
   delete ETAG[p];
@@ -1363,7 +1440,7 @@ const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?
 const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
 
 let pollN=0;
-async function sync(silent,push,attempt){
+async function sync(silent,push,attempt,force){
   attempt=attempt||0;push=push!==false;
   if(SYNCING)return;
   if(!configured()){if(!silent)toast(t('addRepo'));return}
@@ -1398,8 +1475,12 @@ async function sync(silent,push,attempt){
     if(push){
       const msg=`${CFG.flight||'flight'} · ${all.length} rows · ${reporter()}`;
       await ghPut(p.json,JSON.stringify(all,null,1),g.sha,msg);
-      let cs=null;try{cs=(await ghGet(p.csv)).sha}catch(e){}
-      await ghPut(p.csv,toCsv(all),cs,msg);
+      /* the CSV is a convenience copy; writing it on every entry would double the
+         write count for no gain, so it follows at most once a minute */
+      if(force||Date.now()-LASTCSV>60000){
+        let cs=null;try{cs=(await ghGet(p.csv)).sha}catch(e){}
+        await ghPut(p.csv,toCsv(all),cs,msg);LASTCSV=Date.now();
+      }
       if(newTombs.length){let ds=null;try{ds=(await ghGet(p.del)).sha}catch(e){}
         await ghPut(p.del,JSON.stringify(TOMB,null,1),ds,'deletions · '+reporter())}
       ENT=all.map(e=>Object.assign({},e,{synced:true,failed:false}));
@@ -1409,7 +1490,8 @@ async function sync(silent,push,attempt){
     LASTERR='';save(K_ENT,ENT);LASTSYNC=new Date();paint();
     if(!silent)toast((push?t('synced'):t('reloaded'))+' '+all.length+' '+t('rows'));
   }catch(e){
-    if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1)}
+    if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1,force)}
+    if(e&&e.hold){LASTERR=String(e.message);if(!silent)toast(LASTERR);return}
     LASTERR=String(e.message||e);
     /* a transport error marks the rows that did not make it, so the log says why */
     ENT.forEach(x=>{if(!x.synced)x.failed=true});save(K_ENT,ENT);paintLog();
@@ -1424,13 +1506,18 @@ function paintStatus(){
   /* course, ground speed and accuracy sit under the flight, in the same type */
   if(GPS&&Date.now()-GPS.t<30000){
     const g=[];
-    if(GPS.alt!=null)g.push(Math.round(GPS.alt*3.28084)+' ft');
-    if(GPS.vs!=null)g.push((GPS.vs>=0?'+':'')+GPS.vs.toFixed(1)+' m/s');
     if(GPS.tc!=null)g.push(pad(Math.round(GPS.tc)%360,3)+'\u00b0');
     if(GPS.sp!=null)g.push((GPS.sp*1.94384).toFixed(1)+' kn');
-    g.push('\u00b1 '+Math.round(GPS.acc||0)+' m');
+    if(GPS.alt!=null)g.push(Math.round(GPS.alt*3.28084)+' ft');
+    if(GPS.vs!=null)g.push((GPS.vs>=0?'+':'')+GPS.vs.toFixed(1)+' m/s');
     $('#hGps').textContent=g.join(' \u00b7 ');
-  }else $('#hGps').textContent=GPS?'GPS stale':(GPSERR||'GPS searching');
+  }else $('#hGps').textContent='';
+  /* accuracy belongs at the bottom with the other housekeeping, not in the navigation line */
+  const fix=GPS&&Date.now()-GPS.t<30000;
+  const acc=fix?Math.round(GPS.acc||0):null;
+  const q=!fix?'poor':(acc<=15?'good':acc<=50?'fair':'poor');
+  $('#fGps').innerHTML='<i class="'+q+'"></i>'
+    +esc(fix?'\u00b1 '+acc+' m':(GPS?t('gpsStale'):(GPSERR||t('gpsSearch'))));
   const un=ENT.filter(e=>!e.synced).length;
   const last=chrono(ENT)[ENT.length-1];
   const when=last?String(last.ts_utc).slice(11,19)+'Z':'--:--:--Z';
@@ -1440,12 +1527,16 @@ function paintStatus(){
      running at this instant */
   const anyFail=ENT.some(e=>e.failed&&!e.synced);
   const mk2=!configured()?'':(un?(anyFail?ST_FAIL:ST_WAIT):ST_OK);
-  $('#hSt').innerHTML=esc(t('lastMsg')+' '+when+'/'+who+'/'+cat+'  |  ')
+  $('#hSt').innerHTML=esc(t('lastMsg')+' '+when+'/'+who+'/'+cat+'  ')
     +(mk2?'<span class="upmark">'+mk2+'</span>':esc(t('noRepo')));
   /* the ticks in the log follow the queue on their own, without a redraw on every tick */
   const failed=ENT.filter(e=>e.failed&&!e.synced).length;
   const sig=un*1000+failed;
   if(sig!==LASTPEND){LASTPEND=sig;paintLog();paintLastBoxes()}
+  const qn=$('#quotaNote');
+  if(qn)qn.textContent=t('quotaNote')
+    .replace('{w}',String(writesIn(3600000))).replace('{m}',String(WRITE_HOUR))
+    .replace('{r}',RATE==null?'\u2014':String(RATE));
   $('#syncNote').textContent=un?un+'/'+ENT.length+' '+t('queued')
     :(LASTSYNC?t('inSync')+' '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
 }
@@ -1463,8 +1554,9 @@ function paintReadout(){
   $('#btnRep').classList.toggle('on',shared()&&!!UI.alt);
   $('#postRow').classList.toggle('shared',shared());
 }
-/* ballast is read off a scale in half kilos; more decimals would only look precise */
-const f1=n=>(Math.round((Number(n)||0)*2)/2).toFixed(1);
+/* ballast is counted in sacks, so it is shown in whole kilograms throughout — a figure like
+   392.3 would suggest a precision the basket does not have */
+const f1=n=>String(Math.round(Number(n)||0));
 function remainText(e){
   const tot=e.ballast_abs_kg,sd=e.sand_left_kg,wt=e.water_left_kg;
   if(tot==null)return '';
@@ -1476,18 +1568,19 @@ function line(e){
   let h='',s='';
   if(e.type==='Ballast'){
     if(e.ballast_action==='count'){
-      h=t('lgInv')+' \u00b7 '+remainText(e);
-      s='sand '+(e.sand_kg!=null?e.sand_kg:'?')+' kg'
+      h=t('takeInv')+' \u00b7 '+remainText(e);
+      s='sand '+(e.sand_kg!=null?f1(e.sand_kg):'?')+' kg'
         +(e.inv_bags!=null?' · '+e.inv_bags+' bags':'')
-        +(e.inv_ready_pct!=null?' · '+t('schuette')+' '+e.inv_ready_pct+'% ('+f1(nz(CFG.readyKg)*nz(e.inv_ready_pct)/100)+' kg)':'')
+        +(e.inv_ready_pct!=null?' · '+t('schuette')+' '+e.inv_ready_pct+'% ('+String(Math.floor(nz(CFG.readyKg)*nz(e.inv_ready_pct)/100))+' kg)':'')
         +' · water '+(e.water_kg!=null?e.water_kg:'?')+' kg'
         +(e.tally_diff_kg!=null?' · diff '+(e.tally_diff_kg>0?'+':'')+e.tally_diff_kg+' kg':'')
         +(e.note?' · '+e.note:'');
     }else{
       const kg=f1(Math.abs(Number(e.ballast_delta_kg)||0));
       const water=e.ballast_medium==='water';
-      h=(e.ballast_delta_kg>0?t('takenOn'):t('dropped'))+' '
-        +(water?kg+' l '+t('waterW').toLowerCase():kg+' kg '+t('sand').toLowerCase())
+      h=t('drop')+' \u00b7 '
+        +(water?kg+' lit '+t('waterW').toLowerCase():kg+' kg '+t('sand').toLowerCase())
+        +' '+(e.ballast_delta_kg>0?t('takenOn'):t('droppedShort'))
         +' \u00b7 '+remainText(e);
       s=e.note||'';
     }
@@ -1498,7 +1591,7 @@ function line(e){
   }else if(e.type==='Ressources'){
     h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
     s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?t('battery').toLowerCase()+' '+e.res_battery_pct+'%':'',
-       e.res_fuel_cell?'fuel '+e.res_fuel_cell:'',
+       e.res_fuel_cell?t('fuelCell').toLowerCase()+' '+e.res_fuel_cell:'',
        e.res_methanol_pct!=null&&e.res_methanol_pct!==''?t('methanolShort')+' '+e.res_methanol_pct+'%':'',
        e.res_solar?'solar '+e.res_solar:'',
        e.res_o2_crew?'O\u2082 crew '+e.res_o2_crew:'',
@@ -1571,7 +1664,8 @@ function paintWaChecks(){
     /* one pill per person, matched by number rather than by position — the coordinator is
        rebuilt on every call and would never match an index */
     box.innerHTML=list.map(r=>
-      `<button data-p="${esc(r.p)}"${waPicked(type,r)?' class="on"':''}>${esc(r.n||r.p)}</button>`).join('');
+      `<button data-p="${esc(r.p)}" class="${waPicked(type,r)?'on':''}${r.group?' wide':''}">`
+      +'<span>'+esc(r.n||r.p)+(r.group?' \u00b7 '+esc(t('groupPick')):'')+'</span></button>').join('');
   }
   /* the label counts what will actually be sent, not what could be */
   for(const sel in WALAB){
@@ -1615,7 +1709,17 @@ function ask(o){
     const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
     const done=v=>{m.classList.remove('on');m.innerHTML='';res(v)};
     if(o.cancel!==false)m.querySelector('[data-a="0"]').onclick=()=>done(null);
-    m.querySelector('[data-a="1"]').onclick=()=>done(o.input?m.querySelector('#mIn').value:(o.html?collect():true));
+    m.querySelector('[data-a="1"]').onclick=ev=>{
+      const val=o.input?m.querySelector('#mIn').value:(o.html?collect():true);
+      /* a confirmation worth seeing stays a moment, in the same green as a posted entry */
+      if(o.okFlash){
+        const b=ev.currentTarget;
+        b.textContent=o.okFlash;b.classList.add('okflash');b.disabled=true;
+        setTimeout(()=>done(val),1000);
+        return;
+      }
+      done(val);
+    };
     m.onclick=ev=>{if(ev.target===m)done(null)};
     if(o.onMount)o.onMount(m,()=>done(null));
     const i=m.querySelector('#mIn');if(i)setTimeout(()=>i.focus(),60);
@@ -1667,6 +1771,11 @@ function buildPrint(pick){
   const title=(CFG.flight||'Flight')+(CFG.call?' \u00b7 '+CFG.call:'');
   const now=new Date();
   const stamp=now.toISOString().slice(0,10)+' '+now.toISOString().slice(11,16)+'Z';
+  /* the document name is what a print-to-PDF ends up called, so it carries the whole story */
+  const stampShort=now.toISOString().slice(2,10).replace(/-/g,'')+' '
+    +now.toISOString().slice(11,16).replace(':','')+'Z';
+  const docName='Log '+(CFG.call||'')+' '+(CFG.flight||'')+' printed '+stampShort
+    +' ('+Object.keys(pick).filter(k=>pick[k]).join(', ')+')';
   const printedBy=t('printedBy').replace('{when}',stamp).replace('{who}',reporter());
   const kinds=Object.keys(pick).filter(k=>pick[k]).join(', ');
 
@@ -1688,20 +1797,23 @@ function buildPrint(pick){
   const title2=title+' \u00b7 '+span;
 
   const body=rows.map((e,i)=>{
-    const pos=e.pos_lat?e.pos_lat+' '+e.pos_lon+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':''):'';
-    const nav=[e.vs_ms!=null?((e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s'):'',
+    /* always the same order: position, altitude, course, speed, rate of climb */
+    const nav=[e.pos_lat?e.pos_lat+' '+e.pos_lon:'',
+               e.alt_ft!=null?e.alt_ft+' ft':'',
                e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',
-               e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':''].filter(Boolean).join(' \u00b7 ');
+               e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':'',
+               e.vs_ms!=null?((e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s'):''
+              ].filter(Boolean).join(' \u00b7 ');
     const newDay=(i===0||dayKey(rows[i-1])!==dayKey(e))
       ? '<tr class="dayrow"><td colspan="4">'+esc2(dayLong(e))+'</td></tr>' : '';
     return newDay+'<tr><td class="n">'+(i+1)+'</td><td class="ts">'+esc2(String(e.ts_utc).slice(11,19))+'Z</td>'
       +'<td class="ty">'+esc2(e.type)+'</td><td class="tx">'+esc2(lastText(e))
-      +'<span class="meta">'+esc2([e.reporter,pos,nav].filter(Boolean).join(' \u00b7 '))+'</span>'
+      +'<span class="meta">'+esc2([e.reporter,nav].filter(Boolean).join(' \u00b7 '))+'</span>'
       +(e.place?'<span class="meta">'+esc2(e.place)+'</span>':'')+'</td></tr>';
   }).join('')
   +'<tr class="endrow"><td class="n"></td><td colspan="3">'+esc2(t('noFurther'))+'</td></tr>';
 
-  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc2(title)+'</title>'
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc2(docName)+'</title>'
    +'<style>'
    +'@page{size:A4 portrait;margin:0}'
    +'*{box-sizing:border-box}'
@@ -2043,13 +2155,21 @@ const o2Sizes=()=>String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x))
   .filter(x=>isFinite(x)&&x>0).slice(0,4);
 /* a cylinder holds volume x pressure litres of gas at one bar */
 const thou=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,"'");
+/* each cylinder keeps its own full pressure — a 10 litre bottle filled to 300 bar next to a
+   2 litre at 200 would otherwise be averaged, and the share of a full load would be wrong */
+const o2FullBars=()=>{
+  const sz=o2Sizes();
+  const list=String(CFG.o2bars||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
+  return sz.map((l,i)=>list[i]>0?list[i]:(nz(CFG.o2bar)||200));
+};
 const o2Litres=()=>{const sz=o2Sizes(),b=UI.o2bars||[];
   return Math.round(sz.reduce((a,l,i)=>a+(b[i]>0?l*b[i]:0),0))};
-const o2Full=()=>Math.round(o2Sizes().reduce((a,l)=>a+l*(nz(CFG.o2bar)||200),0));
+const o2Full=()=>{const sz=o2Sizes(),f=o2FullBars();
+  return Math.round(sz.reduce((a,l,i)=>a+l*f[i],0))};
 const o2Pct=()=>{const f=o2Full();return f?Math.min(100,Math.round(o2Litres()/f*100)):null};
 const o2Summary=()=>{
   if(!o2Sizes().length||!(UI.o2bars||[]).some(x=>x>0))return '';
-  const p=o2Pct();return thou(o2Litres())+' l'+(p==null?'':' ('+p+'%)');
+  const p=o2Pct();return thou(o2Litres())+' lit'+(p==null?'':' ('+p+'%)');
 };
 function paintRes(){
   $('#rBat').textContent=UI.bat==null?'\u2014':UI.bat+'%';
@@ -2090,7 +2210,7 @@ $('#rO2').onclick=async()=>{
 const o2Detail=()=>{
   const sizes=o2Sizes(),bars=UI.o2bars||[];
   return sizes.map((l,i)=>bars[i]==null?null:
-    '#'+(i+1)+' '+l+' l '+bars[i]+' bar'+(UI.o2use===i?' ('+t('inUse')+')':''))
+    '#'+(i+1)+' '+l+' lit '+bars[i]+' bar'+(UI.o2use===i?' ('+t('inUse')+')':''))
     .filter(Boolean).join('; ');
 };
 
@@ -2447,7 +2567,8 @@ function posTick(){
 let OPST=null;
 async function opsAsk(){
   const r=await ask({title:t('opsTitle'),text:t('opsText'),input:'number',
-    value:String(nz(CFG.opsMin)||20),ph:'20',ok:t('opsSet'),cancel:t('opsNo')});
+    value:String(nz(CFG.opsMin)||20),ph:'20',ok:t('opsSet'),cancel:t('opsNo'),
+    okFlash:t('opsConfirmed')});
   if(r===null)return;
   const m=Math.max(1,Math.min(240,parseInt(r,10)||20));
   CFG.opsMin=m;save(K_CFG,CFG);
@@ -2517,7 +2638,7 @@ $('#btnPost').onclick=async()=>{
     const st=$('#aStation').value.trim(),msg=$('#aMsg').value.trim();
     if(!st&&!msg){flash('','');return toast(t('enterStation'))}
     const rc=recipients('ATC');
-    e=add({type:'ATC',atc_dir:UI.adir,atc_station:st.toUpperCase(),atc_freq:$('#aFreq').value.trim(),
+    e=add({type:'ATC',atc_dir:UI.adir,atc_station:st,atc_freq:$('#aFreq').value.trim(),
       atc_squawk:sq,atc_msg:msg,
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
     ['#aStation','#aFreq','#aSquawk'].forEach(x=>{$(x).value='';delete $(x).dataset.keep});
@@ -2580,6 +2701,8 @@ function fieldsFor(e){
 $('#logList').addEventListener('click',e=>{const b=e.target.closest('.entry');if(b)editEntry(b.dataset.id)});
 async function editEntry(id){
   const e=ENT.find(x=>x.id===id);if(!e)return;
+  /* the log is the flight record: one device is answerable for it */
+  if(CFG.role!=='master')return info(t('editEntry'),t('editMasterOnly'));
   const val=k=>k==='_kg'?Math.abs(e.ballast_delta_kg||0):(e[k]==null?'':e[k]);
   const html=fieldsFor(e).map(([k,l,t])=>`<div class="f"><p class="lab">${esc(l)}</p>`+
     (t==='area'?`<textarea data-k="${k}">${esc(val(k))}</textarea>`
@@ -2619,12 +2742,12 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',groupName:'#sGroupName',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){
   const vols=String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
-  const bar=nz(CFG.o2bar)||200;
+  const bars=o2FullBars(),bar=nz(CFG.o2bar)||200;
   $('#o2Rows').innerHTML='<div class="o2head"><span></span><span>'+esc(t('lVol'))+'</span>'
     +'<span>'+esc(t('lFullBar'))+'</span></div>'
     +Array.from({length:4},(_,i)=>
@@ -2639,9 +2762,10 @@ function readO2Rows(){
   for(let i=0;i<4;i++){
     const v=parseFloat(($('[data-ov="'+i+'"]')||{}).value);
     const b=parseFloat(($('[data-ob="'+i+'"]')||{}).value);
-    if(isFinite(v)&&v>0){vols.push(v);if(isFinite(b)&&b>0)bars.push(b)}
+    if(isFinite(v)&&v>0){vols.push(v);bars.push(isFinite(b)&&b>0?Math.round(b):200)}
   }
-  return {o2:vols.join(','), o2bar:bars.length?Math.round(bars.reduce((a,b)=>a+b,0)/bars.length):200};
+  return {o2:vols.join(','), o2bars:bars.join(','),
+          o2bar:bars.length?Math.round(bars.reduce((a,b)=>a+b,0)/bars.length):200};
 }
 function paintWaRows(){
   const w=CFG.wa||[];
@@ -2672,12 +2796,8 @@ function readWaRows(){
   }
   return out;
 }
-function paintModeLab(){
-  $('#sReporterLab').textContent=($('#sMode button.on')||{dataset:{}}).dataset.v==='shared'
-    ? 'On a shared device the PIC decides, and the reporter button switches to the other pilot.'
-    : 'On a personal device every entry is filed under the reporter name above, whoever is PIC.';
-}
-const TPLF={ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
+function paintModeLab(){}
+const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
 function fillTplRows(){
   for(const k in TPLF)$(TPLF[k]).value=tplFor(k);
   $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ')
@@ -2809,7 +2929,7 @@ $('#btnSave').onclick=async()=>{
       :'These settings apply to every entry made on this device from now on. '+mode+' device, '+wa.length+' WhatsApp recipient(s).'},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
   Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
-  const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bar=o2.o2bar;
+  const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bars=o2.o2bars;CFG.o2bar=o2.o2bar;
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.alt=0;save(K_UI,UI);
@@ -2978,12 +3098,20 @@ UI.act='drop';save(K_UI,UI);setAct('drop');mark('#bAct','drop');syncVfr();carryA
 recalc(ENT);paint();wake();
 addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
+/* Reading is cheap while nothing changes, writing is not. So the app reads on a short
+   rhythm and only pushes when there is something to push, with a pause between bursts. */
+/* The gap between background pushes widens as the hour's writes add up: ten seconds
+   normally, more once the budget is half spent. One push carries everything that is
+   waiting, so a longer gap delays by seconds and never loses a row. */
+let lastPush=0;
+const pushGap=()=>{const w=writesIn(3600000);return w>350?30000:w>220?18000:10000};
 setInterval(()=>{
   if(!configured()||!navigator.onLine||document.hidden)return;
   pollN++;
   const pending=ENT.some(e=>!e.synced);
-  if(pending){if(pollN%2===0)sync(true,true)}
-  else sync(true,false);
+  if(pending){
+    if(Date.now()-lastPush>=pushGap()&&budgetOk()){lastPush=Date.now();sync(true,true)}
+  }else if(pollN%2===0)sync(true,false);
 },5000);
 posTick();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
