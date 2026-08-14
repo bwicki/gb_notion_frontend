@@ -7,6 +7,7 @@ const SHELL = [
   './manifest.webmanifest',
   './readme.html',
   './setup.html',
+  './notion.html',
   './license.html',
   './logo.png',
   './favicon.ico',
