@@ -93,7 +93,7 @@ locked: press *Unlock settings* and enter **1234**. Fill in the device mode and 
 pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
 amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
-Ressources entry says otherwise.
+Resources entry says otherwise.
 
 The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.
@@ -151,7 +151,7 @@ On a shared device the reporter defaults to whoever is pilot in command, and a b
 exceptional case. It reads *reporting as* with the name below, and appends *(PIC)* when the two
 are the same person, so a glance tells you both facts at once. It turns dark
 while the alternate is active, so the exception is visible, and every entry carries that name
-until it is switched back. Changing the PIC on the Ressources tab moves the default with it.
+until it is switched back. Changing the PIC on the Resources tab moves the default with it.
 
 Each row also records `device_mode`, so it is possible to tell afterwards which reporting
 regime a row came from.
@@ -227,7 +227,7 @@ difference live, before an inventory is posted.
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.
 
-## 7. ATC, Ressources, Other
+## 7. ATC, Resources, Other
 
 **ATC** puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.
@@ -277,10 +277,10 @@ until you change them.
 The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.
 
-The remark field on Ballast and Ressources is the same size as the ATC message field, since a
+The remark field on Ballast and Resources is the same size as the ATC message field, since a
 remark is often the more important part of the entry.
 
-**Ressources** puts current PIC and who is resting on the first line as panel switches, then
+**Resources** puts current PIC and who is resting on the first line as panel switches, then
 battery, fuel cell and solar cell on the second, then methanol level, *Crew on O2* and the O2
 level on the third. Only pilots the master actually named appear: leave the second name empty
 and the switches shrink to a single-handed flight.
@@ -328,7 +328,7 @@ expect to repeat it.
 **Each of the four forms opens with the last entry of its own kind**, in a panel headed
 `Last Message | A. Wicki | 21:04:37Z` — what it was, who filed it and when. ATC spells the call
 out as `RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450` with the wording beneath; Ballast shows the
-drop or the inventory; Ressources the crew and power state; Other the note. Where nothing of
+drop or the inventory; Resources the crew and power state; Other the note. Where nothing of
 that kind has been reported yet, the panel simply reads `-`.
 
 The reporter is named because the entry may well have come from the other pilot's device: the
@@ -337,7 +337,7 @@ never has to be reconstructed from memory, and never depends on who made the las
 
 ## 8. WhatsApp
 
-ATC, Ressources and Other each list the recipients individually at the foot of the form, under
+ATC, Resources and Other each list the recipients individually at the foot of the form, under
 *Also send to WhatsApp* — the entry always goes to the table, and WhatsApp is the addition, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.
 
@@ -353,7 +353,7 @@ version matched by index and silently dropped the coordinator, which is the sort
 is only noticed when a message does not arrive.
 
 The **ATC Coordinator** is listed first and only on ATC, and is the only one ticked there by
-default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
+default — an ATC call belongs with the coordinator, not with the whole crew. On Resources and
 Other the coordinator does not appear and everybody else is ticked by default. Each choice is
 remembered per message type, so the pattern you settle into is the one you keep.
 
@@ -364,7 +364,7 @@ Above them sits a ninth, separate entry: the **ATC Coordinator**. It is offered 
 only, as its own checkbox above the general one, and it is ticked by default there — an ATC
 call normally goes to the coordinator whether or not the rest of the list is in play. The two
 checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
-to both, or to nobody. Ressources and Other never see the coordinator.
+to both, or to nobody. Resources and Other never see the coordinator.
 
 With the box ticked, posting first writes the entry as usual, then opens a sheet with the
 finished message and one button per recipient. An ATC entry reads:
@@ -420,7 +420,7 @@ braces are substituted, and lines behave in three ways:
 |---|---|
 | `{type}` `{callsign}` `{flight}` `{reporter}` | who and what |
 | `{dir}` `{station}` `{freq}` `{squawk}` `{msg}` | the ATC fields |
-| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Ressources fields |
+| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Resources fields |
 | `{note}` | the free remark |
 | `{time}` | UTC as `21:04Z` |
 | `{pos}` | degrees, minutes and seconds, `484532N 0072345E` |
@@ -610,7 +610,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `reporter` | who made the entry |
 | `source` | `app`, or whatever an external writer sets, e.g. `tally` |
 | `ts_utc`, `ts_local` | the same instant in UTC and with local offset |
-| `type` | `Ballast`, `ATC`, `Ressources`, `Other` — the values used on the Tally form |
+| `type` | `Ballast`, `ATC`, `Resources`, `Other` — the values used on the Tally form |
 | `pos_lat`, `pos_lon`, `alt_ft` | position of the reporting device in short notation, `484532N` / `0072345E`, and altitude in feet |
 | `tc_deg`, `speed_kt` | track over ground in degrees and ground speed in knots, one decimal |
 | `lat`, `lon`, `alt_gps_m` | the same fix in decimal degrees and metres, for map links |
@@ -627,7 +627,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `atc_dir` | `RX` received, `TX` sent |
 | `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
 | `crew_pic`, `crew_rest` | crew state at the moment of the entry |
-| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Ressources entry |
+| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Resources entry |
 | `res_methanol_pct` | methanol level in per cent |
 | `res_o2_crew` | whether the crew is on oxygen |
 | `res_o2` | reserve as `560 l (70%)` |
@@ -639,9 +639,9 @@ data/<flight-id>.deleted.json  ids that were removed
 | `edited_at`, `edited_by` | set when a row was changed after the fact |
 | `id` | UUID, the stable key for Notion |
 
-`type` deliberately uses the spelling from the Tally form, including `Ressources`, so the
-existing Notion select options match without editing. To change it, edit the four `data-t`
-attributes in `index.html` and the matching strings in the post handler.
+`type` uses the canonical values `Ballast`, `ATC`, `Resources`, `Other`, and `POS`. Legacy
+`Ressources` rows are normalized to `Resources` when the app loads them, so existing flight
+data remains usable and is rewritten with the corrected value on the next synchronization.
 
 ## 13. Polling from Notion
 
@@ -689,7 +689,7 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 
 ## 13c. Place names
 
-Off by default, and a setting of its own under *Ressources*. Switched on, each entry's position
+Off by default, and a setting of its own under *Resources*. Switched on, each entry's position
 is turned once into something a reader can place — `near Szeged/HU` — which then appears under
 the position in the WhatsApp message, in the log, in the printout and in a `place` column.
 

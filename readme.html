@@ -107,7 +107,7 @@ locked: press <em>Unlock settings</em> and enter <strong>1234</strong>. Fill in 
 pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
 amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
-Ressources entry says otherwise.</p>
+Resources entry says otherwise.</p>
 <p>The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.</p>
 <p>Opening the <strong>WhatsApp message layout</strong> or the <strong>GitHub connection</strong> asks first — <em>Do you really
@@ -170,7 +170,7 @@ reporter button is hidden; there is nothing to get wrong.</p>
 exceptional case. It reads <em>reporting as</em> with the name below, and appends <em>(PIC)</em> when the two
 are the same person, so a glance tells you both facts at once. It turns dark
 while the alternate is active, so the exception is visible, and every entry carries that name
-until it is switched back. Changing the PIC on the Ressources tab moves the default with it.</p>
+until it is switched back. Changing the PIC on the Resources tab moves the default with it.</p>
 <p>Each row also records <code>device_mode</code>, so it is possible to tell afterwards which reporting
 regime a row came from.</p>
 <h2>5a. Position</h2>
@@ -249,7 +249,7 @@ difference live, before an inventory is posted.</p>
 <code>first inventory total − currently on board</code>. Throwing sand is not exact; counting sacks is.
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.</p>
-<h2>7. ATC, Ressources, Other</h2>
+<h2>7. ATC, Resources, Other</h2>
 <p><strong>ATC</strong> puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.</p>
 <p>A frequency must lie between <strong>118.000 and 136.975 MHz</strong> and be a real channel name. Both
@@ -288,9 +288,9 @@ a station calls you is rarely what you note down when you call it. Both start wi
 until you change them.</p>
 <p>The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.</p>
-<p>The remark field on Ballast and Ressources is the same size as the ATC message field, since a
+<p>The remark field on Ballast and Resources is the same size as the ATC message field, since a
 remark is often the more important part of the entry.</p>
-<p><strong>Ressources</strong> puts current PIC and who is resting on the first line as panel switches, then
+<p><strong>Resources</strong> puts current PIC and who is resting on the first line as panel switches, then
 battery, fuel cell and solar cell on the second, then methanol level, <em>Crew on O2</em> and the O2
 level on the third. Only pilots the master actually named appear: leave the second name empty
 and the switches shrink to a single-handed flight.</p>
@@ -329,13 +329,13 @@ expect to repeat it.</p>
 <p><strong>Each of the four forms opens with the last entry of its own kind</strong>, in a panel headed
 <code>Last Message | A. Wicki | 21:04:37Z</code> — what it was, who filed it and when. ATC spells the call
 out as <code>RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450</code> with the wording beneath; Ballast shows the
-drop or the inventory; Ressources the crew and power state; Other the note. Where nothing of
+drop or the inventory; Resources the crew and power state; Other the note. Where nothing of
 that kind has been reported yet, the panel simply reads <code>-</code>.</p>
 <p>The reporter is named because the entry may well have come from the other pilot's device: the
 panel is read from the table, not from what this device happens to remember. A follow-up call
 never has to be reconstructed from memory, and never depends on who made the last one.</p>
 <h2>8. WhatsApp</h2>
-<p>ATC, Ressources and Other each list the recipients individually at the foot of the form, under
+<p>ATC, Resources and Other each list the recipients individually at the foot of the form, under
 <em>Also send to WhatsApp</em> — the entry always goes to the table, and WhatsApp is the addition, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.</p>
 <p>On ATC the coordinator sits on a line of its own above the rest of the list, so the one
@@ -348,7 +348,7 @@ rather than by position — an earlier
 version matched by index and silently dropped the coordinator, which is the sort of thing that
 is only noticed when a message does not arrive.</p>
 <p>The <strong>ATC Coordinator</strong> is listed first and only on ATC, and is the only one ticked there by
-default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
+default — an ATC call belongs with the coordinator, not with the whole crew. On Resources and
 Other the coordinator does not appear and everybody else is ticked by default. Each choice is
 remembered per message type, so the pattern you settle into is the one you keep.</p>
 <p>Recipients are defined in the setup, up to eight, each with a name and a number in
@@ -357,7 +357,7 @@ international form with digits only, for example <code>41791234567</code>.</p>
 only, as its own checkbox above the general one, and it is ticked by default there — an ATC
 call normally goes to the coordinator whether or not the rest of the list is in play. The two
 checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
-to both, or to nobody. Ressources and Other never see the coordinator.</p>
+to both, or to nobody. Resources and Other never see the coordinator.</p>
 <p>With the box ticked, posting first writes the entry as usual, then opens a sheet with the
 finished message and one button per recipient. An ATC entry reads:</p>
 <pre><code>*ATC | HB-QWV*
@@ -417,7 +417,7 @@ braces are substituted, and lines behave in three ways:</p>
 </tr>
 <tr>
 <td><code>{pic}</code> <code>{resting}</code> <code>{battery}</code> <code>{fuelcell}</code> <code>{solar}</code></td>
-<td>the Ressources fields</td>
+<td>the Resources fields</td>
 </tr>
 <tr>
 <td><code>{note}</code></td>
@@ -631,7 +631,7 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 </tr>
 <tr>
 <td><code>type</code></td>
-<td><code>Ballast</code>, <code>ATC</code>, <code>Ressources</code>, <code>Other</code> — the values used on the Tally form</td>
+<td><code>Ballast</code>, <code>ATC</code>, <code>Resources</code>, <code>Other</code> — the values used on the Tally form</td>
 </tr>
 <tr>
 <td><code>pos_lat</code>, <code>pos_lon</code>, <code>alt_ft</code></td>
@@ -699,7 +699,7 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 </tr>
 <tr>
 <td><code>res_battery_pct</code>, <code>res_fuel_cell</code>, <code>res_solar</code></td>
-<td>battery, fuel cell and solar cell as reported on a Ressources entry</td>
+<td>battery, fuel cell and solar cell as reported on a Resources entry</td>
 </tr>
 <tr>
 <td><code>res_methanol_pct</code></td>
@@ -743,9 +743,9 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 </tr>
 </tbody>
 </table>
-<p><code>type</code> deliberately uses the spelling from the Tally form, including <code>Ressources</code>, so the
-existing Notion select options match without editing. To change it, edit the four <code>data-t</code>
-attributes in <code>index.html</code> and the matching strings in the post handler.</p>
+<p><code>type</code> uses the canonical values <code>Ballast</code>, <code>ATC</code>, <code>Resources</code>, <code>Other</code>, and <code>POS</code>. Legacy
+<code>Ressources</code> rows are normalized to <code>Resources</code> when the app loads them, so existing flight
+data remains usable and is rewritten with the corrected value on the next synchronization.</p>
 <h2>13. Polling from Notion</h2>
 <p><strong>GitHub API — immediate, recommended</strong></p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/contents/data/&lt;flight-id&gt;.json
@@ -782,7 +782,7 @@ produces duplicates.</p>
   picture-in-picture on a laptop is the only true always-on-top.</li>
 </ul>
 <h2>13c. Place names</h2>
-<p>Off by default, and a setting of its own under <em>Ressources</em>. Switched on, each entry's position
+<p>Off by default, and a setting of its own under <em>Resources</em>. Switched on, each entry's position
 is turned once into something a reader can place — <code>near Szeged/HU</code> — which then appears under
 the position in the WhatsApp message, in the log, in the printout and in a <code>place</code> column.</p>
 <p><strong>Two things to weigh before switching it on.</strong> The lookup goes to OpenStreetMap's public

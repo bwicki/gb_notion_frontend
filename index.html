@@ -366,7 +366,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
     <div class="types" id="types">
       <button data-ty="Ballast" class="on">Ballast</button>
       <button data-ty="ATC">ATC</button>
-      <button data-ty="Ressources">Ressou.</button>
+      <button data-ty="Resources">Resour.</button>
       <button data-ty="Other">Other</button>
     </div>
 
@@ -440,7 +440,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div class="links wa" id="waATC"></div></div>
       </div>
 
-      <div class="blk" id="b-Ressources">
+      <div class="blk" id="b-Resources">
         <div class="lastmsg" id="cLast">
           <div class="lm-top"></div><div class="lm-body"></div>
         </div>
@@ -600,7 +600,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <input type="text" id="sMsgRx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
-        <h3 data-t="hRessources">Ressources</h3>
+        <h3 data-t="hResources">Resources</h3>
         <div class="f two">
           <div><p class="lab" data-t="lPosMin">Automatic position report every</p>
             <div class="sfx"><input type="number" id="sPosMin" inputmode="numeric" step="5" placeholder="0"><span>min</span></div></div>
@@ -643,7 +643,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <p class="lab" data-t="hintTpl">One template per message type.</p>
             <div class="f"><p class="lab">Ballast</p><textarea id="tplBal" style="min-height:104px"></textarea></div>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
-            <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
+            <div class="f"><p class="lab">Resources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
             <p class="hint" id="tplKeys"></p>
             <button class="go sm sec" id="btnTplReset" data-t="resetDefault">Reset to default</button>
@@ -692,7 +692,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-20';
+const APP_VERSION='v260816-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -704,17 +704,29 @@ const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25'
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
-  Ressources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  Resources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Ballast:'*{type} | {callsign}*\n{ballast}\nMsg: {note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}'};
 const TPL_KEYS=['type','callsign','ballast','atcmsgtype','dir','station','freq','squawk','msg','pic','resting',
   'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','place','location','alt','vs','tc','speed','maps','reporter','flight'];
+function canonicalType(v){return v==='Ressources'?'Resources':v}
+function canonicalEntry(e){if(e&&e.type==='Ressources')e.type='Resources';return e}
+function canonicalTemplates(tpl){
+  if(!tpl||typeof tpl!=='object')return tpl;
+  if(tpl.Resources==null&&tpl.Ressources!=null)tpl.Resources=tpl.Ressources;
+  delete tpl.Ressources;
+  return tpl;
+}
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
-let ENT=load(K_ENT,[]);
+CFG.tpl=canonicalTemplates(CFG.tpl);
+let ENT=load(K_ENT,[]).map(canonicalEntry);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
                       waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
+UI.type=canonicalType(UI.type);
+if(UI.waSel&&UI.waSel.Resources==null&&UI.waSel.Ressources!=null)UI.waSel.Resources=UI.waSel.Ressources;
+if(UI.waSel)delete UI.waSel.Ressources;
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false,LASTERR='';
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
@@ -809,7 +821,7 @@ const L={en:{
  lVfr:'VFR squawk', lEmerg:'Emergency squawks', lBagKg:'Bag standard weight',
  lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
- hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
+ hResources:'Resources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
  lGeo:'Place name with each position', lMethInit:'Methanol level at start',
  lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
  place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
@@ -929,7 +941,7 @@ const L={en:{
  lVfr:'VFR-Squawk', lEmerg:'Notfall-Squawks', lBagKg:'Standardgewicht pro Sack',
  lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
  lReadySteps:'Standard-Meldeschritte Schütte',
- hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
+ hResources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
  lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
  lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
  place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
@@ -1349,6 +1361,7 @@ function applyShared(o){
     if(o[k]===undefined)return;
     if(JSON.stringify(o[k])!==JSON.stringify(CFG[k])){CFG[k]=o[k];changed=true}
   });
+  CFG.tpl=canonicalTemplates(CFG.tpl);
   return changed;
 }
 /* two masters would overwrite each other's setup, so a master watches for a second one */
@@ -1427,7 +1440,7 @@ async function ghPut(p,text,sha,msg){
   if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,90));
   delete ETAG[p];
 }
-const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
+const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v.map(canonicalEntry):[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
   'pos_lat','pos_lon','alt_ft','place','tc_deg','speed_kt','vs_ms','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
   'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','sand_left_kg','water_left_kg','total_ballast_kg','tally_diff_kg',
@@ -1588,7 +1601,7 @@ function line(e){
     h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')
       +(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
     s=e.atc_msg||'';
-  }else if(e.type==='Ressources'){
+  }else if(e.type==='Resources'){
     h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
     s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?t('battery').toLowerCase()+' '+e.res_battery_pct+'%':'',
        e.res_fuel_cell?t('fuelCell').toLowerCase()+' '+e.res_fuel_cell:'',
@@ -1649,9 +1662,9 @@ function paintCrew(){
   $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>${esc(t('nobody'))}</button>`
     +crew.map(([k,n])=>`<button data-v="${k}"${UI.rest===k?' class="on"':''}>${esc(n)}</button>`).join('');
 }
-const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waBal':'Ballast','#waRes':'Ressources','#waOth':'Other'};
+const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waBal':'Ballast','#waRes':'Resources','#waOth':'Other'};
 /* on ATC the coordinator gets a line of its own above the rest of the list */
-const WALAB={'#waATCco':'ATC','#waBal':'Ballast','#waRes':'Ressources','#waOth':'Other'};
+const WALAB={'#waATCco':'ATC','#waBal':'Ballast','#waRes':'Resources','#waOth':'Other'};
 function paintWaChecks(){
   for(const sel in WABOX){
     const type=WABOX[sel],box=$(sel),roster=waRoster(type),co=atcCo();
@@ -1748,8 +1761,8 @@ const isNight=()=>document.documentElement.dataset.theme==='night';
 /* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
    Pagination is measured rather than guessed, so no entry is ever cut in half. */
 async function printSheet(){
-  const kinds=['Ballast','ATC','Ressources','Other','POS'];
-  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true};
+  const kinds=['Ballast','ATC','Resources','Other','POS'];
+  let pick={Ballast:true,ATC:true,Resources:true,Other:true,POS:true};
   await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
     text:t('printPick'),
     html:'<div class="links wa" id="prK">'+kinds.map(k=>
@@ -2058,7 +2071,7 @@ function setType(ty){
   if(ty==='ATC'){carryAtc();paintMsgChips()}
   if(ty==='Ballast'){UI.act='drop';UI.med='sand';save(K_UI,UI);
     mark('#bAct','drop');mark('#bMed','sand');setAct('drop')}
-  if(ty==='Ressources'){carryRes();paintRes()}
+  if(ty==='Resources'){carryRes();paintRes()}
 }
 $('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.ty)});
 
@@ -2234,7 +2247,7 @@ function acceptPre(scope){
 }
 /* Every kind of message shows the last one of its own kind, whoever filed it and from
    whichever device, so the header names the reporter and the time. */
-const LASTBOX={Ballast:'#bLast',ATC:'#aLast',Ressources:'#cLast',Other:'#oLast'};
+const LASTBOX={Ballast:'#bLast',ATC:'#aLast',Resources:'#cLast',Other:'#oLast'};
 /* one running line, blocks separated by middle dots, one weight throughout */
 function lastText(e){
   const DOT=' \u00b7 ';
@@ -2303,7 +2316,7 @@ function adoptLast(){
                 water:inv.water_kg==null?'':String(inv.water_kg)};
     if(inv.inv_ready_pct!=null)UI.ready=Number(inv.inv_ready_pct);
   }
-  const r=lastOf('Ressources');
+  const r=lastOf('Resources');
   if(r&&UI.adopted!==r.id){
     UI.adopted=r.id;
     if(r.res_fuel_cell)UI.fuel=r.res_fuel_cell;
@@ -2327,7 +2340,7 @@ const carryDrop=()=>{adoptLast();$('#bKg').value='';paintSum()};
 const carryInv=()=>{adoptLast();paintReady();return preFill(INVF,UI.lastInv)};
 const carryRes=()=>{adoptLast();mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);
   mark('#rO2crew',UI.o2crew);paintCrew();paintRes()};
-[['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Ressources',RESF]].forEach(([scope,pairs])=>{
+[['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Resources',RESF]].forEach(([scope,pairs])=>{
   pairs.forEach(([sel])=>{const el=$(sel);if(!el)return;
     ['focus','input','change'].forEach(ev=>el.addEventListener(ev,()=>acceptPre(scope)))});
 });
@@ -2645,9 +2658,9 @@ $('#btnPost').onclick=async()=>{
     paintFreqWarn();
     $('#aMsg').value='';paintMsgChips();toast(t('atcPosted'));carryAtc();
     if(UI.adir==='TX'&&/ops\s*normal/i.test(msg))setTimeout(opsAsk,400);
-  }else if(ty==='Ressources'){
-    const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Ressources');
-    e=add({type:'Ressources',note:$('#cNote').value.trim(),
+  }else if(ty==='Resources'){
+    const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Resources');
+    e=add({type:'Resources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
       res_methanol_pct:UI.meth,res_o2_crew:UI.o2crew,
@@ -2655,7 +2668,7 @@ $('#btnPost').onclick=async()=>{
       res_o2_detail:o2Detail(),res_o2_inuse:UI.o2use==null?null:UI.o2use+1,
       res_o2_bars:(UI.o2bars||[]).map(x=>x==null?'':x).join(';'),
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
+    $('#cNote').value='';acceptPre('#b-Resources');carryRes();toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
     if(!v){flash('','');return toast(t('noteEmpty'))}
@@ -2692,7 +2705,7 @@ function fieldsFor(e){
       : [['_kg','Kilograms dropped','number'],['note','Remark','text']];
   if(e.type==='ATC')
     return [['atc_station','Station','text'],['atc_freq','FREQ','text'],['atc_squawk','SQ','text'],['atc_msg','Message','area']];
-  if(e.type==='Ressources')
+  if(e.type==='Resources')
     return [['crew_pic','Pilot in command','text'],['crew_rest','Resting','text'],
             ['res_battery_pct','Battery %','number'],['res_fuel_cell','Fuel cell on/off','text'],
             ['res_solar','Solar on/off','text'],['note','Remark','text']];
@@ -2797,7 +2810,7 @@ function readWaRows(){
   return out;
 }
 function paintModeLab(){}
-const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
+const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Resources:'#tplRes',Other:'#tplOth'};
 function fillTplRows(){
   for(const k in TPLF)$(TPLF[k]).value=tplFor(k);
   $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ')
