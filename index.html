@@ -622,6 +622,11 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
         <p class="hint" data-t="hintAuto">Entries are posted automatically.</p>
 
+        <h3 data-t="hReporting">Reporting</h3>
+        <div class="f"><p class="lab" data-t="lWebhook">Reporting-Webhook</p>
+          <input type="url" id="sWebhook" inputmode="url" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+        <p class="hint" data-t="hintWebhook">Webhook to the Zapier API for forwarding entries to Notion</p>
+
         <details class="fold" id="foldWa">
           <summary data-t="waRecipients">WhatsApp recipients</summary>
           <div class="in">
@@ -692,15 +697,15 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260816-01';
-const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
-const PASS='1234';        /* opens the settings on any device */
+const APP_VERSION='v260816-02';
+const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6', K_HOOK='bsk.webhook.v1';
+const PASS='1234';        /* opens the flight setup on the master device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
            bagKg:15,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           fresh:0,blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',webhook:'https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
@@ -721,6 +726,7 @@ let CFG=Object.assign({},DEF,load(K_CFG,{}));
 CFG.tpl=canonicalTemplates(CFG.tpl);
 let ENT=load(K_ENT,[]).map(canonicalEntry);
 let TOMB=load(K_TOMB,[]);
+let HOOKQ=(()=>{const q=load(K_HOOK,[]);return Array.isArray(q)?q:[]})();
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
                       waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
@@ -765,10 +771,11 @@ const L={en:{
  saveSettings:'Save settings', clearDevice:'Clear entries on this device',
  checkConn:'Check connection', hDevice:'This device', hFlight:'Flight', hBallast:'Ballast',
  hApp:'App', hLanguage:'Language', hReporter:'Reporter on this device',
- langHint:'The interface only. Everything written to GitHub and to WhatsApp stays English.',
+ langHint:'The interface only. Everything written to GitHub, the Reporting Webhook and WhatsApp stays English.',
  master:'Master', follower:'Follower', personalDev:'Personal device', sharedDev:'Shared device',
  setupRole:'Setup role', modeHint:'On a shared device the reporting person may be chosen between the two pilots at any time.', nightColour:'Night colour', tone:'Confirmation tone',
- waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
+ waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection', hReporting:'Reporting',
+ lWebhook:'Reporting-Webhook', hintWebhook:'Webhook to the Zapier API for forwarding entries to Notion', webhookBad:'Enter a valid HTTPS webhook URL',
  mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
  mExport:'Export the table', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
@@ -779,7 +786,7 @@ const L={en:{
  sqDigits:'A squawk is four digits, each 0 to 7',
  freqRange:'A frequency runs from 118.000 to 136.975 MHz', freqStep:'Not a channel: names end in 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
- takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
+ takenOver:'Taken over from the last call', settingsSaved:'Settings saved', webhookQueued:'Posted to GitHub; webhook queued for retry',
  wrongPass:'Wrong password', checking:'Checking\u2026',
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
@@ -885,10 +892,11 @@ const L={en:{
  clearDevice:'Einträge auf diesem Gerät löschen', checkConn:'Verbindung prüfen',
  hDevice:'Dieses Gerät', hFlight:'Fahrt', hBallast:'Ballast', hApp:'App', hLanguage:'Sprache',
  hReporter:'Melder auf diesem Gerät',
- langHint:'Nur die Oberfläche. Alles, was nach GitHub und WhatsApp geht, bleibt englisch.',
+ langHint:'Nur die Oberfläche. Alles, was nach GitHub, an den Reporting-Webhook und zu WhatsApp geht, bleibt englisch.',
  master:'Master', follower:'Follower', personalDev:'Persönliches Gerät', sharedDev:'Gemeinsames Gerät',
  setupRole:'Rolle', modeHint:'Auf einem gemeinsamen Gerät kann jederzeit zwischen den beiden Piloten gewählt werden, wer meldet.', nightColour:'Nachtfarbe', tone:'Quittungston',
- waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
+ waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung', hReporting:'Weiterleitung',
+ lWebhook:'Reporting-Webhook', hintWebhook:'Webhook zur Zapier-API für die Weiterleitung der Einträge an Notion', webhookBad:'Eine gültige HTTPS-Webhook-URL eingeben',
  mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
  mExport:'Tabelle exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
@@ -899,7 +907,7 @@ const L={en:{
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7',
  freqRange:'Eine Frequenz liegt zwischen 118.000 und 136.975 MHz', freqStep:'Kein Kanal: Endungen sind 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
- takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
+ takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert', webhookQueued:'Auf GitHub gespeichert; Webhook für erneuten Versuch vorgemerkt',
  wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
@@ -1099,6 +1107,58 @@ function gpsSnap(){
     alt_gps_m:GPS.alt==null?null:Math.round(GPS.alt),
     gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
     gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
+}
+function validWebhookUrl(value){
+  if(!String(value||'').trim())return true;
+  try{return new URL(String(value).trim()).protocol==='https:'}catch(e){return false}
+}
+function webhookEntry(e){
+  const out=Object.assign({},e);
+  delete out.synced;delete out.failed;
+  return out;
+}
+const webhookPending=id=>HOOKQ.some(x=>x&&x.id===id);
+let HOOKING=false;
+function queueWebhook(e){
+  const url=String(CFG.webhook||'').trim();
+  if(!url)return;
+  if(!validWebhookUrl(url))return;
+  const item={id:e.id,url:url,payload:webhookEntry(e),attempts:0,next:0,last_error:''};
+  const i=HOOKQ.findIndex(x=>x&&x.id===e.id);
+  if(i>=0)HOOKQ[i]=item;else HOOKQ.push(item);
+  save(K_HOOK,HOOKQ);flushWebhooks();
+}
+/* Zapier explicitly advises browser clients not to set a custom Content-Type header: doing so
+   triggers a CORS preflight that its Catch Hook rejects. The body is still valid JSON. Each
+   queue item captures the URL used when the entry was made, so changing the setting cannot
+   silently redirect an entry that is already waiting. */
+async function flushWebhooks(){
+  if(HOOKING||!navigator.onLine||!HOOKQ.length)return;
+  HOOKING=true;
+  const blocked=new Set();
+  try{
+    for(const snapshot of [...HOOKQ]){
+      const item=HOOKQ.find(x=>x&&x.id===snapshot.id);
+      if(!item||blocked.has(item.url)||Number(item.next||0)>Date.now())continue;
+      const ctrl=typeof AbortController==='function'?new AbortController():null;
+      const timer=ctrl?setTimeout(()=>ctrl.abort(),12000):null;
+      try{
+        const r=await fetch(item.url,{method:'POST',body:JSON.stringify(item.payload),
+          keepalive:true,signal:ctrl?ctrl.signal:undefined});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        HOOKQ=HOOKQ.filter(x=>x&&x.id!==item.id);
+      }catch(e){
+        const current=HOOKQ.find(x=>x&&x.id===item.id);
+        if(current){
+          current.attempts=Number(current.attempts||0)+1;
+          current.last_error=String(e&&e.name==='AbortError'?'timeout':(e&&e.message)||e);
+          current.next=Date.now()+Math.min(300000,5000*Math.pow(2,Math.min(current.attempts-1,6)));
+          blocked.add(current.url);
+        }
+      }finally{if(timer)clearTimeout(timer)}
+      save(K_HOOK,HOOKQ);
+    }
+  }finally{HOOKING=false}
 }
 function add(part){
   const now=new Date();
@@ -1308,7 +1368,7 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 /* everything a second device needs; per-device choices are deliberately left out */
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked',
   'bagKg','readyKg','methInit','posMin','opsMin','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
-  'atcName','atcNum','groupName','wa','tpl'];
+  'atcName','atcNum','groupName','wa','tpl','webhook'];
 function setupPayload(withToken){
   const o={v:1,master_device:DEV,updated_at:new Date().toISOString(),by:reporter()};
   SHARED.forEach(k=>o[k]=CFG[k]);
@@ -1959,7 +2019,7 @@ async function shareSheet(){
   };
   await ask({title:t('shareTitle'),cancel:false,ok:t('copyLink'),
     text:'Open this link on the other device. It carries the flight, the pilots, the ballast '
-      +'figures, the WhatsApp recipients and the message templates, and sets that device to '
+      +'figures, the Reporting Webhook, the WhatsApp recipients and the message templates, and sets that device to '
       +'Follower. Its own reporter name, device mode and colours stay untouched.',
     html:'<button class="check on" id="shTok"><span class="box"><svg viewBox="0 0 24 24">'
       +'<path d="M5 12.5 10 17.5 19 7"/></svg></span><span>Include the GitHub token'
@@ -1999,6 +2059,7 @@ async function importFromHash(){
   const ok=await ask({title:'Apply this setup?',ok:'Apply',cancel:'Discard',
     text:'Flight '+(o.flight||'—')+' · '+(o.call||'—')+' · repository '+(o.repo||'—')+' · '
       +((o.wa||[]).length)+' WhatsApp recipient(s) · '
+      +(o.webhook?'Reporting Webhook included · ':'no Reporting Webhook · ')
       +(o.token?'a GitHub token is included':'no token — it has to be entered on this device')
       +'. Your reporter name, device mode and colours are left as they are.'});
   if(!ok)return false;
@@ -2610,25 +2671,27 @@ $('#btnPost').onclick=async()=>{
       const bags=$('#iBags').value,water=$('#iWater').value;
       if(bags===''&&water===''){flash('','');return toast(t('enterInv'))}
       const c=invCalc(bags,water,UI.ready);
-      add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
+      e=add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
         sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
         inv_bags:bags===''?null:Math.round(nz(bags)),inv_ready_pct:UI.ready,note:$('#iNote').value.trim()});
+      queueWebhook(e);
       $('#iNote').value='';acceptPre('#b-Ballast');paintInv();
       const last=chrono(ENT)[chrono(ENT).length-1];
-      {const be=chrono(ENT)[ENT.length-1],rc=recipients('Ballast');
-       confirmPost(be,rc.length?()=>waSend(be,rc):null);}
+      {const rc=recipients('Ballast');
+       confirmPost(e,rc.length?()=>waSend(e,rc):null);}
       toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
     }else{
       const kg=parseFloat($('#bKg').value);
       if(!(kg>0)){flash('','');return toast(t('enterKg'))}
       {const rcb=recipients('Ballast');
-      add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
+      e=add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
         ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim(),
         whatsapp:rcb.length?'yes':'',whatsapp_to:rcb.map(r=>r.n||r.p).join('; ')});}
+      queueWebhook(e);
       $('#bKg').value='';$('#bNote').value='';paintSum();
       acceptPre('#b-Ballast');carryDrop();
-      {const be=chrono(ENT)[ENT.length-1],rc=recipients('Ballast');
-       confirmPost(be,rc.length?()=>waSend(be,rc):null);}
+      {const rc=recipients('Ballast');
+       confirmPost(e,rc.length?()=>waSend(e,rc):null);}
       toast('\u2212'+kg+' kg '+(UI.med||'sand'));
     }
     return;
@@ -2694,7 +2757,7 @@ $('#btnPost').onclick=async()=>{
     }else if(nAtt){toast(t('mediaLater'))}
     $('#oMsg').value='';toast(t('notePosted'));
   }
-  if(e){const rc=recipients(ty);confirmPost(e,rc.length?()=>waSend(e,rc):null)}
+  if(e){queueWebhook(e);const rc=recipients(ty);confirmPost(e,rc.length?()=>waSend(e,rc):null)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -2756,7 +2819,7 @@ function applyEdit(e,v){
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
   bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',groupName:'#sGroupName',
-  repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
+  repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken',webhook:'#sWebhook'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){
   const vols=String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
@@ -2931,6 +2994,7 @@ pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
 $('#btnSave').onclick=async()=>{
   if(!UNLOCKED)return;
   const next={};for(const k in SF)next[k]=$(SF[k]).value.trim();
+  if(!validWebhookUrl(next.webhook))return toast(t('webhookBad'));
   const wa=readWaRows();
   const mode=($('#sMode button.on')||{dataset:{v:'personal'}}).dataset.v;
   const role=($('#sRole button.on')||{dataset:{v:'master'}}).dataset.v;
@@ -3085,6 +3149,7 @@ function flash(kind,msg,after){
   ft=setTimeout(()=>flash('',''),3000);
 }
 const waitSync=async()=>{for(let i=0;i<50&&SYNCING;i++)await new Promise(r=>setTimeout(r,120))};
+const waitWebhook=async()=>{for(let i=0;i<100&&HOOKING;i++)await new Promise(r=>setTimeout(r,120))};
 /* every post says what actually became of it, not just that it was written down */
 async function confirmPost(e,after){
   if(!configured()){flash('fail',t('fNoRepo'),after);return}
@@ -3092,8 +3157,10 @@ async function confirmPost(e,after){
   await waitSync();
   if(!SYNCING&&ENT.some(x=>!x.synced))await sync(true,true);
   await waitSync();
+  await waitWebhook();
   const row=ENT.find(x=>x.id===e.id);
-  if(row&&row.synced)flash('ok',t('fPosted'),after);
+  if(row&&row.synced&&webhookPending(e.id))flash('wait',t('webhookQueued'),after);
+  else if(row&&row.synced)flash('ok',t('fPosted'),after);
   else if(!navigator.onLine)flash('wait',t('fQueued'),after);
   else flash('fail',t('fFailed')+(LASTERR?': '+LASTERR:''),after);
 }
@@ -3109,7 +3176,8 @@ mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
 mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#rO2crew',UI.o2crew);paintRes();mark('#bMed',UI.med||'sand');
 UI.act='drop';save(K_UI,UI);setAct('drop');mark('#bAct','drop');syncVfr();carryAtc();carryRes();paintChips();paintPics();paintVoice();paintSum();
 recalc(ENT);paint();wake();
-addEventListener('online',()=>sync(true,true));
+flushWebhooks();
+addEventListener('online',()=>{sync(true,true);flushWebhooks()});
 setInterval(paintStatus,5000);
 /* Reading is cheap while nothing changes, writing is not. So the app reads on a short
    rhythm and only pushes when there is something to push, with a pause between bursts. */
@@ -3119,6 +3187,7 @@ setInterval(paintStatus,5000);
 let lastPush=0;
 const pushGap=()=>{const w=writesIn(3600000);return w>350?30000:w>220?18000:10000};
 setInterval(()=>{
+  flushWebhooks();
   if(!configured()||!navigator.onLine||document.hidden)return;
   pollN++;
   const pending=ENT.some(e=>!e.synced);

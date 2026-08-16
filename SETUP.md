@@ -111,10 +111,13 @@ On the device that will be the **master** — normally the pilot in command's iP
 2. **Setup role**: Master
 3. **Flight**: flight ID, callsign, both pilots
 4. **Ballast**: weight per bag, full ready ballast, quick drop amounts
-5. Open **GitHub connection**: `<owner>/gb_flight_data`, branch `main`, folder `data`, paste
+5. **Reporting-Webhook**: leave the supplied Zapier Catch Hook URL in place, or enter the HTTPS
+   Catch Hook for the Zap that forwards entries to Notion. The default is
+   `https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/`. Leaving it empty disables this path.
+6. Open **GitHub connection**: `<owner>/gb_flight_data`, branch `main`, folder `data`, paste
    the token
-6. **Check connection** — it should name the repository back to you
-7. **Save settings**
+7. **Check connection** — it should name the repository back to you
+8. **Save settings**
 
 The other devices do not need any of this typed again — see section 6.
 
@@ -142,17 +145,18 @@ start every device is asked *Is this the master device?* — the password makes 
 follower without being asked. There is no default and nothing is assumed; the question comes
 back on each start until it is answered.
 
-The settings password **1234** is a different thing entirely: it opens the settings screen on
-any device, master or not, so anyone can correct a reporter name or read the setup. Only
-switching a device *to* master asks for 5678.
+The settings password **1234** is a different thing entirely: on the Master it unlocks the
+shared flight setup. Followers can change their reporter name and personal display choices,
+but cannot unlock or edit the shared setup. The Reporting-Webhook is therefore editable only
+on the Master.
 
 One device is the **master** and owns the flight setup. The others are **followers**.
 
 **To bring a device on board:** on the master, Menu → **Share setup with another device**. A
 link appears. Send it to the other device however you normally send things — Signal, WhatsApp,
 AirDrop, a message to yourself. Opening it in the browser there shows what is about to be
-applied and asks for a yes. On yes, that device takes on the whole setup and marks itself a
-Follower.
+applied and asks for a yes. On yes, that device takes on the whole setup, including the
+Reporting-Webhook, and marks itself a Follower.
 
 **The token in the link.** The checkbox in the share sheet decides whether the token travels
 with it. With the token, the other device can send immediately and nothing else has to be
@@ -168,11 +172,15 @@ it, and are left alone.
 `data/_setup.json`. Followers pick that up within about thirty seconds and apply it, with a
 short note on screen. Change the flight ID, rename a pilot, add a WhatsApp recipient or edit a
 message template on the master, and the whole crew has it without anyone touching a setup
-screen. A follower can still be unlocked and edited locally, but the next publication from the
-master wins.
+screen. Followers cannot unlock and edit this shared setup locally.
 
 **Two masters would fight** over `_setup.json` and each undo the other. Exactly one device is
 the master.
+
+**Treat the Reporting-Webhook URL like a secret.** The Master stores it locally and publishes
+it in `data/_setup.json`; the setup invitation link carries it as well. Anyone who has a Zapier
+Catch Hook URL can submit data to that Zap. Send an invitation link only over a trusted channel
+and remove it after the follower is configured.
 
 ## 7. Polling from Notion
 
@@ -217,7 +225,7 @@ through a flight afterwards, too slow to follow one live.
 - [ ] Flight ID set, and different from the last flight
 - [ ] Every device shows the same flight in its header
 - [ ] Exactly one device is set to Master
-- [ ] A test entry appears in the repository, and in Notion
+- [ ] A test entry appears in the repository and reaches Notion through the Reporting-Webhook
 - [ ] Test entry deleted afterwards, so the flight starts empty
 - [ ] Start ballast entered, or the first inventory planned for before launch
 
@@ -229,12 +237,20 @@ device.
 **Entries stay `queued`** — no connection, or the token has expired or been revoked. *Send now*
 in the menu shows the actual error rather than failing quietly.
 
+**The post button says the webhook is queued** — GitHub received the entry, but the Zapier
+request did not complete. The app retries from its local webhook queue after five seconds, then
+with increasing pauses up to five minutes. Check that the Zap is switched on and its Catch Hook
+URL is still current.
+
 **A `404` on the first entry** — the data repository has no branch yet. Add a README to it
 through the GitHub web interface and try again.
 
 **A `403`** — the token lacks *Contents: Read and write*, or does not include this repository.
 
 **Notion shows duplicates** — it is appending instead of upserting on `id`.
+
+This rule also applies to webhook delivery: use the entry's stable `id` as the Notion key. A
+retry may follow an ambiguous network response even if Zapier already accepted the first copy.
 
 **Notion is minutes behind** — it is polling `raw.githubusercontent.com` instead of the API.
 

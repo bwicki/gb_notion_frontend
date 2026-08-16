@@ -37,17 +37,19 @@ flight. Same four message types as the Tally form, same submit action, but it ke
 without signal, stamps every entry with time and GPS position, carries the ballast figure
 forward across all devices, and lets several people report in parallel.</p>
 <p>Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. The app reads the same files back every five seconds, so each device always shows the
+files. A manual entry is also sent as one JSON object to the configured Reporting Webhook.
+The app reads the GitHub files back every five seconds, so each device always shows the
 complete flight.</p>
-<p>No build step, no dependencies, no external requests other than to the GitHub API.</p>
-<hr />
+<p>No build step and no dependencies. The app talks to the GitHub API, the configured Zapier
+webhook, OpenStreetMap when place names are enabled, and WhatsApp links when selected.</p>
+<hr>
 <h2>1. The screen</h2>
 <p>The whole app fits one phone screen without scrolling, and its outline is always visible.
 Only the log and the setup scroll.</p>
 <p>Day mode is dark anthracite on a grey ground; unselected buttons carry a visible outline and a
 white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
 the header switches in one tap and the choice is remembered; on first launch the app follows
-the iPad's own appearance setting.</p>
+the iPad&#39;s own appearance setting.</p>
 <p>The header shows UTC to the second and, at its right, the ballast still on board in the same
 size, then the flight and callsign with the live navigation line beneath them — <code>293° · 12.3 kn · ± 8 m</code>, course over ground, ground speed
 and the accuracy of the current fix. Before a fix it reads <code>GPS searching</code>; with a fix but no
@@ -72,7 +74,7 @@ favicons have a transparent ground so they sit in a browser tab of any colour; t
 icons stay opaque, since iOS renders transparency in an app icon as black.
 The set covers all three platforms: <code>apple-touch-icon</code> in 120, 152, 167 and 180 pixels for
 iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
-with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
+with the artwork inside the safe circle so Android&#39;s adaptive shapes do not clip it, a
 <code>mask-icon.svg</code> for pinned tabs in desktop Safari, and a multi-resolution <code>favicon.ico</code>.
 The icons are opaque — iOS renders transparency in a home screen icon as black — and the
 manifest background is white to match, so the Android splash shows no seam. The 16 and 32 pixel
@@ -101,15 +103,20 @@ airspace uses something else.</p>
 inventory: it seeds the running figure so that early drops count, and it gives the first
 inventory something to compare against in <code>tally_diff_kg</code>. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.</p>
-<p>The reporter name for this device sits at the top of the setup and needs no password — it
-changes often enough, and getting it wrong only mislabels entries. Everything below it is
-locked: press <em>Unlock settings</em> and enter <strong>1234</strong>. Fill in the device mode and name, the flight, the two
-pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
-amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
+<p>Device mode, language, reporter name, night colour and confirmation tone are personal settings
+and need no password. The shared flight setup below them is editable only on the Master: press
+<em>Unlock settings</em> and enter <strong>1234</strong>. Fill in the flight, the two pilots, the weight of one
+ballast bag, the full ready-ballast weight, and the quick drop amounts. The methanol level at
+the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
 Resources entry says otherwise.</p>
 <p>The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.</p>
+<p>The <strong>Reporting-Webhook</strong> is the HTTPS endpoint that receives each manual entry for forwarding
+to Notion. Its default is
+<code>https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/</code>. It is part of the shared flight setup:
+only the Master can edit it, and Followers receive the Master&#39;s saved value automatically.
+Leaving the field empty disables webhook delivery.</p>
 <p>Opening the <strong>WhatsApp message layout</strong> or the <strong>GitHub connection</strong> asks first — <em>Do you really
 want to change these settings?</em> Those two are where a slip costs a flight rather than a
 keystroke.</p>
@@ -119,8 +126,8 @@ applies, so a flight in progress cannot be overwritten by a stray tap. Leaving t
 screen locks it again.</p>
 <h2>3. Install on the iPad</h2>
 <p>Safari → Share → <strong>Add to Home Screen</strong>. It is saved as <em>Basket Reporting</em> and launches full
-screen without Safari's bars, and location and wake lock work as expected. Location permission is requested on the
-first entry; "While Using the App" is enough. Without it, entries are still recorded, with
+screen without Safari&#39;s bars, and location and wake lock work as expected. Location permission is requested on the
+first entry; &quot;While Using the App&quot; is enough. Without it, entries are still recorded, with
 <code>gps_fix</code> set to <code>false</code>.</p>
 <h2>4. Floating over other apps</h2>
 <p>The minimise button collapses the app to a blue pill reading <code>HB-QWV Reporting</code> with the
@@ -138,8 +145,7 @@ Anything claiming otherwise on a web page is drawing inside that page.</p>
 <th>How to keep it above the other app</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><strong>iPad</strong></td>
 <td>Install to the Home Screen, then drag it from the Dock onto the running app — <strong>Slide Over</strong> gives a narrow window floating over a map or Foreflight, swiped off the edge and back with one gesture. <strong>Split View</strong> and <strong>Stage Manager</strong> are the fixed and the free-floating variants.</td>
 </tr>
@@ -155,14 +161,13 @@ Anything claiming otherwise on a web page is drawing inside that page.</p>
 <td><strong>Chrome on a laptop</strong></td>
 <td>The minimise button opens a genuine always-on-top window through document picture-in-picture — the only browser feature that does this. It survives switching to any other application. Useful for the chase car.</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>The app detects the picture-in-picture case on its own: press minimise and you get the
 always-on-top window where the browser supports it, and the in-app pill everywhere else.
 Clicking either brings the app back.</p>
 <h2>5. Who is reporting</h2>
 <p>The setup asks whether this is a <strong>personal device</strong> or a <strong>shared device</strong>.</p>
-<p>On a personal device — the default, and what the two pilots' own phones should be set to —
+<p>On a personal device — the default, and what the two pilots&#39; own phones should be set to —
 every entry is filed under the name entered there, whoever happens to be pilot in command. The
 reporter button is hidden; there is nothing to get wrong.</p>
 <p>On a shared device the reporter defaults to whoever is pilot in command, and a button beside
@@ -175,7 +180,7 @@ until it is switched back. Changing the PIC on the Resources tab moves the defau
 regime a row came from.</p>
 <h2>5a. Position</h2>
 <p>The position on every row is the fix of the device that made the entry, taken at the moment of
-posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
+posting. Rows merged in from another iPad keep that iPad&#39;s position — nothing is ever
 re-stamped. Three columns carry it in short notation: <code>pos_lat</code> as <code>484532N</code>, <code>pos_lon</code> as
 <code>0072345E</code>, and <code>alt_ft</code> as WGS84 altitude in feet. The decimal degrees and metres stay
 alongside for map links and for anything that needs the raw value.</p>
@@ -190,7 +195,7 @@ carried over from ten minutes ago would be added to by mistake far more often th
 save a keystroke.</p>
 <p><strong>Sand and water are carried forward separately.</strong> An inventory sets both, a drop reduces the
 one it was made of, and every entry therefore knows what is left of each — recorded as
-<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. An inventory reads <code>sand 390 kg („Schütte" 100%) · water 20 kg · 24 bags</code> — the Schütte named
+<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. An inventory reads <code>sand 390 kg („Schütte&quot; 100%) · water 20 kg · 24 bags</code> — the Schütte named
 separately as a percentage and counted inside the sand figure, since that is where it physically
 is. A drop reads
 <code>dropped 40 kg sand · remaining 370.0 kg total ballast (350.0 kg sand, 20.0 kg water)</code>, and a
@@ -206,10 +211,10 @@ always the one dark button, so a knock against the iPad cannot log a drop.</p>
 inputs:</p>
 <ul>
 <li><em>Bags</em> and <em>Water</em> on one line — bags counted in total including safety ballast and
-  multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
-<li><em>Ready ballast</em> („Schütte") — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
-  percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
-  selected.</li>
+multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
+<li><em>Ready ballast</em> („Schütte&quot;) — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
+percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
+selected.</li>
 </ul>
 <p>The running total under the fields shows the result before it is posted, and the entry lands
 in the table as three columns:</p>
@@ -220,8 +225,7 @@ in the table as three columns:</p>
 <th>Contents</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>sand_kg</code></td>
 <td>bags × weight per bag, <strong>plus</strong> the ready ballast</td>
 </tr>
@@ -233,8 +237,7 @@ in the table as three columns:</p>
 <td><code>total_ballast_kg</code></td>
 <td>sand + water, and the new figure on board</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>Ready ballast is always sand, so sand + water = total. <code>inv_bags</code> and <code>inv_ready_pct</code> are
 carried alongside so an inventory can be reopened and corrected later.</p>
 <p><strong><code>tally_diff_kg</code> records where the figures parted company.</strong> Every inventory stores the
@@ -275,7 +278,7 @@ turbulence is a waste of a hand. Typing turns the text dark.</p>
 One tap puts all three values back in dark type and drops the cursor into the message, without
 any message of its own — the fields having filled is the confirmation. The station comes back
 with a trailing space and is then left alone: tapping into it keeps what was copied, so
-<code>ZURICH INFO</code> can be turned into <code>ZURICH INFO ARRIVAL</code> without retyping the first two words.
+<code>ZURICH INFO </code> can be turned into <code>ZURICH INFO ARRIVAL</code> without retyping the first two words.
 FREQ and SQ still clear on a tap, because those two are replaced rather than extended.</p>
 <p>Beneath the station field are the station presets — <em>Info, Radar, Tower, Control, Approach</em> by
 default, and whatever you put in the setup instead. A tap inserts the word <strong>where the cursor
@@ -315,7 +318,7 @@ overwhelming majority of entries, and a form that opens on Inventory because tha
 happened an hour ago costs a tap every single time.</p>
 <p><strong>Other</strong> is a free note, up to four pictures, and a voice note. They are scaled down to 1024 pixels and
 about 60 per cent JPEG quality in the browser before anything is stored, because a queued entry
-has to survive in the device's local storage until there is a link again. Each picture is
+has to survive in the device&#39;s local storage until there is a link again. Each picture is
 written to <code>data/media/&lt;entry-id&gt;-&lt;n&gt;.jpg</code> in the repository and the row records how many were
 attached and where they landed.</p>
 <p><em>Add voice msg</em> records through the microphone — press once to start, once again to stop, two
@@ -331,7 +334,7 @@ expect to repeat it.</p>
 out as <code>RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450</code> with the wording beneath; Ballast shows the
 drop or the inventory; Resources the crew and power state; Other the note. Where nothing of
 that kind has been reported yet, the panel simply reads <code>-</code>.</p>
-<p>The reporter is named because the entry may well have come from the other pilot's device: the
+<p>The reporter is named because the entry may well have come from the other pilot&#39;s device: the
 panel is read from the table, not from what this device happens to remember. A follow-up call
 never has to be reconstructed from memory, and never depends on who made the last one.</p>
 <h2>8. WhatsApp</h2>
@@ -391,12 +394,11 @@ rest appears behind it, since WhatsApp takes one chat at a time.</p>
 braces are substituted, and lines behave in three ways:</p>
 <ul>
 <li><code>{key}</code> — a line whose placeholders are all empty is dropped, so a field nobody reported
-  costs nothing.</li>
+costs nothing.</li>
 <li><code>{!key}</code> — the line is kept whatever happens, and an empty value prints as <code>-</code>. The Msg line
-  uses this, so every message shows what was said even when nothing was.</li>
-<li>A line made of nothing but values and separators, like <code>{time} · {pos} · {alt} · {tc} ·
-  {speed}</code>, keeps its own separator and simply loses the parts that are missing. Without a fix
-  it collapses to the time alone, with no stray dots left behind.</li>
+uses this, so every message shows what was said even when nothing was.</li>
+<li>A line made of nothing but values and separators, like <code>{time} · {pos} · {alt} · {tc} · {speed}</code>, keeps its own separator and simply loses the parts that are missing. Without a fix
+it collapses to the time alone, with no stray dots left behind.</li>
 </ul>
 <p><em>Reset to default</em> puts the three templates back.</p>
 <table>
@@ -406,8 +408,7 @@ braces are substituted, and lines behave in three ways:</p>
 <th>Value</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>{type}</code> <code>{callsign}</code> <code>{flight}</code> <code>{reporter}</code></td>
 <td>who and what</td>
 </tr>
@@ -447,8 +448,7 @@ braces are substituted, and lines behave in three ways:</p>
 <td><code>{maps}</code></td>
 <td>link to the position on Google Maps</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>Without a position fix <code>{pos}</code>, <code>{alt}</code> and <code>{maps}</code> are empty: the map line disappears and the
 time line keeps just the time.</p>
 <p>The row records <code>whatsapp</code> = <code>yes</code> and <code>whatsapp_to</code> with the names, so the table shows which
@@ -465,8 +465,7 @@ cannot be recorded here.</p>
 <th>Who has it</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><strong>1234</strong></td>
 <td>opens the settings screen</td>
 <td>everybody in the crew</td>
@@ -476,8 +475,7 @@ cannot be recorded here.</p>
 <td>makes a device the master</td>
 <td>one person, normally the PIC</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>The first time the app starts on a fresh device it asks the question outright: <em>Is this the
 master device?</em> Entering <strong>5678</strong> makes it the master. Choosing <em>Join as follower</em> — or getting
 the password wrong three times — makes it a follower. A device that was set up through an
@@ -486,12 +484,12 @@ invitation link is a follower without being asked, because the link came from a 
 question comes back on the next start until it is answered.</p>
 <p>Later changes go the same way: in the settings the role can be switched to Follower freely, but
 switching to Master asks for <strong>5678</strong> again. And because two masters would overwrite each
-other's setup, each published setup carries the identity of the device that wrote it; a master
+other&#39;s setup, each published setup carries the identity of the device that wrote it; a master
 that sees a different one in the file says so on screen.</p>
-<p>One device owns the flight setup and is the <strong>Master</strong> — normally the PIC's iPad. The others
+<p>One device owns the flight setup and is the <strong>Master</strong> — normally the PIC&#39;s iPad. The others
 are <strong>Followers</strong>.</p>
 <p>Menu → <em>Share setup with another device</em> produces a link carrying the flight, the pilots, the
-ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
+ballast figures, the Reporting Webhook, the WhatsApp recipients and the message templates. Opening it on the other
 device shows what is about to be applied and asks for a yes; on yes that device takes the whole
 setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
 link — with it the other device can send at once, without it the token has to be typed there.
@@ -501,7 +499,7 @@ the colour scheme and the confirmation tone. Those belong to the device.</p>
 <p>Every time the master saves settings it publishes them to <code>data/_setup.json</code>, and followers
 apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
-one device may be the master; two would overwrite each other's publication.</p>
+one device may be the master; two would overwrite each other&#39;s publication.</p>
 <h2>8b. What carries over</h2>
 <p>Every form arrives holding what was reported last time, greyed and dashed: the station,
 frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
@@ -514,16 +512,29 @@ mid-flight and the second device opens with exactly what the first one last repo
 five seconds it takes the table to arrive. Only free text is never carried over — remarks, notes
 and the ATC message are typed each time.</p>
 <p>Touching any greyed field in a form accepts all of them at once, and nothing is asked again at
-posting. Notes and messages are never carried over: repeating yesterday's wording verbatim is
+posting. Notes and messages are never carried over: repeating yesterday&#39;s wording verbatim is
 worse than typing it again.</p>
 <p>The footer names the last entry, its reporter and its kind, plus the state of the upload —
 <code>last msg 21:04:37Z/AW/Ballast | upload ✓</code> when everything has reached GitHub, <code>✗ 3</code> when three
 are still queued.</p>
 <h2>9. Sending, and what happens without a link</h2>
 <p>There is nothing to switch on. Pressing <strong>Post to CC Notion</strong> writes the entry to the device and
-sends it straight away. If there is no connection the entry is held in a queue — the header
-shows how many are waiting — and the queue goes out on its own as soon as the link returns,
-either on the browser's online event or on the next five-second cycle, whichever comes first.</p>
+sends it straight away to GitHub and, independently, to the Reporting Webhook. The webhook
+receives one top-level JSON object per press, using the same entry schema as a row in the GitHub
+JSON file. The <code>type</code> field identifies the path: <code>ATC</code>, <code>Ballast</code>, <code>Resources</code> or <code>Other</code>.
+Automatic <code>POS</code> heartbeat rows are not sent to the webhook because they are not created by a
+press on this button.</p>
+<p>If there is no connection the GitHub copy is held in the main queue — the header shows how many
+are waiting — and that queue goes out on its own as soon as the link returns, either on the
+browser&#39;s online event or on the next five-second cycle, whichever comes first.</p>
+<p>Webhook delivery has its own local retry queue. Each queued item keeps the URL that was active
+when it was posted and retries with exponential pauses from five seconds up to five minutes.
+If GitHub succeeds while the webhook is still waiting, the post button turns yellow and says so.
+The request body is JSON but deliberately carries no custom <code>Content-Type</code> header: Zapier
+advises browser clients to omit it so the Catch Hook does not reject the CORS preflight.</p>
+<p>Use <code>id</code> as the unique key in the Zapier/Notion action and upsert instead of append. A retry can
+otherwise create a duplicate in the rare case where Zapier accepted a request but the device
+lost the response before it could remove the local queue item.</p>
 <p>Order is never in doubt: the file is always written as the complete set of rows sorted by
 <code>ts_utc</code>, so a queued entry lands in its correct place in the sequence rather than at the end.
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.</p>
@@ -548,7 +559,7 @@ footer and the margins, and fills each page with as many rows as actually fit. W
 gives no measurements it falls back to a fixed count rather than putting one entry per page.</p>
 <p><em>Send now</em> in the menu forces an attempt, and <em>Reload from GitHub</em> pulls the table without
 writing. Neither is needed in normal use. <em>Export the table</em> asks for the format first — CSV or
-JSON — and then for the destination: <em>Download</em> puts the file in the browser's downloads,
+JSON — and then for the destination: <em>Download</em> puts the file in the browser&#39;s downloads,
 <em>Share…</em> hands it to the system share sheet, which on an iPad is the way into Files, Mail or a
 chat. Share only appears where the browser supports handing over files.</p>
 <h2>10. Several devices at once</h2>
@@ -567,12 +578,12 @@ changed, GitHub answers 304 with no body, and a 304 does not count against the h
 background.</p>
 <p><strong>Tally rows.</strong> Anything appended to the same JSON file appears in the app and in the ballast
 calculation, provided it carries at least <code>id</code>, <code>ts_utc</code> and <code>type</code>. Give Tally-sourced rows
-<code>reporter: "Tally"</code> and <code>source: "tally"</code> so it is visible where they came from. A ballast row
+<code>reporter: &quot;Tally&quot;</code> and <code>source: &quot;tally&quot;</code> so it is visible where they came from. A ballast row
 may be relative (<code>ballast_delta_kg</code>, negative for a drop) or an inventory
-(<code>ballast_action: "count"</code> with <code>total_ballast_kg</code>, which resets the running total).</p>
+(<code>ballast_action: &quot;count&quot;</code> with <code>total_ballast_kg</code>, which resets the running total).</p>
 <p><strong>Deletions</strong> are shared through <code>data/&lt;flight-id&gt;.deleted.json</code>, holding the ids that were
 removed with the time and the person who removed them. Every device applies that list, so a
-deleted row does not reappear from another iPad's copy, and the main table stays clean.</p>
+deleted row does not reappear from another iPad&#39;s copy, and the main table stays clean.</p>
 <h2>11. The log</h2>
 <p><em>Log</em> in the menu opens it: the whole flight, newest first, with time,
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
@@ -604,8 +615,7 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <th>Content</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>flight_id</code>, <code>callsign</code></td>
 <td>from the setup</td>
 </tr>
@@ -741,8 +751,7 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <td><code>id</code></td>
 <td>UUID, the stable key for Notion</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p><code>type</code> uses the canonical values <code>Ballast</code>, <code>ATC</code>, <code>Resources</code>, <code>Other</code>, and <code>POS</code>. Legacy
 <code>Ressources</code> rows are normalized to <code>Resources</code> when the app loads them, so existing flight
 data remains usable and is rewritten with the corrected value on the next synchronization.</p>
@@ -762,30 +771,34 @@ produces duplicates.</p>
 <h2>14. Limits worth knowing before takeoff</h2>
 <ul>
 <li><strong>GPS in the background:</strong> once the app is not in the foreground and the display locks,
-  iPadOS suspends location updates. The app holds a wake lock while it is active. This records
-  events, not a track — use a dedicated logger for a gapless trace.</li>
+iPadOS suspends location updates. The app holds a wake lock while it is active. This records
+events, not a track — use a dedicated logger for a gapless trace.</li>
 <li><strong>Altitude:</strong> <code>alt_gps_m</code> is GPS altitude above the WGS84 ellipsoid, not the altimeter
-  reading. The altimeter governs what is reported to ATC.</li>
+reading. The altimeter governs what is reported to ATC.</li>
 <li><strong>Rate limit:</strong> with two iPads and a Notion poll on the same token, the hourly budget is
-  comfortable as long as the conditional requests keep returning 304. Frequent writes are what
-  cost — each post is roughly four requests.</li>
+comfortable as long as the conditional requests keep returning 304. Frequent writes are what
+cost — each post is roughly four requests.</li>
 <li><strong>The passwords are 1234 and 5678 and both live in the source.</strong> They guard against a mistaken
-  tap in the basket and against a second device declaring itself master, not against anyone who
-  reads the file. Change <code>PASS</code> and <code>MASTER_PASS</code> in <code>index.html</code> for different ones — and if
-  you do, tell the crew, because a device that cannot answer the master question ends up a
-  follower.</li>
+tap in the basket and against a second device declaring itself master, not against anyone who
+reads the file. Change <code>PASS</code> and <code>MASTER_PASS</code> in <code>index.html</code> for different ones — and if
+you do, tell the crew, because a device that cannot answer the master question ends up a
+follower.</li>
 <li><strong>Token on the device:</strong> stored unencrypted in the browser. If the iPad is lost, revoking the
-  token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
-  server side and point the API host in the code at the Worker.</li>
+token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
+server side and point the API host in the code at the Worker.</li>
+<li><strong>Webhook URL on the device:</strong> the Zapier Catch Hook URL is stored unencrypted, is published
+by the Master in <code>data/_setup.json</code>, and can be carried in the setup invitation link. Treat
+both the URL and an invitation containing it like a secret; anyone who has it can submit to
+that Zap.</li>
 <li><strong>The pill floats inside the app only</strong> on phones and tablets — see section 4. Slide Over on
-  iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
-  picture-in-picture on a laptop is the only true always-on-top.</li>
+iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
+picture-in-picture on a laptop is the only true always-on-top.</li>
 </ul>
 <h2>13c. Place names</h2>
-<p>Off by default, and a setting of its own under <em>Resources</em>. Switched on, each entry's position
+<p>Off by default, and a setting of its own under <em>Resources</em>. Switched on, each entry&#39;s position
 is turned once into something a reader can place — <code>near Szeged/HU</code> — which then appears under
 the position in the WhatsApp message, in the log, in the printout and in a <code>place</code> column.</p>
-<p><strong>Two things to weigh before switching it on.</strong> The lookup goes to OpenStreetMap's public
+<p><strong>Two things to weigh before switching it on.</strong> The lookup goes to OpenStreetMap&#39;s public
 service, so the coordinates of the entry leave the device; and it only works with a link. There
 is no offline place database that would fit in a web app. Failures are silent by design: the
 entry is written immediately and the place is filled in afterwards if an answer arrives, so a
@@ -793,16 +806,11 @@ lost lookup costs nothing but an empty field.</p>
 <p>Answers are cached on a coarse grid — about a kilometre — so a long flight costs a few dozen
 requests rather than one per entry, which keeps well inside what the service asks of its users.</p>
 <h2>14a. Language</h2>
-<p>Night colour, confirmation tone and language sit above the password, because they are personal
-preferences rather than flight settings and every crew member may want their own. A device
-whose holder does not know the settings password is a <strong>follower</strong> on a <strong>personal device</strong> —
-that is what the app assumes when the master question is declined, and neither can be changed
-without the password.</p>
-<p>The setup switches the interface between English and German, above the password, because it is
-a personal preference rather than a flight setting and every crew member may want a different
-one.</p>
+<p>Device mode, reporter name, night colour, confirmation tone and language sit above the lock,
+because they belong to this device and every crew member may want different choices. Followers
+can change those personal settings, but only the Master can unlock the shared flight setup.</p>
 <p>Every label, button, hint, dialog and message in the app follows the switch. <strong>Only the
-interface changes:</strong> everything written to GitHub and everything sent to WhatsApp
+interface changes:</strong> everything written to GitHub, sent to the Reporting Webhook or sent to WhatsApp
 stays English: the column names, the values in <code>type</code>, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.</p>
@@ -811,7 +819,7 @@ coordinator should not have to guess which language the next message arrives in.
 for the master password
 <code>5678</code>, then for the name of the new flight, then twice for confirmation — naming how many
 entries the old flight holds and how many of them are still queued.</p>
-<p><strong>Nothing is moved and nothing is overwritten.</strong> The old flight's files are named after it, so
+<p><strong>Nothing is moved and nothing is overwritten.</strong> The old flight&#39;s files are named after it, so
 they simply stay where they are; they are recorded in <code>data/_flights.json</code> with the time they
 were closed, the number of rows and who closed them, which gives you an index of the season.
 Before closing, whatever is still queued is sent one last time. If there is no connection and
@@ -819,8 +827,8 @@ rows are still waiting, the app says so and asks again before going on — those
 lost, because clearing the local table is what makes the new flight start empty.</p>
 <p>The new flight ID is published to the followers along with the rest of the setup. A follower
 that sees the flight change files its own table away under <code>bsk.archive.&lt;flight&gt;</code> on the device
-and then clears it, so nobody carries yesterday's entries
-into today's flight under the new name.</p>
+and then clears it, so nobody carries yesterday&#39;s entries
+into today&#39;s flight under the new name.</p>
 <p><strong>The first entry of a flight belongs to the master.</strong> A follower trying to make it is told
 <em>New flight must be initiated by the master device</em>; the master is reminded once that the flight
 has been opened and asked to look over the settings, and the setup screen opens for that. From
@@ -838,24 +846,25 @@ forces the service worker to fetch the new files rather than serve the old ones,
 with an unchanged cache name may not reach a device that already has the app installed.</p>
 <h2>16. License</h2>
 <p>Custom license, © 2026 Wicki Aero GmbH.</p>
-<p><strong><a href="license.html" target="_blank" rel="noopener">Read the full licence</a></strong> — it opens in a window of its own, and the same text
+<p><strong><a href="license.html">Read the full licence</a></strong> — it opens in a window of its own, and the same text
 sits in <code>LICENSE</code> in the repository.</p>
 <p>In short: use it and host it as it is, for yourself, your club or your school, free of charge.
 Do not modify it, translate it, republish a changed version of it, strip the attribution from
-it, or build a competing product on it, without asking first — balthasar@wicki.aero. Any public
+it, or build a competing product on it, without asking first — <a href="mailto:balthasar@wicki.aero">balthasar@wicki.aero</a>. Any public
 copy keeps the copyright notice and a visible link back to
 <a href="https://github.com/bwicki/gb_notion_frontend">the source repository</a>.</p>
 <p>Two things the licence spells out that are easy to get wrong:</p>
-<p><strong>Configuration is not modification.</strong> Entering your flight, crew, ballast, WhatsApp and GitHub
+<p><strong>Configuration is not modification.</strong> Entering your flight, crew, ballast, Reporting Webhook, WhatsApp and GitHub
 settings, switching language or colour scheme, editing the message templates in the setup, and
 dropping your own logo file next to the app are all ordinary use. You are meant to do all of
 that.</p>
 <p><strong>The flight data is yours.</strong> The JSON, CSV and media files the app writes into your repository
 are your records, not part of the licensed software.</p>
 <p><strong>Third-party components: none.</strong> No libraries, no fonts, no frameworks, no trackers, nothing
-from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
-service, and to the wa.me links you tap. That is the whole list, which is also why it works with
-no signal and why there is nothing to keep up to date but the app itself.</p>
+from a CDN. The app talks to the GitHub API with your token, to the configured Zapier Catch Hook,
+to OpenStreetMap when place names are enabled, to the browser&#39;s geolocation service, and to the
+wa.me links you tap. That is the whole list, which is also why the reporting form keeps working
+with no signal and why there is nothing to keep up to date but the app itself.</p>
 <h2>17. Files</h2>
 <pre><code>index.html                  the complete app
 manifest.webmanifest        Home Screen installation

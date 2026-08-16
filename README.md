@@ -6,10 +6,12 @@ without signal, stamps every entry with time and GPS position, carries the balla
 forward across all devices, and lets several people report in parallel.
 
 Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. The app reads the same files back every five seconds, so each device always shows the
+files. A manual entry is also sent as one JSON object to the configured Reporting Webhook.
+The app reads the GitHub files back every five seconds, so each device always shows the
 complete flight.
 
-No build step, no dependencies, no external requests other than to the GitHub API.
+No build step and no dependencies. The app talks to the GitHub API, the configured Zapier
+webhook, OpenStreetMap when place names are enabled, and WhatsApp links when selected.
 
 ---
 
@@ -87,16 +89,22 @@ inventory: it seeds the running figure so that early drops count, and it gives t
 inventory something to compare against in `tally_diff_kg`. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.
 
-The reporter name for this device sits at the top of the setup and needs no password — it
-changes often enough, and getting it wrong only mislabels entries. Everything below it is
-locked: press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
-pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
-amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
+Device mode, language, reporter name, night colour and confirmation tone are personal settings
+and need no password. The shared flight setup below them is editable only on the Master: press
+*Unlock settings* and enter **1234**. Fill in the flight, the two pilots, the weight of one
+ballast bag, the full ready-ballast weight, and the quick drop amounts. The methanol level at
+the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
 Resources entry says otherwise.
 
 The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.
+
+The **Reporting-Webhook** is the HTTPS endpoint that receives each manual entry for forwarding
+to Notion. Its default is
+`https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/`. It is part of the shared flight setup:
+only the Master can edit it, and Followers receive the Master's saved value automatically.
+Leaving the field empty disables webhook delivery.
 
 Opening the **WhatsApp message layout** or the **GitHub connection** asks first — *Do you really
 want to change these settings?* Those two are where a slip costs a flight rather than a
@@ -464,7 +472,7 @@ One device owns the flight setup and is the **Master** — normally the PIC's iP
 are **Followers**.
 
 Menu → *Share setup with another device* produces a link carrying the flight, the pilots, the
-ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
+ballast figures, the Reporting Webhook, the WhatsApp recipients and the message templates. Opening it on the other
 device shows what is about to be applied and asks for a yes; on yes that device takes the whole
 setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
 link — with it the other device can send at once, without it the token has to be typed there.
@@ -503,9 +511,25 @@ are still queued.
 ## 9. Sending, and what happens without a link
 
 There is nothing to switch on. Pressing **Post to CC Notion** writes the entry to the device and
-sends it straight away. If there is no connection the entry is held in a queue — the header
-shows how many are waiting — and the queue goes out on its own as soon as the link returns,
-either on the browser's online event or on the next five-second cycle, whichever comes first.
+sends it straight away to GitHub and, independently, to the Reporting Webhook. The webhook
+receives one top-level JSON object per press, using the same entry schema as a row in the GitHub
+JSON file. The `type` field identifies the path: `ATC`, `Ballast`, `Resources` or `Other`.
+Automatic `POS` heartbeat rows are not sent to the webhook because they are not created by a
+press on this button.
+
+If there is no connection the GitHub copy is held in the main queue — the header shows how many
+are waiting — and that queue goes out on its own as soon as the link returns, either on the
+browser's online event or on the next five-second cycle, whichever comes first.
+
+Webhook delivery has its own local retry queue. Each queued item keeps the URL that was active
+when it was posted and retries with exponential pauses from five seconds up to five minutes.
+If GitHub succeeds while the webhook is still waiting, the post button turns yellow and says so.
+The request body is JSON but deliberately carries no custom `Content-Type` header: Zapier
+advises browser clients to omit it so the Catch Hook does not reject the CORS preflight.
+
+Use `id` as the unique key in the Zapier/Notion action and upsert instead of append. A retry can
+otherwise create a duplicate in the rare case where Zapier accepted a request but the device
+lost the response before it could remove the local queue item.
 
 Order is never in doubt: the file is always written as the complete set of rows sorted by
 `ts_utc`, so a queued entry lands in its correct place in the sequence rather than at the end.
@@ -683,6 +707,10 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 - **Token on the device:** stored unencrypted in the browser. If the iPad is lost, revoking the
   token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
   server side and point the API host in the code at the Worker.
+- **Webhook URL on the device:** the Zapier Catch Hook URL is stored unencrypted, is published
+  by the Master in `data/_setup.json`, and can be carried in the setup invitation link. Treat
+  both the URL and an invitation containing it like a secret; anyone who has it can submit to
+  that Zap.
 - **The pill floats inside the app only** on phones and tablets — see section 4. Slide Over on
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
@@ -704,18 +732,12 @@ requests rather than one per entry, which keeps well inside what the service ask
 
 ## 14a. Language
 
-Night colour, confirmation tone and language sit above the password, because they are personal
-preferences rather than flight settings and every crew member may want their own. A device
-whose holder does not know the settings password is a **follower** on a **personal device** —
-that is what the app assumes when the master question is declined, and neither can be changed
-without the password.
-
-The setup switches the interface between English and German, above the password, because it is
-a personal preference rather than a flight setting and every crew member may want a different
-one.
+Device mode, reporter name, night colour, confirmation tone and language sit above the lock,
+because they belong to this device and every crew member may want different choices. Followers
+can change those personal settings, but only the Master can unlock the shared flight setup.
 
 Every label, button, hint, dialog and message in the app follows the switch. **Only the
-interface changes:** everything written to GitHub and everything sent to WhatsApp
+interface changes:** everything written to GitHub, sent to the Reporting Webhook or sent to WhatsApp
 stays English: the column names, the values in `type`, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.
@@ -773,7 +795,7 @@ copy keeps the copyright notice and a visible link back to
 
 Two things the licence spells out that are easy to get wrong:
 
-**Configuration is not modification.** Entering your flight, crew, ballast, WhatsApp and GitHub
+**Configuration is not modification.** Entering your flight, crew, ballast, Reporting Webhook, WhatsApp and GitHub
 settings, switching language or colour scheme, editing the message templates in the setup, and
 dropping your own logo file next to the app are all ordinary use. You are meant to do all of
 that.
@@ -782,9 +804,10 @@ that.
 are your records, not part of the licensed software.
 
 **Third-party components: none.** No libraries, no fonts, no frameworks, no trackers, nothing
-from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
-service, and to the wa.me links you tap. That is the whole list, which is also why it works with
-no signal and why there is nothing to keep up to date but the app itself.
+from a CDN. The app talks to the GitHub API with your token, to the configured Zapier Catch Hook,
+to OpenStreetMap when place names are enabled, to the browser's geolocation service, and to the
+wa.me links you tap. That is the whole list, which is also why the reporting form keeps working
+with no signal and why there is nothing to keep up to date but the app itself.
 
 ## 17. Files
 
