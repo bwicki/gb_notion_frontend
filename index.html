@@ -144,7 +144,7 @@ input.bad{border-color:#B5442F}
 .f{margin-bottom:10px}
 .lab{font-size:11.5px;color:var(--muted);margin:0 0 6px}
 .hint{font-size:11px;color:var(--muted);margin:-4px 0 10px}
-input[type=text],input[type=number],input[type=password],input[type=tel],textarea{
+input[type=text],input[type=number],input[type=password],input[type=tel],input[type=url],textarea{
   width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;
   color:var(--ink);font:inherit;padding:10px 12px;appearance:none;min-height:44px}
 textarea{min-height:74px;resize:none;line-height:1.35}
@@ -697,7 +697,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260816-02';
+const APP_VERSION='v260816-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6', K_HOOK='bsk.webhook.v1';
 const PASS='1234';        /* opens the flight setup on the master device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
