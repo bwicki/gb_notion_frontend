@@ -318,6 +318,14 @@ h3:first-child{margin-top:14px}
 html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 #modal.on{display:flex}
 .sheet{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;max-width:400px;max-height:86dvh;overflow-y:auto}
+/* the title row of a window: heading on the left, one optional square button on the right */
+.sheetHead{display:flex;align-items:flex-start;gap:10px;margin-bottom:2px}
+.sheetHead h4{flex:1;min-width:0;margin:0}
+.headbtn{flex:0 0 auto;width:40px;height:40px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:9px;background:var(--field);color:var(--ink)}
+.headbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.headbtn:active{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .sheet h4{margin:0 0 8px;font-size:17px;font-weight:500}
 .sheet p{margin:0 0 12px;font-size:13.5px;color:var(--muted);line-height:1.45}
 .sheetBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
@@ -695,7 +703,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-04';
+const APP_VERSION='v260817-05';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */

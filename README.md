@@ -1,4 +1,4 @@
-# GB Notion Frontend — Basket Reporting
+ GB Notion Frontend — Basket Reporting
 
 An offline version of the Basket Reporting form for use in the basket during a gas balloon
 flight. Same four message types as the Tally form, same submit action, but it keeps working
@@ -6,12 +6,10 @@ without signal, stamps every entry with time and GPS position, carries the balla
 forward across all devices, and lets several people report in parallel.
 
 Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. A manual entry is also sent as one JSON object to the configured Reporting Webhook.
-The app reads the GitHub files back every five seconds, so each device always shows the
+files. The app reads the same files back every five seconds, so each device always shows the
 complete flight.
 
-No build step and no dependencies. The app talks to the GitHub API, the configured Zapier
-webhook, OpenStreetMap when place names are enabled, and WhatsApp links when selected.
+No build step, no dependencies, no external requests other than to the GitHub API.
 
 ---
 
@@ -20,24 +18,45 @@ webhook, OpenStreetMap when place names are enabled, and WhatsApp links when sel
 The whole app fits one phone screen without scrolling, and its outline is always visible.
 Only the log and the setup scroll.
 
+The day/night switch is a square button at the top right of the menu, level with the word
+*Menu*, and nowhere else: choosing the colour is a thing one does between flights, and a button
+that turns the whole display red has no business under a thumb reaching for the post button, and shows the mode it leads to: a
+moon by day, a sun at night. **Every start is a day start** — night is chosen for a night, and a
+fresh launch is far more often a new day than the continuation of one.
+
 Day mode is dark anthracite on a grey ground; unselected buttons carry a visible outline and a
 white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
 the header switches in one tap and the choice is remembered; on first launch the app follows
 the iPad's own appearance setting.
 
-The header shows UTC to the second and, at its right, the ballast still on board in the same
-size, then the flight and callsign with the live navigation line beneath them — `293° · 12.3 kn · ± 8 m`, course over ground, ground speed
-and the accuracy of the current fix. Before a fix it reads `GPS searching`; with a fix but no
+The header shows UTC to the second with the ballast still on board directly beneath it, right
+aligned with the seconds and in the same size, then the flight and callsign with the live navigation line beneath them — `293° · 12.3 kn · 3937 ft · +1.4 m/s` — course over ground, ground speed, altitude and rate of
+climb, in the order a pilot reads them. The accuracy of the fix has moved to the footer, where
+it sits beside a red, amber or green dot: green under 15 metres, amber under 50, red beyond
+that or with no fix at all. The rate of climb is figured from the altitude
+of two fixes at least five seconds apart and smoothed, because the raw difference between two
+consumer fixes jumps far too much to read. Before a fix it reads `GPS searching`; with a fix but no
 movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.
 
-Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
-switch, Reload from GitHub, Send now, Print the log, Export the table, and *About — more info*,
-which opens this manual as a page in its own window; the licence is linked from its last
-section. *Report* is the filled button at the top, because reporting is what the app is for and
-the menu should not make you hunt for the way back. The switch is named for the mode it takes you to, so
+Everything that is not reporting lives behind the menu, and the menu is a list of **places**
+rather than a list of actions: *Return to Reporting Screen …* with a back arrow at the top,
+*Open log*, *Settings*, *Log — reload, print, export*, *Share setup with another device* on the
+master, and *About — more info*, which opens this manual in a window of its own with the licence
+linked from its last section.
+
+The three things that turn the log into a document — reloading it from GitHub, printing it,
+exporting it — sit together behind one entry, so the main list stays short. The day/night switch
+has become a square button at the top right of the menu, level with the word *Menu*: it is a
+setting, not a destination, and it no longer takes a line of its own.
+
+**Send now has gone.** Entries go out by themselves the moment they are made and again as soon
+as a lost connection returns; when something really is stuck, *Synchronize data* at the top of
+the setup does the job properly — it clears the cached ETags, pushes, reads the whole table back
+and then says what happened. A second button that only said *try again* was one button too
+many. The switch is named for the mode it takes you to, so
 it reads *Night mode* by day and *Day mode* at night.
 
 Keeping the header to two buttons leaves the whole width for the flight and the navigation
@@ -89,22 +108,16 @@ inventory: it seeds the running figure so that early drops count, and it gives t
 inventory something to compare against in `tally_diff_kg`. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.
 
-Device mode, language, reporter name, night colour and confirmation tone are personal settings
-and need no password. The shared flight setup below them is editable only on the Master: press
-*Unlock settings* and enter **1234**. Fill in the flight, the two pilots, the weight of one
-ballast bag, the full ready-ballast weight, and the quick drop amounts. The methanol level at
-the start of the flight is a setting of its own — a tank is not always
+The reporter name for this device sits at the top of the setup and needs no password — it
+changes often enough, and getting it wrong only mislabels entries. Everything below it is
+locked: press *Unlock settings* and enter **1234**. Fill in the device mode and name, the flight, the two
+pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
+amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
-Resources entry says otherwise.
+Ressources entry says otherwise.
 
 The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.
-
-The **Reporting-Webhook** is the HTTPS endpoint that receives each manual entry for forwarding
-to Notion. Its default is
-`https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/`. It is part of the shared flight setup:
-only the Master can edit it, and Followers receive the Master's saved value automatically.
-Leaving the field empty disables webhook delivery.
 
 Opening the **WhatsApp message layout** or the **GitHub connection** asks first — *Do you really
 want to change these settings?* Those two are where a slip costs a flight rather than a
@@ -155,11 +168,13 @@ every entry is filed under the name entered there, whoever happens to be pilot i
 reporter button is hidden; there is nothing to get wrong.
 
 On a shared device the reporter defaults to whoever is pilot in command, and a button beside
-*Post to CC Notion* — about a third of the width — switches to the other pilot for the
-exceptional case. It reads *reporting as* with the name below, and appends *(PIC)* when the two
+*Report to CC* — about a third of the width — **walks through everyone who might be
+filing**: both pilots, and the name this device carries if it belongs to neither. A crew member
+on board who is not one of the two named pilots therefore needs no setting of their own; enter
+the name once as the reporter of the device and the button offers all three. It reads *reporting as* with the name below, and appends *(PIC)* when the two
 are the same person, so a glance tells you both facts at once. It turns dark
 while the alternate is active, so the exception is visible, and every entry carries that name
-until it is switched back. Changing the PIC on the Resources tab moves the default with it.
+until it is switched back. Changing the PIC on the Ressources tab moves the default with it.
 
 Each row also records `device_mode`, so it is possible to tell afterwards which reporting
 regime a row came from.
@@ -183,6 +198,11 @@ available. The header carries the live values under the flight number.
 The kilogram field starts empty every time the Ballast tab is opened. A running total that
 carried over from ten minutes ago would be added to by mistake far more often than it would
 save a keystroke.
+
+Ballast is shown in **whole kilograms everywhere** — in the header, the log, the messages and
+the printout. Ballast is counted in sacks, and a figure like `392.3 kg` would suggest a
+precision the basket does not have. The Schütte is rounded **down**, so its share is never
+overstated. The stored values keep whatever was entered; only the display is rounded.
 
 **Sand and water are carried forward separately.** An inventory sets both, a drop reduces the
 one it was made of, and every entry therefore knows what is left of each — recorded as
@@ -235,7 +255,7 @@ difference live, before an inventory is posted.
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.
 
-## 7. ATC, Resources, Other
+## 7. ATC, Ressources, Other
 
 **ATC** puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.
@@ -259,7 +279,11 @@ the entry goes out, because they are three keystrokes away from ordinary codes.
 
 The **VFR** button fills the squawk with the conspicuity code from the setup, `7000` by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, FREQ and SQ open holding the last call in grey. Tapping into any of them clears that
+turns the light off. The station is typed as it reads — `Bern Info`, not `BERN INFO`. The keyboard capitalises the
+first letter of each word and the app no longer forces upper case, since a station name is a
+place name.
+
+Station, FREQ and SQ open holding the last call in grey. Tapping into any of them clears that
 field at once — those three are replaced rather than edited, and deleting four digits by hand in
 turbulence is a waste of a hand. Typing turns the text dark.
 
@@ -268,7 +292,9 @@ One tap puts all three values back in dark type and drops the cursor into the me
 any message of its own — the fields having filled is the confirmation. The station comes back
 with a trailing space and is then left alone: tapping into it keeps what was copied, so
 `ZURICH INFO ` can be turned into `ZURICH INFO ARRIVAL` without retyping the first two words.
-FREQ and SQ still clear on a tap, because those two are replaced rather than extended.
+FREQ and SQ still clear on a tap, because those two are replaced rather than extended. Empty,
+the two fields say what belongs in them — `FREQ XXX.XXX MHz` and `SQ XXXX` — which is a line of
+labels saved above them.
 
 Beneath the station field are the station presets — *Info, Radar, Tower, Control, Approach* by
 default, and whatever you put in the setup instead. A tap inserts the word **where the cursor
@@ -285,10 +311,10 @@ until you change them.
 The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.
 
-The remark field on Ballast and Resources is the same size as the ATC message field, since a
+The remark field on Ballast and Ressources is the same size as the ATC message field, since a
 remark is often the more important part of the entry.
 
-**Resources** puts current PIC and who is resting on the first line as panel switches, then
+**Ressources** puts current PIC and who is resting on the first line as panel switches, then
 battery, fuel cell and solar cell on the second, then methanol level, *Crew on O2* and the O2
 level on the third. Only pilots the master actually named appear: leave the second name empty
 and the switches shrink to a single-handed flight.
@@ -296,11 +322,20 @@ and the switches shrink to a single-handed flight.
 Changing the PIC puts the other pilot on rest automatically, because that is what a handover
 normally means. *Nobody* is still one tap away for the stretches when both are awake.
 
+**A handover is asked about before it is filed.** If the PIC named on this report differs from
+the one on the last, posting stops to ask *The pilot in command changes from A to B. Report it?*
+On *Report the change* the entry is marked and reads **Change of PIC** at the head of its line in
+the log and at the head of the WhatsApp message; on *Just the reading* it is filed as an ordinary
+resources report with the new name. A change of command is a fact of the flight, not a side
+effect of a tap, and the log should be able to show when it happened.
+
 *Battery* and *Methanol level* both open the same list of percentages in a window, rather than
 a dropdown, so the two read alike and both are one tap away in gloves.
 
 **O₂ Reserve** is calculated rather than typed: volume × pressure, summed over the cylinders,
-which gives the litres of gas at one bar. The button reads `600 l (21%) ②` — the reserve, its
+which gives the litres of gas at one bar. **Each cylinder keeps its own full pressure**, taken
+from the setup table — a 10 litre bottle filled to 300 bar beside a 2 litre at 200 would
+otherwise be averaged, and the share of a full load would come out wrong. The button reads `1'700 lit (50%) ①`, thousands separated by an apostrophe — the reserve, its
 share of a full load, and the number of the bottle in use in a circle. It never shows more than
 100 per cent, and it never shows pressures: those belong in the input window, which is where you
 report them. Tapping it opens one row per cylinder with its size, a field for the pressure, and
@@ -328,6 +363,11 @@ minutes at most. The recording appears with a player so it can be listened to be
 and is written to `data/media/<entry-id>-voice.webm`, or `.m4a` on iOS, where Safari records
 in that format instead.
 
+**A picture or a voice note travels with the message.** `wa.me` carries text only, so when an
+Other entry has an attachment the app hands message and file together to the system share
+sheet, where WhatsApp is one of the destinations and the chat is picked there. Without an
+attachment the direct `wa.me` route is used as before, which is one tap fewer.
+
 **Attachments are not queued.** Unlike the entries themselves, pictures and voice notes live
 only in memory until they are uploaded; posting without a connection files the note and says so,
 but the attachment is gone on the next reload. Record and photograph when there is a link, or
@@ -336,7 +376,7 @@ expect to repeat it.
 **Each of the four forms opens with the last entry of its own kind**, in a panel headed
 `Last Message | A. Wicki | 21:04:37Z` — what it was, who filed it and when. ATC spells the call
 out as `RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450` with the wording beneath; Ballast shows the
-drop or the inventory; Resources the crew and power state; Other the note. Where nothing of
+drop or the inventory; Ressources the crew and power state; Other the note. Where nothing of
 that kind has been reported yet, the panel simply reads `-`.
 
 The reporter is named because the entry may well have come from the other pilot's device: the
@@ -345,23 +385,31 @@ never has to be reconstructed from memory, and never depends on who made the las
 
 ## 8. WhatsApp
 
-ATC, Resources and Other each list the recipients individually at the foot of the form, under
-*Also send to WhatsApp* — the entry always goes to the table, and WhatsApp is the addition, one
+All four forms list the recipients individually at the foot, under *Also send to WhatsApp* —
+the entry always goes to the table, and WhatsApp is the addition. **Ballast is off by default**
+even where the others are on: a drop happens many times an hour and would be noise in a chat,
+but the option is there as a fallback when the table cannot be reached, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.
 
 On ATC the coordinator sits on a line of its own above the rest of the list, so the one
 recipient that matters is never lost among the others.
 
-Each recipient has a pill of its own with a check circle in front of it, filled when it is on
-and clearly outlined when it is off — an earlier version drew the off state so faintly that a
-list of three looked like a list of one. The label counts them, *Also send to WhatsApp · 3*, so
-an empty list is visible as an empty list rather than as a bug. Pills are matched by number
+**Recipients sit in three columns** in small type, each its own tappable field with a tick in
+front of it — faint when off, solid when on. Six recipients take two rows rather than six, and
+nothing can slip out of view; a long name is cut with an ellipsis rather than pushing the grid
+apart. The group keeps a full-width row of its own at the end. The label counts what will actually be sent: *Also send to WhatsApp ·
+3 recipients*.
+
+In the setup, under the recipient rows, a line counts as you type: *3 with a usable number*, and
+names it when a row is being ignored because the number is too short. A recipient with no usable
+number cannot be messaged and is silently dropped, which is exactly the sort of thing that
+should not be silent. Pills are matched by number
 rather than by position — an earlier
 version matched by index and silently dropped the coordinator, which is the sort of thing that
 is only noticed when a message does not arrive.
 
 The **ATC Coordinator** is listed first and only on ATC, and is the only one ticked there by
-default — an ATC call belongs with the coordinator, not with the whole crew. On Resources and
+default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
 Other the coordinator does not appear and everybody else is ticked by default. Each choice is
 remembered per message type, so the pattern you settle into is the one you keep.
 
@@ -372,7 +420,7 @@ Above them sits a ninth, separate entry: the **ATC Coordinator**. It is offered 
 only, as its own checkbox above the general one, and it is ticked by default there — an ATC
 call normally goes to the coordinator whether or not the rest of the list is in play. The two
 checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
-to both, or to nobody. Resources and Other never see the coordinator.
+to both, or to nobody. Ressources and Other never see the coordinator.
 
 With the box ticked, posting first writes the entry as usual, then opens a sheet with the
 finished message and one button per recipient. An ATC entry reads:
@@ -397,12 +445,12 @@ check with the count for waiting, red cross when an attempt was refused.
 **The post button carries the whole exchange.** The moment it is pressed it greys out, locks
 and reads *… wait for confirmation*, so a second tap cannot post the same entry twice. The entry
 appears in *Last Message* as soon as it is written. Then the button becomes the answer for three
-seconds — pale green *Posted to CC Notion* when the row reached GitHub, pale yellow *Queued for
+seconds — pale green *Reported to CC* when the row reached GitHub, pale yellow *Queued for
 later delivery (no internet connection currently)* when it is waiting, pale red *Failed* with
 the reason when something else went wrong — an expired token, a repository that is not there. The entry itself
 is never lost either way; the band only says where it stands.
 
-**Sending is immediate.** With a box ticked, pressing *Post to CC Notion* writes the entry and
+**Sending is immediate.** With a box ticked, pressing *Report to CC* writes the entry and
 opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
 tick survives from one message to the next, so a run of ATC calls to the coordinator is one
 button each. Only the send button inside WhatsApp is still yours to press; no browser can press
@@ -422,13 +470,21 @@ braces are substituted, and lines behave in three ways:
   {speed}`, keeps its own separator and simply loses the parts that are missing. Without a fix
   it collapses to the time alone, with no stray dots left behind.
 
-*Reset to default* puts the three templates back.
+*Reset to default* puts the four templates back.
+
+**The built-in templates are the standard, and your edits survive.** A template you have written
+is kept across updates — losing someone's wording to a version bump would be worse than a
+missing placeholder. What the app does do is fill in a kind of message that has no saved
+template at all, which is how the Ballast template appeared when it was added without anybody
+having to reset anything. Placeholders added since your edit — the rate of climb, the place
+name, the direction of an ATC call — have to be put in by hand, or *Reset to default* brings the
+current wording back for all four.
 
 | Placeholder | Value |
 |---|---|
 | `{type}` `{callsign}` `{flight}` `{reporter}` | who and what |
 | `{dir}` `{station}` `{freq}` `{squawk}` `{msg}` | the ATC fields |
-| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Resources fields |
+| `{pic}` `{resting}` `{battery}` `{fuelcell}` `{solar}` | the Ressources fields |
 | `{note}` | the free remark |
 | `{time}` | UTC as `21:04Z` |
 | `{pos}` | degrees, minutes and seconds, `484532N 0072345E` |
@@ -445,6 +501,38 @@ entries were meant to go out. Whether they were actually sent happens inside Wha
 cannot be recorded here.
 
 ## 8a. Master and followers
+
+**The master owns the setup and the log; the followers own their reporting.** That is the whole
+division. Entries can only be changed or deleted on the master — a follower that taps a row is
+told so and asked to post a correction instead, which the master can then tidy. The log is the
+flight record, and one device has to be answerable for it.
+Only the master can unlock the protected part of the setup — a follower that tries is told so
+and pointed at the personal settings above, which are open to everyone. The master may be a
+shared or a personal device; that choice says who reports, not who owns the flight.
+
+A follower posts everything a master posts, with no restriction, and every device sees it within
+five seconds. The one exception is the first entry of a new flight, which belongs to the master
+— that entry is what tells the crew the flight is really running.
+
+**The role can be handed over.** Beside every other device in the list is *Make master*. The
+master offers, and **nothing changes until that device accepts**: the offer travels in the
+published setup, the other device asks its holder *Accept / Not now*, and only on a yes does it
+take the role and publish itself as the owner. The old master sees that in the file and steps
+down to follower on its own.
+
+Two masters at once would overwrite each other's setup, so the change is deliberately one-way
+and confirmed at both ends. A declined offer is remembered and not asked again; the master can
+withdraw it by offering the role to somebody else, or by leaving it and carrying on.
+
+**Devices on this flight** sits below the GitHub connection on the master. It is read from two
+places: the entries themselves — who wrote, from which device, when, how many rows — and a small
+card every device leaves in `data/_seen/`, at most once every half hour. Without that card a
+follower that has been set up but has not yet reported would be invisible, which is exactly the
+moment one wants to see it. The master reads the cards when the menu is opened. A device that has
+not reported for **36 hours** is shown as quiet; the master is never counted out, since it may
+simply be watching. *Remove* puts a device on a list published with the setup; the next time it
+checks in it clears its own token and says so. Its entries stay in the table — removing a device
+is not rewriting the log. *Allow again* undoes it.
 
 **The master is whoever knows the master password.** There is no other rule and no default.
 
@@ -472,7 +560,7 @@ One device owns the flight setup and is the **Master** — normally the PIC's iP
 are **Followers**.
 
 Menu → *Share setup with another device* produces a link carrying the flight, the pilots, the
-ballast figures, the Reporting Webhook, the WhatsApp recipients and the message templates. Opening it on the other
+ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
 device shows what is about to be applied and asks for a yes; on yes that device takes the whole
 setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
 link — with it the other device can send at once, without it the token has to be typed there.
@@ -485,6 +573,22 @@ Every time the master saves settings it publishes them to `data/_setup.json`, an
 apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
 one device may be the master; two would overwrite each other's publication.
+
+## 7b. Automatic position reports
+
+Set an interval under *Ressources* in the setup and the app writes a **POS** row on its own at
+that rhythm — position, place, altitude and rate of climb — so the track of the flight survives
+the hours when nobody has a hand free. `0` turns it off, which is the default. POS rows go into
+the table and the printout like any other kind and can be filtered out of a printout on their
+own.
+
+## 7c. The Ops Normal clock
+
+Send a transmitted call whose message contains *Ops Normal* and the app asks whether to keep the
+time. Pressing *Remind me* turns the button green and holds it for a second reading *Confirmed*,
+the same signal the post button gives, before the window closes: *Remind of the next Ops Normal in how many minutes?*, twenty by default and changeable in
+the window. When it falls due there is a tone and a message. It is the one call that has to
+happen on a clock, and the one most easily forgotten in weather.
 
 ## 8b. What carries over
 
@@ -510,30 +614,18 @@ are still queued.
 
 ## 9. Sending, and what happens without a link
 
-There is nothing to switch on. Pressing **Post to CC Notion** writes the entry to the device and
-sends it straight away to GitHub and, independently, to the Reporting Webhook. The webhook
-receives one top-level JSON object per press, using the same entry schema as a row in the GitHub
-JSON file. The `type` field identifies the path: `ATC`, `Ballast`, `Resources` or `Other`.
-Automatic `POS` heartbeat rows are not sent to the webhook because they are not created by a
-press on this button.
-
-If there is no connection the GitHub copy is held in the main queue — the header shows how many
-are waiting — and that queue goes out on its own as soon as the link returns, either on the
-browser's online event or on the next five-second cycle, whichever comes first.
-
-Webhook delivery has its own local retry queue. Each queued item keeps the URL that was active
-when it was posted and retries with exponential pauses from five seconds up to five minutes.
-If GitHub succeeds while the webhook is still waiting, the post button turns yellow and says so.
-The request body is JSON but deliberately carries no custom `Content-Type` header: Zapier
-advises browser clients to omit it so the Catch Hook does not reject the CORS preflight.
-
-Use `id` as the unique key in the Zapier/Notion action and upsert instead of append. A retry can
-otherwise create a duplicate in the rare case where Zapier accepted a request but the device
-lost the response before it could remove the local queue item.
+There is nothing to switch on. Pressing **Report to CC** writes the entry to the device and
+sends it straight away. If there is no connection the entry is held in a queue — the header
+shows how many are waiting — and the queue goes out on its own as soon as the link returns,
+either on the browser's online event or on the next five-second cycle, whichever comes first.
 
 Order is never in doubt: the file is always written as the complete set of rows sorted by
 `ts_utc`, so a queued entry lands in its correct place in the sequence rather than at the end.
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.
+
+The first sheet of a printout carries the Gas Balloon Team Switzerland logo at its top right,
+taken from `logo.png` beside the app; without that file it falls back to the app's own mark. The following
+sheets carry the small mark, so the first page is recognisable as the first.
 
 **Print the log** builds an A4 portrait printout in its own window: you pick which of the four
 kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
@@ -550,8 +642,13 @@ three. The heading beside the callsign carries the span: `Wed 20 May 2026` for a
 `Wed 20 May 2026 - Fri 22 May 2026` when it went further. Dates follow the UTC clock, like every
 time in the log, so a launch at 23:40 local does not appear to belong to the wrong day. A day
 heading never stands alone at the foot of a page — it travels with the first entry under it. Every page carries the flight in its heading with the mark on
-the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260813-03` on the left
-and `Page 2 / 3` on the right. After the last entry the table closes with
+the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260813-20` on the left
+and `Page 2 / 3` on the right.
+
+The document is named
+`Log HB-QWV GB-2026-01 printed 260813 0616Z (Ballast, ATC, Ressources, Other, POS)`, which is
+what a print-to-PDF ends up called: callsign, flight, the moment of printing and the kinds it
+contains, without opening it. After the last entry the table closes with
 `[no further log entries]`, so a printout can be seen to be complete.
 
 Pagination is measured: the app takes the real height of a sheet, subtracts the heading, the
@@ -634,7 +731,7 @@ data/<flight-id>.deleted.json  ids that were removed
 | `reporter` | who made the entry |
 | `source` | `app`, or whatever an external writer sets, e.g. `tally` |
 | `ts_utc`, `ts_local` | the same instant in UTC and with local offset |
-| `type` | `Ballast`, `ATC`, `Resources`, `Other` — the values used on the Tally form |
+| `type` | `Ballast`, `ATC`, `Ressources`, `Other` — the values used on the Tally form |
 | `pos_lat`, `pos_lon`, `alt_ft` | position of the reporting device in short notation, `484532N` / `0072345E`, and altitude in feet |
 | `tc_deg`, `speed_kt` | track over ground in degrees and ground speed in knots, one decimal |
 | `lat`, `lon`, `alt_gps_m` | the same fix in decimal degrees and metres, for map links |
@@ -650,8 +747,10 @@ data/<flight-id>.deleted.json  ids that were removed
 | `inv_bags`, `inv_ready_pct` | what the inventory was built from |
 | `atc_dir` | `RX` received, `TX` sent |
 | `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
+| `crew_change` | `yes` when the entry was filed as a handover of command |
 | `crew_pic`, `crew_rest` | crew state at the moment of the entry |
-| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Resources entry |
+| `vs_ms` | rate of climb in metres per second |
+| `res_battery_pct`, `res_fuel_cell`, `res_solar` | battery, fuel cell and solar cell as reported on a Ressources entry |
 | `res_methanol_pct` | methanol level in per cent |
 | `res_o2_crew` | whether the crew is on oxygen |
 | `res_o2` | reserve as `560 l (70%)` |
@@ -663,9 +762,9 @@ data/<flight-id>.deleted.json  ids that were removed
 | `edited_at`, `edited_by` | set when a row was changed after the fact |
 | `id` | UUID, the stable key for Notion |
 
-`type` uses the canonical values `Ballast`, `ATC`, `Resources`, `Other`, and `POS`. Legacy
-`Ressources` rows are normalized to `Resources` when the app loads them, so existing flight
-data remains usable and is rewritten with the corrected value on the next synchronization.
+`type` deliberately uses the spelling from the Tally form, including `Ressources`, so the
+existing Notion select options match without editing. To change it, edit the four `data-t`
+attributes in `index.html` and the matching strings in the post handler.
 
 ## 13. Polling from Notion
 
@@ -699,7 +798,12 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 - **Rate limit:** with two iPads and a Notion poll on the same token, the hourly budget is
   comfortable as long as the conditional requests keep returning 304. Frequent writes are what
   cost — each post is roughly four requests.
-- **The passwords are 1234 and 5678 and both live in the source.** They guard against a mistaken
+- **The GitHub token stays put.** Leaving the token field empty when saving means *leave it as it
+is*, not *clear it* — a fine-grained token cannot be retyped from memory, and losing it by
+accident would ground the device until a new one is made. To replace it, paste the new one over
+the old.
+
+**The passwords are 1234 and 5678 and both live in the source.** They guard against a mistaken
   tap in the basket and against a second device declaring itself master, not against anyone who
   reads the file. Change `PASS` and `MASTER_PASS` in `index.html` for different ones — and if
   you do, tell the crew, because a device that cannot answer the master question ends up a
@@ -707,21 +811,27 @@ Behind a CDN with roughly a five minute cache. Fine after the flight, too slow d
 - **Token on the device:** stored unencrypted in the browser. If the iPad is lost, revoking the
   token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
   server side and point the API host in the code at the Worker.
-- **Webhook URL on the device:** the Zapier Catch Hook URL is stored unencrypted, is published
-  by the Master in `data/_setup.json`, and can be carried in the setup invitation link. Treat
-  both the URL and an invitation containing it like a secret; anyone who has it can submit to
-  that Zap.
 - **The pill floats inside the app only** on phones and tablets — see section 4. Slide Over on
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
 
 ## 13c. Place names
 
-Off by default, and a setting of its own under *Resources*. Switched on, each entry's position
+On by default, and a setting of its own under *Ressources*. Switched on, each entry's position
 is turned once into something a reader can place — `near Szeged/HU` — which then appears under
 the position in the WhatsApp message, in the log, in the printout and in a `place` column.
 
-**Two things to weigh before switching it on.** The lookup goes to OpenStreetMap's public
+It appears as `{place}` — `near Szeged/HU` — and as `{location}` for the bare `Szeged/HU`, in
+the heading of the Last Message panel after the time, in the log, in the printout and in a
+`place` column. A message on its way to WhatsApp waits up to two and a half seconds for the
+lookup rather than going out without it; beyond that it leaves anyway, because a message that
+arrives is worth more than a place name.
+
+Lookups are queued one at a time with a second between them, as the service asks. A failure is
+not remembered — the next entry in the same square kilometre tries again — while an answer is,
+so a long flight costs a few dozen requests rather than one per entry.
+
+**Two things to weigh before switching it off.** The lookup goes to OpenStreetMap's public
 service, so the coordinates of the entry leave the device; and it only works with a link. There
 is no offline place database that would fit in a web app. Failures are silent by design: the
 entry is written immediately and the place is filled in afterwards if an answer arrives, so a
@@ -732,12 +842,18 @@ requests rather than one per entry, which keeps well inside what the service ask
 
 ## 14a. Language
 
-Device mode, reporter name, night colour, confirmation tone and language sit above the lock,
-because they belong to this device and every crew member may want different choices. Followers
-can change those personal settings, but only the Master can unlock the shared flight setup.
+Device mode, night colour, confirmation tone and language sit above the password, because they are personal
+preferences rather than flight settings and every crew member may want their own. A device
+whose holder does not know the settings password is a **follower** on a **personal device** —
+that is what the app assumes when the master question is declined, and neither can be changed
+without the password.
+
+The setup switches the interface between English and German, above the password, because it is
+a personal preference rather than a flight setting and every crew member may want a different
+one.
 
 Every label, button, hint, dialog and message in the app follows the switch. **Only the
-interface changes:** everything written to GitHub, sent to the Reporting Webhook or sent to WhatsApp
+interface changes:** everything written to GitHub and everything sent to WhatsApp
 stays English: the column names, the values in `type`, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.
@@ -766,12 +882,80 @@ into today's flight under the new name.
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.
 
+## 14c. Working without a link, and GitHub's limits
+
+**The app is complete offline.** Its own files are cached, so it opens with no connection at
+all; entries are written to the device first and only then offered to GitHub. Without a link an
+entry is filed, marked with a straw check in the log and in the footer, and the post button says
+*Queued for later delivery*. Reporting continues unaffected — ballast, ATC, crew, notes, the
+automatic position reports, everything. When the connection returns, the queue goes out on its
+own, in order, and the checks turn green without anyone pressing anything.
+
+**GitHub's numbers, and what the app does about them.** A personal token is allowed 5,000
+requests an hour, and a conditional read that answers `304 Not Modified` costs nothing at all —
+so the five-second poll is effectively free. The real constraint is the secondary limit on
+writing: **80 write requests a minute and 500 an hour**, counted across everything the account
+does.
+
+Four things keep the app inside that:
+
+- One push carries every waiting entry, so three drops in a minute cost one write, not three.
+- Writes are spaced at least a second apart, as GitHub asks, and background pushes wait ten
+  seconds between bursts — stretching to eighteen and then thirty as the hour's budget is spent.
+- The CSV is written at most once a minute rather than on every entry, which halves the count.
+  The JSON, which Notion reads, is always current.
+- Writes are counted over a rolling hour and stopped at 440. Entries then stay queued and go out
+  as the hour rolls on. If GitHub asks for a pause anyway, the `retry-after` it sends is obeyed.
+
+The setup shows where you stand: *GitHub budget: 12 of 440 writes used this hour, 4,900 requests
+left on the token.*
+
+**Upgrading the GitHub account does not help.** Free and Pro have exactly the same 5,000
+requests an hour for a personal token; the higher 15,000 applies only to a GitHub App owned by
+an Enterprise Cloud organisation, which is a different kind of integration altogether. There is
+nothing to buy here, and with the measures above nothing to buy it for: a flight making an entry
+a minute for twenty hours uses well under half the hourly write budget.
+
+## 14d. Keeping the crew on the current build
+
+The service worker takes a new version over the moment it is installed, and the app now looks
+for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
+When one has arrived it says so: *A newer version is ready — close the app and open it again.*
+
+That message is the answer to a confusion worth knowing about. **What you see on screen may not
+be what is in the repository.** An installed web app keeps running the version it started with
+until it is closed and opened again — reloading a page inside it is not enough. If a change you
+asked for seems not to have happened, check the version in the bottom right corner first, and
+close the app from the app switcher before opening it again.
+
+## 14e. When a change does not appear
+
+The service worker caches each file on its own and carries on past one that is missing. That
+sounds like housekeeping and is not: `cache.addAll()` rejects as a whole if a single request
+fails, and a worker whose installation fails is never activated — the app then keeps serving the
+**previous version indefinitely**, and every change made since is invisible. One icon missing
+from the server is enough. The install now notes what it could not fetch in the console and
+takes over anyway.
+
+So when something you asked for is not there, the order to check is:
+
+1. The version in the bottom right corner. If it is not the one you deployed, nothing else
+   matters yet.
+2. The browser console for `404` on any file of the app. A missing file means the upload was
+   incomplete — the `icons` folder is the usual one, because a drag-and-drop upload does not
+   always carry a folder with it.
+3. Close the installed app from the app switcher and open it again. A reload inside it is not
+   enough.
+
+`GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
+card in the repository yet. It disappears with the first one.
+
 ## 15. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260813-09` is the ninth build of 13 August 2026.
+smaller counter. `v260817-05` is the fifth build of 17 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
@@ -795,7 +979,7 @@ copy keeps the copyright notice and a visible link back to
 
 Two things the licence spells out that are easy to get wrong:
 
-**Configuration is not modification.** Entering your flight, crew, ballast, Reporting Webhook, WhatsApp and GitHub
+**Configuration is not modification.** Entering your flight, crew, ballast, WhatsApp and GitHub
 settings, switching language or colour scheme, editing the message templates in the setup, and
 dropping your own logo file next to the app are all ordinary use. You are meant to do all of
 that.
@@ -804,10 +988,9 @@ that.
 are your records, not part of the licensed software.
 
 **Third-party components: none.** No libraries, no fonts, no frameworks, no trackers, nothing
-from a CDN. The app talks to the GitHub API with your token, to the configured Zapier Catch Hook,
-to OpenStreetMap when place names are enabled, to the browser's geolocation service, and to the
-wa.me links you tap. That is the whole list, which is also why the reporting form keeps working
-with no signal and why there is nothing to keep up to date but the app itself.
+from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
+service, and to the wa.me links you tap. That is the whole list, which is also why it works with
+no signal and why there is nothing to keep up to date but the app itself.
 
 ## 17. Files
 
