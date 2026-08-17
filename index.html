@@ -93,8 +93,9 @@ input.bad{border-color:#B5442F}
 .lastmsg{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:0 0 10px;
   background:var(--field)}
 .lastmsg.hide{display:none}
-.lm-top{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm-top{font-size:10px;font-weight:600;letter-spacing:.01em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-stretch:condensed}
 .lm-body{font-size:12.5px;line-height:1.35;font-variant-numeric:tabular-nums}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .thumbs figure{position:relative;margin:0}
@@ -108,15 +109,15 @@ input.bad{border-color:#B5442F}
 #btnVoice.rec{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:11px;
   background:var(--sel);color:var(--sel-ink);font-size:13px;line-height:1}
-.links.wa{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.links.wa button{padding:0 7px;min-height:36px;font-size:11px;line-height:1.15;
+.links.wa{display:grid;grid-template-columns:1fr;gap:6px}
+.links.wa button{padding:0 11px;min-height:42px;font-size:12.5px;line-height:1.15;
   border:1.5px solid var(--line);border-radius:8px;color:var(--ink);background:var(--field);
   display:flex;align-items:center;gap:4px;text-align:left;width:100%;min-width:0;
   overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .links.wa button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .links.wa button::before{content:"\2713";font-size:11px;opacity:.22;flex:0 0 auto}
 .links.wa button.on::before{opacity:1}
-.links.wa button.wide{grid-column:1 / -1}
+.links.wa.wa2{grid-template-columns:0.85fr 1.15fr}
 .links.wa button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .ball{display:flex;gap:34px;margin:10px 0 14px}
 .stat b{display:block;font-size:23px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
@@ -144,7 +145,7 @@ input.bad{border-color:#B5442F}
 .f{margin-bottom:10px}
 .lab{font-size:11.5px;color:var(--muted);margin:0 0 6px}
 .hint{font-size:11px;color:var(--muted);margin:-4px 0 10px}
-input[type=text],input[type=number],input[type=password],input[type=tel],input[type=url],textarea{
+input[type=text],input[type=number],input[type=password],input[type=tel],textarea{
   width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;
   color:var(--ink);font:inherit;padding:10px 12px;appearance:none;min-height:44px}
 textarea{min-height:74px;resize:none;line-height:1.35}
@@ -157,7 +158,7 @@ input.pre{color:var(--carry);border-style:dashed}
 .four .lab{font-size:10px}
 .four select,.four .lvl{font-size:12px;padding:0 4px}
 .four .pnl button{font-size:11.5px}
-.atcrow{display:grid;grid-template-columns:1fr .82fr 96px;gap:8px;align-items:end}
+.atcrow{display:grid;grid-template-columns:1fr .82fr 96px;gap:8px;align-items:center}
 .vfr{min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--field);
   font-size:13px;letter-spacing:.04em}
 .vfr.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
@@ -206,12 +207,19 @@ select:focus{outline:0;border-color:var(--sel)}
 .lvlgrid button{min-height:46px;border:1px solid var(--line);border-radius:9px;
   background:var(--field);font-size:14px}
 .lvlgrid button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.settbl{max-height:58vh;overflow:auto;margin-top:2px}
+.settbl table{width:100%;border-collapse:collapse;font-size:12px}
+.settbl td{padding:4px 6px;border-bottom:.5px solid var(--line-soft);vertical-align:top}
+.settbl td:first-child{color:var(--muted);width:44%}
+.settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
 .devrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
   padding:8px 0;border-bottom:.5px solid var(--line-soft)}
 .devrow b{display:block;font-size:13px;font-weight:400}
 .devrow i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px}
 .devrow.stale b,.devrow.stale i{opacity:.5}
-.devrow button{padding:6px 12px;border:1px solid var(--line);border-radius:8px;font-size:12px;color:#B5442F}
+.devbtns{display:flex;gap:6px}
+.devrow button{padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:11.5px;color:#B5442F}
+.devrow button[data-act="hand"]{color:var(--ink)}
 .devrow .self{font-size:10.5px;color:var(--muted);padding-right:4px}
 .o2head{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;font-size:10px;color:var(--muted);margin-bottom:3px}
 .o2set{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px}
@@ -219,6 +227,7 @@ select:focus{outline:0;border-color:var(--sel)}
 .o2row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:8px}
 .o2row label{display:flex;align-items:center;gap:9px;min-width:0}
 .o2row input[type=radio]{width:20px;height:20px;flex:0 0 auto;accent-color:var(--sel);margin:0}
+.o2row input.ro{opacity:.5;background:var(--soft)}
 .o2row span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qrow{display:flex;align-items:flex-end;gap:8px}
 .qrow .pills{flex:1;min-width:0}
@@ -366,7 +375,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
     <div class="types" id="types">
       <button data-ty="Ballast" class="on">Ballast</button>
       <button data-ty="ATC">ATC</button>
-      <button data-ty="Resources">Resour.</button>
+      <button data-ty="Ressources">Ressou.</button>
       <button data-ty="Other">Other</button>
     </div>
 
@@ -394,8 +403,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button id="bReset" class="hide" data-t="reset">Reset</button>
           </div>
           <div class="f"><textarea id="bNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
-          <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
-            <div class="links wa" id="waBal"></div></div>
+          <div class="f"><div class="links wa" id="waBal"></div></div>
         </div>
 
         <div class="sub" id="s-count">
@@ -426,21 +434,17 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <div class="f"><input type="text" id="aStation" data-tp="station" placeholder="Station" autocapitalize="words"></div>
         <div class="f"><div class="links small" id="aStaChips"></div></div>
         <div class="f atcrow">
-          <div><p class="lab">FREQ</p>
-            <div class="sfx"><input type="text" id="aFreq" inputmode="decimal" placeholder="xxx.xxx"><span>MHz</span></div></div>
-          <div><p class="lab">SQ</p>
-            <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="xxxx"></div>
+          <input type="text" id="aFreq" inputmode="decimal" data-tp="pFreq" placeholder="FREQ XXX.XXX MHz">
+          <input type="text" id="aSquawk" inputmode="numeric" maxlength="4" data-tp="pSq" placeholder="SQ XXXX">
           <button class="vfr" id="btnVfr">VFR</button>
         </div>
         <p class="warn hide" id="aFreqWarn"></p>
         <div class="f"><textarea id="aMsg" data-tp="message" placeholder="Message"></textarea></div>
         <div class="f"><div class="links small" id="aChips"></div></div>
-        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
-          <div class="links wa" id="waATCco" style="margin-bottom:7px"></div>
-          <div class="links wa" id="waATC"></div></div>
+        <div class="f"><div class="links wa wa2" id="waATC"></div></div>
       </div>
 
-      <div class="blk" id="b-Resources">
+      <div class="blk" id="b-Ressources">
         <div class="lastmsg" id="cLast">
           <div class="lm-top"></div><div class="lm-body"></div>
         </div>
@@ -465,8 +469,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button class="lvl" id="rO2">—</button></div>
         </div>
         <div class="f"><textarea id="cNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
-        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
-          <div class="links wa" id="waRes"></div></div>
+        <div class="f"><div class="links wa" id="waRes"></div></div>
       </div>
 
       <div class="blk" id="b-Other">
@@ -483,15 +486,14 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div class="thumbs" id="oThumbs"></div>
           <div class="voicebar" id="oVoice"></div>
         </div>
-        <div class="f"><p class="lab" data-t="sendWa">Also send to WhatsApp</p>
-          <div class="links wa" id="waOth"></div></div>
+        <div class="f"><div class="links wa" id="waOth"></div></div>
       </div>
     </div>
 
     <div class="foot">
       <div class="postrow" id="postRow">
         <button class="rep" id="btnRep"><em data-t="reportingAsLbl">reporting as</em><b id="repName">—</b></button>
-        <button class="go" id="btnPost" data-t="post">Post to CC Notion</button>
+        <button class="go" id="btnPost" data-t="post">Report to CC</button>
       </div>
       <div class="ftline"><p class="tiny" id="hSt"></p><span class="gpsq" id="fGps"></span><span class="ver"></span></div>
     </div>
@@ -516,8 +518,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
     <div class="scroll">
       <div id="syncBox" style="display:none">
         <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
-        <p class="hint" data-t="syncHint" style="margin-top:12px">Sends what is waiting and reads the table back.</p>
-        <p class="hint" id="quotaNote"></p>
+        <p class="hint" style="margin-top:12px"><span data-t="syncHint">Sends what is waiting and reads the table back.</span> <span id="quotaNote"></span></p>
       </div>
 
       <h3 data-t="hDevice">This device</h3>
@@ -551,7 +552,10 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
       <div id="setLocked">
         <p class="lock" data-t="lockText">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake.</p>
+        <div class="f two">
         <button class="go" id="btnUnlock" data-t="unlock">Unlock settings</button>
+        <button class="go sec" id="btnShowSet" data-t="showSet">Show settings</button>
+      </div>
       </div>
 
       <div id="setOpen" style="display:none">
@@ -600,7 +604,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <input type="text" id="sMsgRx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
-        <h3 data-t="hResources">Resources</h3>
+        <h3 data-t="hRessources">Ressources</h3>
         <div class="f two">
           <div><p class="lab" data-t="lPosMin">Automatic position report every</p>
             <div class="sfx"><input type="number" id="sPosMin" inputmode="numeric" step="5" placeholder="0"><span>min</span></div></div>
@@ -622,23 +626,14 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
         <p class="hint" data-t="hintAuto">Entries are posted automatically.</p>
 
-        <h3 data-t="hReporting">Reporting</h3>
-        <div class="f"><p class="lab" data-t="lWebhook">Reporting-Webhook</p>
-          <input type="url" id="sWebhook" inputmode="url" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-        <p class="hint" data-t="hintWebhook">Webhook to the Zapier API for forwarding entries to Notion</p>
-
         <details class="fold" id="foldWa">
-          <summary data-t="waRecipients">WhatsApp recipients</summary>
+          <summary data-t="waRecipients">WhatsApp</summary>
           <div class="in">
-            <p class="lab" data-t="hintWaNums">Numbers in international form, digits only, e.g. 41791234567.</p>
+            <p class="lab" data-t="hintWaNums">Number in international form, digits only, e.g. 41791234567.</p>
             <div class="f two"><input type="text" id="sAtcName" data-tp="pAtcName" placeholder="ATC Coordinator">
               <input type="tel" id="sAtcNum" inputmode="numeric" data-tp="pNumber" placeholder="Number"></div>
             <p class="hint" data-t="hintAtcCo">Offered on ATC entries only, and ticked by default there.</p>
-        <div class="f"><p class="lab" data-t="lGroup">WhatsApp group</p>
-          <input type="text" id="sGroupName" maxlength="18" placeholder="Crew"></div>
-        <p class="hint" data-t="hintGroup">A name for the group entry.</p>
-            <p class="lab" id="waCount"></p>
-            <div id="waRows"></div>
+            <p class="hint" data-t="hintChat">Everyone else is reached through the chat picker.</p>
           </div>
         </details>
 
@@ -648,7 +643,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <p class="lab" data-t="hintTpl">One template per message type.</p>
             <div class="f"><p class="lab">Ballast</p><textarea id="tplBal" style="min-height:104px"></textarea></div>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
-            <div class="f"><p class="lab">Resources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
+            <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
             <p class="hint" id="tplKeys"></p>
             <button class="go sm sec" id="btnTplReset" data-t="resetDefault">Reset to default</button>
@@ -697,42 +692,29 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260816-03';
-const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6', K_HOOK='bsk.webhook.v1';
-const PASS='1234';        /* opens the flight setup on the master device */
+const APP_VERSION='v260813-27';
+const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
+const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
            bagKg:15,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           fresh:0,blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',webhook:'https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,tplVer:0,handover:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
-  Resources:'*{type} | {callsign}*\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  Ressources:'*{type} | {callsign}*\n{picchange}\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Ballast:'*{type} | {callsign}*\n{ballast}\nMsg: {note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}'};
-const TPL_KEYS=['type','callsign','ballast','atcmsgtype','dir','station','freq','squawk','msg','pic','resting',
+const TPL_KEYS=['type','callsign','ballast','atcmsgtype','picchange','dir','station','freq','squawk','msg','pic','resting',
   'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','place','location','alt','vs','tc','speed','maps','reporter','flight'];
-function canonicalType(v){return v==='Ressources'?'Resources':v}
-function canonicalEntry(e){if(e&&e.type==='Ressources')e.type='Resources';return e}
-function canonicalTemplates(tpl){
-  if(!tpl||typeof tpl!=='object')return tpl;
-  if(tpl.Resources==null&&tpl.Ressources!=null)tpl.Resources=tpl.Ressources;
-  delete tpl.Ressources;
-  return tpl;
-}
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
-CFG.tpl=canonicalTemplates(CFG.tpl);
-let ENT=load(K_ENT,[]).map(canonicalEntry);
+let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
-let HOOKQ=(()=>{const q=load(K_HOOK,[]);return Array.isArray(q)?q:[]})();
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      waSel:{},alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
+                      waSel:{},repName:'',alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
-UI.type=canonicalType(UI.type);
-if(UI.waSel&&UI.waSel.Resources==null&&UI.waSel.Ressources!=null)UI.waSel.Resources=UI.waSel.Ressources;
-if(UI.waSel)delete UI.waSel.Ressources;
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false,LASTERR='';
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
 
@@ -756,29 +738,34 @@ const L={en:{
  remaining:'remaining', totalBallast:'total ballast', methanolShort:'methanol', droppedSince:'dropped since 1st inventory', droppedStart:'dropped since start',
  drop:'Drop Report', takeInv:'Inventory Report', sand:'Sand', waterW:'Water',
  kgDropped:'Ballast (in kg) dropped since last ballast drop report', bags:'sand bags', water:'water', remark:'Remark (optional)',
- readyBallast:'Ready ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last Message', station:'Station',
+ readyBallast:'Ready ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last msg', station:'Station',
  message:'Message', confirmLast:'Confirm from last call', copyLast:'Copy from last call', sendWa:'Also send to WhatsApp',
  hDevices:'Devices on this flight', hintDevices:'Seen through the entries they wrote. A device that has not reported for 36 hours is shown as quiet; the master is never counted out.',
  devActive:'active', devQuiet:'quiet', devBlocked:'removed', devNever:'nothing written yet',
- devUnknown:'unnamed', devSelf:'this device', devKick:'Remove', devAllow:'Allow again',
+ devUnknown:'unnamed', devSelf:'this device', devKick:'Remove', devAllow:'Allow again', devMakeMaster:'Make master', devOffered:'Offered',
+ handTitle:'Master role', handAsk:'Offer the master role to {d}? Nothing changes until that device accepts.',
+ handOffer:'Offer it', handWait:'{d} has been offered the role. This device stays master until the offer is accepted.',
+ handTake:'The master device offers you the master role. Accepting makes this device the owner of the flight setup, and the other one becomes a follower.',
+ handAccept:'Accept', handDecline:'Not now',
+ handNowMaster:'This device is now the master. The setup screen is yours to change.',
+ handStepDown:'The role has been handed over. This device is now a follower.',
  devKickAsk:'Device {d} loses its access to the repository the next time it checks in. Its entries stay in the table.',
  devBlockedInfo:'The master has removed this device from the flight. Reporting still works; nothing is sent until a new setup arrives.',
- noRecipients:'No recipients set up', recipient:'recipient', recipients:'recipients', waCount:'{n} with a usable number', waBad:'{n} row(s) ignored — number too short', currentPic:'Current PIC', resting:'Resting',
+ noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
  nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
  export:'Export', format:'Format', destination:'Destination', download:'Download', share:'Share…', battery:'Battery', fuelCell:'Fuel cell', solarCell:'Solar Panel',
- on:'On', off:'Off', note:'Note', addPictures:'Add pictures', post:'Post to CC Notion',
- logHead:'Log — tap an entry to edit', unlock:'Unlock settings', saveName:'Save name',
+ on:'On', off:'Off', note:'Note', addPictures:'Add pictures', post:'Report to CC',
+ logHead:'Log — tap an entry to edit', unlock:'Unlock settings', showSet:'Show settings', saveName:'Save name',
  saveSettings:'Save settings', clearDevice:'Clear entries on this device',
  checkConn:'Check connection', hDevice:'This device', hFlight:'Flight', hBallast:'Ballast',
  hApp:'App', hLanguage:'Language', hReporter:'Reporter on this device',
- langHint:'The interface only. Everything written to GitHub, the Reporting Webhook and WhatsApp stays English.',
+ langHint:'The interface only. Everything written to GitHub and to WhatsApp stays English.',
  master:'Master', follower:'Follower', personalDev:'Personal device', sharedDev:'Shared device',
  setupRole:'Setup role', modeHint:'On a shared device the reporting person may be chosen between the two pilots at any time.', nightColour:'Night colour', tone:'Confirmation tone',
- waRecipients:'WhatsApp recipients', waLayout:'WhatsApp message layout', ghConn:'GitHub connection', hReporting:'Reporting',
- lWebhook:'Reporting-Webhook', hintWebhook:'Webhook to the Zapier API for forwarding entries to Notion', webhookBad:'Enter a valid HTTPS webhook URL',
- mReport:'Report', mLog:'Log', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
- mReload:'Reload from GitHub', mSend:'Send now', mShare:'Share setup with another device',
- mExport:'Export the table', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
+ waRecipients:'WhatsApp', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
+ mReport:'Return to Reporting Screen \u2026', mLog:'Open log', mDocs:'Log \u2014 reload, print, export', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
+ mReload:'Reload log', mSend:'Send now', mShare:'Share setup with another device',
+ mExport:'Export the log', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
  page:'Page', logHeadPrint:'Flight log',
  printedBy:'printed {when} by {who}', noFurther:'[no further log entries]', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
@@ -786,7 +773,7 @@ const L={en:{
  sqDigits:'A squawk is four digits, each 0 to 7',
  freqRange:'A frequency runs from 118.000 to 136.975 MHz', freqStep:'Not a channel: names end in 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
- takenOver:'Taken over from the last call', settingsSaved:'Settings saved', webhookQueued:'Posted to GitHub; webhook queued for retry',
+ takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password', checking:'Checking\u2026',
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
@@ -817,7 +804,7 @@ const L={en:{
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
  addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
  noRecorder:'This browser cannot record audio', mediaLater:'Attachments go up with the next connection', sharedWithMedia:'Shared with the attachment — pick the chat in WhatsApp',
- o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', liters:'lit', bars:'bars',
+ o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', inUseHint:'Only the cylinder in use can be reported. Switch first, then enter the pressure.', o2switch:'Do you want to change O\u2082 cylinder?', liters:'lit', bars:'bars',
  levelTitle:'Level', notSet:'not set',
  pName:'Name', pFlight:'Flight ID', pCall:'Callsign', pInit:'Ballast on board at start, kg',
  pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
@@ -828,18 +815,19 @@ const L={en:{
  lVfr:'VFR squawk', lEmerg:'Emergency squawks', lBagKg:'Bag standard weight',
  lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
- hResources:'Resources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
+ hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
  lGeo:'Place name with each position', lMethInit:'Methanol level at start',
  lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
  place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
  lStations:'Station presets', lMsgRx:'Message presets \u2014 Rx', lMsgTx:'Message presets \u2014 Tx', pO2bar:'Full pressure bar', pRepo:'owner/repo', pBranch:'Branch', pFolder:'Folder',
- pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'xxxx',
+ pToken:'Fine-grained token', pAtcName:'ATC Coordinator', pNumber:'Number', pSq:'SQ XXXX', pFreq:'FREQ XXX.XXX MHz',
  hintRole:'The master owns the flight setup and publishes it. Followers pick up every change the master saves.',
  hintInit:'Only needed before the first inventory. Leave it empty and the ballast figure starts with the first Take Inventory.',
  hintAuto:'Entries are posted automatically. Without a connection they are held on the device and go out in order as soon as the link is back.',
  hintWaNums:'Numbers in international form, digits only, e.g. 41791234567.',
  hintAtcCo:'Offered on ATC entries only, and ticked by default there.',
- lGroup:'WhatsApp group', groupPick:'pick the chat',
+ hintChat:'Everyone else is reached through the chat picker: it opens WhatsApp with the message ready and the chat list showing, so any person or group can be chosen there. Nothing else has to be kept up to date here.',
+ pickChat:'WhatsApp \u00b7 pick the chat',
  hintGroup:'A name for the group entry in the recipient list. WhatsApp has no address for a group that an app may call, so this entry opens WhatsApp with the message ready and the chat list open — you pick the group there. Leave the field empty to hide the entry.',
  hintTpl:'One template per message type. A line whose placeholders are all empty is dropped; {!key} keeps its line and prints -.',
  lockText:'The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.',
@@ -853,7 +841,9 @@ const L={en:{
  inSync:'In sync, last at', reportingAs:'Reporting as', reportingAsLbl:'reporting as', notThePic:'not the PIC',
  shareTitle:'Share setup', copyLink:'Copy link', done:'Done',
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
- lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position',
+ lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', picChange:'Change of PIC',
+ picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
+ picChangeYes:'Report the change', picChangeNo:'Just the reading',
  lPosMin:'Automatic position report every', lOpsMin:'Ops Normal reminder after',
  lPosHint:'0 turns the automatic report off. With a number, a POS row is written at that interval with position, altitude and rate of climb — the track of the flight survives even when nobody has a hand free.',
  opsTitle:'Ops Normal', opsText:'Remind of the next Ops Normal in how many minutes?',
@@ -880,26 +870,31 @@ const L={en:{
  message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', copyLast:'Vom letzten Ruf kopieren', sendWa:'Auch an WhatsApp senden',
  hDevices:'Geräte auf dieser Fahrt', hintDevices:'Erkannt an den Einträgen, die sie geschrieben haben. Ein Gerät, das 36 Stunden nichts gemeldet hat, gilt als still; der Master nie.',
  devActive:'aktiv', devQuiet:'still', devBlocked:'entfernt', devNever:'noch nichts geschrieben',
- devUnknown:'ohne Namen', devSelf:'dieses Gerät', devKick:'Entfernen', devAllow:'Wieder zulassen',
+ devUnknown:'ohne Namen', devSelf:'dieses Gerät', devKick:'Entfernen', devAllow:'Wieder zulassen', devMakeMaster:'Zum Master', devOffered:'Angeboten',
+ handTitle:'Master-Rolle', handAsk:'Die Master-Rolle an {d} übergeben? Es ändert sich nichts, bis dieses Gerät annimmt.',
+ handOffer:'Anbieten', handWait:'{d} wurde die Rolle angeboten. Dieses Gerät bleibt Master, bis das Angebot angenommen wird.',
+ handTake:'Das Master-Gerät bietet dir die Master-Rolle an. Mit der Annahme gehört die Einrichtung der Fahrt diesem Gerät, das andere wird Follower.',
+ handAccept:'Annehmen', handDecline:'Jetzt nicht',
+ handNowMaster:'Dieses Gerät ist jetzt der Master. Der Einrichtungsbildschirm gehört dir.',
+ handStepDown:'Die Rolle wurde übergeben. Dieses Gerät ist jetzt Follower.',
  devKickAsk:'Gerät {d} verliert beim nächsten Abgleich seinen Zugang zum Repository. Seine Einträge bleiben in der Tabelle.',
  devBlockedInfo:'Der Master hat dieses Gerät von der Fahrt entfernt. Melden geht weiter, gesendet wird nichts, bis eine neue Einrichtung eintrifft.',
- noRecipients:'Keine Empfänger hinterlegt', recipient:'Empfänger', recipients:'Empfänger', waCount:'{n} mit brauchbarer Nummer', waBad:'{n} Zeile(n) ignoriert — Nummer zu kurz', currentPic:'Aktueller PIC', resting:'Ruht',
+ noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
  nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
  export:'Export', format:'Format', destination:'Ziel', download:'Herunterladen', share:'Teilen…', battery:'Batterie', fuelCell:'Brennstoffzelle', solarCell:'Solarpanel',
- on:'Ein', off:'Aus', note:'Notiz', addPictures:'Bilder anfügen', post:'An CC Notion senden',
- logHead:'Logbuch — Eintrag antippen zum Ändern', unlock:'Einstellungen entsperren',
+ on:'Ein', off:'Aus', note:'Notiz', addPictures:'Bilder anfügen', post:'An CC melden',
+ logHead:'Logbuch — Eintrag antippen zum Ändern', unlock:'Einstellungen entsperren', showSet:'Einstellungen anzeigen',
  saveName:'Namen sichern', saveSettings:'Einstellungen sichern',
  clearDevice:'Einträge auf diesem Gerät löschen', checkConn:'Verbindung prüfen',
  hDevice:'Dieses Gerät', hFlight:'Fahrt', hBallast:'Ballast', hApp:'App', hLanguage:'Sprache',
  hReporter:'Melder auf diesem Gerät',
- langHint:'Nur die Oberfläche. Alles, was nach GitHub, an den Reporting-Webhook und zu WhatsApp geht, bleibt englisch.',
+ langHint:'Nur die Oberfläche. Alles, was nach GitHub und WhatsApp geht, bleibt englisch.',
  master:'Master', follower:'Follower', personalDev:'Persönliches Gerät', sharedDev:'Gemeinsames Gerät',
  setupRole:'Rolle', modeHint:'Auf einem gemeinsamen Gerät kann jederzeit zwischen den beiden Piloten gewählt werden, wer meldet.', nightColour:'Nachtfarbe', tone:'Quittungston',
- waRecipients:'WhatsApp-Empfänger', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung', hReporting:'Weiterleitung',
- lWebhook:'Reporting-Webhook', hintWebhook:'Webhook zur Zapier-API für die Weiterleitung der Einträge an Notion', webhookBad:'Eine gültige HTTPS-Webhook-URL eingeben',
- mReport:'Melden', mLog:'Logbuch', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
- mReload:'Von GitHub laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
- mExport:'Tabelle exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
+ waRecipients:'WhatsApp', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
+ mReport:'Zurück zum Meldebildschirm \u2026', mLog:'Logbuch öffnen', mDocs:'Logbuch \u2014 laden, drucken, exportieren', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
+ mReload:'Logbuch neu laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
+ mExport:'Logbuch exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
  page:'Seite', logHeadPrint:'Bordbuch',
  printedBy:'gedruckt {when} von {who}', noFurther:'[keine weiteren Einträge]', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
@@ -907,7 +902,7 @@ const L={en:{
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7',
  freqRange:'Eine Frequenz liegt zwischen 118.000 und 136.975 MHz', freqStep:'Kein Kanal: Endungen sind 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
- takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert', webhookQueued:'Auf GitHub gespeichert; Webhook für erneuten Versuch vorgemerkt',
+ takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
@@ -938,7 +933,7 @@ const L={en:{
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
  addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
  noRecorder:'Dieser Browser kann keinen Ton aufnehmen', mediaLater:'Anhänge gehen mit der nächsten Verbindung raus', sharedWithMedia:'Mit Anhang geteilt — Chat in WhatsApp wählen',
- o2title:'O\u2082-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt', o2crewOff:'Nur solange die Crew an O\u2082 ist', inUse:'in Gebrauch',
+ o2title:'O\u2082-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt', o2crewOff:'Nur solange die Crew an O\u2082 ist', inUse:'in Gebrauch', inUseHint:'Nur die benutzte Flasche lässt sich melden. Zuerst umschalten, dann den Druck eintragen.', o2switch:'Soll die O\u2082-Flasche gewechselt werden?',
  liters:'lit', bars:'bar', levelTitle:'Stand', notSet:'nicht gesetzt',
  pName:'Name', pFlight:'Fahrtkennung', pCall:'Rufzeichen', pInit:'Ballast an Bord beim Start, kg',
  pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
@@ -949,18 +944,19 @@ const L={en:{
  lVfr:'VFR-Squawk', lEmerg:'Notfall-Squawks', lBagKg:'Standardgewicht pro Sack',
  lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
  lReadySteps:'Standard-Meldeschritte Schütte',
- hResources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
+ hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
  lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
  lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
  place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
  lStations:'Stellen-Vorschläge', lMsgRx:'Textbausteine \u2014 Rx', lMsgTx:'Textbausteine \u2014 Tx', pO2bar:'Fülldruck bar', pRepo:'benutzer/repo', pBranch:'Branch', pFolder:'Ordner',
- pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'xxxx',
+ pToken:'Fine-grained Token', pAtcName:'ATC-Koordinator', pNumber:'Nummer', pSq:'SQ XXXX', pFreq:'FREQ XXX.XXX MHz',
  hintRole:'Der Master besitzt die Einrichtung der Fahrt und gibt sie weiter. Follower übernehmen jede Änderung.',
  hintInit:'Nur vor dem ersten Inventar nötig. Leer lassen, dann beginnt die Ballastzahl mit dem ersten Inventar.',
  hintAuto:'Einträge gehen automatisch raus. Ohne Verbindung bleiben sie auf dem Gerät und werden der Reihe nach gesendet, sobald die Leitung steht.',
  hintWaNums:'Nummern international, nur Ziffern, z. B. 41791234567.',
  hintAtcCo:'Erscheint nur bei ATC-Meldungen und ist dort standardmässig angewählt.',
- lGroup:'WhatsApp-Gruppe', groupPick:'Chat wählen',
+ hintChat:'Alle übrigen werden über die Chatauswahl erreicht: Sie öffnet WhatsApp mit fertiger Nachricht und offener Chatliste, sodass dort jede Person und jede Gruppe gewählt werden kann. Sonst muss hier nichts gepflegt werden.',
+ pickChat:'WhatsApp \u00b7 Chat wählen',
  hintGroup:'Ein Name für den Gruppeneintrag in der Empfängerliste. WhatsApp kennt keine Adresse für eine Gruppe, die eine App aufrufen dürfte; dieser Eintrag öffnet WhatsApp deshalb mit fertiger Nachricht und offener Chatliste — die Gruppe wählst du dort. Feld leer lassen blendet den Eintrag aus.',
  hintTpl:'Eine Vorlage je Nachrichtentyp. Eine Zeile, deren Platzhalter alle leer sind, fällt weg; {!key} behält die Zeile und schreibt -.',
  lockText:'Der übrige Teil der Einrichtung ist geschützt, damit eine laufende Fahrt nicht versehentlich überschrieben wird. Melden geht ohne Entsperren.',
@@ -975,7 +971,9 @@ const L={en:{
  inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', reportingAsLbl:'meldet als', notThePic:'nicht der PIC',
  shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', done:'Fertig',
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
- lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position',
+ lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', picChange:'Change of PIC',
+ picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
+ picChangeYes:'Report the change', picChangeNo:'Just the reading',
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
@@ -1047,30 +1045,39 @@ const picName=()=>UI.pic==='p2'?p2n():p1n();
 const otherName=()=>UI.pic==='p2'?p1n():p2n();
 const restName=()=>UI.rest==='p1'?p1n():UI.rest==='p2'?p2n():'';
 const shared=()=>CFG.mode==='shared';
-const reporter=()=>shared()?(UI.alt?otherName():picName()):(CFG.reporter||picName());
-const waList=()=>(CFG.wa||[]).filter(r=>r&&r.p&&String(r.p).replace(/\D/g,'').length>5);
+/* On a shared device the button walks through everyone who might be filing: both pilots,
+   and the name this device carries if it belongs to neither — a crew member on board who is
+   not one of the two named pilots. */
+function repList(){
+  const out=crewList().map(c=>c[1]).filter(Boolean);
+  const r=String(CFG.reporter||'').trim();
+  if(r&&!out.includes(r))out.push(r);
+  return out.length?out:[r||'\u2014'];
+}
+function reporter(){
+  if(!shared())return String(CFG.reporter||'').trim()||picName();
+  const list=repList();
+  const cur=UI.repName&&list.includes(UI.repName)?UI.repName:picName();
+  return list.includes(cur)?cur:list[0];
+}
 const atcCo=()=>String(CFG.atcNum||'').replace(/\D/g,'').length>5
   ? {n:CFG.atcName||'ATC Coordinator',p:String(CFG.atcNum).replace(/\D/g,'')} : null;
 /* every recipient is listed on its own. On ATC the coordinator leads and is the only one
    ticked; elsewhere the coordinator does not appear and everybody else is ticked. */
-/* WhatsApp has no callable address for a group, so the group entry opens the app with the
-   message ready and the chat list open; the group is picked there, once per message. */
-const waGroup=()=>{const n=String(CFG.groupName||'').trim();
-  return n?{n:n,p:'group',group:true}:null};
+/* Two ways out, and no list to keep: the coordinator, who has a number and can be called
+   directly, and the chat picker, which opens WhatsApp with the message ready and lets the
+   sender choose the conversation — the only route to a group WhatsApp offers an app. */
+const waGroup=()=>({n:'',p:'group',group:true});
 function waRoster(type){
-  const out=[],co=atcCo(),g=waGroup();
+  const out=[],co=atcCo();
   if(type==='ATC'&&co)out.push(co);
-  waList().forEach(r=>{if(!out.some(x=>x.p===r.p))out.push(r)});
-  if(g)out.push(g);
+  out.push(waGroup());
   return out;
 }
 function waDefault(type,r){
   const co=atcCo();
   if(r.group)return false;
-  if(type==='ATC')return !!(co&&r.p===co.p);
-  /* ballast goes out many times an hour; sending every drop by default would be noise */
-  if(type==='Ballast')return false;
-  return true;
+  return type==='ATC'&&!!(co&&r.p===co.p);
 }
 function waPicked(type,r){
   const sel=(UI.waSel||{})[type]||{};
@@ -1108,58 +1115,6 @@ function gpsSnap(){
     gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
     gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
 }
-function validWebhookUrl(value){
-  if(!String(value||'').trim())return true;
-  try{return new URL(String(value).trim()).protocol==='https:'}catch(e){return false}
-}
-function webhookEntry(e){
-  const out=Object.assign({},e);
-  delete out.synced;delete out.failed;
-  return out;
-}
-const webhookPending=id=>HOOKQ.some(x=>x&&x.id===id);
-let HOOKING=false;
-function queueWebhook(e){
-  const url=String(CFG.webhook||'').trim();
-  if(!url)return;
-  if(!validWebhookUrl(url))return;
-  const item={id:e.id,url:url,payload:webhookEntry(e),attempts:0,next:0,last_error:''};
-  const i=HOOKQ.findIndex(x=>x&&x.id===e.id);
-  if(i>=0)HOOKQ[i]=item;else HOOKQ.push(item);
-  save(K_HOOK,HOOKQ);flushWebhooks();
-}
-/* Zapier explicitly advises browser clients not to set a custom Content-Type header: doing so
-   triggers a CORS preflight that its Catch Hook rejects. The body is still valid JSON. Each
-   queue item captures the URL used when the entry was made, so changing the setting cannot
-   silently redirect an entry that is already waiting. */
-async function flushWebhooks(){
-  if(HOOKING||!navigator.onLine||!HOOKQ.length)return;
-  HOOKING=true;
-  const blocked=new Set();
-  try{
-    for(const snapshot of [...HOOKQ]){
-      const item=HOOKQ.find(x=>x&&x.id===snapshot.id);
-      if(!item||blocked.has(item.url)||Number(item.next||0)>Date.now())continue;
-      const ctrl=typeof AbortController==='function'?new AbortController():null;
-      const timer=ctrl?setTimeout(()=>ctrl.abort(),12000):null;
-      try{
-        const r=await fetch(item.url,{method:'POST',body:JSON.stringify(item.payload),
-          keepalive:true,signal:ctrl?ctrl.signal:undefined});
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        HOOKQ=HOOKQ.filter(x=>x&&x.id!==item.id);
-      }catch(e){
-        const current=HOOKQ.find(x=>x&&x.id===item.id);
-        if(current){
-          current.attempts=Number(current.attempts||0)+1;
-          current.last_error=String(e&&e.name==='AbortError'?'timeout':(e&&e.message)||e);
-          current.next=Date.now()+Math.min(300000,5000*Math.pow(2,Math.min(current.attempts-1,6)));
-          blocked.add(current.url);
-        }
-      }finally{if(timer)clearTimeout(timer)}
-      save(K_HOOK,HOOKQ);
-    }
-  }finally{HOOKING=false}
-}
 function add(part){
   const now=new Date();
   const e=Object.assign({
@@ -1172,7 +1127,7 @@ function add(part){
     tc_deg:null,speed_kt:null,vs_ms:null,ballast_medium:'',
     sand_kg:null,water_kg:null,sand_left_kg:null,water_left_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
-    crew_pic:picName(),crew_rest:restName(),res_battery_pct:null,res_fuel_cell:'',res_solar:'',
+    crew_pic:picName(),crew_rest:restName(),crew_change:'',res_battery_pct:null,res_fuel_cell:'',res_solar:'',
     res_methanol_pct:null,res_o2_crew:'',res_o2:'',res_o2_liters:null,res_o2_pct:null,
     res_o2_detail:'',res_o2_inuse:null,res_o2_bars:'',note:'',
     whatsapp:'',whatsapp_to:'',attachments:'',attachment_paths:'',edited_at:'',edited_by:'',
@@ -1184,12 +1139,25 @@ function add(part){
 }
 
 /* ── WhatsApp ──────────────────────────────────────────────────────── */
+/* The built-in templates are the standard. A copy edited on the device is kept — losing
+   someone's wording to a version bump would be worse than a missing placeholder — but a kind
+   of message that has no saved template at all falls through to the current default, so
+   Ballast appeared when it was added without anybody having to reset anything. */
+const TPL_VER=5;
+function tplMigrate(){
+  if(Number(CFG.tplVer)===TPL_VER){return}
+  const c=CFG.tpl&&typeof CFG.tpl==='object'?Object.assign({},CFG.tpl):null;
+  if(c){for(const k in c)if(c[k]==null||c[k]==='')delete c[k]}
+  CFG.tpl=c&&Object.keys(c).length?c:null;
+  CFG.tplVer=TPL_VER;save(K_CFG,CFG);
+}
 function tplFor(t){const c=(CFG.tpl||{});return (c[t]!=null&&c[t]!=='')?c[t]:(TPL[t]||TPL.Other)}
 function waVals(e){
   return {
     type:e.type||'', callsign:CFG.call||'', flight:e.flight_id||'', reporter:e.reporter||'',
     ballast:e.type==='Ballast'?line(e).h:'',
     atcmsgtype:e.type==='ATC'?(e.atc_dir==='TX'?'Tx':'Rx'):'',
+    picchange:e.crew_change?t('picChange'):'',
     dir:e.atc_dir==='TX'?'Sent':e.atc_dir==='RX'?'Received':'',
     station:e.atc_station||'', freq:e.atc_freq||'', squawk:e.atc_squawk||'', msg:e.atc_msg||'',
     pic:e.crew_pic||'', resting:e.crew_rest||'',
@@ -1200,6 +1168,8 @@ function waVals(e){
     time:String(e.ts_utc||'').slice(11,19)+'Z',
     pos:e.gps_fix?(e.pos_lat+' '+e.pos_lon):'',
     posdm:e.gps_fix?(dm(e.lat,2)+(e.lat>=0?'N':'S')+' '+dm(e.lon,3)+(e.lon>=0?'E':'W')):'',
+    place:e.place||'',
+    location:String(e.place||'').replace(/^near\s+/i,''),
     alt:e.alt_ft==null?'':Math.round(e.alt_ft/10)*10+' ft',
     tc:e.tc_deg==null?'':'TC '+pad(Math.round(e.tc_deg),3),
     speed:e.speed_kt==null?'':Number(e.speed_kt).toFixed(1)+' kn',
@@ -1275,6 +1245,7 @@ function openLink(url){
    WhatsApp takes one chat at a time, so any others are offered afterwards */
 async function waSend(e,list){
   if(!list||!list.length)return;
+  await waitPlace(e,2500);
   const txt=waText(e);
   if(await shareWithMedia(e,txt)){toast(t('sharedWithMedia'));return}
   const enc=encodeURIComponent(txt);
@@ -1285,7 +1256,7 @@ async function waSend(e,list){
   }else toast('WhatsApp: '+(list[0].n||list[0].p));
 }
 async function waSheet(e,list,compact){
-  list=list||waList();const txt=waText(e);
+  list=list||[];const txt=waText(e);
   if(!list.length){await ask({title:'No recipients',cancel:false,ok:'Close',
     text:'Add WhatsApp recipients in the setup first. The entry has been posted regardless.',
     html:'<div class="waPre">'+esc(txt)+'</div>'});return}
@@ -1366,11 +1337,12 @@ const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight|
 const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
-const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked',
+const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked','geo',
   'bagKg','readyKg','methInit','posMin','opsMin','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
-  'atcName','atcNum','groupName','wa','tpl','webhook'];
+  'atcName','atcNum','tpl','tplVer'];
 function setupPayload(withToken){
-  const o={v:1,master_device:DEV,updated_at:new Date().toISOString(),by:reporter()};
+  const o={v:1,master_device:DEV,master_offer:String(CFG.handover||''),
+           updated_at:new Date().toISOString(),by:reporter()};
   SHARED.forEach(k=>o[k]=CFG[k]);
   if(withToken&&CFG.token)o.token=CFG.token;
   return o;
@@ -1421,7 +1393,6 @@ function applyShared(o){
     if(o[k]===undefined)return;
     if(JSON.stringify(o[k])!==JSON.stringify(CFG[k])){CFG[k]=o[k];changed=true}
   });
-  CFG.tpl=canonicalTemplates(CFG.tpl);
   return changed;
 }
 /* two masters would overwrite each other's setup, so a master watches for a second one */
@@ -1431,7 +1402,14 @@ async function checkMaster(){
     const g=await ghGet(setupPath(),true);
     if(g.notModified||!g.text)return;
     const o=JSON.parse(g.text);
-    if(o.master_device&&o.master_device!==DEV)toast(t('twoMasters'));
+    if(!o.master_device||o.master_device===DEV)return;
+    if(CFG.handover&&o.master_device===CFG.handover){
+      CFG.role='follower';CFG.handover='';CFG.provisioned=1;save(K_CFG,CFG);
+      fillSetup();paintSyncBox();lockSettings();paintStatus();
+      info(t('handTitle'),t('handStepDown'));
+      return;
+    }
+    toast(t('twoMasters'));
   }catch(e){}
 }
 async function followSetup(){
@@ -1440,6 +1418,19 @@ async function followSetup(){
     const g=await ghGet(setupPath(),true);
     if(g.notModified||!g.text)return;
     const o=JSON.parse(g.text);
+    /* an offer of the master role waits for a yes; a no is remembered so it is not asked again */
+    if(o.master_offer===DEV&&CFG.role!=='master'&&UI.declined!==o.updated_at){
+      const yes=await ask({title:t('handTitle'),text:t('handTake'),
+        ok:t('handAccept'),cancel:t('handDecline')});
+      if(yes){
+        CFG.role='master';CFG.handover='';CFG.provisioned=1;save(K_CFG,CFG);
+        await publishSetup();
+        fillSetup();paintSyncBox();lockSettings();paintStatus();
+        await info(t('handTitle'),t('handNowMaster'));
+        return;
+      }
+      UI.declined=o.updated_at;save(K_UI,UI);
+    }
     if(Array.isArray(o.blocked)&&o.blocked.includes(DEV)&&CFG.token){
       CFG.token='';CFG.provisioned=0;save(K_CFG,CFG);
       paintStatus();info(t('devBlocked'),t('devBlockedInfo'));
@@ -1500,12 +1491,12 @@ async function ghPut(p,text,sha,msg){
   if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,90));
   delete ETAG[p];
 }
-const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v.map(canonicalEntry):[]}catch(e){return[]}};
+const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
   'pos_lat','pos_lon','alt_ft','place','tc_deg','speed_kt','vs_ms','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
   'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','sand_left_kg','water_left_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
-  'crew_pic','crew_rest','res_battery_pct','res_fuel_cell','res_solar',
+  'crew_pic','crew_rest','crew_change','res_battery_pct','res_fuel_cell','res_solar',
   'res_methanol_pct','res_o2_crew','res_o2','res_o2_liters','res_o2_pct','res_o2_detail',
   'res_o2_inuse','res_o2_bars','note',
   'whatsapp','whatsapp_to','attachments','attachment_paths','edited_at','edited_by','id'];
@@ -1524,7 +1515,7 @@ async function sync(silent,push,attempt,force){
     const g=await ghGet(p.json,!push);
     if(g.notModified&&!push&&!ENT.some(e=>!e.synced)){LASTSYNC=new Date();return}
 
-    if(push||pollN%6===0){await followSetup();await checkMaster()}
+    if(push||pollN%6===0||CFG.handover){await followSetup();await checkMaster()}
 
     let rt=null;
     if(push||pollN%6===0){try{rt=parse((await ghGet(p.del)).text)}catch(e){rt=null}}
@@ -1624,7 +1615,7 @@ function paintReadout(){
   $$('[data-t="droppedSince"]').forEach(el=>el.textContent=firstInv()?t('droppedSince'):t('droppedStart'));
   const who=reporter();
   $('#repName').textContent=who+(who===picName()?' (PIC)':'');
-  $('#btnRep').classList.toggle('on',shared()&&!!UI.alt);
+  $('#btnRep').classList.toggle('on',shared()&&reporter()!==picName());
   $('#postRow').classList.toggle('shared',shared());
 }
 /* ballast is counted in sacks, so it is shown in whole kilograms throughout — a figure like
@@ -1661,8 +1652,9 @@ function line(e){
     h=(e.atc_dir==='TX'?'To ':'From ')+(e.atc_station||'ATC')+(e.atc_freq?' '+e.atc_freq:'')
       +(e.atc_squawk?' \u00b7 '+e.atc_squawk:'');
     s=e.atc_msg||'';
-  }else if(e.type==='Resources'){
-    h='PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
+  }else if(e.type==='Ressources'){
+    h=(e.crew_change?t('picChange')+' \u00b7 ':'')
+      +'PIC '+(e.crew_pic||'\u2014')+(e.crew_rest?' \u00b7 '+e.crew_rest+' '+t('lgResting'):' \u00b7 '+t('lgAwake'));
     s=[e.res_battery_pct!=null&&e.res_battery_pct!==''?t('battery').toLowerCase()+' '+e.res_battery_pct+'%':'',
        e.res_fuel_cell?t('fuelCell').toLowerCase()+' '+e.res_fuel_cell:'',
        e.res_methanol_pct!=null&&e.res_methanol_pct!==''?t('methanolShort')+' '+e.res_methanol_pct+'%':'',
@@ -1722,30 +1714,17 @@ function paintCrew(){
   $('#cRest').innerHTML=`<button data-v=""${!UI.rest?' class="on"':''}>${esc(t('nobody'))}</button>`
     +crew.map(([k,n])=>`<button data-v="${k}"${UI.rest===k?' class="on"':''}>${esc(n)}</button>`).join('');
 }
-const WABOX={'#waATCco':'ATC','#waATC':'ATC','#waBal':'Ballast','#waRes':'Resources','#waOth':'Other'};
+const WABOX={'#waATC':'ATC','#waBal':'Ballast','#waRes':'Ressources','#waOth':'Other'};
 /* on ATC the coordinator gets a line of its own above the rest of the list */
-const WALAB={'#waATCco':'ATC','#waBal':'Ballast','#waRes':'Resources','#waOth':'Other'};
 function paintWaChecks(){
   for(const sel in WABOX){
-    const type=WABOX[sel],box=$(sel),roster=waRoster(type),co=atcCo();
-    let list=roster;
-    if(type==='ATC'){
-      const isCo=r=>co&&r.p===co.p;
-      list=sel==='#waATCco'?roster.filter(isCo):roster.filter(r=>!isCo(r));
-    }
-    if(!list.length){box.innerHTML=sel==='#waATCco'?'':'<span class="lab">'+esc(t('noRecipients'))+'</span>';continue}
+    const type=WABOX[sel],box=$(sel),list=waRoster(type);
+    box.classList.toggle('wa2',list.length>1);
     /* one pill per person, matched by number rather than by position — the coordinator is
        rebuilt on every call and would never match an index */
     box.innerHTML=list.map(r=>
-      `<button data-p="${esc(r.p)}" class="${waPicked(type,r)?'on':''}${r.group?' wide':''}">`
-      +'<span>'+esc(r.n||r.p)+(r.group?' \u00b7 '+esc(t('groupPick')):'')+'</span></button>').join('');
-  }
-  /* the label counts what will actually be sent, not what could be */
-  for(const sel in WALAB){
-    const lab=$(sel).closest('.f').querySelector('[data-t="sendWa"]');
-    if(!lab)continue;
-    const n=recipients(WALAB[sel]).length;
-    lab.textContent=t('sendWa')+(n?' \u00b7 '+n+' '+t(n===1?'recipient':'recipients'):'');
+      `<button data-p="${esc(r.p)}" class="${waPicked(type,r)?'on':''}">`
+      +'<span>'+esc(r.group?t('pickChat'):(r.n||r.p))+'</span></button>').join('');
   }
 }
 for(const sel in WABOX)$(sel).addEventListener('click',ev=>{
@@ -1771,7 +1750,8 @@ function ask(o){
   return new Promise(res=>{
     const m=$('#modal');
     m.innerHTML=`<div class="sheet">
-      <h4>${esc(o.title||'')}</h4>${o.text?`<p>${esc(o.text)}</p>`:''}
+      ${o.headBtn?`<button class="headbtn" id="mHead" aria-label="${esc(o.headBtn.label||'')}"><svg viewBox="0 0 24 24">${o.headBtn.icon}</svg></button>`:''}
+    <h4>${esc(o.title||'')}</h4>${o.text?`<p>${esc(o.text)}</p>`:''}
       ${o.html||''}
       ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
       <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
@@ -1816,13 +1796,38 @@ function setTheme(t,persist){
   if(persist){CFG.theme=t;save(K_CFG,CFG)}
 }
 const isNight=()=>document.documentElement.dataset.theme==='night';
+const IC_DAY='<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6 17 7M7 17l-1.4 1.4M18.4 18.4 17 17M7 7 5.6 5.6"/>';
+const IC_NIGHT='<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>';
 
 /* ── Navigation and menu ───────────────────────────────────────────── */
+/* Everything that produces a document out of the log lives together, so the main menu
+   stays a list of places rather than a list of actions. */
+async function docsMenu(){
+  const IC2={
+    pull:'<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/>',
+    print:'<path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6H7Z"/>',
+    export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>'
+  };
+  const items=[['pull',t('mReload')],['print',t('mPrint')],['export',t('mExport')]];
+  await ask({title:t('mDocs'),cancel:false,ok:t('close'),
+    html:'<div class="menu">'+items.map(([k,l])=>
+      `<button class="go sec sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC2[k]}</svg>${esc(l)}</button>`
+      ).join('')+'</div>',
+    onMount:(m,close)=>{m.querySelector('.menu').addEventListener('click',ev=>{
+      const b=ev.target.closest('button[data-m]');if(!b)return;
+      const k=b.dataset.m;close();
+      setTimeout(()=>{
+        if(k==='pull')sync(false,false);
+        else if(k==='print')printSheet();
+        else if(k==='export')exportSheet();
+      },120);
+    })}});
+}
 /* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
    Pagination is measured rather than guessed, so no entry is ever cut in half. */
 async function printSheet(){
-  const kinds=['Ballast','ATC','Resources','Other','POS'];
-  let pick={Ballast:true,ATC:true,Resources:true,Other:true,POS:true};
+  const kinds=['Ballast','ATC','Ressources','Other','POS'];
+  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true};
   await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
     text:t('printPick'),
     html:'<div class="links wa" id="prK">'+kinds.map(k=>
@@ -2019,7 +2024,7 @@ async function shareSheet(){
   };
   await ask({title:t('shareTitle'),cancel:false,ok:t('copyLink'),
     text:'Open this link on the other device. It carries the flight, the pilots, the ballast '
-      +'figures, the Reporting Webhook, the WhatsApp recipients and the message templates, and sets that device to '
+      +'figures, the WhatsApp recipients and the message templates, and sets that device to '
       +'Follower. Its own reporter name, device mode and colours stay untouched.',
     html:'<button class="check on" id="shTok"><span class="box"><svg viewBox="0 0 24 24">'
       +'<path d="M5 12.5 10 17.5 19 7"/></svg></span><span>Include the GitHub token'
@@ -2059,7 +2064,6 @@ async function importFromHash(){
   const ok=await ask({title:'Apply this setup?',ok:'Apply',cancel:'Discard',
     text:'Flight '+(o.flight||'—')+' · '+(o.call||'—')+' · repository '+(o.repo||'—')+' · '
       +((o.wa||[]).length)+' WhatsApp recipient(s) · '
-      +(o.webhook?'Reporting Webhook included · ':'no Reporting Webhook · ')
       +(o.token?'a GitHub token is included':'no token — it has to be entered on this device')
       +'. Your reporter name, device mode and colours are left as they are.'});
   if(!ok)return false;
@@ -2083,26 +2087,26 @@ $('#btnMenu').onclick=()=>openMenu();
 $('#btnLogBack').onclick=()=>setView('form');
 async function openMenu(){
   const IC={
-    form:'<path d="M4 5h13l3 3v11H4Z"/><path d="M8 10h8M8 14h5"/>',
+    form:'<path d="M14 6l-6 6 6 6"/><path d="M20 6v12"/>',
     log:'<path d="M5 6h0M5 12h0M5 18h0" stroke-width="2.3"/><path d="M10 6h9M10 12h9M10 18h6"/>',
     set:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M18 6l-1.4 1.4M7.4 16.6 6 18M18 18l-1.4-1.4M7.4 7.4 6 6"/>',
-    theme:isNight()
-      ?'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6 17 7M7 17l-1.4 1.4M18.4 18.4 17 17M7 7 5.6 5.6"/>'
-      :'<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/>',
+
     pull:'<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/>',
     sync:'<path d="M12 20V9"/><path d="M8 13l4-4 4 4"/><path d="M5 5h14"/>',
     share:'<circle cx="7" cy="12" r="2.6"/><circle cx="17" cy="6.5" r="2.6"/><circle cx="17" cy="17.5" r="2.6"/><path d="M9.3 10.8 14.7 7.7M9.3 13.2l5.4 3.1"/>',
     export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>',
     print:'<path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6H7Z"/>',
+    docs:'<path d="M4 6h7l2 2h7v11H4Z"/><path d="M8 13h8M8 16h5"/>',
     about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>',
     license:''
   };
   const items=[['form',t('mReport')],['log',t('mLog')],['set',t('mSettings')],
-               ['theme',isNight()?t('mDay'):t('mNight')],
-               ['pull',t('mReload')],['sync',t('mSend')]]
-    .concat(CFG.role==='master'?[['share',t('mShare')]]:[]).concat([
-               ['print',t('mPrint')],['export',t('mExport')],['about',t('mAbout')]]);
+               ['docs',t('mDocs')]]
+    .concat(CFG.role==='master'?[['share',t('mShare')]]:[])
+    .concat([['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
+    headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
+             act:()=>setTheme(isNight()?'day':'night',true)},
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go ${k==='form'?'':'sec'} sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
@@ -2111,18 +2115,20 @@ async function openMenu(){
       close();
       const k=b.dataset.m;
       if(k==='form'||k==='log'||k==='set')setView(k);
-      else if(k==='theme')setTheme(isNight()?'day':'night',true);
+      else if(k==='docs')docsMenu();
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
-      else if(k==='export')exportSheet();
-      else if(k==='print')printSheet();
       else if(k==='share')shareSheet();
       else if(k==='about')window.open('readme.html','_blank','noopener');
     })}});
 }
 $('#btnRep').onclick=()=>{if(!shared())return;
-  UI.alt=UI.alt?0:1;save(K_UI,UI);paintReadout();
-  toast(t('reportingAs')+' '+reporter()+(UI.alt?' \u2014 '+t('notThePic'):''))};
+  const list=repList();
+  const i=list.indexOf(reporter());
+  UI.repName=list[(i+1)%list.length];
+  save(K_UI,UI);paintReadout();paintStatus();
+  toast(t('reportingAs')+' '+reporter()
+    +(reporter()===picName()?' \u00b7 PIC':' \u2014 '+t('notThePic')))};
 
 function setType(ty){
   UI.type=ty;save(K_UI,UI);
@@ -2132,7 +2138,7 @@ function setType(ty){
   if(ty==='ATC'){carryAtc();paintMsgChips()}
   if(ty==='Ballast'){UI.act='drop';UI.med='sand';save(K_UI,UI);
     mark('#bAct','drop');mark('#bMed','sand');setAct('drop')}
-  if(ty==='Resources'){carryRes();paintRes()}
+  if(ty==='Ressources'){carryRes();paintRes()}
 }
 $('#types').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setType(b.dataset.ty)});
 
@@ -2267,15 +2273,34 @@ $('#rO2').onclick=async()=>{
   if(!sizes.length){toast(t('o2none'));return}
   const bars=(UI.o2bars||[]).slice();
   let use=UI.o2use==null?0:UI.o2use;
-  const r=await ask({title:t('o2title'),ok:t('ok'),cancel:t('cancel'),
-    html:sizes.map((l,i)=>`<div class="o2row">
+  const full=o2FullBars();
+  const shown=sizes.map((l,i)=>bars[i]==null?full[i]:bars[i]);
+  /* only the bottle being breathed from can be reported; the others keep what was last
+     entered, or their full pressure from the setup, and are shown for reference */
+  const rowHtml=(i,l)=>`<div class="o2row">
         <label><input type="radio" name="o2use" value="${i}"${use===i?' checked':''}>
-          <span>O\u2082-cylinder ${i+1} \u00b7 ${l} ${esc(t('liters'))}</span></label>
+          <span>O\u2082 ${i+1} \u00b7 ${l} ${esc(t('liters'))}</span></label>
         <input data-k="b${i}" type="number" inputmode="numeric" step="10" style="width:104px"
-          value="${bars[i]==null?'':esc(bars[i])}" placeholder="${esc(t('bars'))}"></div>`).join('')
-      +'<p class="lab">'+esc(t('inUse'))+'</p>',
-    onMount:m=>{m.addEventListener('change',ev=>{
-      if(ev.target.name==='o2use')use=Number(ev.target.value)})}});
+          value="${shown[i]==null?'':esc(shown[i])}" placeholder="${esc(t('bars'))}"
+          ${use===i?'':'readonly class="ro"'}></div>`;
+  const r=await ask({title:t('o2title'),ok:t('ok'),cancel:t('cancel'),
+    html:sizes.map((l,i)=>rowHtml(i,l)).join('')
+      +'<p class="lab">'+esc(t('inUseHint'))+'</p>',
+    onMount:m=>{m.addEventListener('change',async ev=>{
+      if(ev.target.name!=='o2use')return;
+      const next=Number(ev.target.value);
+      if(next===use)return;
+      if(!await ask({title:t('o2title'),text:t('o2switch'),ok:t('ok'),cancel:t('cancel')})){
+        const back=m.querySelector('input[name="o2use"][value="'+use+'"]');
+        if(back)back.checked=true;
+        return;
+      }
+      use=next;
+      m.querySelectorAll('input[data-k]').forEach((inp,i)=>{
+        const open=i===use;
+        inp.readOnly=!open;inp.classList.toggle('ro',!open);
+      });
+    })}});
   if(r&&typeof r==='object'){
     UI.o2bars=sizes.map((l,i)=>{const v=parseFloat(r['b'+i]);return isFinite(v)?Math.round(v):null});
     UI.o2use=use;save(K_UI,UI);paintRes();
@@ -2308,7 +2333,7 @@ function acceptPre(scope){
 }
 /* Every kind of message shows the last one of its own kind, whoever filed it and from
    whichever device, so the header names the reporter and the time. */
-const LASTBOX={Ballast:'#bLast',ATC:'#aLast',Resources:'#cLast',Other:'#oLast'};
+const LASTBOX={Ballast:'#bLast',ATC:'#aLast',Ressources:'#cLast',Other:'#oLast'};
 /* one running line, blocks separated by middle dots, one weight throughout */
 function lastText(e){
   const DOT=' \u00b7 ';
@@ -2329,7 +2354,8 @@ function paintLastBoxes(){
     const e=lastOf(ty);
     box.querySelector('.lm-top').textContent=t('lastMessage')+' | '
       +(e?(e.reporter||e.device||'\u2014'):'\u2014')+' | '
-      +(e?String(e.ts_utc).slice(11,19)+'Z':'\u2014');
+      +(e?String(e.ts_utc).slice(11,19)+'Z':'\u2014')
+      +(e&&e.place?' | '+e.place:'');
     box.querySelector('.lm-body').textContent=e?lastText(e):'-';
   }
 }
@@ -2377,7 +2403,7 @@ function adoptLast(){
                 water:inv.water_kg==null?'':String(inv.water_kg)};
     if(inv.inv_ready_pct!=null)UI.ready=Number(inv.inv_ready_pct);
   }
-  const r=lastOf('Resources');
+  const r=lastOf('Ressources');
   if(r&&UI.adopted!==r.id){
     UI.adopted=r.id;
     if(r.res_fuel_cell)UI.fuel=r.res_fuel_cell;
@@ -2401,7 +2427,7 @@ const carryDrop=()=>{adoptLast();$('#bKg').value='';paintSum()};
 const carryInv=()=>{adoptLast();paintReady();return preFill(INVF,UI.lastInv)};
 const carryRes=()=>{adoptLast();mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);
   mark('#rO2crew',UI.o2crew);paintCrew();paintRes()};
-[['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Resources',RESF]].forEach(([scope,pairs])=>{
+[['#b-ATC',ATCF],['#b-Ballast',DROPF.concat(INVF)],['#b-Ressources',RESF]].forEach(([scope,pairs])=>{
   pairs.forEach(([sel])=>{const el=$(sel);if(!el)return;
     ['focus','input','change'].forEach(ev=>el.addEventListener(ev,()=>acceptPre(scope)))});
 });
@@ -2587,13 +2613,25 @@ async function uploadMedia(id,pics,voice){
    link simply leaves the field empty. */
 const GEOC={};
 const geoKey=(la,lo)=>la.toFixed(2)+','+lo.toFixed(2);
-let GEOBUSY=false;
+/* one lookup at a time, in a queue rather than dropped — two entries a second apart must
+   both end up with a place, and a failure must not poison the cell for the rest of the flight */
+let GEOQ=Promise.resolve();
 async function placeFor(la,lo){
   if(!Number(CFG.geo)||!navigator.onLine||la==null||lo==null)return '';
   const k=geoKey(la,lo);
-  if(GEOC[k]!==undefined)return GEOC[k];
-  if(GEOBUSY)return '';
-  GEOBUSY=true;
+  if(GEOC[k])return GEOC[k];
+  const run=()=>lookupPlace(la,lo,k);
+  GEOQ=GEOQ.then(run,run);
+  return GEOQ;
+}
+let GEOLAST=0;
+async function lookupPlace(la,lo,k){
+  if(GEOC[k])return GEOC[k];
+  /* the service asks for no more than a request a second — the pause goes before the call,
+     not after the answer, so a message waiting on it is not held up for nothing */
+  const gap=1100-(Date.now()-GEOLAST);
+  if(gap>0)await new Promise(r=>setTimeout(r,gap));
+  GEOLAST=Date.now();
   try{
     const u='https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&addressdetails=1'
       +'&lat='+encodeURIComponent(la.toFixed(4))+'&lon='+encodeURIComponent(lo.toFixed(4));
@@ -2603,20 +2641,28 @@ async function placeFor(la,lo){
     const town=a.city||a.town||a.village||a.hamlet||a.municipality||a.county||a.state||'';
     const cc=(a.country_code||'').toUpperCase();
     const out=town?('near '+town+(cc?'/'+cc:'')):(cc||'');
-    GEOC[k]=out;
+    if(out)GEOC[k]=out;           /* only a real answer is remembered */
     return out;
-  }catch(e){GEOC[k]='';return ''}
-  finally{GEOBUSY=false}
+  }catch(e){return ''}
 }
-/* the entry is written at once and the place is filled in when the answer arrives */
+/* The entry is written at once and the place filled in when the answer arrives. The promise
+   is kept on the row so a message on its way out can wait a moment for it. */
+const PLACEQ={};
 function addPlace(e){
   if(!Number(CFG.geo)||e.lat==null||e.lon==null)return;
-  placeFor(Number(e.lat),Number(e.lon)).then(pl=>{
-    if(!pl)return;
-    const row=ENT.find(x=>x.id===e.id);
-    if(!row||row.place)return;
-    row.place=pl;row.synced=false;save(K_ENT,ENT);paint();sync(true,true);
-  });
+  PLACEQ[e.id]=placeFor(Number(e.lat),Number(e.lon)).then(pl=>{
+    delete PLACEQ[e.id];
+    if(!pl)return '';
+    const row=ENT.find(x=>x.id===e.id)||e;
+    if(!row.place){row.place=pl;row.synced=false;save(K_ENT,ENT);paint()}
+    if(e!==row&&!e.place)e.place=pl;
+    return pl;
+  },()=>{delete PLACEQ[e.id];return ''});
+}
+/* wait a little for a place, but never hold a message hostage to a slow lookup */
+async function waitPlace(e,ms){
+  if(e.place||!PLACEQ[e.id])return;
+  await Promise.race([PLACEQ[e.id],new Promise(r=>setTimeout(r,ms||2500))]);
 }
 
 /* ── Automatic position report ──────────────────────────────────────
@@ -2671,27 +2717,25 @@ $('#btnPost').onclick=async()=>{
       const bags=$('#iBags').value,water=$('#iWater').value;
       if(bags===''&&water===''){flash('','');return toast(t('enterInv'))}
       const c=invCalc(bags,water,UI.ready);
-      e=add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
+      add({type:'Ballast',ballast_action:'count',ballast_delta_kg:null,
         sand_kg:c.sand,water_kg:c.water,total_ballast_kg:c.total,ballast_abs_kg:c.total,
         inv_bags:bags===''?null:Math.round(nz(bags)),inv_ready_pct:UI.ready,note:$('#iNote').value.trim()});
-      queueWebhook(e);
       $('#iNote').value='';acceptPre('#b-Ballast');paintInv();
       const last=chrono(ENT)[chrono(ENT).length-1];
-      {const rc=recipients('Ballast');
-       confirmPost(e,rc.length?()=>waSend(e,rc):null);}
+      {const be=chrono(ENT)[ENT.length-1],rc=recipients('Ballast');
+       confirmPost(be,rc.length?()=>waSend(be,rc):null);}
       toast(t('invPosted')+' '+c.total+' kg'+(last&&last.tally_diff_kg!=null?' · diff '+(last.tally_diff_kg>0?'+':'')+last.tally_diff_kg+' kg':''));
     }else{
       const kg=parseFloat($('#bKg').value);
       if(!(kg>0)){flash('','');return toast(t('enterKg'))}
       {const rcb=recipients('Ballast');
-      e=add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
+      add({type:'Ballast',ballast_action:'drop',ballast_medium:UI.med||'sand',
         ballast_delta_kg:r1(-kg),note:$('#bNote').value.trim(),
         whatsapp:rcb.length?'yes':'',whatsapp_to:rcb.map(r=>r.n||r.p).join('; ')});}
-      queueWebhook(e);
       $('#bKg').value='';$('#bNote').value='';paintSum();
       acceptPre('#b-Ballast');carryDrop();
-      {const rc=recipients('Ballast');
-       confirmPost(e,rc.length?()=>waSend(e,rc):null);}
+      {const be=chrono(ENT)[ENT.length-1],rc=recipients('Ballast');
+       confirmPost(be,rc.length?()=>waSend(be,rc):null);}
       toast('\u2212'+kg+' kg '+(UI.med||'sand'));
     }
     return;
@@ -2721,17 +2765,26 @@ $('#btnPost').onclick=async()=>{
     paintFreqWarn();
     $('#aMsg').value='';paintMsgChips();toast(t('atcPosted'));carryAtc();
     if(UI.adir==='TX'&&/ops\s*normal/i.test(msg))setTimeout(opsAsk,400);
-  }else if(ty==='Resources'){
-    const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Resources');
-    e=add({type:'Resources',note:$('#cNote').value.trim(),
+  }else if(ty==='Ressources'){
+    const bat=UI.bat==null?'':String(UI.bat);const rc=recipients('Ressources');
+    /* a handover of command is a fact of the flight, not a side effect of a tap */
+    const prev=lastOf('Ressources');
+    let picChanged='';
+    if(prev&&prev.crew_pic&&prev.crew_pic!==picName()){
+      if(await ask({title:t('picChange'),
+        text:t('picChangeAsk').replace('{a}',prev.crew_pic).replace('{b}',picName()),
+        ok:t('picChangeYes'),cancel:t('picChangeNo')}))picChanged='yes';
+    }
+    e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
+      crew_change:picChanged,
       res_fuel_cell:UI.fuel,res_solar:UI.solar,
       res_methanol_pct:UI.meth,res_o2_crew:UI.o2crew,
       res_o2:o2Summary(),res_o2_liters:o2Litres()||null,res_o2_pct:o2Pct(),
       res_o2_detail:o2Detail(),res_o2_inuse:UI.o2use==null?null:UI.o2use+1,
       res_o2_bars:(UI.o2bars||[]).map(x=>x==null?'':x).join(';'),
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#cNote').value='';acceptPre('#b-Resources');carryRes();toast(t('crewPosted'));
+    $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
     if(!v){flash('','');return toast(t('noteEmpty'))}
@@ -2757,7 +2810,7 @@ $('#btnPost').onclick=async()=>{
     }else if(nAtt){toast(t('mediaLater'))}
     $('#oMsg').value='';toast(t('notePosted'));
   }
-  if(e){queueWebhook(e);const rc=recipients(ty);confirmPost(e,rc.length?()=>waSend(e,rc):null)}
+  if(e){const rc=recipients(ty);confirmPost(e,rc.length?()=>waSend(e,rc):null)}
 };
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
@@ -2768,7 +2821,7 @@ function fieldsFor(e){
       : [['_kg','Kilograms dropped','number'],['note','Remark','text']];
   if(e.type==='ATC')
     return [['atc_station','Station','text'],['atc_freq','FREQ','text'],['atc_squawk','SQ','text'],['atc_msg','Message','area']];
-  if(e.type==='Resources')
+  if(e.type==='Ressources')
     return [['crew_pic','Pilot in command','text'],['crew_rest','Resting','text'],
             ['res_battery_pct','Battery %','number'],['res_fuel_cell','Fuel cell on/off','text'],
             ['res_solar','Solar on/off','text'],['note','Remark','text']];
@@ -2818,8 +2871,8 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',groupName:'#sGroupName',
-  repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken',webhook:'#sWebhook'};
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){
   const vols=String(CFG.o2||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
@@ -2843,37 +2896,8 @@ function readO2Rows(){
   return {o2:vols.join(','), o2bars:bars.join(','),
           o2bar:bars.length?Math.round(bars.reduce((a,b)=>a+b,0)/bars.length):200};
 }
-function paintWaRows(){
-  const w=CFG.wa||[];
-  $('#waRows').innerHTML=Array.from({length:8},(_,i)=>{
-    const r=w[i]||{n:'',p:''};
-    return `<div class="f two"><input type="text" data-wn="${i}" placeholder="Name ${i+1}" value="${esc(r.n)}">
-      <input type="tel" data-wp="${i}" inputmode="numeric" placeholder="41791234567" value="${esc(r.p)}"></div>`;
-  }).join('');
-  $('#waRows').oninput=paintWaCount;
-}
-function paintWaCount(){
-  const el=$('#waCount');if(!el)return;
-  let ok=0,bad=0;
-  for(let i=0;i<8;i++){
-    const n=(($('[data-wn="'+i+'"]')||{}).value||'').trim();
-    const p=String((($('[data-wp="'+i+'"]')||{}).value||'')).replace(/\D/g,'');
-    if(p.length>5)ok++; else if(n||p)bad++;
-  }
-  el.textContent=t('waCount').replace('{n}',String(ok))
-    +(bad?' \u00b7 '+t('waBad').replace('{n}',String(bad)):'');
-  el.classList.toggle('warn',!!bad);
-}
-function readWaRows(){
-  const out=[];
-  for(let i=0;i<8;i++){
-    const n=($('[data-wn="'+i+'"]')||{}).value||'',p=($('[data-wp="'+i+'"]')||{}).value||'';
-    if(String(p).replace(/\D/g,'').length>5)out.push({n:n.trim(),p:String(p).replace(/\D/g,'')});
-  }
-  return out;
-}
 function paintModeLab(){}
-const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Resources:'#tplRes',Other:'#tplOth'};
+const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
 function fillTplRows(){
   for(const k in TPLF)$(TPLF[k]).value=tplFor(k);
   $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ')
@@ -2898,7 +2922,7 @@ function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
   mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sGeo',String(Number(CFG.geo)||0));mark('#sNight',CFG.night);mark('#sRole',CFG.role);
-  paintWaRows();paintWaCount();paintO2Rows();paintModeLab();fillTplRows();
+  paintO2Rows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
   UNLOCKED=false;$('#setLocked').style.display='';$('#setOpen').style.display='none';
@@ -2938,12 +2962,29 @@ function paintDevices(){
       <div><b>${esc(d2.reporter||t('devUnknown'))}</b>
         <i>${esc(d2.device)} \u00b7 ${esc(state)} \u00b7 ${esc(when)} \u00b7 ${d2.n} ${esc(t('rows'))}</i></div>
       ${self?'<span class="self">'+esc(t('devSelf'))+'</span>'
-            :'<button data-dev="'+esc(d2.device)+'">'+esc(blocked.includes(d2.device)?t('devAllow'):t('devKick'))+'</button>'}
+            :'<span class="devbtns">'
+              +(blocked.includes(d2.device)?''
+                :'<button data-act="hand" data-dev="'+esc(d2.device)+'" data-name="'+esc(d2.reporter||'')+'">'
+                  +esc(CFG.handover===d2.device?t('devOffered'):t('devMakeMaster'))+'</button>')
+              +'<button data-dev="'+esc(d2.device)+'">'+esc(blocked.includes(d2.device)?t('devAllow'):t('devKick'))+'</button>'
+             +'</span>'}
     </div>`;
   }).join('');
 }
+/* Handing the role over: the master names a device, that device says yes, and only then
+   does the old master step down. Two masters at once would overwrite each other's setup,
+   so the change is one-way and confirmed at both ends. */
+async function offerMaster(devId,name){
+  if(!await ask({title:t('handTitle'),
+    text:t('handAsk').replace('{d}',name||devId),ok:t('handOffer'),cancel:t('cancel')}))return;
+  CFG.handover=devId;save(K_CFG,CFG);
+  await publishSetup();
+  paintDevices();
+  await info(t('handTitle'),t('handWait').replace('{d}',name||devId));
+}
 $('#devList').addEventListener('click',async ev=>{
   const b=ev.target.closest('button');if(!b||!b.dataset.dev)return;
+  if(b.dataset.act==='hand')return offerMaster(b.dataset.dev,b.dataset.name||'');
   const id=b.dataset.dev,blocked=(CFG.blocked||[]).slice();
   const i=blocked.indexOf(id);
   if(i>=0){blocked.splice(i,1)}
@@ -2969,6 +3010,49 @@ $('#btnSaveRep').onclick=()=>{
   CFG.reporter=$('#sReporterOpen').value.trim().slice(0,10);save(K_CFG,CFG);
   paintReadout();paintStatus();toast(t('reporterSet')+' '+reporter());
 };
+/* everything that is set, on one screen, without unlocking anything */
+function settingsRows(){
+  const yn=v=>Number(v)?t('on'):t('off');
+  const R=[
+    [t('hFlight'),''],
+    [t('lFlight'),CFG.flight||'\u2014'],[t('lCall'),CFG.call||'\u2014'],
+    [t('lP1'),CFG.p1||'\u2014'],[t('lP2'),CFG.p2||'\u2014'],
+    [t('hDevice'),''],
+    [t('setupRole'),CFG.role==='master'?t('master'):t('follower')],
+    [t('hReporter'),reporter()],
+    ['Mode',CFG.mode==='shared'?t('sharedDev'):t('personalDev')],
+    [t('hLanguage'),(CFG.lang||'en').toUpperCase()],
+    [t('nightColour'),CFG.night||'red'],[t('tone'),yn(CFG.beep)],
+    [t('hBallast'),''],
+    [t('lInit'),(nz(CFG.init)||0)+' kg'],[t('lBagKg'),(nz(CFG.bagKg)||0)+' kg'],
+    [t('lReadyKg'),(nz(CFG.readyKg)||0)+' kg'],[t('lSteps'),CFG.steps||'\u2014'],
+    [t('lReadySteps'),CFG.readySteps||'\u2014'],
+    [t('hAtc'),''],
+    [t('lVfr'),CFG.vfr||'\u2014'],[t('lEmerg'),CFG.emerg||'\u2014'],
+    [t('lStations'),CFG.stations||'\u2014'],
+    [t('lMsgRx'),CFG.msgRx||'\u2014'],[t('lMsgTx'),CFG.msgTx||'\u2014'],
+    [t('hRessources'),''],
+    [t('lO2'),(CFG.o2||'\u2014')+(CFG.o2bars?'  ('+CFG.o2bars+' bar)':'')],
+    [t('lMethInit'),(nz(CFG.methInit)||0)+'%'],
+    [t('lPosMin'),(nz(CFG.posMin)||0)+' min'],[t('lOpsMin'),(nz(CFG.opsMin)||0)+' min'],
+    [t('lGeo'),yn(CFG.geo)],
+    ['WhatsApp',''],
+    [t('pAtcName'),(CFG.atcName||'\u2014')+(CFG.atcNum?' \u00b7 '+CFG.atcNum:'')],
+    [t('ghConn'),''],
+    ['Repository',CFG.repo||'\u2014'],['Branch',CFG.branch||'main'],['Folder',CFG.dir||'data'],
+    ['Token',CFG.token?'\u2022\u2022\u2022\u2022 '+String(CFG.token).slice(-4):t('devNever')],
+    ['Version',APP_VERSION]
+  ];
+  return R;
+}
+async function showSettings(){
+  const rows=settingsRows().map(([k,v])=>v===''
+    ? `<tr class="sh"><td colspan="2">${esc(k)}</td></tr>`
+    : `<tr><td>${esc(k)}</td><td>${esc(String(v))}</td></tr>`).join('');
+  await ask({title:t('showSet'),cancel:false,ok:t('close'),
+    html:'<div class="settbl"><table>'+rows+'</table></div>'});
+}
+$('#btnShowSet').onclick=showSettings;
 $('#btnUnlock').onclick=async()=>{
   if(CFG.role!=='master')return info(t('unlock'),t('masterOnly'));
   const v=await ask({title:'Settings password',text:'Enter the password to change the flight setup.',
@@ -2994,8 +3078,6 @@ pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
 $('#btnSave').onclick=async()=>{
   if(!UNLOCKED)return;
   const next={};for(const k in SF)next[k]=$(SF[k]).value.trim();
-  if(!validWebhookUrl(next.webhook))return toast(t('webhookBad'));
-  const wa=readWaRows();
   const mode=($('#sMode button.on')||{dataset:{v:'personal'}}).dataset.v;
   const role=($('#sRole button.on')||{dataset:{v:'master'}}).dataset.v;
   const night=($('#sNight button.on')||{dataset:{v:'red'}}).dataset.v;
@@ -3003,13 +3085,13 @@ $('#btnSave').onclick=async()=>{
   if(!await confirm2(
     {title:'Save settings?',text:flightChanged
       ?'The flight ID changes from "'+(CFG.flight||'none')+'" to "'+(next.flight||'none')+'". Entries are written to a different file from now on.'
-      :'These settings apply to every entry made on this device from now on. '+mode+' device, '+wa.length+' WhatsApp recipient(s).'},
+      :'These settings apply to every entry made on this device from now on. '+mode+' device, '+(CFG.atcNum?'ATC Coordinator set.':'No ATC Coordinator set.')},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
   Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
   const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bars=o2.o2bars;CFG.o2bar=o2.o2bar;
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
-  if(!shared())UI.alt=0;save(K_UI,UI);
+  if(!shared())UI.repName='';save(K_UI,UI);
   save(K_CFG,CFG);applyLang();posTick();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();paintSyncBox();
   setTheme(document.documentElement.dataset.theme,false);
   recalc(ENT);save(K_ENT,ENT);paint();
@@ -3149,7 +3231,6 @@ function flash(kind,msg,after){
   ft=setTimeout(()=>flash('',''),3000);
 }
 const waitSync=async()=>{for(let i=0;i<50&&SYNCING;i++)await new Promise(r=>setTimeout(r,120))};
-const waitWebhook=async()=>{for(let i=0;i<100&&HOOKING;i++)await new Promise(r=>setTimeout(r,120))};
 /* every post says what actually became of it, not just that it was written down */
 async function confirmPost(e,after){
   if(!configured()){flash('fail',t('fNoRepo'),after);return}
@@ -3157,10 +3238,8 @@ async function confirmPost(e,after){
   await waitSync();
   if(!SYNCING&&ENT.some(x=>!x.synced))await sync(true,true);
   await waitSync();
-  await waitWebhook();
   const row=ENT.find(x=>x.id===e.id);
-  if(row&&row.synced&&webhookPending(e.id))flash('wait',t('webhookQueued'),after);
-  else if(row&&row.synced)flash('ok',t('fPosted'),after);
+  if(row&&row.synced)flash('ok',t('fPosted'),after);
   else if(!navigator.onLine)flash('wait',t('fQueued'),after);
   else flash('fail',t('fFailed')+(LASTERR?': '+LASTERR:''),after);
 }
@@ -3170,14 +3249,13 @@ function toast(m){const el=$('#toast');el.textContent=m;el.className='on';clearT
 /* ── Start ─────────────────────────────────────────────────────────── */
 $$('.ver').forEach(e=>e.textContent=APP_VERSION);
 setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
-applyLang();fillSetup();paintRepHint();paintSyncBox();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
+tplMigrate();applyLang();fillSetup();paintRepHint();paintSyncBox();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
 mark('#rFuel',UI.fuel);mark('#rSolar',UI.solar);mark('#rO2crew',UI.o2crew);paintRes();mark('#bMed',UI.med||'sand');
 UI.act='drop';save(K_UI,UI);setAct('drop');mark('#bAct','drop');syncVfr();carryAtc();carryRes();paintChips();paintPics();paintVoice();paintSum();
 recalc(ENT);paint();wake();
-flushWebhooks();
-addEventListener('online',()=>{sync(true,true);flushWebhooks()});
+addEventListener('online',()=>sync(true,true));
 setInterval(paintStatus,5000);
 /* Reading is cheap while nothing changes, writing is not. So the app reads on a short
    rhythm and only pushes when there is something to push, with a pause between bursts. */
@@ -3187,7 +3265,6 @@ setInterval(paintStatus,5000);
 let lastPush=0;
 const pushGap=()=>{const w=writesIn(3600000);return w>350?30000:w>220?18000:10000};
 setInterval(()=>{
-  flushWebhooks();
   if(!configured()||!navigator.onLine||document.hidden)return;
   pollN++;
   const pending=ENT.some(e=>!e.synced);
