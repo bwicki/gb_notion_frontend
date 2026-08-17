@@ -693,7 +693,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-28';
+const APP_VERSION='v260813-30';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -775,7 +775,7 @@ const L={en:{
  freqRange:'A frequency runs from 118.000 to 136.975 MHz', freqStep:'Not a channel: names end in 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC posted',
  crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
- wrongPass:'Wrong password', checking:'Checking\u2026',
+ wrongPass:'Wrong password', checking:'Checking\u2026', newVersion:'A newer version is ready — close the app and open it again',
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
  quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
@@ -800,7 +800,7 @@ const L={en:{
  newFlightDone:'New flight',
  firstByMaster:'New flight must be initiated by the master device.',
  verifySettings:'New flight initiated. Please verify that all settings are accurate.',
- waitConfirm:'\u2026 wait for confirmation', fPosted:'Posted to CC Notion', fQueued:'Queued for later delivery (no internet connection currently)',
+ waitConfirm:'\u2026 wait for confirmation', fPosted:'Reported to CC', fQueued:'Queued for later delivery (no internet connection currently)',
  fFailed:'Failed', fNoRepo:'Failed: no repository configured',
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
  addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
@@ -904,7 +904,7 @@ const L={en:{
  freqRange:'Eine Frequenz liegt zwischen 118.000 und 136.975 MHz', freqStep:'Kein Kanal: Endungen sind 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC gesendet',
  crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
- wrongPass:'Falsches Passwort', checking:'Prüfe\u2026',
+ wrongPass:'Falsches Passwort', checking:'Prüfe\u2026', newVersion:'Eine neuere Fassung liegt bereit — App schliessen und neu öffnen',
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
  quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
@@ -929,7 +929,7 @@ const L={en:{
  newFlightDone:'Neue Fahrt',
  firstByMaster:'Eine neue Fahrt muss vom Master-Gerät eröffnet werden.',
  verifySettings:'Neue Fahrt eröffnet. Bitte alle Einstellungen prüfen.',
- waitConfirm:'\u2026 warte auf Bestätigung', fPosted:'An CC Notion gesendet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
+ waitConfirm:'\u2026 warte auf Bestätigung', fPosted:'An CC gemeldet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
  fFailed:'Fehlgeschlagen', fNoRepo:'Fehlgeschlagen: kein Repository eingerichtet',
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
  addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
@@ -3286,7 +3286,22 @@ setInterval(()=>{
   }else if(pollN%2===0)sync(true,false);
 },5000);
 posTick();
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* Keeping the crew on the current build. The worker already takes over at once; what was
+   missing was a nudge to look for a new one and a word when it has arrived. */
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    const look=()=>{try{reg.update()}catch(e){}};
+    look();
+    setInterval(look,15*60*1000);
+    addEventListener('focus',look);
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;if(!nw)return;
+      nw.addEventListener('statechange',()=>{
+        if(nw.state==='installed'&&navigator.serviceWorker.controller)toast(t('newVersion'));
+      });
+    });
+  }).catch(()=>{});
+}
 (async()=>{
   const applied=await importFromHash();
   if(applied){
