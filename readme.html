@@ -30,38 +30,54 @@ a{color:inherit}
 
 .nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
-<p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
+<p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="notion.html">Notion</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
 <h1>GB Notion Frontend — Basket Reporting</h1>
 <p>An offline version of the Basket Reporting form for use in the basket during a gas balloon
 flight. Same four message types as the Tally form, same submit action, but it keeps working
 without signal, stamps every entry with time and GPS position, carries the ballast figure
 forward across all devices, and lets several people report in parallel.</p>
 <p>Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. A manual entry is also sent as one JSON object to the configured Reporting Webhook.
-The app reads the GitHub files back every five seconds, so each device always shows the
+files. The app reads the same files back every five seconds, so each device always shows the
 complete flight.</p>
-<p>No build step and no dependencies. The app talks to the GitHub API, the configured Zapier
-webhook, OpenStreetMap when place names are enabled, and WhatsApp links when selected.</p>
-<hr>
+<p>No build step, no dependencies, no external requests other than to the GitHub API.</p>
+<hr />
 <h2>1. The screen</h2>
 <p>The whole app fits one phone screen without scrolling, and its outline is always visible.
 Only the log and the setup scroll.</p>
+<p>The day/night switch is a square button at the top right of the menu, level with the word
+<em>Menu</em>, and nowhere else: choosing the colour is a thing one does between flights, and a button
+that turns the whole display red has no business under a thumb reaching for the post button, and shows the mode it leads to: a
+moon by day, a sun at night. <strong>Every start is a day start</strong> — night is chosen for a night, and a
+fresh launch is far more often a new day than the continuation of one.</p>
 <p>Day mode is dark anthracite on a grey ground; unselected buttons carry a visible outline and a
 white face. Night mode is red on black and preserves dark adaptation. The sun/moon button in
 the header switches in one tap and the choice is remembered; on first launch the app follows
-the iPad&#39;s own appearance setting.</p>
-<p>The header shows UTC to the second and, at its right, the ballast still on board in the same
-size, then the flight and callsign with the live navigation line beneath them — <code>293° · 12.3 kn · ± 8 m</code>, course over ground, ground speed
-and the accuracy of the current fix. Before a fix it reads <code>GPS searching</code>; with a fix but no
+the iPad's own appearance setting.</p>
+<p>The header shows UTC to the second with the ballast still on board directly beneath it, right
+aligned with the seconds and in the same size, then the flight and callsign with the live navigation line beneath them — <code>293° · 12.3 kn · 3937 ft · +1.4 m/s</code> — course over ground, ground speed, altitude and rate of
+climb, in the order a pilot reads them. The accuracy of the fix has moved to the footer, where
+it sits beside a red, amber or green dot: green under 15 metres, amber under 50, red beyond
+that or with no fix at all. The rate of climb is figured from the altitude
+of two fixes at least five seconds apart and smoothed, because the raw difference between two
+consumer fixes jumps far too much to read. Before a fix it reads <code>GPS searching</code>; with a fix but no
 movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.</p>
-<p>Everything that is not reporting lives behind the menu: Report, Log, Settings, the day/night
-switch, Reload from GitHub, Send now, Print the log, Export the table, and <em>About — more info</em>,
-which opens this manual as a page in its own window; the licence is linked from its last
-section. <em>Report</em> is the filled button at the top, because reporting is what the app is for and
-the menu should not make you hunt for the way back. The switch is named for the mode it takes you to, so
+<p>Everything that is not reporting lives behind the menu, and the menu is a list of <strong>places</strong>
+rather than a list of actions: <em>Return to Reporting Screen …</em> with a back arrow at the top,
+<em>Open log</em>, <em>Settings</em>, <em>Log — reload, print, export</em>, <em>Share setup with another device</em> on the
+master, and <em>About — more info</em>, which opens this manual in a window of its own with the licence
+linked from its last section.</p>
+<p>The three things that turn the log into a document — reloading it from GitHub, printing it,
+exporting it — sit together behind one entry, so the main list stays short. The day/night switch
+has become a square button at the top right of the menu, level with the word <em>Menu</em>: it is a
+setting, not a destination, and it no longer takes a line of its own.</p>
+<p><strong>Send now has gone.</strong> Entries go out by themselves the moment they are made and again as soon
+as a lost connection returns; when something really is stuck, <em>Synchronize data</em> at the top of
+the setup does the job properly — it clears the cached ETags, pushes, reads the whole table back
+and then says what happened. A second button that only said <em>try again</em> was one button too
+many. The switch is named for the mode it takes you to, so
 it reads <em>Night mode</em> by day and <em>Day mode</em> at night.</p>
 <p>Keeping the header to two buttons leaves the whole width for the flight and the navigation
 line, and the three screens are always one tap apart through the menu.</p>
@@ -74,7 +90,7 @@ favicons have a transparent ground so they sit in a browser tab of any colour; t
 icons stay opaque, since iOS renders transparency in an app icon as black.
 The set covers all three platforms: <code>apple-touch-icon</code> in 120, 152, 167 and 180 pixels for
 iPhone and iPad, manifest icons in 192 to 512 for Android and Chrome, two maskable versions
-with the artwork inside the safe circle so Android&#39;s adaptive shapes do not clip it, a
+with the artwork inside the safe circle so Android's adaptive shapes do not clip it, a
 <code>mask-icon.svg</code> for pinned tabs in desktop Safari, and a multi-resolution <code>favicon.ico</code>.
 The icons are opaque — iOS renders transparency in a home screen icon as black — and the
 manifest background is white to match, so the Android splash shows no seam. The 16 and 32 pixel
@@ -103,20 +119,15 @@ airspace uses something else.</p>
 inventory: it seeds the running figure so that early drops count, and it gives the first
 inventory something to compare against in <code>tally_diff_kg</code>. Leave it empty and the ballast
 figure simply starts with the first Take Inventory.</p>
-<p>Device mode, language, reporter name, night colour and confirmation tone are personal settings
-and need no password. The shared flight setup below them is editable only on the Master: press
-<em>Unlock settings</em> and enter <strong>1234</strong>. Fill in the flight, the two pilots, the weight of one
-ballast bag, the full ready-ballast weight, and the quick drop amounts. The methanol level at
-the start of the flight is a setting of its own — a tank is not always
+<p>The reporter name for this device sits at the top of the setup and needs no password — it
+changes often enough, and getting it wrong only mislabels entries. Everything below it is
+locked: press <em>Unlock settings</em> and enter <strong>1234</strong>. Fill in the device mode and name, the flight, the two
+pilots, the weight of one ballast bag, the full ready-ballast weight, and the quick drop
+amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
-Resources entry says otherwise.</p>
+Ressources entry says otherwise.</p>
 <p>The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.</p>
-<p>The <strong>Reporting-Webhook</strong> is the HTTPS endpoint that receives each manual entry for forwarding
-to Notion. Its default is
-<code>https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/</code>. It is part of the shared flight setup:
-only the Master can edit it, and Followers receive the Master&#39;s saved value automatically.
-Leaving the field empty disables webhook delivery.</p>
 <p>Opening the <strong>WhatsApp message layout</strong> or the <strong>GitHub connection</strong> asks first — <em>Do you really
 want to change these settings?</em> Those two are where a slip costs a flight rather than a
 keystroke.</p>
@@ -126,8 +137,8 @@ applies, so a flight in progress cannot be overwritten by a stray tap. Leaving t
 screen locks it again.</p>
 <h2>3. Install on the iPad</h2>
 <p>Safari → Share → <strong>Add to Home Screen</strong>. It is saved as <em>Basket Reporting</em> and launches full
-screen without Safari&#39;s bars, and location and wake lock work as expected. Location permission is requested on the
-first entry; &quot;While Using the App&quot; is enough. Without it, entries are still recorded, with
+screen without Safari's bars, and location and wake lock work as expected. Location permission is requested on the
+first entry; "While Using the App" is enough. Without it, entries are still recorded, with
 <code>gps_fix</code> set to <code>false</code>.</p>
 <h2>4. Floating over other apps</h2>
 <p>The minimise button collapses the app to a blue pill reading <code>HB-QWV Reporting</code> with the
@@ -145,7 +156,8 @@ Anything claiming otherwise on a web page is drawing inside that page.</p>
 <th>How to keep it above the other app</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><strong>iPad</strong></td>
 <td>Install to the Home Screen, then drag it from the Dock onto the running app — <strong>Slide Over</strong> gives a narrow window floating over a map or Foreflight, swiped off the edge and back with one gesture. <strong>Split View</strong> and <strong>Stage Manager</strong> are the fixed and the free-floating variants.</td>
 </tr>
@@ -161,26 +173,29 @@ Anything claiming otherwise on a web page is drawing inside that page.</p>
 <td><strong>Chrome on a laptop</strong></td>
 <td>The minimise button opens a genuine always-on-top window through document picture-in-picture — the only browser feature that does this. It survives switching to any other application. Useful for the chase car.</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>The app detects the picture-in-picture case on its own: press minimise and you get the
 always-on-top window where the browser supports it, and the in-app pill everywhere else.
 Clicking either brings the app back.</p>
 <h2>5. Who is reporting</h2>
 <p>The setup asks whether this is a <strong>personal device</strong> or a <strong>shared device</strong>.</p>
-<p>On a personal device — the default, and what the two pilots&#39; own phones should be set to —
+<p>On a personal device — the default, and what the two pilots' own phones should be set to —
 every entry is filed under the name entered there, whoever happens to be pilot in command. The
 reporter button is hidden; there is nothing to get wrong.</p>
 <p>On a shared device the reporter defaults to whoever is pilot in command, and a button beside
-<em>Post to CC Notion</em> — about a third of the width — switches to the other pilot for the
-exceptional case. It reads <em>reporting as</em> with the name below, and appends <em>(PIC)</em> when the two
+<em>Report to CC</em> — about a third of the width — <strong>walks through everyone who might be
+filing</strong>: both pilots, and the name this device carries if it belongs to neither. A crew member
+on board who is not one of the two named pilots therefore needs no setting of their own; enter
+the name once as the reporter of the device and the button offers all three. It reads <em>reporting as</em> with the name below, and appends <em>(PIC)</em> when the two
 are the same person, so a glance tells you both facts at once. It turns dark
 while the alternate is active, so the exception is visible, and every entry carries that name
-until it is switched back. Changing the PIC on the Resources tab moves the default with it.</p>
+until it is switched back. Changing the PIC on the Ressources tab moves the default with it.</p>
 <p>Each row also records <code>device_mode</code>, so it is possible to tell afterwards which reporting
 regime a row came from.</p>
 <h2>5a. Position</h2>
 <p>The position on every row is the fix of the device that made the entry, taken at the moment of
-posting. Rows merged in from another iPad keep that iPad&#39;s position — nothing is ever
+posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
 re-stamped. Three columns carry it in short notation: <code>pos_lat</code> as <code>484532N</code>, <code>pos_lon</code> as
 <code>0072345E</code>, and <code>alt_ft</code> as WGS84 altitude in feet. The decimal degrees and metres stay
 alongside for map links and for anything that needs the raw value.</p>
@@ -193,9 +208,13 @@ available. The header carries the live values under the flight number.</p>
 <p>The kilogram field starts empty every time the Ballast tab is opened. A running total that
 carried over from ten minutes ago would be added to by mistake far more often than it would
 save a keystroke.</p>
+<p>Ballast is shown in <strong>whole kilograms everywhere</strong> — in the header, the log, the messages and
+the printout. Ballast is counted in sacks, and a figure like <code>392.3 kg</code> would suggest a
+precision the basket does not have. The Schütte is rounded <strong>down</strong>, so its share is never
+overstated. The stored values keep whatever was entered; only the display is rounded.</p>
 <p><strong>Sand and water are carried forward separately.</strong> An inventory sets both, a drop reduces the
 one it was made of, and every entry therefore knows what is left of each — recorded as
-<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. An inventory reads <code>sand 390 kg („Schütte&quot; 100%) · water 20 kg · 24 bags</code> — the Schütte named
+<code>sand_left_kg</code> and <code>water_left_kg</code> beside the total. An inventory reads <code>sand 390 kg („Schütte" 100%) · water 20 kg · 24 bags</code> — the Schütte named
 separately as a percentage and counted inside the sand figure, since that is where it physically
 is. A drop reads
 <code>dropped 40 kg sand · remaining 370.0 kg total ballast (350.0 kg sand, 20.0 kg water)</code>, and a
@@ -211,10 +230,10 @@ always the one dark button, so a knock against the iPad cannot log a drop.</p>
 inputs:</p>
 <ul>
 <li><em>Bags</em> and <em>Water</em> on one line — bags counted in total including safety ballast and
-multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
-<li><em>Ready ballast</em> („Schütte&quot;) — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
-percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
-selected.</li>
+  multiplied by the weight per bag from the setup, water in litres at one kilogram per litre.</li>
+<li><em>Ready ballast</em> („Schütte") — the steps come from the setup, <code>0,10,25,50,75,100</code> by default, as a
+  percentage of the full ready-ballast weight, normally 30 kg. The last value used stays
+  selected.</li>
 </ul>
 <p>The running total under the fields shows the result before it is posted, and the entry lands
 in the table as three columns:</p>
@@ -225,7 +244,8 @@ in the table as three columns:</p>
 <th>Contents</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>sand_kg</code></td>
 <td>bags × weight per bag, <strong>plus</strong> the ready ballast</td>
 </tr>
@@ -237,7 +257,8 @@ in the table as three columns:</p>
 <td><code>total_ballast_kg</code></td>
 <td>sand + water, and the new figure on board</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>Ready ballast is always sand, so sand + water = total. <code>inv_bags</code> and <code>inv_ready_pct</code> are
 carried alongside so an inventory can be reopened and corrected later.</p>
 <p><strong><code>tally_diff_kg</code> records where the figures parted company.</strong> Every inventory stores the
@@ -252,7 +273,7 @@ difference live, before an inventory is posted.</p>
 <code>first inventory total − currently on board</code>. Throwing sand is not exact; counting sacks is.
 Every later inventory therefore feeds straight into the dropped figure, including whatever
 went overboard without being logged.</p>
-<h2>7. ATC, Resources, Other</h2>
+<h2>7. ATC, Ressources, Other</h2>
 <p><strong>ATC</strong> puts the station on its own line, then FREQ, SQ and a VFR button side by side,
 then the message.</p>
 <p>A frequency must lie between <strong>118.000 and 136.975 MHz</strong> and be a real channel name. Both
@@ -271,15 +292,20 @@ one to three digits is refused on posting. The emergency codes are listed in the
 the entry goes out, because they are three keystrokes away from ordinary codes.</p>
 <p>The <strong>VFR</strong> button fills the squawk with the conspicuity code from the setup, <code>7000</code> by default,
 and lights up while that code is set. Tapping it again clears the field; typing anything else
-turns the light off. Station, FREQ and SQ open holding the last call in grey. Tapping into any of them clears that
+turns the light off. The station is typed as it reads — <code>Bern Info</code>, not <code>BERN INFO</code>. The keyboard capitalises the
+first letter of each word and the app no longer forces upper case, since a station name is a
+place name.</p>
+<p>Station, FREQ and SQ open holding the last call in grey. Tapping into any of them clears that
 field at once — those three are replaced rather than edited, and deleting four digits by hand in
 turbulence is a waste of a hand. Typing turns the text dark.</p>
 <p>Beside <em>Transmitted</em> sits <strong>Copy from last call</strong>, greyed and dashed, and it stays there.
 One tap puts all three values back in dark type and drops the cursor into the message, without
 any message of its own — the fields having filled is the confirmation. The station comes back
 with a trailing space and is then left alone: tapping into it keeps what was copied, so
-<code>ZURICH INFO </code> can be turned into <code>ZURICH INFO ARRIVAL</code> without retyping the first two words.
-FREQ and SQ still clear on a tap, because those two are replaced rather than extended.</p>
+<code>ZURICH INFO</code> can be turned into <code>ZURICH INFO ARRIVAL</code> without retyping the first two words.
+FREQ and SQ still clear on a tap, because those two are replaced rather than extended. Empty,
+the two fields say what belongs in them — <code>FREQ XXX.XXX MHz</code> and <code>SQ XXXX</code> — which is a line of
+labels saved above them.</p>
 <p>Beneath the station field are the station presets — <em>Info, Radar, Tower, Control, Approach</em> by
 default, and whatever you put in the setup instead. A tap inserts the word <strong>where the cursor
 stands</strong> rather than replacing the field, with exactly one space between it and what is already
@@ -291,18 +317,26 @@ a station calls you is rarely what you note down when you call it. Both start wi
 until you change them.</p>
 <p>The standard phrases sit above the message field. Tapping one adds it, tapping it again takes
 it out, so QNH and Ops Normal are a toggle rather than something that accumulates.</p>
-<p>The remark field on Ballast and Resources is the same size as the ATC message field, since a
+<p>The remark field on Ballast and Ressources is the same size as the ATC message field, since a
 remark is often the more important part of the entry.</p>
-<p><strong>Resources</strong> puts current PIC and who is resting on the first line as panel switches, then
+<p><strong>Ressources</strong> puts current PIC and who is resting on the first line as panel switches, then
 battery, fuel cell and solar cell on the second, then methanol level, <em>Crew on O2</em> and the O2
 level on the third. Only pilots the master actually named appear: leave the second name empty
 and the switches shrink to a single-handed flight.</p>
 <p>Changing the PIC puts the other pilot on rest automatically, because that is what a handover
 normally means. <em>Nobody</em> is still one tap away for the stretches when both are awake.</p>
+<p><strong>A handover is asked about before it is filed.</strong> If the PIC named on this report differs from
+the one on the last, posting stops to ask <em>The pilot in command changes from A to B. Report it?</em>
+On <em>Report the change</em> the entry is marked and reads <strong>Change of PIC</strong> at the head of its line in
+the log and at the head of the WhatsApp message; on <em>Just the reading</em> it is filed as an ordinary
+resources report with the new name. A change of command is a fact of the flight, not a side
+effect of a tap, and the log should be able to show when it happened.</p>
 <p><em>Battery</em> and <em>Methanol level</em> both open the same list of percentages in a window, rather than
 a dropdown, so the two read alike and both are one tap away in gloves.</p>
 <p><strong>O₂ Reserve</strong> is calculated rather than typed: volume × pressure, summed over the cylinders,
-which gives the litres of gas at one bar. The button reads <code>600 l (21%) ②</code> — the reserve, its
+which gives the litres of gas at one bar. <strong>Each cylinder keeps its own full pressure</strong>, taken
+from the setup table — a 10 litre bottle filled to 300 bar beside a 2 litre at 200 would
+otherwise be averaged, and the share of a full load would come out wrong. The button reads <code>1'700 lit (50%) ①</code>, thousands separated by an apostrophe — the reserve, its
 share of a full load, and the number of the bottle in use in a circle. It never shows more than
 100 per cent, and it never shows pressures: those belong in the input window, which is where you
 report them. Tapping it opens one row per cylinder with its size, a field for the pressure, and
@@ -318,13 +352,17 @@ overwhelming majority of entries, and a form that opens on Inventory because tha
 happened an hour ago costs a tap every single time.</p>
 <p><strong>Other</strong> is a free note, up to four pictures, and a voice note. They are scaled down to 1024 pixels and
 about 60 per cent JPEG quality in the browser before anything is stored, because a queued entry
-has to survive in the device&#39;s local storage until there is a link again. Each picture is
+has to survive in the device's local storage until there is a link again. Each picture is
 written to <code>data/media/&lt;entry-id&gt;-&lt;n&gt;.jpg</code> in the repository and the row records how many were
 attached and where they landed.</p>
 <p><em>Add voice msg</em> records through the microphone — press once to start, once again to stop, two
 minutes at most. The recording appears with a player so it can be listened to before posting,
 and is written to <code>data/media/&lt;entry-id&gt;-voice.webm</code>, or <code>.m4a</code> on iOS, where Safari records
 in that format instead.</p>
+<p><strong>A picture or a voice note travels with the message.</strong> <code>wa.me</code> carries text only, so when an
+Other entry has an attachment the app hands message and file together to the system share
+sheet, where WhatsApp is one of the destinations and the chat is picked there. Without an
+attachment the direct <code>wa.me</code> route is used as before, which is one tap fewer.</p>
 <p><strong>Attachments are not queued.</strong> Unlike the entries themselves, pictures and voice notes live
 only in memory until they are uploaded; posting without a connection files the note and says so,
 but the attachment is gone on the next reload. Record and photograph when there is a link, or
@@ -332,26 +370,33 @@ expect to repeat it.</p>
 <p><strong>Each of the four forms opens with the last entry of its own kind</strong>, in a panel headed
 <code>Last Message | A. Wicki | 21:04:37Z</code> — what it was, who filed it and when. ATC spells the call
 out as <code>RCVD  ZURICH INFO  FREQ 124.700 MHz  SQ 2450</code> with the wording beneath; Ballast shows the
-drop or the inventory; Resources the crew and power state; Other the note. Where nothing of
+drop or the inventory; Ressources the crew and power state; Other the note. Where nothing of
 that kind has been reported yet, the panel simply reads <code>-</code>.</p>
-<p>The reporter is named because the entry may well have come from the other pilot&#39;s device: the
+<p>The reporter is named because the entry may well have come from the other pilot's device: the
 panel is read from the table, not from what this device happens to remember. A follow-up call
 never has to be reconstructed from memory, and never depends on who made the last one.</p>
 <h2>8. WhatsApp</h2>
-<p>ATC, Resources and Other each list the recipients individually at the foot of the form, under
-<em>Also send to WhatsApp</em> — the entry always goes to the table, and WhatsApp is the addition, one
+<p>All four forms list the recipients individually at the foot, under <em>Also send to WhatsApp</em> —
+the entry always goes to the table, and WhatsApp is the addition. <strong>Ballast is off by default</strong>
+even where the others are on: a drop happens many times an hour and would be noise in a chat,
+but the option is there as a fallback when the table cannot be reached, one
 chip per person, tapped on and off. Ballast entries never go to WhatsApp.</p>
 <p>On ATC the coordinator sits on a line of its own above the rest of the list, so the one
 recipient that matters is never lost among the others.</p>
-<p>Each recipient has a pill of its own with a check circle in front of it, filled when it is on
-and clearly outlined when it is off — an earlier version drew the off state so faintly that a
-list of three looked like a list of one. The label counts them, <em>Also send to WhatsApp · 3</em>, so
-an empty list is visible as an empty list rather than as a bug. Pills are matched by number
+<p><strong>Recipients sit in three columns</strong> in small type, each its own tappable field with a tick in
+front of it — faint when off, solid when on. Six recipients take two rows rather than six, and
+nothing can slip out of view; a long name is cut with an ellipsis rather than pushing the grid
+apart. The group keeps a full-width row of its own at the end. The label counts what will actually be sent: <em>Also send to WhatsApp ·
+3 recipients</em>.</p>
+<p>In the setup, under the recipient rows, a line counts as you type: <em>3 with a usable number</em>, and
+names it when a row is being ignored because the number is too short. A recipient with no usable
+number cannot be messaged and is silently dropped, which is exactly the sort of thing that
+should not be silent. Pills are matched by number
 rather than by position — an earlier
 version matched by index and silently dropped the coordinator, which is the sort of thing that
 is only noticed when a message does not arrive.</p>
 <p>The <strong>ATC Coordinator</strong> is listed first and only on ATC, and is the only one ticked there by
-default — an ATC call belongs with the coordinator, not with the whole crew. On Resources and
+default — an ATC call belongs with the coordinator, not with the whole crew. On Ressources and
 Other the coordinator does not appear and everybody else is ticked by default. Each choice is
 remembered per message type, so the pattern you settle into is the one you keep.</p>
 <p>Recipients are defined in the setup, up to eight, each with a name and a number in
@@ -360,7 +405,7 @@ international form with digits only, for example <code>41791234567</code>.</p>
 only, as its own checkbox above the general one, and it is ticked by default there — an ATC
 call normally goes to the coordinator whether or not the rest of the list is in play. The two
 checkboxes are independent, so an ATC entry can go to the coordinator alone, to the list alone,
-to both, or to nobody. Resources and Other never see the coordinator.</p>
+to both, or to nobody. Ressources and Other never see the coordinator.</p>
 <p>With the box ticked, posting first writes the entry as usual, then opens a sheet with the
 finished message and one button per recipient. An ATC entry reads:</p>
 <pre><code>*ATC | HB-QWV*
@@ -379,11 +424,11 @@ check with the count for waiting, red cross when an attempt was refused.</p>
 <p><strong>The post button carries the whole exchange.</strong> The moment it is pressed it greys out, locks
 and reads <em>… wait for confirmation</em>, so a second tap cannot post the same entry twice. The entry
 appears in <em>Last Message</em> as soon as it is written. Then the button becomes the answer for three
-seconds — pale green <em>Posted to CC Notion</em> when the row reached GitHub, pale yellow <em>Queued for
+seconds — pale green <em>Reported to CC</em> when the row reached GitHub, pale yellow <em>Queued for
 later delivery (no internet connection currently)</em> when it is waiting, pale red <em>Failed</em> with
 the reason when something else went wrong — an expired token, a repository that is not there. The entry itself
 is never lost either way; the band only says where it stands.</p>
-<p><strong>Sending is immediate.</strong> With a box ticked, pressing <em>Post to CC Notion</em> writes the entry and
+<p><strong>Sending is immediate.</strong> With a box ticked, pressing <em>Report to CC</em> writes the entry and
 opens WhatsApp with the message already in the chat — no preview, no list, no extra tap. The
 tick survives from one message to the next, so a run of ATC calls to the coordinator is one
 button each. Only the send button inside WhatsApp is still yours to press; no browser can press
@@ -394,13 +439,21 @@ rest appears behind it, since WhatsApp takes one chat at a time.</p>
 braces are substituted, and lines behave in three ways:</p>
 <ul>
 <li><code>{key}</code> — a line whose placeholders are all empty is dropped, so a field nobody reported
-costs nothing.</li>
+  costs nothing.</li>
 <li><code>{!key}</code> — the line is kept whatever happens, and an empty value prints as <code>-</code>. The Msg line
-uses this, so every message shows what was said even when nothing was.</li>
-<li>A line made of nothing but values and separators, like <code>{time} · {pos} · {alt} · {tc} · {speed}</code>, keeps its own separator and simply loses the parts that are missing. Without a fix
-it collapses to the time alone, with no stray dots left behind.</li>
+  uses this, so every message shows what was said even when nothing was.</li>
+<li>A line made of nothing but values and separators, like <code>{time} · {pos} · {alt} · {tc} ·
+  {speed}</code>, keeps its own separator and simply loses the parts that are missing. Without a fix
+  it collapses to the time alone, with no stray dots left behind.</li>
 </ul>
-<p><em>Reset to default</em> puts the three templates back.</p>
+<p><em>Reset to default</em> puts the four templates back.</p>
+<p><strong>The built-in templates are the standard, and your edits survive.</strong> A template you have written
+is kept across updates — losing someone's wording to a version bump would be worse than a
+missing placeholder. What the app does do is fill in a kind of message that has no saved
+template at all, which is how the Ballast template appeared when it was added without anybody
+having to reset anything. Placeholders added since your edit — the rate of climb, the place
+name, the direction of an ATC call — have to be put in by hand, or <em>Reset to default</em> brings the
+current wording back for all four.</p>
 <table>
 <thead>
 <tr>
@@ -408,7 +461,8 @@ it collapses to the time alone, with no stray dots left behind.</li>
 <th>Value</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>{type}</code> <code>{callsign}</code> <code>{flight}</code> <code>{reporter}</code></td>
 <td>who and what</td>
 </tr>
@@ -418,7 +472,7 @@ it collapses to the time alone, with no stray dots left behind.</li>
 </tr>
 <tr>
 <td><code>{pic}</code> <code>{resting}</code> <code>{battery}</code> <code>{fuelcell}</code> <code>{solar}</code></td>
-<td>the Resources fields</td>
+<td>the Ressources fields</td>
 </tr>
 <tr>
 <td><code>{note}</code></td>
@@ -448,13 +502,41 @@ it collapses to the time alone, with no stray dots left behind.</li>
 <td><code>{maps}</code></td>
 <td>link to the position on Google Maps</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>Without a position fix <code>{pos}</code>, <code>{alt}</code> and <code>{maps}</code> are empty: the map line disappears and the
 time line keeps just the time.</p>
 <p>The row records <code>whatsapp</code> = <code>yes</code> and <code>whatsapp_to</code> with the names, so the table shows which
 entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
 cannot be recorded here.</p>
 <h2>8a. Master and followers</h2>
+<p><strong>The master owns the setup and the log; the followers own their reporting.</strong> That is the whole
+division. Entries can only be changed or deleted on the master — a follower that taps a row is
+told so and asked to post a correction instead, which the master can then tidy. The log is the
+flight record, and one device has to be answerable for it.
+Only the master can unlock the protected part of the setup — a follower that tries is told so
+and pointed at the personal settings above, which are open to everyone. The master may be a
+shared or a personal device; that choice says who reports, not who owns the flight.</p>
+<p>A follower posts everything a master posts, with no restriction, and every device sees it within
+five seconds. The one exception is the first entry of a new flight, which belongs to the master
+— that entry is what tells the crew the flight is really running.</p>
+<p><strong>The role can be handed over.</strong> Beside every other device in the list is <em>Make master</em>. The
+master offers, and <strong>nothing changes until that device accepts</strong>: the offer travels in the
+published setup, the other device asks its holder <em>Accept / Not now</em>, and only on a yes does it
+take the role and publish itself as the owner. The old master sees that in the file and steps
+down to follower on its own.</p>
+<p>Two masters at once would overwrite each other's setup, so the change is deliberately one-way
+and confirmed at both ends. A declined offer is remembered and not asked again; the master can
+withdraw it by offering the role to somebody else, or by leaving it and carrying on.</p>
+<p><strong>Devices on this flight</strong> sits below the GitHub connection on the master. It is read from two
+places: the entries themselves — who wrote, from which device, when, how many rows — and a small
+card every device leaves in <code>data/_seen/</code>, at most once every half hour. Without that card a
+follower that has been set up but has not yet reported would be invisible, which is exactly the
+moment one wants to see it. The master reads the cards when the menu is opened. A device that has
+not reported for <strong>36 hours</strong> is shown as quiet; the master is never counted out, since it may
+simply be watching. <em>Remove</em> puts a device on a list published with the setup; the next time it
+checks in it clears its own token and says so. Its entries stay in the table — removing a device
+is not rewriting the log. <em>Allow again</em> undoes it.</p>
 <p><strong>The master is whoever knows the master password.</strong> There is no other rule and no default.</p>
 <p>Two passwords, doing two different jobs:</p>
 <table>
@@ -465,7 +547,8 @@ cannot be recorded here.</p>
 <th>Who has it</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><strong>1234</strong></td>
 <td>opens the settings screen</td>
 <td>everybody in the crew</td>
@@ -475,7 +558,8 @@ cannot be recorded here.</p>
 <td>makes a device the master</td>
 <td>one person, normally the PIC</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>The first time the app starts on a fresh device it asks the question outright: <em>Is this the
 master device?</em> Entering <strong>5678</strong> makes it the master. Choosing <em>Join as follower</em> — or getting
 the password wrong three times — makes it a follower. A device that was set up through an
@@ -484,12 +568,12 @@ invitation link is a follower without being asked, because the link came from a 
 question comes back on the next start until it is answered.</p>
 <p>Later changes go the same way: in the settings the role can be switched to Follower freely, but
 switching to Master asks for <strong>5678</strong> again. And because two masters would overwrite each
-other&#39;s setup, each published setup carries the identity of the device that wrote it; a master
+other's setup, each published setup carries the identity of the device that wrote it; a master
 that sees a different one in the file says so on screen.</p>
-<p>One device owns the flight setup and is the <strong>Master</strong> — normally the PIC&#39;s iPad. The others
+<p>One device owns the flight setup and is the <strong>Master</strong> — normally the PIC's iPad. The others
 are <strong>Followers</strong>.</p>
 <p>Menu → <em>Share setup with another device</em> produces a link carrying the flight, the pilots, the
-ballast figures, the Reporting Webhook, the WhatsApp recipients and the message templates. Opening it on the other
+ballast figures, the WhatsApp recipients and the message templates. Opening it on the other
 device shows what is about to be applied and asks for a yes; on yes that device takes the whole
 setup and marks itself a Follower. A checkbox decides whether the GitHub token travels with the
 link — with it the other device can send at once, without it the token has to be typed there.
@@ -499,7 +583,19 @@ the colour scheme and the confirmation tone. Those belong to the device.</p>
 <p>Every time the master saves settings it publishes them to <code>data/_setup.json</code>, and followers
 apply the change within about thirty seconds with a note on screen. Rename a pilot or start a
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
-one device may be the master; two would overwrite each other&#39;s publication.</p>
+one device may be the master; two would overwrite each other's publication.</p>
+<h2>7b. Automatic position reports</h2>
+<p>Set an interval under <em>Ressources</em> in the setup and the app writes a <strong>POS</strong> row on its own at
+that rhythm — position, place, altitude and rate of climb — so the track of the flight survives
+the hours when nobody has a hand free. <code>0</code> turns it off, which is the default. POS rows go into
+the table and the printout like any other kind and can be filtered out of a printout on their
+own.</p>
+<h2>7c. The Ops Normal clock</h2>
+<p>Send a transmitted call whose message contains <em>Ops Normal</em> and the app asks whether to keep the
+time. Pressing <em>Remind me</em> turns the button green and holds it for a second reading <em>Confirmed</em>,
+the same signal the post button gives, before the window closes: <em>Remind of the next Ops Normal in how many minutes?</em>, twenty by default and changeable in
+the window. When it falls due there is a tone and a message. It is the one call that has to
+happen on a clock, and the one most easily forgotten in weather.</p>
 <h2>8b. What carries over</h2>
 <p>Every form arrives holding what was reported last time, greyed and dashed: the station,
 frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
@@ -512,32 +608,22 @@ mid-flight and the second device opens with exactly what the first one last repo
 five seconds it takes the table to arrive. Only free text is never carried over — remarks, notes
 and the ATC message are typed each time.</p>
 <p>Touching any greyed field in a form accepts all of them at once, and nothing is asked again at
-posting. Notes and messages are never carried over: repeating yesterday&#39;s wording verbatim is
+posting. Notes and messages are never carried over: repeating yesterday's wording verbatim is
 worse than typing it again.</p>
 <p>The footer names the last entry, its reporter and its kind, plus the state of the upload —
 <code>last msg 21:04:37Z/AW/Ballast | upload ✓</code> when everything has reached GitHub, <code>✗ 3</code> when three
 are still queued.</p>
 <h2>9. Sending, and what happens without a link</h2>
-<p>There is nothing to switch on. Pressing <strong>Post to CC Notion</strong> writes the entry to the device and
-sends it straight away to GitHub and, independently, to the Reporting Webhook. The webhook
-receives one top-level JSON object per press, using the same entry schema as a row in the GitHub
-JSON file. The <code>type</code> field identifies the path: <code>ATC</code>, <code>Ballast</code>, <code>Resources</code> or <code>Other</code>.
-Automatic <code>POS</code> heartbeat rows are not sent to the webhook because they are not created by a
-press on this button.</p>
-<p>If there is no connection the GitHub copy is held in the main queue — the header shows how many
-are waiting — and that queue goes out on its own as soon as the link returns, either on the
-browser&#39;s online event or on the next five-second cycle, whichever comes first.</p>
-<p>Webhook delivery has its own local retry queue. Each queued item keeps the URL that was active
-when it was posted and retries with exponential pauses from five seconds up to five minutes.
-If GitHub succeeds while the webhook is still waiting, the post button turns yellow and says so.
-The request body is JSON but deliberately carries no custom <code>Content-Type</code> header: Zapier
-advises browser clients to omit it so the Catch Hook does not reject the CORS preflight.</p>
-<p>Use <code>id</code> as the unique key in the Zapier/Notion action and upsert instead of append. A retry can
-otherwise create a duplicate in the rare case where Zapier accepted a request but the device
-lost the response before it could remove the local queue item.</p>
+<p>There is nothing to switch on. Pressing <strong>Report to CC</strong> writes the entry to the device and
+sends it straight away. If there is no connection the entry is held in a queue — the header
+shows how many are waiting — and the queue goes out on its own as soon as the link returns,
+either on the browser's online event or on the next five-second cycle, whichever comes first.</p>
 <p>Order is never in doubt: the file is always written as the complete set of rows sorted by
 <code>ts_utc</code>, so a queued entry lands in its correct place in the sequence rather than at the end.
 An entry made at 21:04 and sent at 21:11 still sits between 21:03 and 21:05 in the table.</p>
+<p>The first sheet of a printout carries the Gas Balloon Team Switzerland logo at its top right,
+taken from <code>logo.png</code> beside the app; without that file it falls back to the app's own mark. The following
+sheets carry the small mark, so the first page is recognisable as the first.</p>
 <p><strong>Print the log</strong> builds an A4 portrait printout in its own window: you pick which of the four
 kinds it should contain, so an ATC-only log for the authority is one tap away. Entries run
 chronologically and numbered, each with its time, kind, content, reporter, position and track,
@@ -551,15 +637,19 @@ three. The heading beside the callsign carries the span: <code>Wed 20 May 2026</
 <code>Wed 20 May 2026 - Fri 22 May 2026</code> when it went further. Dates follow the UTC clock, like every
 time in the log, so a launch at 23:40 local does not appear to belong to the wrong day. A day
 heading never stands alone at the foot of a page — it travels with the first entry under it. Every page carries the flight in its heading with the mark on
-the right, and a footer reading <code>printed 2026-08-13 09:45Z by A. Wicki · v260813-03</code> on the left
-and <code>Page 2 / 3</code> on the right. After the last entry the table closes with
+the right, and a footer reading <code>printed 2026-08-13 09:45Z by A. Wicki · v260813-20</code> on the left
+and <code>Page 2 / 3</code> on the right.</p>
+<p>The document is named
+<code>Log HB-QWV GB-2026-01 printed 260813 0616Z (Ballast, ATC, Ressources, Other, POS)</code>, which is
+what a print-to-PDF ends up called: callsign, flight, the moment of printing and the kinds it
+contains, without opening it. After the last entry the table closes with
 <code>[no further log entries]</code>, so a printout can be seen to be complete.</p>
 <p>Pagination is measured: the app takes the real height of a sheet, subtracts the heading, the
 footer and the margins, and fills each page with as many rows as actually fit. Where a browser
 gives no measurements it falls back to a fixed count rather than putting one entry per page.</p>
 <p><em>Send now</em> in the menu forces an attempt, and <em>Reload from GitHub</em> pulls the table without
 writing. Neither is needed in normal use. <em>Export the table</em> asks for the format first — CSV or
-JSON — and then for the destination: <em>Download</em> puts the file in the browser&#39;s downloads,
+JSON — and then for the destination: <em>Download</em> puts the file in the browser's downloads,
 <em>Share…</em> hands it to the system share sheet, which on an iPad is the way into Files, Mail or a
 chat. Share only appears where the browser supports handing over files.</p>
 <h2>10. Several devices at once</h2>
@@ -578,12 +668,12 @@ changed, GitHub answers 304 with no body, and a 304 does not count against the h
 background.</p>
 <p><strong>Tally rows.</strong> Anything appended to the same JSON file appears in the app and in the ballast
 calculation, provided it carries at least <code>id</code>, <code>ts_utc</code> and <code>type</code>. Give Tally-sourced rows
-<code>reporter: &quot;Tally&quot;</code> and <code>source: &quot;tally&quot;</code> so it is visible where they came from. A ballast row
+<code>reporter: "Tally"</code> and <code>source: "tally"</code> so it is visible where they came from. A ballast row
 may be relative (<code>ballast_delta_kg</code>, negative for a drop) or an inventory
-(<code>ballast_action: &quot;count&quot;</code> with <code>total_ballast_kg</code>, which resets the running total).</p>
+(<code>ballast_action: "count"</code> with <code>total_ballast_kg</code>, which resets the running total).</p>
 <p><strong>Deletions</strong> are shared through <code>data/&lt;flight-id&gt;.deleted.json</code>, holding the ids that were
 removed with the time and the person who removed them. Every device applies that list, so a
-deleted row does not reappear from another iPad&#39;s copy, and the main table stays clean.</p>
+deleted row does not reappear from another iPad's copy, and the main table stays clean.</p>
 <h2>11. The log</h2>
 <p><em>Log</em> in the menu opens it: the whole flight, newest first, with time,
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
@@ -615,7 +705,8 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <th>Content</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>flight_id</code>, <code>callsign</code></td>
 <td>from the setup</td>
 </tr>
@@ -641,7 +732,7 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 </tr>
 <tr>
 <td><code>type</code></td>
-<td><code>Ballast</code>, <code>ATC</code>, <code>Resources</code>, <code>Other</code> — the values used on the Tally form</td>
+<td><code>Ballast</code>, <code>ATC</code>, <code>Ressources</code>, <code>Other</code> — the values used on the Tally form</td>
 </tr>
 <tr>
 <td><code>pos_lat</code>, <code>pos_lon</code>, <code>alt_ft</code></td>
@@ -704,12 +795,20 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <td>message content</td>
 </tr>
 <tr>
+<td><code>crew_change</code></td>
+<td><code>yes</code> when the entry was filed as a handover of command</td>
+</tr>
+<tr>
 <td><code>crew_pic</code>, <code>crew_rest</code></td>
 <td>crew state at the moment of the entry</td>
 </tr>
 <tr>
+<td><code>vs_ms</code></td>
+<td>rate of climb in metres per second</td>
+</tr>
+<tr>
 <td><code>res_battery_pct</code>, <code>res_fuel_cell</code>, <code>res_solar</code></td>
-<td>battery, fuel cell and solar cell as reported on a Resources entry</td>
+<td>battery, fuel cell and solar cell as reported on a Ressources entry</td>
 </tr>
 <tr>
 <td><code>res_methanol_pct</code></td>
@@ -751,10 +850,11 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <td><code>id</code></td>
 <td>UUID, the stable key for Notion</td>
 </tr>
-</tbody></table>
-<p><code>type</code> uses the canonical values <code>Ballast</code>, <code>ATC</code>, <code>Resources</code>, <code>Other</code>, and <code>POS</code>. Legacy
-<code>Ressources</code> rows are normalized to <code>Resources</code> when the app loads them, so existing flight
-data remains usable and is rewritten with the corrected value on the next synchronization.</p>
+</tbody>
+</table>
+<p><code>type</code> deliberately uses the spelling from the Tally form, including <code>Ressources</code>, so the
+existing Notion select options match without editing. To change it, edit the four <code>data-t</code>
+attributes in <code>index.html</code> and the matching strings in the post handler.</p>
 <h2>13. Polling from Notion</h2>
 <p><strong>GitHub API — immediate, recommended</strong></p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/contents/data/&lt;flight-id&gt;.json
@@ -771,34 +871,42 @@ produces duplicates.</p>
 <h2>14. Limits worth knowing before takeoff</h2>
 <ul>
 <li><strong>GPS in the background:</strong> once the app is not in the foreground and the display locks,
-iPadOS suspends location updates. The app holds a wake lock while it is active. This records
-events, not a track — use a dedicated logger for a gapless trace.</li>
+  iPadOS suspends location updates. The app holds a wake lock while it is active. This records
+  events, not a track — use a dedicated logger for a gapless trace.</li>
 <li><strong>Altitude:</strong> <code>alt_gps_m</code> is GPS altitude above the WGS84 ellipsoid, not the altimeter
-reading. The altimeter governs what is reported to ATC.</li>
+  reading. The altimeter governs what is reported to ATC.</li>
 <li><strong>Rate limit:</strong> with two iPads and a Notion poll on the same token, the hourly budget is
-comfortable as long as the conditional requests keep returning 304. Frequent writes are what
-cost — each post is roughly four requests.</li>
-<li><strong>The passwords are 1234 and 5678 and both live in the source.</strong> They guard against a mistaken
-tap in the basket and against a second device declaring itself master, not against anyone who
-reads the file. Change <code>PASS</code> and <code>MASTER_PASS</code> in <code>index.html</code> for different ones — and if
-you do, tell the crew, because a device that cannot answer the master question ends up a
-follower.</li>
-<li><strong>Token on the device:</strong> stored unencrypted in the browser. If the iPad is lost, revoking the
-token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
-server side and point the API host in the code at the Worker.</li>
-<li><strong>Webhook URL on the device:</strong> the Zapier Catch Hook URL is stored unencrypted, is published
-by the Master in <code>data/_setup.json</code>, and can be carried in the setup invitation link. Treat
-both the URL and an invitation containing it like a secret; anyone who has it can submit to
-that Zap.</li>
-<li><strong>The pill floats inside the app only</strong> on phones and tablets — see section 4. Slide Over on
-iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
-picture-in-picture on a laptop is the only true always-on-top.</li>
+  comfortable as long as the conditional requests keep returning 304. Frequent writes are what
+  cost — each post is roughly four requests.</li>
+<li><strong>The GitHub token stays put.</strong> Leaving the token field empty when saving means <em>leave it as it
+is</em>, not <em>clear it</em> — a fine-grained token cannot be retyped from memory, and losing it by
+accident would ground the device until a new one is made. To replace it, paste the new one over
+the old.</li>
 </ul>
+<p><strong>The passwords are 1234 and 5678 and both live in the source.</strong> They guard against a mistaken
+  tap in the basket and against a second device declaring itself master, not against anyone who
+  reads the file. Change <code>PASS</code> and <code>MASTER_PASS</code> in <code>index.html</code> for different ones — and if
+  you do, tell the crew, because a device that cannot answer the master question ends up a
+  follower.
+- <strong>Token on the device:</strong> stored unencrypted in the browser. If the iPad is lost, revoking the
+  token is enough. To avoid it entirely, put a Cloudflare Worker in front holding the token
+  server side and point the API host in the code at the Worker.
+- <strong>The pill floats inside the app only</strong> on phones and tablets — see section 4. Slide Over on
+  iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
+  picture-in-picture on a laptop is the only true always-on-top.</p>
 <h2>13c. Place names</h2>
-<p>Off by default, and a setting of its own under <em>Resources</em>. Switched on, each entry&#39;s position
+<p>On by default, and a setting of its own under <em>Ressources</em>. Switched on, each entry's position
 is turned once into something a reader can place — <code>near Szeged/HU</code> — which then appears under
 the position in the WhatsApp message, in the log, in the printout and in a <code>place</code> column.</p>
-<p><strong>Two things to weigh before switching it on.</strong> The lookup goes to OpenStreetMap&#39;s public
+<p>It appears as <code>{place}</code> — <code>near Szeged/HU</code> — and as <code>{location}</code> for the bare <code>Szeged/HU</code>, in
+the heading of the Last Message panel after the time, in the log, in the printout and in a
+<code>place</code> column. A message on its way to WhatsApp waits up to two and a half seconds for the
+lookup rather than going out without it; beyond that it leaves anyway, because a message that
+arrives is worth more than a place name.</p>
+<p>Lookups are queued one at a time with a second between them, as the service asks. A failure is
+not remembered — the next entry in the same square kilometre tries again — while an answer is,
+so a long flight costs a few dozen requests rather than one per entry.</p>
+<p><strong>Two things to weigh before switching it off.</strong> The lookup goes to OpenStreetMap's public
 service, so the coordinates of the entry leave the device; and it only works with a link. There
 is no offline place database that would fit in a web app. Failures are silent by design: the
 entry is written immediately and the place is filled in afterwards if an answer arrives, so a
@@ -806,11 +914,16 @@ lost lookup costs nothing but an empty field.</p>
 <p>Answers are cached on a coarse grid — about a kilometre — so a long flight costs a few dozen
 requests rather than one per entry, which keeps well inside what the service asks of its users.</p>
 <h2>14a. Language</h2>
-<p>Device mode, reporter name, night colour, confirmation tone and language sit above the lock,
-because they belong to this device and every crew member may want different choices. Followers
-can change those personal settings, but only the Master can unlock the shared flight setup.</p>
+<p>Device mode, night colour, confirmation tone and language sit above the password, because they are personal
+preferences rather than flight settings and every crew member may want their own. A device
+whose holder does not know the settings password is a <strong>follower</strong> on a <strong>personal device</strong> —
+that is what the app assumes when the master question is declined, and neither can be changed
+without the password.</p>
+<p>The setup switches the interface between English and German, above the password, because it is
+a personal preference rather than a flight setting and every crew member may want a different
+one.</p>
 <p>Every label, button, hint, dialog and message in the app follows the switch. <strong>Only the
-interface changes:</strong> everything written to GitHub, sent to the Reporting Webhook or sent to WhatsApp
+interface changes:</strong> everything written to GitHub and everything sent to WhatsApp
 stays English: the column names, the values in <code>type</code>, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.</p>
@@ -819,7 +932,7 @@ coordinator should not have to guess which language the next message arrives in.
 for the master password
 <code>5678</code>, then for the name of the new flight, then twice for confirmation — naming how many
 entries the old flight holds and how many of them are still queued.</p>
-<p><strong>Nothing is moved and nothing is overwritten.</strong> The old flight&#39;s files are named after it, so
+<p><strong>Nothing is moved and nothing is overwritten.</strong> The old flight's files are named after it, so
 they simply stay where they are; they are recorded in <code>data/_flights.json</code> with the time they
 were closed, the number of rows and who closed them, which gives you an index of the season.
 Before closing, whatever is still queued is sent one last time. If there is no connection and
@@ -827,17 +940,74 @@ rows are still waiting, the app says so and asks again before going on — those
 lost, because clearing the local table is what makes the new flight start empty.</p>
 <p>The new flight ID is published to the followers along with the rest of the setup. A follower
 that sees the flight change files its own table away under <code>bsk.archive.&lt;flight&gt;</code> on the device
-and then clears it, so nobody carries yesterday&#39;s entries
-into today&#39;s flight under the new name.</p>
+and then clears it, so nobody carries yesterday's entries
+into today's flight under the new name.</p>
 <p><strong>The first entry of a flight belongs to the master.</strong> A follower trying to make it is told
 <em>New flight must be initiated by the master device</em>; the master is reminded once that the flight
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.</p>
+<h2>14c. Working without a link, and GitHub's limits</h2>
+<p><strong>The app is complete offline.</strong> Its own files are cached, so it opens with no connection at
+all; entries are written to the device first and only then offered to GitHub. Without a link an
+entry is filed, marked with a straw check in the log and in the footer, and the post button says
+<em>Queued for later delivery</em>. Reporting continues unaffected — ballast, ATC, crew, notes, the
+automatic position reports, everything. When the connection returns, the queue goes out on its
+own, in order, and the checks turn green without anyone pressing anything.</p>
+<p><strong>GitHub's numbers, and what the app does about them.</strong> A personal token is allowed 5,000
+requests an hour, and a conditional read that answers <code>304 Not Modified</code> costs nothing at all —
+so the five-second poll is effectively free. The real constraint is the secondary limit on
+writing: <strong>80 write requests a minute and 500 an hour</strong>, counted across everything the account
+does.</p>
+<p>Four things keep the app inside that:</p>
+<ul>
+<li>One push carries every waiting entry, so three drops in a minute cost one write, not three.</li>
+<li>Writes are spaced at least a second apart, as GitHub asks, and background pushes wait ten
+  seconds between bursts — stretching to eighteen and then thirty as the hour's budget is spent.</li>
+<li>The CSV is written at most once a minute rather than on every entry, which halves the count.
+  The JSON, which Notion reads, is always current.</li>
+<li>Writes are counted over a rolling hour and stopped at 440. Entries then stay queued and go out
+  as the hour rolls on. If GitHub asks for a pause anyway, the <code>retry-after</code> it sends is obeyed.</li>
+</ul>
+<p>The setup shows where you stand: <em>GitHub budget: 12 of 440 writes used this hour, 4,900 requests
+left on the token.</em></p>
+<p><strong>Upgrading the GitHub account does not help.</strong> Free and Pro have exactly the same 5,000
+requests an hour for a personal token; the higher 15,000 applies only to a GitHub App owned by
+an Enterprise Cloud organisation, which is a different kind of integration altogether. There is
+nothing to buy here, and with the measures above nothing to buy it for: a flight making an entry
+a minute for twenty hours uses well under half the hourly write budget.</p>
+<h2>14d. Keeping the crew on the current build</h2>
+<p>The service worker takes a new version over the moment it is installed, and the app now looks
+for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
+When one has arrived it says so: <em>A newer version is ready — close the app and open it again.</em></p>
+<p>That message is the answer to a confusion worth knowing about. <strong>What you see on screen may not
+be what is in the repository.</strong> An installed web app keeps running the version it started with
+until it is closed and opened again — reloading a page inside it is not enough. If a change you
+asked for seems not to have happened, check the version in the bottom right corner first, and
+close the app from the app switcher before opening it again.</p>
+<h2>14e. When a change does not appear</h2>
+<p>The service worker caches each file on its own and carries on past one that is missing. That
+sounds like housekeeping and is not: <code>cache.addAll()</code> rejects as a whole if a single request
+fails, and a worker whose installation fails is never activated — the app then keeps serving the
+<strong>previous version indefinitely</strong>, and every change made since is invisible. One icon missing
+from the server is enough. The install now notes what it could not fetch in the console and
+takes over anyway.</p>
+<p>So when something you asked for is not there, the order to check is:</p>
+<ol>
+<li>The version in the bottom right corner. If it is not the one you deployed, nothing else
+   matters yet.</li>
+<li>The browser console for <code>404</code> on any file of the app. A missing file means the upload was
+   incomplete — the <code>icons</code> folder is the usual one, because a drag-and-drop upload does not
+   always carry a folder with it.</li>
+<li>Close the installed app from the app switcher and open it again. A reload inside it is not
+   enough.</li>
+</ol>
+<p><code>GET .../data/_seen?ref=main 404</code> in the console is not a fault: it says no device has left its
+card in the repository yet. It disappears with the first one.</p>
 <h2>15. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v260813-09</code> is the ninth build of 13 August 2026.</p>
+smaller counter. <code>v260817-04</code> is the fourth build of 17 August 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the
@@ -846,25 +1016,24 @@ forces the service worker to fetch the new files rather than serve the old ones,
 with an unchanged cache name may not reach a device that already has the app installed.</p>
 <h2>16. License</h2>
 <p>Custom license, © 2026 Wicki Aero GmbH.</p>
-<p><strong><a href="license.html">Read the full licence</a></strong> — it opens in a window of its own, and the same text
+<p><strong><a href="license.html" target="_blank" rel="noopener">Read the full licence</a></strong> — it opens in a window of its own, and the same text
 sits in <code>LICENSE</code> in the repository.</p>
 <p>In short: use it and host it as it is, for yourself, your club or your school, free of charge.
 Do not modify it, translate it, republish a changed version of it, strip the attribution from
-it, or build a competing product on it, without asking first — <a href="mailto:balthasar@wicki.aero">balthasar@wicki.aero</a>. Any public
+it, or build a competing product on it, without asking first — balthasar@wicki.aero. Any public
 copy keeps the copyright notice and a visible link back to
 <a href="https://github.com/bwicki/gb_notion_frontend">the source repository</a>.</p>
 <p>Two things the licence spells out that are easy to get wrong:</p>
-<p><strong>Configuration is not modification.</strong> Entering your flight, crew, ballast, Reporting Webhook, WhatsApp and GitHub
+<p><strong>Configuration is not modification.</strong> Entering your flight, crew, ballast, WhatsApp and GitHub
 settings, switching language or colour scheme, editing the message templates in the setup, and
 dropping your own logo file next to the app are all ordinary use. You are meant to do all of
 that.</p>
 <p><strong>The flight data is yours.</strong> The JSON, CSV and media files the app writes into your repository
 are your records, not part of the licensed software.</p>
 <p><strong>Third-party components: none.</strong> No libraries, no fonts, no frameworks, no trackers, nothing
-from a CDN. The app talks to the GitHub API with your token, to the configured Zapier Catch Hook,
-to OpenStreetMap when place names are enabled, to the browser&#39;s geolocation service, and to the
-wa.me links you tap. That is the whole list, which is also why the reporting form keeps working
-with no signal and why there is nothing to keep up to date but the app itself.</p>
+from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
+service, and to the wa.me links you tap. That is the whole list, which is also why it works with
+no signal and why there is nothing to keep up to date but the app itself.</p>
 <h2>17. Files</h2>
 <pre><code>index.html                  the complete app
 manifest.webmanifest        Home Screen installation

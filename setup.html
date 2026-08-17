@@ -30,14 +30,14 @@ a{color:inherit}
 
 .nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
-<p class="nav2"><a href="readme.html">Manual</a> · Setup guide · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
+<p class="nav2"><a href="readme.html">Manual</a> · Setup guide · <a href="notion.html">Notion</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
 <h1>Setup — data repository, token and Notion polling</h1>
 <p>Everything the app needs on the GitHub side, and how Notion reads the result. The same material,
 laid out for printing and handing to whoever built the Notion integration, is in
 <strong>Setup-data-repository.pdf</strong> in the repository. Do this once per
 season, not once per flight. Twenty minutes, no command line.</p>
 <p>The app itself is documented separately in <a href="readme.html">the manual</a>.</p>
-<hr>
+<hr />
 <h2>1. Why a second repository</h2>
 <p>The app writes the flight table straight into a repository through the GitHub Contents API.
 Every entry is two commits — one for the JSON, one for the CSV.</p>
@@ -53,7 +53,8 @@ data apart:</p>
 <th>Visibility</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>&lt;owner&gt;/gb_notion_frontend</code></td>
 <td>the app, served by GitHub Pages</td>
 <td>public — Pages needs it, unless you have Pro</td>
@@ -63,7 +64,8 @@ data apart:</p>
 <td>the flight tables</td>
 <td>your choice, see below</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p><strong>Public or private for the data?</strong> Public means the position, track and ballast history of
 every flight are readable by anyone who finds the URL. Private keeps them behind the token.
 Notion can poll a private repository perfectly well through the API — only the
@@ -74,9 +76,9 @@ followable, make it private.</p>
 <li>github.com → <strong>New repository</strong></li>
 <li>Name: <code>gb_flight_data</code></li>
 <li>Private, unless you decided otherwise</li>
-<li><strong>Tick &quot;Add a README file&quot;</strong> — this matters. A repository with no commits has no branch yet,
-and the Contents API cannot write into a branch that does not exist. Without this the first
-entry fails with a 404 and the cause is not obvious.</li>
+<li><strong>Tick "Add a README file"</strong> — this matters. A repository with no commits has no branch yet,
+   and the Contents API cannot write into a branch that does not exist. Without this the first
+   entry fails with a 404 and the cause is not obvious.</li>
 <li>Create repository</li>
 </ol>
 <p>Nothing else. The app creates the <code>data/</code> folder and the files inside it on its own.</p>
@@ -92,23 +94,21 @@ address has not moved:</p>
 and leaves only the repository to pick:</p>
 <pre><code>https://github.com/settings/personal-access-tokens/new?name=basket-write-2026&amp;expires_in=180&amp;contents=write
 </code></pre>
-<ol start="4">
-<li><p><strong>Token name</strong>: something you will recognise later, e.g. <code>basket-reporting-2026</code></p>
-</li>
-<li><p><strong>Expiration</strong>: set it to shortly after the season, not &quot;no expiration&quot;. A token that
-expires is a token you cannot forget about.</p>
-</li>
-<li><p><strong>Repository access</strong>: <em>Only select repositories</em> → pick <code>gb_flight_data</code> alone</p>
-</li>
-<li><p><strong>Permissions → Repository permissions → Contents → Read and write</strong></p>
-<p><strong>There is no single &quot;read &amp; write&quot; switch on a fine-grained token</strong> — that is the classic
-token with its coarse <code>repo</code> scope. Here you pick one named permission at a time and give
-each its own level. Under <em>Permissions</em> there are three groups: <em>Repository permissions</em>,
-<em>Organization permissions</em> and <em>Account permissions</em>; you want the first. In the newer
-interface the list starts empty and you click <strong>Add permissions</strong> and search for the one you
-need, in the older one every permission is listed with a dropdown beside it.</p>
+<ol>
+<li><strong>Token name</strong>: something you will recognise later, e.g. <code>basket-reporting-2026</code></li>
+<li><strong>Expiration</strong>: set it to shortly after the season, not "no expiration". A token that
+   expires is a token you cannot forget about.</li>
+<li><strong>Repository access</strong>: <em>Only select repositories</em> → pick <code>gb_flight_data</code> alone</li>
+<li><strong>Permissions → Repository permissions → Contents → Read and write</strong></li>
+</ol>
+<p><strong>There is no single "read &amp; write" switch on a fine-grained token</strong> — that is the classic
+   token with its coarse <code>repo</code> scope. Here you pick one named permission at a time and give
+   each its own level. Under <em>Permissions</em> there are three groups: <em>Repository permissions</em>,
+   <em>Organization permissions</em> and <em>Account permissions</em>; you want the first. In the newer
+   interface the list starts empty and you click <strong>Add permissions</strong> and search for the one you
+   need, in the older one every permission is listed with a dropdown beside it.</p>
 <p>The list is alphabetical, so it opens on <strong>Actions</strong>. That is not the one — keep going down
-to <strong>Contents</strong>, three rows further.</p>
+   to <strong>Contents</strong>, three rows further.</p>
 <table>
 <thead>
 <tr>
@@ -117,7 +117,8 @@ to <strong>Contents</strong>, three rows further.</p>
 <th>Note</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Actions</td>
 <td>No access</td>
 <td>The first row in the list, and the wrong one. A token with <em>Actions: Read and write</em> can start and stop workflow runs and still cannot write a log row; the app answers with a 403.</td>
@@ -130,45 +131,48 @@ to <strong>Contents</strong>, three rows further.</p>
 <tr>
 <td>Metadata</td>
 <td>Read-only</td>
-<td>Added automatically as soon as any other permission is set, cannot be switched off, and grants nothing beyond the repository&#39;s name and description.</td>
+<td>Added automatically as soon as any other permission is set, cannot be switched off, and grants nothing beyond the repository's name and description.</td>
 </tr>
 <tr>
 <td>everything else</td>
 <td>No access</td>
 <td>Not Administration, not Actions, not Workflows. Contents alone is enough.</td>
 </tr>
-</tbody></table>
-</li>
-<li><p><strong>Generate token</strong>, then copy it. GitHub shows it once. If you lose it, revoke it and make a
-new one — there is no way to read it back.</p>
-</li>
-</ol>
+<tr>
+<td>8. <strong>Generate token</strong>, then copy it. GitHub shows it once. If you lose it, revoke it and make a</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>new one — there is no way to read it back.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p>The token looks like <code>github_pat_</code> followed by about eighty characters.</p>
 <h3>Where the token ends up</h3>
-<p>On each device, in the browser&#39;s local storage, unencrypted. That is a deliberate trade: no
+<p>On each device, in the browser's local storage, unencrypted. That is a deliberate trade: no
 server, no account, no login, and the app works with no signal. The consequences:</p>
 <ul>
 <li>If an iPad is lost, <strong>revoke the token on GitHub</strong>. That is the whole remedy, and it takes
-fifteen seconds. Everything already written stays.</li>
+  fifteen seconds. Everything already written stays.</li>
 <li>Anyone with physical access to an unlocked device can read it out of the browser storage.</li>
 <li>The token cannot touch anything but the one data repository, so the damage ceiling is: flight
-logs written or deleted.</li>
+  logs written or deleted.</li>
 </ul>
 <p>If that is not acceptable, put a Cloudflare Worker in front of the GitHub API holding the token
 server-side, and point <code>API</code> in <code>index.html</code> at the Worker. The app never needs to know the
 token in that arrangement.</p>
 <h2>4. Enter it in the app</h2>
-<p>On the device that will be the <strong>master</strong> — normally the pilot in command&#39;s iPad:</p>
+<p>On the device that will be the <strong>master</strong> — normally the pilot in command's iPad:</p>
 <ol>
 <li>Menu → <strong>Settings</strong> → <em>Unlock settings</em>, password <code>1234</code></li>
 <li><strong>Setup role</strong>: Master</li>
 <li><strong>Flight</strong>: flight ID, callsign, both pilots</li>
 <li><strong>Ballast</strong>: weight per bag, full ready ballast, quick drop amounts</li>
-<li><strong>Reporting-Webhook</strong>: leave the supplied Zapier Catch Hook URL in place, or enter the HTTPS
-Catch Hook for the Zap that forwards entries to Notion. The default is
-<code>https://hooks.zapier.com/hooks/catch/21180853/4t6kt0g/</code>. Leaving it empty disables this path.</li>
 <li>Open <strong>GitHub connection</strong>: <code>&lt;owner&gt;/gb_flight_data</code>, branch <code>main</code>, folder <code>data</code>, paste
-the token</li>
+   the token</li>
 <li><strong>Check connection</strong> — it should name the repository back to you</li>
 <li><strong>Save settings</strong></li>
 </ol>
@@ -189,16 +193,15 @@ start every device is asked <em>Is this the master device?</em> — the password
 <em>Join as follower</em> makes it a follower, and a device set up through an invitation link is a
 follower without being asked. There is no default and nothing is assumed; the question comes
 back on each start until it is answered.</p>
-<p>The settings password <strong>1234</strong> is a different thing entirely: on the Master it unlocks the
-shared flight setup. Followers can change their reporter name and personal display choices,
-but cannot unlock or edit the shared setup. The Reporting-Webhook is therefore editable only
-on the Master.</p>
+<p>The settings password <strong>1234</strong> is a different thing entirely: it opens the settings screen on
+any device, master or not, so anyone can correct a reporter name or read the setup. Only
+switching a device <em>to</em> master asks for 5678.</p>
 <p>One device is the <strong>master</strong> and owns the flight setup. The others are <strong>followers</strong>.</p>
 <p><strong>To bring a device on board:</strong> on the master, Menu → <strong>Share setup with another device</strong>. A
 link appears. Send it to the other device however you normally send things — Signal, WhatsApp,
 AirDrop, a message to yourself. Opening it in the browser there shows what is about to be
-applied and asks for a yes. On yes, that device takes on the whole setup, including the
-Reporting-Webhook, and marks itself a Follower.</p>
+applied and asks for a yes. On yes, that device takes on the whole setup and marks itself a
+Follower.</p>
 <p><strong>The token in the link.</strong> The checkbox in the share sheet decides whether the token travels
 with it. With the token, the other device can send immediately and nothing else has to be
 typed. Without it, someone has to enter the token there by hand, and until then that device
@@ -211,13 +214,10 @@ it, and are left alone.</p>
 <code>data/_setup.json</code>. Followers pick that up within about thirty seconds and apply it, with a
 short note on screen. Change the flight ID, rename a pilot, add a WhatsApp recipient or edit a
 message template on the master, and the whole crew has it without anyone touching a setup
-screen. Followers cannot unlock and edit this shared setup locally.</p>
+screen. A follower can still be unlocked and edited locally, but the next publication from the
+master wins.</p>
 <p><strong>Two masters would fight</strong> over <code>_setup.json</code> and each undo the other. Exactly one device is
 the master.</p>
-<p><strong>Treat the Reporting-Webhook URL like a secret.</strong> The Master stores it locally and publishes
-it in <code>data/_setup.json</code>; the setup invitation link carries it as well. Anyone who has a Zapier
-Catch Hook URL can submit data to that Zap. Send an invitation link only over a trusted channel
-and remove it after the follower is configured.</p>
 <h2>7. Polling from Notion</h2>
 <p><strong>The endpoint to use</strong>, private or public repository alike:</p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/gb_flight_data/contents/data/&lt;flight-id&gt;.json
@@ -244,30 +244,24 @@ archive or hide the rows whose ids appear there.</p>
 through a flight afterwards, too slow to follow one live.</p>
 <h2>8. Checklist before a flight</h2>
 <ul>
-<li><input disabled="" type="checkbox"> Token not expired — check the date on GitHub</li>
-<li><input disabled="" type="checkbox"> Master shows <em>Check connection</em> naming the data repository</li>
-<li><input disabled="" type="checkbox"> Flight ID set, and different from the last flight</li>
-<li><input disabled="" type="checkbox"> Every device shows the same flight in its header</li>
-<li><input disabled="" type="checkbox"> Exactly one device is set to Master</li>
-<li><input disabled="" type="checkbox"> A test entry appears in the repository and reaches Notion through the Reporting-Webhook</li>
-<li><input disabled="" type="checkbox"> Test entry deleted afterwards, so the flight starts empty</li>
-<li><input disabled="" type="checkbox"> Start ballast entered, or the first inventory planned for before launch</li>
+<li>[ ] Token not expired — check the date on GitHub</li>
+<li>[ ] Master shows <em>Check connection</em> naming the data repository</li>
+<li>[ ] Flight ID set, and different from the last flight</li>
+<li>[ ] Every device shows the same flight in its header</li>
+<li>[ ] Exactly one device is set to Master</li>
+<li>[ ] A test entry appears in the repository, and in Notion</li>
+<li>[ ] Test entry deleted afterwards, so the flight starts empty</li>
+<li>[ ] Start ballast entered, or the first inventory planned for before launch</li>
 </ul>
 <h2>9. When something does not arrive</h2>
 <p><strong>The header says <code>no repository</code></strong> — repository or token missing in the settings on that
 device.</p>
 <p><strong>Entries stay <code>queued</code></strong> — no connection, or the token has expired or been revoked. <em>Send now</em>
 in the menu shows the actual error rather than failing quietly.</p>
-<p><strong>The post button says the webhook is queued</strong> — GitHub received the entry, but the Zapier
-request did not complete. The app retries from its local webhook queue after five seconds, then
-with increasing pauses up to five minutes. Check that the Zap is switched on and its Catch Hook
-URL is still current.</p>
 <p><strong>A <code>404</code> on the first entry</strong> — the data repository has no branch yet. Add a README to it
 through the GitHub web interface and try again.</p>
 <p><strong>A <code>403</code></strong> — the token lacks <em>Contents: Read and write</em>, or does not include this repository.</p>
 <p><strong>Notion shows duplicates</strong> — it is appending instead of upserting on <code>id</code>.</p>
-<p>This rule also applies to webhook delivery: use the entry&#39;s stable <code>id</code> as the Notion key. A
-retry may follow an ambiguous network response even if Zapier already accepted the first copy.</p>
 <p><strong>Notion is minutes behind</strong> — it is polling <code>raw.githubusercontent.com</code> instead of the API.</p>
 <p><strong>A follower will not take the setup</strong> — it is set to Master. One master only.</p>
 </main></body></html>

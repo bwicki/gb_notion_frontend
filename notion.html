@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Basket Reporting — Notion</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<style>
+:root{--bg:#E4E7EA;--card:#F4F6F7;--ink:#22262A;--muted:#6D757B;--line:#C9D0D5}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0D0F10;--card:#131617;--ink:#D8DCE0;--muted:#8A9198;--line:#2C3236}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 16px/1.6 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:720px;margin:0 auto;padding:28px 20px 80px;background:var(--card);min-height:100vh}
+h1{font-size:26px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:13px;font-weight:400;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  margin:38px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+h3{font-size:17px;font-weight:500;margin:26px 0 8px}
+p,li{font-size:15.5px}
+code{font:13.5px/1.5 ui-monospace,"SF Mono",Menlo,monospace;background:var(--bg);
+  padding:1px 5px;border-radius:4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:13px 15px;overflow-x:auto}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+a{color:inherit}
+
+.nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
+.nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
+<p class="nav2"><a href="readme.html">Manual</a> · <a href="setup.html">Setup guide</a> · Notion · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
+<h1>Getting the flight table into Notion</h1>
+<p>For whoever builds and runs the Notion side. It answers one question first, because the
+answer decides everything else.</p>
+<hr />
+<h2>Can Notion fetch this by itself?</h2>
+<p><strong>Plain Notion cannot.</strong> Database automations in Notion trigger on things that happen <em>inside</em>
+Notion — a page created, a property changed, a date reached. There is no native automation that
+says "every five minutes, fetch this URL and write the rows into a database". The GitHub
+connector Notion ships syncs <em>issues and pull requests</em>, not files in a repository, so it is no
+help here either.</p>
+<p>That leaves three honest routes. They differ in who owns the clock.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Who runs the timer</th>
+<th>Delay</th>
+<th>Cost</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. GitHub Actions</strong> <em>(recommended)</em></td>
+<td>GitHub, triggered by the app's own commit</td>
+<td>seconds</td>
+<td>none</td>
+<td>a script, supplied below</td>
+</tr>
+<tr>
+<td>2. Notion Worker (sync)</td>
+<td>Notion, on a schedule</td>
+<td>15 min at best</td>
+<td>Business plan</td>
+<td>a worker, deployed by CLI</td>
+</tr>
+<tr>
+<td>3. Make, Zapier, n8n, API Connector</td>
+<td>the service</td>
+<td>1–15 min</td>
+<td>subscription</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Route 1 is the one to take, and it is not a workaround.</strong> The app already commits to the
+repository on every entry. That commit can start a workflow directly, so nothing polls anything:
+the entry is in Notion a few seconds after the pilot pressed the button. Route 2 and 3 both add
+a waiting room in front of a door that is already open.</p>
+<p>Route 2 is worth knowing about because it is first-party. Notion Workers, introduced at Notion's
+2026 developer day, run small pieces of code on Notion's servers and can pull external data on a
+schedule — every 15 minutes, hourly, daily. They need the Business plan and the Notion CLI. For
+a flight being followed live, a quarter of an hour is too coarse; for an archive built after
+landing it would do.</p>
+<hr />
+<h2>What the app writes</h2>
+<p>One file per flight, in the data repository, always the complete table:</p>
+<pre><code>data/&lt;flight-id&gt;.json          every row, sorted by ts_utc
+data/&lt;flight-id&gt;.csv           the same rows as CSV
+data/&lt;flight-id&gt;.deleted.json  ids the crew removed
+data/_setup.json               the crew's own configuration, not flight data
+data/_flights.json             an index of closed flights
+</code></pre>
+<p>Each row carries a stable <code>id</code> (a UUID). <strong>Upsert on that id. Never append.</strong> The file holds the
+whole table, not a delta; an integration that appends will double the table on its second run.</p>
+<hr />
+<h2>Route 1, step by step</h2>
+<h3>1. A Notion database</h3>
+<p>Create a database in the workspace. Give it a <strong>Name</strong> column of type <em>title</em> — the script puts
+the row's <code>id</code> there, and that is what makes the upsert work. Then add whichever of these you
+want; the script skips any column that does not exist and says so in the run log rather than
+failing:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Column</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>title</td>
+<td>Direction</td>
+<td>select</td>
+</tr>
+<tr>
+<td>Flight</td>
+<td>text</td>
+<td>Station</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Callsign</td>
+<td>text</td>
+<td>Frequency</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>select</td>
+<td>Squawk</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>date</td>
+<td>Message</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Reporter</td>
+<td>text</td>
+<td>PIC</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Device</td>
+<td>text</td>
+<td>Resting</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Position</td>
+<td>text</td>
+<td>Battery</td>
+<td>number</td>
+</tr>
+<tr>
+<td>Longitude</td>
+<td>text</td>
+<td>FuelCell</td>
+<td>select</td>
+</tr>
+<tr>
+<td>Place</td>
+<td>text</td>
+<td>Methanol</td>
+<td>number</td>
+</tr>
+<tr>
+<td>Altitude</td>
+<td>number</td>
+<td>Solar</td>
+<td>select</td>
+</tr>
+<tr>
+<td>Track</td>
+<td>number</td>
+<td>CrewO2</td>
+<td>select</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>number</td>
+<td>O2Litres</td>
+<td>number</td>
+</tr>
+<tr>
+<td>Vario</td>
+<td>number</td>
+<td>O2Percent</td>
+<td>number</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>select</td>
+<td>Note</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>select</td>
+<td>Edited</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Delta</td>
+<td>number</td>
+<td>Ballast</td>
+<td>number</td>
+</tr>
+<tr>
+<td>Sand</td>
+<td>number</td>
+<td>Water</td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Keep the Edited column.</strong> The script uses it to tell an unchanged row from a corrected one, and
+that is what keeps a run from rewriting two hundred pages every time.</p>
+<h3>2. A Notion integration</h3>
+<ol>
+<li>notion.com/my-integrations → <strong>New integration</strong>, internal, in the right workspace</li>
+<li>Capabilities: <strong>Read content</strong>, <strong>Update content</strong>, <strong>Insert content</strong></li>
+<li>Copy the token — it begins with <code>ntn_</code></li>
+<li>Open the database in Notion → <strong>⋯</strong> → <strong>Connections</strong> → add the integration</li>
+</ol>
+<p>Without step 4 the integration cannot see the database, and every call answers 404. It is the
+step people miss.</p>
+<h3>3. The database id</h3>
+<p>From the database URL:</p>
+<pre><code>https://www.notion.so/workspace/8f2c1a04b7e34f6d9a5c0e1b2d3f4a5b?v=...
+                               └───────── the 32 characters you need ─────────┘
+</code></pre>
+<h3>4. The files, in the data repository</h3>
+<pre><code>notion-sync/sync.mjs                    the script
+.github/workflows/notion-sync.yml       the workflow (from notion-sync/notion-sync.yml)
+</code></pre>
+<p>The workflow file has to sit at <code>.github/workflows/</code>, the script wherever the workflow points —
+<code>notion-sync/</code> in the supplied version.</p>
+<h3>5. Two secrets</h3>
+<p>Repository → Settings → Secrets and variables → Actions → <strong>New repository secret</strong></p>
+<pre><code>NOTION_TOKEN      ntn_...
+NOTION_DATABASE   8f2c1a04b7e34f6d9a5c0e1b2d3f4a5b
+</code></pre>
+<h3>6. Run it once by hand</h3>
+<p>Actions → <em>Notion sync</em> → <strong>Run workflow</strong>. The log ends with a line like</p>
+<pre><code>rows 128 · created 128 · updated 0 · archived 0
+</code></pre>
+<p>From then on it runs on its own: every commit the app makes starts it, and a quarter-hourly
+schedule catches anything a failed run missed.</p>
+<hr />
+<h2>What the script does, and what it costs</h2>
+<p>It reads the flight files, drops the rows listed in the tombstone file, fetches the pages already
+in the database once, and then writes only what changed — a new row is created, a corrected row
+is patched, an unchanged row costs no request at all. A row the crew deleted is <strong>archived</strong>
+rather than destroyed, so nothing is lost by accident.</p>
+<p>Requests are spaced by about a third of a second, which sits inside Notion's roughly three per
+second. A flight of two hundred entries costs two hundred writes spread over the flight, not in
+one burst, because each entry starts its own run.</p>
+<p>GitHub Actions minutes: public repositories are free; a private repository has 2,000 minutes a
+month on the Free plan. A run takes about twenty seconds, so a flight with two hundred entries
+uses a little over an hour of that budget. If that becomes tight, remove the <code>push</code> trigger and
+leave the schedule — the table is complete in every run, so a fifteen-minute rhythm loses
+nothing but immediacy.</p>
+<hr />
+<h2>Route 3, if no code is wanted at all</h2>
+<p>Make, Zapier, n8n and Notion's own API Connector can all do this without a repository. The shape
+is the same in each: a scheduled HTTP request, then a Notion upsert.</p>
+<pre><code>GET https://api.github.com/repos/&lt;owner&gt;/gb_flight_data/contents/data/&lt;flight-id&gt;.json
+Authorization: Bearer &lt;read-only GitHub token&gt;
+Accept: application/vnd.github.raw
+X-GitHub-Api-Version: 2022-11-28
+</code></pre>
+<p><code>Accept: application/vnd.github.raw</code> returns the file itself; without it GitHub sends an envelope
+with the content base64-encoded inside. Iterate the array, upsert on <code>id</code>, and poll no faster
+than the service allows. Send <code>If-None-Match</code> with the previous ETag if the tool supports it —
+an unchanged file then answers <code>304</code> and costs nothing against the GitHub rate limit.</p>
+<hr />
+<h2>When rows do not arrive</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every call answers 404</td>
+<td>The integration was never added to the database under <em>Connections</em>.</td>
+</tr>
+<tr>
+<td>The workflow does not start on a commit</td>
+<td>It is not on the default branch, or the path filter does not match the folder in use.</td>
+</tr>
+<tr>
+<td>Rows double on the second run</td>
+<td>The integration is appending instead of upserting on <code>id</code>.</td>
+</tr>
+<tr>
+<td>A deleted row reappears</td>
+<td><code>&lt;flight&gt;.deleted.json</code> is not being read.</td>
+</tr>
+<tr>
+<td>Everything is rewritten every run</td>
+<td>The <strong>Edited</strong> column is missing, so the script cannot tell an unchanged row.</td>
+</tr>
+<tr>
+<td>429 from Notion</td>
+<td>Requests are going out too fast; the supplied script already paces itself and retries.</td>
+</tr>
+</tbody>
+</table>
+</main></body></html>
