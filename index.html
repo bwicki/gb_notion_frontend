@@ -73,6 +73,7 @@ header{flex:0 0 auto;display:flex;align-items:center;gap:8px;height:56px;
   padding:0 8px 0 var(--pad);border-bottom:1px solid var(--line-soft)}
 .hleft{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
 header .clock{font-size:15px;line-height:1.15;white-space:nowrap}
+header button.hide{display:none}
 .hinfo{flex:1;min-width:0;padding-left:9px;display:flex;flex-direction:column;justify-content:center;gap:1px}
 header .id{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
@@ -693,7 +694,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-30';
+const APP_VERSION='v260817-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1516,7 +1517,7 @@ async function sync(silent,push,attempt,force){
     const g=await ghGet(p.json,!push);
     if(g.notModified&&!push&&!ENT.some(e=>!e.synced)){LASTSYNC=new Date();return}
 
-    if(push||pollN%6===0||CFG.handover){await followSetup();await checkMaster()}
+    if(push||pollN%6===0||CFG.handover){await followSetup();await checkMaster();announce()}
 
     let rt=null;
     if(push||pollN%6===0){try{rt=parse((await ghGet(p.del)).text)}catch(e){rt=null}}
@@ -2083,6 +2084,8 @@ function setView(v){
   UI.view=v;save(K_UI,UI);
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   $('#btnMenu').classList.toggle('on',v!=='form');
+  /* the switch belongs where settings are made, not on the screen used in flight */
+  $('#btnTheme').classList.toggle('hide',v!=='set');
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
@@ -2667,6 +2670,46 @@ async function waitPlace(e,ms){
   await Promise.race([PLACEQ[e.id],new Promise(r=>setTimeout(r,ms||2500))]);
 }
 
+/* ── Presence ───────────────────────────────────────────────────────
+   A device that has written nothing cannot be seen in the table, and a follower that has just
+   been set up has written nothing. So every device leaves a small card of its own in the
+   repository — one write every half hour at most, which is nothing against the budget — and
+   the master reads them when it opens the setup. */
+const seenPath=d2=>(CFG.dir||'data').replace(/^\/|\/$/g,'')+'/_seen/'+String(d2).replace(/[^A-Za-z0-9_-]/g,'-')+'.json';
+let LASTSEEN=0;
+async function announce(){
+  if(!configured()||!navigator.onLine)return;
+  if(Date.now()-LASTSEEN<30*60000)return;
+  LASTSEEN=Date.now();
+  try{
+    const p2=seenPath(DEV);
+    let sha=null;try{sha=(await ghGet(p2)).sha}catch(e){}
+    await ghPut(p2,JSON.stringify({device:DEV,reporter:reporter(),role:CFG.role||'',
+      at:new Date().toISOString(),version:APP_VERSION},null,1),sha,'device \u00b7 '+reporter());
+  }catch(e){}
+}
+let SEEN={};
+async function loadSeen(){
+  if(CFG.role!=='master'||!configured()||!navigator.onLine)return;
+  try{
+    const dir=(CFG.dir||'data').replace(/^\/|\/$/g,'')+'/_seen';
+    const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(dir)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
+      {headers:hdr(),cache:'no-store'});
+    if(!r.ok)return;
+    const list=await r.json();
+    if(!Array.isArray(list))return;
+    for(const f of list.slice(0,12)){
+      if(!/\.json$/.test(f.name||''))continue;
+      try{
+        const g=await ghGet(dir+'/'+f.name);
+        const o=g.text?JSON.parse(g.text):null;   /* parse() only ever yields arrays */
+        if(o&&o.device)SEEN[o.device]=o;
+      }catch(e){}
+    }
+    paintDevices();
+  }catch(e){}
+}
+
 /* ── Automatic position report ──────────────────────────────────────
    A heartbeat: every so many minutes a POS row with position, altitude and rate of climb,
    so the track of the flight survives even when nobody has time to report. */
@@ -2945,6 +2988,13 @@ function deviceRoster(){
     cur.reporter=e.reporter||cur.reporter;cur.last=e.ts_utc||cur.last;cur.n++;
     m.set(e.device,cur);
   });
+  /* devices that have announced themselves but written nothing yet still belong here */
+  for(const id in SEEN){
+    const o=SEEN[id],cur=m.get(id)||{device:id,reporter:'',last:'',n:0};
+    if(!cur.reporter)cur.reporter=o.reporter||'';
+    if(!cur.last||String(o.at||'')>String(cur.last))cur.last=cur.n?cur.last:(o.at||'');
+    m.set(id,cur);
+  }
   if(!m.has(DEV))m.set(DEV,{device:DEV,reporter:reporter(),last:'',n:0});
   return [...m.values()].sort((a,b)=>String(b.last).localeCompare(String(a.last)));
 }
@@ -3060,6 +3110,7 @@ async function showSettings(){
     html:'<div class="settbl"><table>'+rows+'</table></div>'});
 }
 $('#btnShowSet').onclick=showSettings;
+$('#btnMenu').addEventListener('click',()=>{if(CFG.role==='master')loadSeen()});
 $('#btnUnlock').onclick=async()=>{
   if(CFG.role!=='master')return info(t('unlock'),t('masterOnly'));
   const v=await ask({title:'Settings password',text:'Enter the password to change the flight setup.',
