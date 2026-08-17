@@ -364,6 +364,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
   <div class="hleft"><span class="clock num" id="hClock">--:--:--Z</span>
     <span class="clock num" id="hBal"></span></div>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
+  <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -583,12 +584,12 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
         <p class="hint" data-t="hintInit">Only needed before the first inventory.</p>
         <div class="f two">
           <div><p class="lab" data-t="lBagKg">Bag standard weight</p>
-            <div class="sfx"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="15"><span>kg</span></div></div>
+            <div class="sfx"><input type="number" id="sBagKg" inputmode="decimal" step="0.5" placeholder="10"><span>kg</span></div></div>
           <div><p class="lab" data-t="lReadyKg">Weight full standby ballast (Sch&#252;tte)</p>
             <div class="sfx"><input type="number" id="sReadyKg" inputmode="decimal" step="0.5" placeholder="30"><span>kg</span></div></div>
         </div>
         <div class="f"><p class="lab" data-t="lSteps">Standard dispense buttons</p>
-          <div class="sfx"><input type="text" id="sSteps" placeholder="5,10,15,25"><span>kg</span></div></div>
+          <div class="sfx"><input type="text" id="sSteps" placeholder="1,5,10,15,25"><span>kg</span></div></div>
         <div class="f"><p class="lab" data-t="lReadySteps">Standard standby (Sch&#252;tte) reporting units</p>
           <input type="text" id="sReady" placeholder="0,10,25,50,75,100"></div>
         <h3 data-t="hAtc">ATC</h3>
@@ -692,12 +693,12 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260813-27';
+const APP_VERSION='v260813-28';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
-const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'5,10,15,25',
-           bagKg:15,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach',
+const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,25',
+           bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            fresh:0,tplVer:0,handover:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
@@ -809,7 +810,7 @@ const L={en:{
  pName:'Name', pFlight:'Flight ID', pCall:'Callsign', pInit:'Ballast on board at start, kg',
  pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
  pBagKg:'Weight per bag kg', pReadyKg:'Full ready ballast kg',
- pSteps:'Quick drop amounts, e.g. 5,10,15,25', pReadySteps:'Ready ballast steps, e.g. 0,10,25,50,75,100',
+ pSteps:'1,5,10,15,25', pReadySteps:'Ready ballast steps, e.g. 0,10,25,50,75,100',
  pO2:'O\u2082 cylinders in liters, e.g. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
  lFlight:'Flight ID', lCall:'Callsign', lP1:'Pilot 1', lP2:'Pilot 2', lInit:'Ballast at launch',
  lVfr:'VFR squawk', lEmerg:'Emergency squawks', lBagKg:'Bag standard weight',
@@ -938,7 +939,7 @@ const L={en:{
  pName:'Name', pFlight:'Fahrtkennung', pCall:'Rufzeichen', pInit:'Ballast an Bord beim Start, kg',
  pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
  pBagKg:'Gewicht pro Sack, kg', pReadyKg:'Voller Ready Ballast, kg',
- pSteps:'Schnellmengen, z. B. 5,10,15,25', pReadySteps:'Ready-Ballast-Stufen, z. B. 0,10,25,50,75,100',
+ pSteps:'1,5,10,15,25', pReadySteps:'Ready-Ballast-Stufen, z. B. 0,10,25,50,75,100',
  pO2:'O\u2082-Flaschen in Liter, z. B. 2,2,10', pStations:'Info,Radar,Tower', pMsgs:'QNH,Ops Normal', hAtc:'ATC',
  lFlight:'Fahrtkennung', lCall:'Rufzeichen', lP1:'Pilot 1', lP2:'Pilot 2', lInit:'Ballast beim Start',
  lVfr:'VFR-Squawk', lEmerg:'Notfall-Squawks', lBagKg:'Standardgewicht pro Sack',
@@ -1790,6 +1791,8 @@ async function confirm2(a,b){
 const NIGHT_BG={red:'#000000',amber:'#000000',green:'#000000',white:'#000000'};
 function setTheme(t,persist){
   document.documentElement.dataset.theme=t;
+  const ic=$('#icTheme');
+  if(ic)ic.innerHTML=t==='night'?IC_DAY:IC_NIGHT;   /* the button shows the mode it leads to */
   document.documentElement.dataset.night=CFG.night||'red';
   const m=document.querySelector('meta[name=theme-color]');
   if(m)m.content=t==='night'?NIGHT_BG[CFG.night||'red']:'#E4E7EA';
@@ -2083,6 +2086,7 @@ function setView(v){
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
+$('#btnTheme').onclick=()=>setTheme(isNight()?'day':'night',true);
 $('#btnMenu').onclick=()=>openMenu();
 $('#btnLogBack').onclick=()=>setView('form');
 async function openMenu(){
@@ -2105,8 +2109,6 @@ async function openMenu(){
     .concat(CFG.role==='master'?[['share',t('mShare')]]:[])
     .concat([['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
-    headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
-             act:()=>setTheme(isNight()?'day':'night',true)},
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go ${k==='form'?'':'sec'} sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
@@ -3006,6 +3008,11 @@ function paintRepHint(){
     ? 'Shared device — entries are filed under the PIC, or under the other pilot while the reporter button is on. This name is the fallback.'
     : 'Personal device — every entry from here is filed under this name, whoever is PIC.';
 }
+/* tapping into one of these means writing a new name, not editing the old one letter by letter */
+['#sP1','#sP2','#sReporterOpen'].forEach(sel=>{
+  const el=$(sel);if(!el)return;
+  el.addEventListener('focus',()=>{setTimeout(()=>{try{el.select()}catch(e){}},0)});
+});
 $('#btnSaveRep').onclick=()=>{
   CFG.reporter=$('#sReporterOpen').value.trim().slice(0,10);save(K_CFG,CFG);
   paintReadout();paintStatus();toast(t('reporterSet')+' '+reporter());
@@ -3078,6 +3085,10 @@ pills('#sNight',v=>{CFG.night=v;document.documentElement.dataset.night=v;
 $('#btnSave').onclick=async()=>{
   if(!UNLOCKED)return;
   const next={};for(const k in SF)next[k]=$(SF[k]).value.trim();
+  /* an empty token field means 'leave it as it is' — nobody can retype a fine-grained token
+     from memory, and clearing it by accident would ground the device */
+  if(!next.token)next.token=CFG.token||'';
+  next.p1=(next.p1||'').slice(0,10);next.p2=(next.p2||'').slice(0,10);
   const mode=($('#sMode button.on')||{dataset:{v:'personal'}}).dataset.v;
   const role=($('#sRole button.on')||{dataset:{v:'master'}}).dataset.v;
   const night=($('#sNight button.on')||{dataset:{v:'red'}}).dataset.v;
@@ -3087,10 +3098,10 @@ $('#btnSave').onclick=async()=>{
       ?'The flight ID changes from "'+(CFG.flight||'none')+'" to "'+(next.flight||'none')+'". Entries are written to a different file from now on.'
       :'These settings apply to every entry made on this device from now on. '+mode+' device, '+(CFG.atcNum?'ATC Coordinator set.':'No ATC Coordinator set.')},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
-  Object.assign(CFG,next);CFG.wa=wa;CFG.mode=mode;CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
+  Object.assign(CFG,next);CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
   const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bars=o2.o2bars;CFG.o2bar=o2.o2bar;
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
-  CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||15;CFG.readyKg=nz(CFG.readyKg)||30;
+  CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||10;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.repName='';save(K_UI,UI);
   save(K_CFG,CFG);applyLang();posTick();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();paintSyncBox();
   setTheme(document.documentElement.dataset.theme,false);
@@ -3248,7 +3259,9 @@ function toast(m){const el=$('#toast');el.textContent=m;el.className='on';clearT
 
 /* ── Start ─────────────────────────────────────────────────────────── */
 $$('.ver').forEach(e=>e.textContent=APP_VERSION);
-setTheme(CFG.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'),false);
+/* every start is a day start: night is chosen for a night, and a fresh launch is usually a
+   new day rather than the continuation of one */
+setTheme('day',false);
 tplMigrate();applyLang();fillSetup();paintRepHint();paintSyncBox();paintQuick();paintReady();paintCrew();paintWaChecks();lockSettings();
 setType(UI.type);setView(UI.view==='set'?'form':UI.view);
 mark('#bAct',UI.act);mark('#aDir',UI.adir);mark('#iReady',UI.ready);
