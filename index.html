@@ -695,7 +695,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-03';
+const APP_VERSION='v260817-04';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -2699,7 +2699,7 @@ async function loadSeen(){
     const dir=(CFG.dir||'data').replace(/^\/|\/$/g,'')+'/_seen';
     const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(dir)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
       {headers:hdr(),cache:'no-store'});
-    if(!r.ok)return;
+    if(!r.ok)return;          /* 404 simply means no device has announced itself yet */
     const list=await r.json();
     if(!Array.isArray(list))return;
     for(const f of list.slice(0,12)){
