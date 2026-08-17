@@ -154,6 +154,8 @@ input::placeholder,textarea::placeholder{color:var(--muted)}
 input:focus,textarea:focus{outline:0;border-color:var(--sel)}
 input.pre{color:var(--carry);border-style:dashed}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btnrow{align-items:end}
+.btnrow .go{height:52px;font-size:15px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .four{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
 .four .lab{font-size:10px}
@@ -365,7 +367,6 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
   <div class="hleft"><span class="clock num" id="hClock">--:--:--Z</span>
     <span class="clock num" id="hBal"></span></div>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
-  <button id="btnTheme" aria-label="Day or night"><svg id="icTheme" viewBox="0 0 24 24"></svg></button>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -554,10 +555,10 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
       <div id="setLocked">
         <p class="lock" data-t="lockText">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake.</p>
-        <div class="f two">
-        <button class="go" id="btnUnlock" data-t="unlock">Unlock settings</button>
-        <button class="go sec" id="btnShowSet" data-t="showSet">Show settings</button>
-      </div>
+        <div class="f two btnrow">
+          <button class="go" id="btnUnlock" data-t="unlock">Unlock settings</button>
+          <button class="go sec" id="btnShowSet" data-t="showSet">Show settings</button>
+        </div>
       </div>
 
       <div id="setOpen" style="display:none">
@@ -694,7 +695,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-01';
+const APP_VERSION='v260817-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1764,6 +1765,8 @@ function ask(o){
     const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
     const done=v=>{m.classList.remove('on');m.innerHTML='';res(v)};
     if(o.cancel!==false)m.querySelector('[data-a="0"]').onclick=()=>done(null);
+    const hb=m.querySelector('#mHead');
+    if(hb&&o.headBtn)hb.onclick=()=>o.headBtn.act();
     m.querySelector('[data-a="1"]').onclick=ev=>{
       const val=o.input?m.querySelector('#mIn').value:(o.html?collect():true);
       /* a confirmation worth seeing stays a moment, in the same green as a posted entry */
@@ -1792,8 +1795,8 @@ async function confirm2(a,b){
 const NIGHT_BG={red:'#000000',amber:'#000000',green:'#000000',white:'#000000'};
 function setTheme(t,persist){
   document.documentElement.dataset.theme=t;
-  const ic=$('#icTheme');
-  if(ic)ic.innerHTML=t==='night'?IC_DAY:IC_NIGHT;   /* the button shows the mode it leads to */
+  const ic=$('#mHead');
+  if(ic)ic.querySelector('svg').innerHTML=t==='night'?IC_DAY:IC_NIGHT;
   document.documentElement.dataset.night=CFG.night||'red';
   const m=document.querySelector('meta[name=theme-color]');
   if(m)m.content=t==='night'?NIGHT_BG[CFG.night||'red']:'#E4E7EA';
@@ -2085,11 +2088,9 @@ function setView(v){
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   $('#btnMenu').classList.toggle('on',v!=='form');
   /* the switch belongs where settings are made, not on the screen used in flight */
-  $('#btnTheme').classList.toggle('hide',v!=='set');
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
 }
-$('#btnTheme').onclick=()=>setTheme(isNight()?'day':'night',true);
 $('#btnMenu').onclick=()=>openMenu();
 $('#btnLogBack').onclick=()=>setView('form');
 async function openMenu(){
@@ -2112,6 +2113,8 @@ async function openMenu(){
     .concat(CFG.role==='master'?[['share',t('mShare')]]:[])
     .concat([['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
+    headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
+             act:()=>setTheme(isNight()?'day':'night',true)},
     text:ENT.length+' rows on this device · '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go ${k==='form'?'':'sec'} sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
