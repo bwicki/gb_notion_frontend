@@ -695,7 +695,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-02';
+const APP_VERSION='v260817-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1753,8 +1753,9 @@ function ask(o){
   return new Promise(res=>{
     const m=$('#modal');
     m.innerHTML=`<div class="sheet">
-      ${o.headBtn?`<button class="headbtn" id="mHead" aria-label="${esc(o.headBtn.label||'')}"><svg viewBox="0 0 24 24">${o.headBtn.icon}</svg></button>`:''}
-    <h4>${esc(o.title||'')}</h4>${o.text?`<p>${esc(o.text)}</p>`:''}
+      <div class="sheetHead"><h4>${esc(o.title||'')}</h4>
+        ${o.headBtn?`<button class="headbtn" id="mHead" aria-label="${esc(o.headBtn.label||'')}"><svg viewBox="0 0 24 24">${o.headBtn.icon}</svg></button>`:''}
+      </div>${o.text?`<p>${esc(o.text)}</p>`:''}
       ${o.html||''}
       ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
       <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
@@ -3344,7 +3345,9 @@ posTick();
    missing was a nudge to look for a new one and a word when it has arrived. */
 if('serviceWorker'in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
-    const look=()=>{try{reg.update()}catch(e){}};
+    /* update() rejects while a worker is installing; an unhandled rejection there shows up
+       in the console as an InvalidStateError and helps nobody */
+    const look=()=>{try{const p2=reg.update();if(p2&&p2.catch)p2.catch(()=>{})}catch(e){}};
     look();
     setInterval(look,15*60*1000);
     addEventListener('focus',look);
