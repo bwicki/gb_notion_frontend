@@ -334,7 +334,8 @@ position, altitude, track and place sit in the footer of the row, not inside the
 nothing is printed twice. It goes to the table only, never to WhatsApp — the crew learns of the change from the
 message that follows, and a chat does not need it twice. Then the resources report itself, as
 before, marked **Change of PIC** at the head of its line and of its WhatsApp message, and sent
-to whoever is ticked.
+to whoever is ticked. Two rows are written, so two receipts appear above the post button in
+turn: *PIC change posted*, then *Crew status posted*.
 
 The log therefore shows the moment of the handover as an event, rather than leaving it to be
 inferred from a name that quietly differs from the one before. **PIC** can be picked or left out
@@ -970,7 +971,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260817-09` is the ninth build of 17 August 2026.
+smaller counter. `v260818-01` is the first build of 18 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

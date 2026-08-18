@@ -703,7 +703,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-09';
+const APP_VERSION='v260818-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -854,7 +854,7 @@ const L={en:{
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
  lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
- picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picChangeNo:'Just the reading',
+ picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
  lPosMin:'Automatic position report every', lOpsMin:'Ops Normal reminder after',
  lPosHint:'0 turns the automatic report off. With a number, a POS row is written at that interval with position, altitude and rate of climb — the track of the flight survives even when nobody has a hand free.',
  opsTitle:'Ops Normal', opsText:'Remind of the next Ops Normal in how many minutes?',
@@ -984,7 +984,7 @@ const L={en:{
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
  lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
- picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picChangeNo:'Just the reading',
+ picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
@@ -2846,8 +2846,11 @@ $('#btnPost').onclick=async()=>{
     /* the handover gets a row of its own before the readings, so the log shows the moment
        of the change rather than leaving it to be read out of a resources report. It goes
        to the table only — the crew already learns of it from the message that follows. */
-    if(picChanged)add({type:'PIC',crew_pic:picName(),crew_rest:restName(),crew_change:'yes',
-      note:t('picNew').replace('{b}',picName())});
+    if(picChanged){
+      add({type:'PIC',crew_pic:picName(),crew_rest:restName(),crew_change:'yes',
+        note:t('picNew').replace('{b}',picName())});
+      toast(t('picPosted'));
+    }
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       crew_change:picChanged,
@@ -2857,7 +2860,9 @@ $('#btnPost').onclick=async()=>{
       res_o2_detail:o2Detail(),res_o2_inuse:UI.o2use==null?null:UI.o2use+1,
       res_o2_bars:(UI.o2bars||[]).map(x=>x==null?'':x).join(';'),
       whatsapp:rc.length?'yes':'',whatsapp_to:rc.map(r=>r.n||r.p).join('; ')});
-    $('#cNote').value='';acceptPre('#b-Ressources');carryRes();toast(t('crewPosted'));
+    $('#cNote').value='';acceptPre('#b-Ressources');carryRes();
+    /* two rows were written, so two receipts — the second waits until the first has been read */
+    if(picChanged)setTimeout(()=>toast(t('crewPosted')),1800); else toast(t('crewPosted'));
   }else{
     const v=$('#oMsg').value.trim();
     if(!v){flash('','');return toast(t('noteEmpty'))}
