@@ -47,8 +47,9 @@ rather than a list of actions: *Return to Reporting Screen …* with a back arro
 master, and *About — more info*, which opens this manual in a window of its own with the licence
 linked from its last section.
 
-The four things that concern the log as a whole — reloading it from GitHub, printing it,
-exporting it, and emptying it — sit together behind one entry, so the main list stays short.
+Everything that concerns the log sits behind one entry, *Log — open, reload, print, export,
+clear*, so the main list stays short: opening it, reloading it from GitHub, printing it,
+exporting it and emptying it.
 
 **Clear the log** is there for the test messages exchanged before a flight: the crew tries the
 whole chain, sees the rows arrive in Notion, and then wipes them so the flight starts on a clean
@@ -721,6 +722,12 @@ deleted row does not reappear from another iPad's copy, and the main table stays
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
 export moved into the menu.
 
+**Each row names its kind** in a small tag before the text — `BALLAST`, `ATC`, `POS` and so on —
+and a row of chips above the list filters by kind, each with its count: *All 128 · Ballast 61 ·
+ATC 42 · Ressources 18 · POS 5 · PIC 2*. Only kinds that actually occur are offered. Reading
+the ATC calls of a long flight is then a tap rather than a search, and the choice is remembered
+between visits.
+
 Each row carries its transmission state at the right edge: a green double check when it has
 reached GitHub, a straw single check while it is waiting for a connection, and a red cross when
 an attempt was refused — an expired token, a repository that is not there. A cross is worth
@@ -980,7 +987,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260818-02` is the second build of 18 August 2026.
+smaller counter. `v260818-03` is the third build of 18 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
