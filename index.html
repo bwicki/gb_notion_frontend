@@ -703,7 +703,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260818-01';
+const APP_VERSION='v260818-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -776,14 +776,18 @@ const L={en:{
  waRecipients:'WhatsApp', waLayout:'WhatsApp message layout', ghConn:'GitHub connection',
  mReport:'Return to Reporting Screen \u2026', mLog:'Open log', mDocs:'Log \u2014 reload, print, export', mSettings:'Settings', mDay:'Day mode', mNight:'Night mode',
  mReload:'Reload log', mSend:'Send now', mShare:'Share setup with another device',
- mExport:'Export the log', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
+ mExport:'Export the log', clearLog:'Clear the log',
+ clearLogPass:'Emptying the log is for the test messages exchanged before a flight. It needs the master password.',
+ clearLogWarn1:'All {n} entries are removed, on this device and on every other one.',
+ clearLogWarn2:'The rows are marked as deleted so they cannot come back from another device. The flight itself, the setup and the archived flights are untouched.',
+ clearLogDone:'{n} entries removed. The log is empty on every device.', mPrint:'Print the log', print:'Print', printPick:'Which kinds of message should the printout contain?',
  page:'Page', logHeadPrint:'Flight log',
  printedBy:'printed {when} by {who}', noFurther:'[no further log entries]', popupBlocked:'The browser blocked the print window', mAbout:'About — more info', mLicense:'License', menu:'Menu',
  enterKg:'Enter the kilograms dropped', enterInv:'Enter the bags and the water',
  enterStation:'Enter a station or a message', noteEmpty:'The note is empty',
  sqDigits:'A squawk is four digits, each 0 to 7',
  freqRange:'A frequency runs from 118.000 to 136.975 MHz', freqStep:'Not a channel: names end in 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC posted',
- crewPosted:'Crew status posted', notePosted:'Note posted', invPosted:'Inventory',
+ crewPosted:'Ressource status posted', notePosted:'Note posted', invPosted:'Inventory',
  takenOver:'Taken over from the last call', settingsSaved:'Settings saved',
  wrongPass:'Wrong password', checking:'Checking\u2026', newVersion:'A newer version is ready — close the app and open it again',
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
@@ -905,14 +909,18 @@ const L={en:{
  waRecipients:'WhatsApp', waLayout:'WhatsApp-Nachrichtenaufbau', ghConn:'GitHub-Verbindung',
  mReport:'Zurück zum Meldebildschirm \u2026', mLog:'Logbuch öffnen', mDocs:'Logbuch \u2014 laden, drucken, exportieren', mSettings:'Einstellungen', mDay:'Tagmodus', mNight:'Nachtmodus',
  mReload:'Logbuch neu laden', mSend:'Jetzt senden', mShare:'Einrichtung an ein anderes Gerät geben',
- mExport:'Logbuch exportieren', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
+ mExport:'Logbuch exportieren', clearLog:'Logbuch leeren',
+ clearLogPass:'Das Leeren des Logbuchs ist für die Testmeldungen vor einer Fahrt gedacht. Es verlangt das Master-Passwort.',
+ clearLogWarn1:'Alle {n} Einträge werden entfernt, auf diesem Gerät und auf allen anderen.',
+ clearLogWarn2:'Die Zeilen werden als gelöscht markiert, damit sie von keinem anderen Gerät zurückkommen. Die Fahrt selbst, die Einrichtung und die archivierten Fahrten bleiben unberührt.',
+ clearLogDone:'{n} Einträge entfernt. Das Logbuch ist auf allen Geräten leer.', mPrint:'Logbuch drucken', print:'Drucken', printPick:'Welche Meldungsarten soll der Ausdruck enthalten?',
  page:'Seite', logHeadPrint:'Bordbuch',
  printedBy:'gedruckt {when} von {who}', noFurther:'[keine weiteren Einträge]', popupBlocked:'Der Browser hat das Druckfenster blockiert', mAbout:'Über — mehr dazu', mLicense:'Lizenz', menu:'Menü',
  enterKg:'Abgeworfene Kilogramm eingeben', enterInv:'Säcke und Wasser eingeben',
  enterStation:'Stelle oder Meldung eingeben', noteEmpty:'Die Notiz ist leer',
  sqDigits:'Ein Squawk hat vier Ziffern, je 0 bis 7',
  freqRange:'Eine Frequenz liegt zwischen 118.000 und 136.975 MHz', freqStep:'Kein Kanal: Endungen sind 00/05/10/15, 25/30/35/40, 50/55/60/65, 75/80/85/90', atcPosted:'ATC gesendet',
- crewPosted:'Crew-Stand gesendet', notePosted:'Notiz gesendet', invPosted:'Inventar',
+ crewPosted:'Ressourcenstand gemeldet', notePosted:'Notiz gesendet', invPosted:'Inventar',
  takenOver:'Vom letzten Ruf übernommen', settingsSaved:'Einstellungen gesichert',
  wrongPass:'Falsches Passwort', checking:'Prüfe\u2026', newVersion:'Eine neuere Fassung liegt bereit — App schliessen und neu öffnen',
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
@@ -1823,13 +1831,40 @@ const IC_NIGHT='<path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.6 8.6 0 1 0 10.4 10.4Z"/
 /* ── Navigation and menu ───────────────────────────────────────────── */
 /* Everything that produces a document out of the log lives together, so the main menu
    stays a list of places rather than a list of actions. */
+/* Emptying the log for real, everywhere. Test messages before a flight are the reason this
+   exists: the crew tries the whole chain, then wipes it so the flight starts on a clean sheet.
+   Every row gets a tombstone, so the other devices drop it too rather than pushing it back. */
+async function clearLog(){
+  const pw=await ask({title:t('clearLog'),text:t('clearLogPass'),input:'password',ph:'\u2022\u2022\u2022\u2022',ok:t('ok')});
+  if(pw===null)return;
+  if(pw!==MASTER_PASS)return info(t('clearLog'),t('wrongPass'));
+  const n=ENT.length;
+  if(!await confirm2(
+    {title:t('clearLog'),text:t('clearLogWarn1').replace('{n}',String(n)),ok:t('clearLog')},
+    {title:t('clearLog'),text:t('clearLogWarn2'),ok:t('clearLog')}))return;
+  /* read the whole table first: a row written by another device and not yet pulled would
+     otherwise survive the wipe and come straight back */
+  if(configured()&&navigator.onLine){
+    for(const k in ETAG)delete ETAG[k];
+    await sync(true,false);await waitSync();
+  }
+  const now=new Date().toISOString(),by=reporter();
+  ENT.forEach(e=>{if(e&&e.id&&!TOMB.some(x=>x.id===e.id))TOMB.push({id:e.id,ts:now,by:by})});
+  ENT=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
+  for(const k in ETAG)delete ETAG[k];
+  UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};save(K_UI,UI);
+  paint();
+  if(configured()&&navigator.onLine){await sync(true,true,0,true);await waitSync()}
+  await info(t('clearLog'),t('clearLogDone').replace('{n}',String(n)));
+}
 async function docsMenu(){
   const IC2={
     pull:'<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/>',
     print:'<path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6H7Z"/>',
     export:'<path d="M5 15v3.5h14V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/>'
   };
-  const items=[['pull',t('mReload')],['print',t('mPrint')],['export',t('mExport')]];
+  IC2.wipe='<path d="M5 7h14"/><path d="M9 7V5h6v2"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v6M14 11v6"/>';
+  const items=[['pull',t('mReload')],['print',t('mPrint')],['export',t('mExport')],['wipe',t('clearLog')]];
   await ask({title:t('mDocs'),cancel:false,ok:t('close'),
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go sec sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC2[k]}</svg>${esc(l)}</button>`
@@ -1841,6 +1876,7 @@ async function docsMenu(){
         if(k==='pull')sync(false,false);
         else if(k==='print')printSheet();
         else if(k==='export')exportSheet();
+        else if(k==='wipe')clearLog();
       },120);
     })}});
 }

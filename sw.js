@@ -6,7 +6,7 @@
    fails is never activated — the app then keeps serving the previous version for ever,
    which is exactly the sort of fault that hides every other change. Each file is therefore
    cached on its own and a failure is noted and passed over. */
-const V = 'basket-reporting-v260818-01';
+const V = 'basket-reporting-v260818-02';
 
 /* the files the app cannot run without */
 const CORE = [

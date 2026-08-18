@@ -47,8 +47,17 @@ rather than a list of actions: *Return to Reporting Screen …* with a back arro
 master, and *About — more info*, which opens this manual in a window of its own with the licence
 linked from its last section.
 
-The three things that turn the log into a document — reloading it from GitHub, printing it,
-exporting it — sit together behind one entry, so the main list stays short. The day/night switch
+The four things that concern the log as a whole — reloading it from GitHub, printing it,
+exporting it, and emptying it — sit together behind one entry, so the main list stays short.
+
+**Clear the log** is there for the test messages exchanged before a flight: the crew tries the
+whole chain, sees the rows arrive in Notion, and then wipes them so the flight starts on a clean
+sheet. It asks for the **master password** and then twice for confirmation. The table is read in
+full first, so a row written on another device and not yet pulled cannot survive the wipe, and
+every row is marked as deleted rather than merely removed — that is what stops it coming back
+from another device on the next sync. The flight itself, the setup and the archived flights are
+untouched. A device that is offline at that moment keeps whatever it has not yet sent; bring it
+online before wiping. The day/night switch
 has become a square button at the top right of the menu, level with the word *Menu*: it is a
 setting, not a destination, and it no longer takes a line of its own.
 
@@ -971,7 +980,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260818-01` is the first build of 18 August 2026.
+smaller counter. `v260818-02` is the second build of 18 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
