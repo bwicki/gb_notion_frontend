@@ -703,7 +703,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-05';
+const APP_VERSION='v260817-07';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -854,7 +854,7 @@ const L={en:{
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
  lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
- picChangeYes:'Report the change', picChangeNo:'Just the reading',
+ picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picChangeNo:'Just the reading',
  lPosMin:'Automatic position report every', lOpsMin:'Ops Normal reminder after',
  lPosHint:'0 turns the automatic report off. With a number, a POS row is written at that interval with position, altitude and rate of climb — the track of the flight survives even when nobody has a hand free.',
  opsTitle:'Ops Normal', opsText:'Remind of the next Ops Normal in how many minutes?',
@@ -984,7 +984,7 @@ const L={en:{
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
  lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
- picChangeYes:'Report the change', picChangeNo:'Just the reading',
+ picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picChangeNo:'Just the reading',
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
@@ -1673,6 +1673,10 @@ function line(e){
        e.res_o2_crew?'O\u2082 crew '+e.res_o2_crew:'',
        e.res_o2?'O\u2082 '+e.res_o2:'',e.note||'']
        .filter(Boolean).join(' \u00b7 ');
+  }else if(e.type==='PIC'){
+    h=e.note||t('picChange');
+    s=[e.pos_lat?e.pos_lat+' '+e.pos_lon:'',e.alt_ft!=null?e.alt_ft+' ft':'',e.place||'']
+      .filter(Boolean).join(' \u00b7 ');
   }else if(e.type==='POS'){
     h=t('lgPos')+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':'')
       +(e.vs_ms!=null?' \u00b7 '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':'');
@@ -1842,8 +1846,8 @@ async function docsMenu(){
 /* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
    Pagination is measured rather than guessed, so no entry is ever cut in half. */
 async function printSheet(){
-  const kinds=['Ballast','ATC','Ressources','Other','POS'];
-  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true};
+  const kinds=['Ballast','ATC','Ressources','Other','POS','PIC'];
+  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,PIC:true};
   await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
     text:t('printPick'),
     html:'<div class="links wa" id="prK">'+kinds.map(k=>
@@ -2832,6 +2836,11 @@ $('#btnPost').onclick=async()=>{
         text:t('picChangeAsk').replace('{a}',prev.crew_pic).replace('{b}',picName()),
         ok:t('picChangeYes'),cancel:t('picChangeNo')}))picChanged='yes';
     }
+    /* the handover gets a row of its own before the readings, so the log shows the moment
+       of the change rather than leaving it to be read out of a resources report. It goes
+       to the table only — the crew already learns of it from the message that follows. */
+    if(picChanged)add({type:'PIC',crew_pic:picName(),crew_rest:restName(),crew_change:'yes',
+      note:t('picNew').replace('{b}',picName())});
     e=add({type:'Ressources',note:$('#cNote').value.trim(),
       res_battery_pct:bat===''?null:Math.round(nz(bat)),
       crew_change:picChanged,
@@ -3162,7 +3171,10 @@ $('#btnSave').onclick=async()=>{
       :'These settings apply to every entry made on this device from now on. '+mode+' device, '+(CFG.atcNum?'ATC Coordinator set.':'No ATC Coordinator set.')},
     {title:'Confirm',text:'Save and apply?',ok:'Save'}))return;
   Object.assign(CFG,next);CFG.role=role;CFG.night=night;CFG.tpl=readTplRows();
-  const o2=readO2Rows();CFG.o2=o2.o2;CFG.o2bars=o2.o2bars;CFG.o2bar=o2.o2bar;
+  /* an empty cylinder table means the rows were never filled in, not that the bottles are
+     gone — the same rule as for the token, and for the same reason */
+  const o2=readO2Rows();
+  if(o2.o2){CFG.o2=o2.o2;CFG.o2bars=o2.o2bars;CFG.o2bar=o2.o2bar}
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||10;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.repName='';save(K_UI,UI);

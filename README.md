@@ -1,4 +1,4 @@
- GB Notion Frontend — Basket Reporting
+# GB Notion Frontend — Basket Reporting
 
 An offline version of the Basket Reporting form for use in the basket during a gas balloon
 flight. Same four message types as the Tally form, same submit action, but it keeps working
@@ -115,6 +115,9 @@ pilots, the weight of one ballast bag, the full ready-ballast weight, and the qu
 amounts. The methanol level at the start of the flight is a setting of its own — a tank is not always
 full when the balloon leaves — and it is what the methanol button shows until the first
 Ressources entry says otherwise.
+
+An empty cylinder table on saving means the rows were never filled in, not that the bottles are
+gone: the previous entry is kept, the same rule that protects the GitHub token.
 
 The oxygen cylinders are a table of up to four, each with its volume and its pressure when
 full. Every input has its name above it and its unit inside it.
@@ -324,9 +327,20 @@ normally means. *Nobody* is still one tap away for the stretches when both are a
 
 **A handover is asked about before it is filed.** If the PIC named on this report differs from
 the one on the last, posting stops to ask *The pilot in command changes from A to B. Report it?*
-On *Report the change* the entry is marked and reads **Change of PIC** at the head of its line in
-the log and at the head of the WhatsApp message; on *Just the reading* it is filed as an ordinary
-resources report with the new name. A change of command is a fact of the flight, not a side
+
+On *Report the change* **two rows are written**. First a row of its own, of a kind called
+**PIC**, reading `PIC Change, new: B. Müller` with the position, altitude and place of the
+moment. It goes to the table only, never to WhatsApp — the crew learns of the change from the
+message that follows, and a chat does not need it twice. Then the resources report itself, as
+before, marked **Change of PIC** at the head of its line and of its WhatsApp message, and sent
+to whoever is ticked.
+
+The log therefore shows the moment of the handover as an event, rather than leaving it to be
+inferred from a name that quietly differs from the one before. **PIC** can be picked or left out
+of a printout like any other kind.
+
+On *Just the reading* it is filed as an ordinary resources report with the new name, and no PIC
+row is written. A change of command is a fact of the flight, not a side
 effect of a tap, and the log should be able to show when it happened.
 
 *Battery* and *Methanol level* both open the same list of percentages in a window, rather than
@@ -955,7 +969,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260817-05` is the fifth build of 17 August 2026.
+smaller counter. `v260817-07` is the seventh build of 17 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
