@@ -703,7 +703,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260817-07';
+const APP_VERSION='v260817-09';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -815,7 +815,7 @@ const L={en:{
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
  addVoice:'Add voice msg', stopRec:'Stop', micDenied:'Microphone not allowed',
  noRecorder:'This browser cannot record audio', mediaLater:'Attachments go up with the next connection', sharedWithMedia:'Shared with the attachment — pick the chat in WhatsApp',
- o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', inUseHint:'Only the cylinder in use can be reported. Switch first, then enter the pressure.', o2switch:'Do you want to change O\u2082 cylinder?', liters:'lit', bars:'bars',
+ o2title:'O\u2082 cylinders', o2none:'No cylinders defined in the setup', o2crewOff:'Only while the crew is on O\u2082', inUse:'in use', assumed:'assumed', inUseHint:'Only the cylinder in use can be reported. Switch first, then enter the pressure.', o2switch:'Do you want to change O\u2082 cylinder?', liters:'lit', bars:'bars',
  levelTitle:'Level', notSet:'not set',
  pName:'Name', pFlight:'Flight ID', pCall:'Callsign', pInit:'Ballast on board at start, kg',
  pVfr:'VFR squawk', pEmerg:'Emergency squawks, e.g. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
@@ -944,7 +944,7 @@ const L={en:{
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
  addVoice:'Sprachnachricht', stopRec:'Stopp', micDenied:'Mikrofon nicht freigegeben',
  noRecorder:'Dieser Browser kann keinen Ton aufnehmen', mediaLater:'Anhänge gehen mit der nächsten Verbindung raus', sharedWithMedia:'Mit Anhang geteilt — Chat in WhatsApp wählen',
- o2title:'O\u2082-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt', o2crewOff:'Nur solange die Crew an O\u2082 ist', inUse:'in Gebrauch', inUseHint:'Nur die benutzte Flasche lässt sich melden. Zuerst umschalten, dann den Druck eintragen.', o2switch:'Soll die O\u2082-Flasche gewechselt werden?',
+ o2title:'O\u2082-Flaschen', o2none:'Keine Flaschen in den Einstellungen hinterlegt', o2crewOff:'Nur solange die Crew an O\u2082 ist', inUse:'in Gebrauch', assumed:'angenommen', inUseHint:'Nur die benutzte Flasche lässt sich melden. Zuerst umschalten, dann den Druck eintragen.', o2switch:'Soll die O\u2082-Flasche gewechselt werden?',
  liters:'lit', bars:'bar', levelTitle:'Stand', notSet:'nicht gesetzt',
  pName:'Name', pFlight:'Fahrtkennung', pCall:'Rufzeichen', pInit:'Ballast an Bord beim Start, kg',
  pVfr:'VFR-Squawk', pEmerg:'Notfall-Squawks, z. B. 7500,7600,7700', pP1:'Pilot 1', pP2:'Pilot 2',
@@ -1674,9 +1674,10 @@ function line(e){
        e.res_o2?'O\u2082 '+e.res_o2:'',e.note||'']
        .filter(Boolean).join(' \u00b7 ');
   }else if(e.type==='PIC'){
+    /* the position belongs in the footer of the entry, as it does everywhere else — repeating
+       it inside the message would print it twice */
     h=e.note||t('picChange');
-    s=[e.pos_lat?e.pos_lat+' '+e.pos_lon:'',e.alt_ft!=null?e.alt_ft+' ft':'',e.place||'']
-      .filter(Boolean).join(' \u00b7 ');
+    s='';
   }else if(e.type==='POS'){
     h=t('lgPos')+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':'')
       +(e.vs_ms!=null?' \u00b7 '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':'');
@@ -2263,13 +2264,18 @@ const o2FullBars=()=>{
   const list=String(CFG.o2bars||'').split(/[^0-9.]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0);
   return sz.map((l,i)=>list[i]>0?list[i]:(nz(CFG.o2bar)||200));
 };
-const o2Litres=()=>{const sz=o2Sizes(),b=UI.o2bars||[];
-  return Math.round(sz.reduce((a,l,i)=>a+(b[i]>0?l*b[i]:0),0))};
+/* A cylinder that has not been reported yet is not empty — it holds what the setup says it
+   holds. So the reserve is always a figure, from the moment the bottles are entered, and a
+   pressure reported later simply replaces the assumption for that one bottle. */
+const o2Now=()=>{const f=o2FullBars(),b=UI.o2bars||[];
+  return o2Sizes().map((l,i)=>(b[i]>0?b[i]:f[i]))};
+const o2Litres=()=>{const sz=o2Sizes(),b=o2Now();
+  return Math.round(sz.reduce((a,l,i)=>a+l*(b[i]||0),0))};
 const o2Full=()=>{const sz=o2Sizes(),f=o2FullBars();
   return Math.round(sz.reduce((a,l,i)=>a+l*f[i],0))};
 const o2Pct=()=>{const f=o2Full();return f?Math.min(100,Math.round(o2Litres()/f*100)):null};
 const o2Summary=()=>{
-  if(!o2Sizes().length||!(UI.o2bars||[]).some(x=>x>0))return '';
+  if(!o2Sizes().length)return '';
   const p=o2Pct();return thou(o2Litres())+' lit'+(p==null?'':' ('+p+'%)');
 };
 function paintRes(){
@@ -2328,10 +2334,11 @@ $('#rO2').onclick=async()=>{
   }
 };
 const o2Detail=()=>{
-  const sizes=o2Sizes(),bars=UI.o2bars||[];
-  return sizes.map((l,i)=>bars[i]==null?null:
-    '#'+(i+1)+' '+l+' lit '+bars[i]+' bar'+(UI.o2use===i?' ('+t('inUse')+')':''))
-    .filter(Boolean).join('; ');
+  const sizes=o2Sizes(),bars=o2Now(),rep=UI.o2bars||[];
+  return sizes.map((l,i)=>
+    '#'+(i+1)+' '+l+' lit '+bars[i]+' bar'+(rep[i]>0?'':' ('+t('assumed')+')')
+    +(UI.o2use===i?' ('+t('inUse')+')':''))
+    .join('; ');
 };
 
 /* ── values carried over from the last message of the same kind ─────
@@ -3178,7 +3185,7 @@ $('#btnSave').onclick=async()=>{
   CFG.repo=CFG.repo.replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   CFG.init=nz(CFG.init);CFG.bagKg=nz(CFG.bagKg)||10;CFG.readyKg=nz(CFG.readyKg)||30;
   if(!shared())UI.repName='';save(K_UI,UI);
-  save(K_CFG,CFG);applyLang();posTick();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRepHint();paintSyncBox();
+  save(K_CFG,CFG);applyLang();posTick();paintQuick();paintReady();paintCrew();paintWaChecks();paintInv();paintRes();paintRepHint();paintSyncBox();
   setTheme(document.documentElement.dataset.theme,false);
   recalc(ENT);save(K_ENT,ENT);paint();
   toast(t('settingsSaved'));lockSettings();setView('form');publishSetup();

@@ -329,8 +329,9 @@ normally means. *Nobody* is still one tap away for the stretches when both are a
 the one on the last, posting stops to ask *The pilot in command changes from A to B. Report it?*
 
 On *Report the change* **two rows are written**. First a row of its own, of a kind called
-**PIC**, reading `PIC Change, new: B. Müller` with the position, altitude and place of the
-moment. It goes to the table only, never to WhatsApp — the crew learns of the change from the
+**PIC**, reading `PIC Change, new: B. Müller`. It is laid out like every other entry — the
+position, altitude, track and place sit in the footer of the row, not inside the message, so
+nothing is printed twice. It goes to the table only, never to WhatsApp — the crew learns of the change from the
 message that follows, and a chat does not need it twice. Then the resources report itself, as
 before, marked **Change of PIC** at the head of its line and of its WhatsApp message, and sent
 to whoever is ticked.
@@ -969,7 +970,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260817-07` is the seventh build of 17 August 2026.
+smaller counter. `v260817-09` is the ninth build of 17 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
