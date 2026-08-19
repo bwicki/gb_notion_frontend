@@ -180,6 +180,9 @@ On a personal device — the default, and what the two pilots' own phones should
 every entry is filed under the name entered there, whoever happens to be pilot in command. The
 reporter button is hidden; there is nothing to get wrong.
 
+Switching between personal and shared takes effect at once: the reporter button appears beside
+*Report to CC* on all four forms, or disappears again, without leaving the setup.
+
 On a shared device the reporter defaults to whoever is pilot in command, and a button beside
 *Report to CC* — about a third of the width — **walks through everyone who might be
 filing**: both pilots, and the name this device carries if it belongs to neither. A crew member
@@ -411,7 +414,8 @@ never has to be reconstructed from memory, and never depends on who made the las
 
 ## 8. WhatsApp
 
-All four forms list the recipients individually at the foot, under *Also send to WhatsApp* —
+All four forms list the recipients at the foot — on Ballast below both the drop and the
+inventory panel, since an inventory is as worth sending as a drop, under *Also send to WhatsApp* —
 the entry always goes to the table, and WhatsApp is the addition. **Ballast is off by default**
 even where the others are on: a drop happens many times an hour and would be noise in a chat,
 but the option is there as a fallback when the table cannot be reached, one
@@ -987,7 +991,7 @@ card in the repository yet. It disappears with the first one.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260818-03` is the third build of 18 August 2026.
+smaller counter. `v260818-05` is the fifth build of 18 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

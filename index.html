@@ -417,7 +417,6 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
             <button id="bReset" class="hide" data-t="reset">Reset</button>
           </div>
           <div class="f"><textarea id="bNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
-          <div class="f"><div class="links wa" id="waBal"></div></div>
         </div>
 
         <div class="sub" id="s-count">
@@ -433,6 +432,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <div class="calc" id="iCalc"></div>
           <div class="f"><textarea id="iNote" data-tp="remark" placeholder="Remark (optional)"></textarea></div>
         </div>
+        <div class="f"><div class="links wa" id="waBal"></div></div>
       </div>
 
       <div class="blk" id="b-ATC">
@@ -707,7 +707,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260818-03';
+const APP_VERSION='v260818-05';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -3215,7 +3215,14 @@ $('#btnUnlock').onclick=async()=>{
 pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
 pills('#sGeo',v=>{CFG.geo=Number(v);save(K_CFG,CFG)});
 pills('#sLang',v=>{CFG.lang=v;save(K_CFG,CFG);applyLang();paintCrew();paintWaChecks();paintReady();paintInv();paint()});
-pills('#sMode',()=>paintModeLab());
+/* The mode moved out of the locked part of the setup and its handler was left behind: it
+   repainted a label and never wrote the value. Switching to shared therefore did nothing at
+   all — the reporter button lives on the reporting screen, so that screen has to be redrawn
+   here too, not only the setup. */
+pills('#sMode',v=>{
+  CFG.mode=v;save(K_CFG,CFG);
+  paintModeLab();paintRepHint();paintReadout();paintStatus();
+});
 $('#sRole').addEventListener('click',async ev=>{
   const b=ev.target.closest('button');
   if(!b||b.dataset.v!=='master')return;
