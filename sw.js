@@ -6,7 +6,7 @@
    fails is never activated — the app then keeps serving the previous version for ever,
    which is exactly the sort of fault that hides every other change. Each file is therefore
    cached on its own and a failure is noted and passed over. */
-const V = 'basket-reporting-v260824-01';
+const V = 'basket-reporting-v260824-05';
 
 /* the files the app cannot run without */
 const CORE = [
@@ -72,10 +72,17 @@ self.addEventListener('fetch', e => {
   if (url.hostname === 'api.github.com') return;            // always live
   if (url.hostname === 'nominatim.openstreetmap.org') return;
   if (url.origin !== self.location.origin) {
-    /* map tiles: whatever was gathered beforehand is served first, so the map still draws
-       when the connection is gone — which is the whole reason it was gathered */
-    e.respondWith(caches.open('basket-tiles')
-      .then(c => c.match(e.request).then(r => r || fetch(e.request))));
+    /* Map tiles: what is already held is served first, and anything fetched to draw the map
+       is kept on the way past. That is ordinary browser caching of what the crew actually
+       looked at — no background harvesting, which every tile provider's terms are about. */
+    e.respondWith((async () => {
+      const c = await caches.open('basket-tiles');
+      const hit = await c.match(e.request);
+      if (hit) return hit;
+      const r = await fetch(e.request);
+      if (r && r.ok && r.type !== 'opaque') { try { await c.put(e.request, r.clone()) } catch (err) {} }
+      return r;
+    })());
     return;
   }
 

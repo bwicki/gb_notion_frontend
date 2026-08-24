@@ -500,7 +500,7 @@ braces are substituted, and lines behave in three ways:
   {speed}`, keeps its own separator and simply loses the parts that are missing. Without a fix
   it collapses to the time alone, with no stray dots left behind.
 
-*Reset to default* puts the four templates back.
+*Reset to default* puts the five templates back.
 
 **The built-in templates are the standard, and your edits survive.** A template you have written
 is kept across updates — losing someone's wording to a version bump would be worse than a
@@ -731,6 +731,9 @@ and a row of chips above the list filters by kind, each with its count: *All 128
 ATC 42 · Ressources 18 · POS 5 · PIC 2*. Only kinds that actually occur are offered. Reading
 the ATC calls of a long flight is then a tap rather than a search, and the choice is remembered
 between visits.
+
+A row that also went out through WhatsApp says so after the reporter's name — *sent to
+WhatsApp*, previously the bare abbreviation `WA`.
 
 Each row carries its transmission state at the right edge: a green double check when it has
 reached GitHub, a straw single check while it is waiting for a connection, and a red cross when
@@ -1018,18 +1021,23 @@ the screen — street or satellite, with zoom buttons. It opens on the last repo
 - The last twenty positions are shown, adjustable in the setup. **An unbroken run of manual
   positions is always shown in full**, however long: that run is the whole picture when the
   satellites are gone.
+- The map pinches to zoom as well as taking the plus and minus buttons; during the gesture the
+  tiles are stretched as they are and the map redraws at the nearest whole zoom when the fingers
+  lift, which keeps the picture steady under the hand.
 - Tapping the map places a crosshair, which can then be dragged until it sits over the place the
   crew believes it is.
 - Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
   last known values because both can be read off the barograph; track and speed, which are
-  optional; and a slider for how sure the position is, in five steps drawn as a circle around
-  the marker. Leaving altitude or rate of climb empty asks once more — keep the previous values,
+  optional; and a slider for how sure the position is, in five steps drawn as a dotted circle
+  around the marker. Climb and sink are a choice of two buttons rather than a minus sign to be
+  remembered with cold hands. Leaving altitude or rate of climb empty asks once more — keep the previous values,
   go back, or send without them.
 - The panel never covers the crosshair: it moves to the top of the screen when the marker sits
   in the lower half.
 
-The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It goes to the
-table and to whichever WhatsApp recipients are ticked on the Other screen, and appears in that
+The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It has a WhatsApp
+template of its own in the setup, goes to the table and to whichever recipients are ticked on
+the Other screen, and appears in that
 screen's Last Message panel. It can be picked or left out of a printout like any other kind.
 
 **Afterwards the estimate is carried forward.** With no fix, the next ATC or ballast report takes
@@ -1038,18 +1046,38 @@ terrestrial guess as a satellite one.
 
 ### Tiles
 
-Map tiles come from outside — everything else in the app does not. While there is a connection,
-tiles within **75 km of the last reported position** are gathered quietly in the background, up
-to zoom 12, both layers; the radius, the zoom and the cap are in the setup. They are kept in a
-cache of their own that survives version changes, so the map still draws when the connection
-does not.
+Three views, chosen at the top right of the map and remembered between visits:
 
-The street layer is OpenStreetMap, the satellite layer Esri World Imagery; both need no key and
-carry their attribution on screen. **Both are used within the courtesy of their operators rather
-than a contract**: OpenStreetMap's tile policy asks that its tiles not be bulk-downloaded, which
-is why the gathering is throttled to roughly one tile a tenth of a second and capped. If you fly
-often enough for that to matter, put a provider of your own — MapTiler and Stadia both have free
-tiers — into *Tile sources* in the setup; the field takes any `{z}/{x}/{y}` template.
+| View | Source |
+|---|---|
+| **Streets** | OpenStreetMap standard tiles |
+| **Terrain** | OpenTopoMap — contours and relief, the most useful of the three for reading ground from the air |
+| **Satellite** | Esri World Imagery |
+
+None of them needs a key. An **ArcGIS access token** can be put in the setup all the same: with
+one, the satellite layer goes through the service Esri asks applications to use, with two
+million tiles a month at no cost; without one it uses Esri's keyless address, which works but
+is not guaranteed. All three templates can be pointed elsewhere in *Tile sources* — a national
+orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
+its own borders, and needs no key either.
+
+**Tiles are kept two ways.** Everything the map draws is held by the service worker on its way
+past. And a ring of tiles around the last reported position — **20 km by default, up to zoom
+13**, both adjustable — is gathered quietly while there is a connection, **for the layer in use
+only**, capped at 400 tiles a run and spaced about eight a second. Switching the view starts a
+ring for the new layer. **Hold this area** on the map takes the whole visible view at three
+zoom levels when you want a particular stretch for certain.
+
+Nothing is ever fetched twice: what is in the cache is skipped.
+
+**One thing to know about these sources.** OpenStreetMap and OpenTopoMap are run on donated
+hardware, and both ask that their tiles not be fetched in advance for offline use — the OSM
+policy says so in as many words, and OpenTopoMap has far less capacity than OSM. Private,
+non-commercial use does not exempt anyone from that; the policies are about server load, not
+about money. What it does change is the scale: one crew, a few flights a year, a few hundred
+tiles a flight, is the load of a person looking at a map for a few minutes. That is the reason
+for the small radius, the cap and the pacing. If a layer ever stops answering, that is what has
+happened, and a keyed provider in *Tile sources* is the answer.
 
 ## 15. Version
 

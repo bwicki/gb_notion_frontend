@@ -379,7 +379,8 @@ body.mapon #app{visibility:hidden}
 #mapSvg .tlab{fill:#1B3A6B;font-size:10px;font-weight:600}
 #mapSvg .mgps{fill:#1B6BC0;stroke:#fff;stroke-width:2;pointer-events:auto}
 #mapSvg .mman{fill:#C0392B;stroke:#fff;stroke-width:2;pointer-events:auto}
-#mapSvg .unc{fill:#C0392B;fill-opacity:.10;stroke:#C0392B;stroke-opacity:.45;stroke-width:1.5}
+#mapSvg .unc{fill:#C0392B;fill-opacity:.08;stroke:#C0392B;stroke-opacity:.75;stroke-width:2;
+  stroke-dasharray:2 5;stroke-linecap:round}
 #mapSvg .mlab{fill:#111;font-size:10px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3}
 #mapPick{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;touch-action:none;z-index:6}
 #mapPick.hide{display:none}
@@ -393,9 +394,23 @@ body.mapon #app{visibility:hidden}
 #mapPop span{display:block;color:var(--muted)}
 #mapCtl{position:absolute;top:calc(10px + var(--safe-t));right:10px;z-index:7;display:flex;
   flex-direction:column;gap:6px;align-items:flex-end}
+#mapCtl button.busy{opacity:.5}
 #mapCtl button{width:42px;height:42px;border:1px solid var(--line);border-radius:9px;
   background:var(--card);font-size:19px;display:grid;place-items:center}
-#mapCtl .pills{background:var(--card);border-radius:9px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:9px;
+  overflow:hidden;height:34px}
+.seg.col{flex-direction:column;height:auto}
+.seg.col button{height:30px;justify-content:flex-start;border-bottom:.5px solid var(--line)}
+.seg.col button:last-child{border-bottom:0}
+.seg button{height:100%;padding:0 10px;font-size:11.5px;line-height:1;color:var(--muted);
+  background:transparent;border:0;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.seg button::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);flex:0 0 auto}
+.seg button.on{background:var(--sel);color:var(--sel-ink)}
+.seg button.on::before{border-color:var(--sel-ink);background:var(--sel-ink)}
+#mapNote{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);z-index:5;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;
+  font-size:12.5px;line-height:1.5;max-width:340px;margin:0 auto;text-align:center}
+#mapNote.hide{display:none}
 #mapAttr{position:absolute;left:8px;bottom:calc(6px + var(--safe-b));z-index:7;font-size:9.5px;
   color:#333;background:rgba(255,255,255,.75);border-radius:5px;padding:2px 6px}
 #mapPuck{position:absolute;left:14px;top:calc(14px + var(--safe-t));z-index:9;width:56px;height:56px;
@@ -413,6 +428,9 @@ body.mapon #app{visibility:hidden}
 .mp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .mp-grid label{font-size:10.5px;color:var(--muted);display:block}
 .mp-grid input{margin-top:2px}
+.vsrow{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center;margin-top:2px}
+.vsrow .seg{height:44px}
+.vsrow .seg button{padding:0 8px;font-size:11px}
 #manUnc{width:100%;margin:2px 0 10px;accent-color:var(--sel)}
 #manPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #manPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
@@ -673,24 +691,31 @@ body.mapon #app{visibility:hidden}
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <h3 data-t="hMap">Map and manual position</h3>
+        <div class="f"><p class="lab" data-t="lTileToken">ArcGIS access token</p>
+          <input type="password" id="sTileToken" placeholder="AAPT…" autocomplete="off"></div>
+        <p class="hint" data-t="lTokenHint">Optional.</p>
         <div class="f two">
-          <div><p class="lab" data-t="lMapKm">Cache tiles within</p>
-            <div class="sfx"><input type="number" id="sMapKm" inputmode="numeric" step="5" placeholder="75"><span>km</span></div></div>
-          <div><p class="lab" data-t="lMapZ">Cache up to zoom</p>
-            <input type="number" id="sMapZ" inputmode="numeric" step="1" placeholder="12"></div>
+          <div><p class="lab" data-t="lMapKm">Keep tiles within</p>
+            <div class="sfx"><input type="number" id="sMapKm" inputmode="numeric" step="5" placeholder="20"><span>km</span></div></div>
+          <div><p class="lab" data-t="lMapZ">Keep up to zoom</p>
+            <input type="number" id="sMapZ" inputmode="numeric" step="1" placeholder="13"></div>
         </div>
+        <button class="go sec" id="btnTileTest" data-t="tileTest">Check the tile sources</button>
+        <p class="hint" id="tileNote"></p>
         <div class="f two">
           <div><p class="lab" data-t="lMapMax">Positions shown on the map</p>
             <input type="number" id="sMapMax" inputmode="numeric" step="1" placeholder="20"></div>
           <div><p class="lab" data-t="lUnc">Uncertainty steps</p>
             <div class="sfx"><input type="text" id="sUnc" placeholder="0.5,1,2,5,10"><span>km</span></div></div>
         </div>
-        <p class="hint" data-t="lMapHint">Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.</p>
+        <p class="hint" data-t="lMapHint">Every tile the map draws is kept for later, and Hold this area on the map keeps the whole view at three zoom levels. A run of manual positions is always shown in full on the map, however long it is.</p>
         <details class="fold" id="foldTiles">
           <summary data-t="lTiles">Tile sources</summary>
           <div class="in">
+            <div class="f"><p class="lab" data-t="lTileTopo">Terrain</p>
+              <input type="text" id="sTileTopo" placeholder="https://tile.opentopomap.org/{z}/{x}/{y}.png"></div>
             <div class="f"><p class="lab" data-t="lTileStreet">Street map</p>
-              <input type="text" id="sTileStreet" placeholder="https://tile.openstreetmap.org/{z}/{x}/{y}.png"></div>
+              <input type="text" id="sTileStreet" placeholder="https://…/{z}/{y}/{x}?token={token}"></div>
             <div class="f"><p class="lab" data-t="lTileSat">Satellite</p>
               <input type="text" id="sTileSat" placeholder="https://…/{z}/{y}/{x}"></div>
             <p class="hint" data-t="lTileHint">Both take {z}, {x} and {y}. The defaults need no key and carry their own attribution. A provider of your own goes here.</p>
@@ -735,6 +760,7 @@ body.mapon #app{visibility:hidden}
           <div class="in">
             <p class="lab" data-t="hintTpl">One template per message type.</p>
             <div class="f"><p class="lab">Ballast</p><textarea id="tplBal" style="min-height:104px"></textarea></div>
+            <div class="f"><p class="lab">MANPOS</p><textarea id="tplMan" style="min-height:104px"></textarea></div>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
@@ -785,14 +811,16 @@ body.mapon #app{visibility:hidden}
   <div id="mapPick" class="hide"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><path d="M24 2v10M24 36v10M2 24h10M36 24h10"/></svg></div>
   <div id="mapPop" class="hide"></div>
   <div id="mapCtl">
-    <div class="pills small" id="mapKind">
-      <button data-v="street" class="on" data-t="mapStreet">Street</button><button data-v="sat" data-t="mapSat">Satellite</button>
+    <div class="seg col" id="mapKind">
+      <button data-v="street" class="on" data-t="mapStreet">Streets</button><button data-v="topo" data-t="mapTopo">Terrain</button><button data-v="sat" data-t="mapSat">Satellite</button>
     </div>
     <button id="mapIn" aria-label="zoom in">+</button>
     <button id="mapOut" aria-label="zoom out">−</button>
+    <button id="mapHold" data-t="mapHold" aria-label="hold this area">⤓</button>
     <button id="mapX" aria-label="close">✕</button>
   </div>
   <div id="mapAttr"></div>
+  <div id="mapNote" class="hide" data-t="tileNoToken">No tile source yet.</div>
   <button id="mapPuck" aria-label="Report"><svg viewBox="0 0 48 48"><path d="M10 12v24M18 11v26M26 12v24M34 11v26" stroke="#1B3A6B"/><path d="M6 34 38 14" stroke="#C0392B"/></svg></button>
   <div id="manPanel" class="hide"></div>
 </div>
@@ -802,15 +830,18 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260824-01';
+const APP_VERSION='v260824-05';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,25',
            bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,
            mapKm:75,mapMax:20,mapZ:12,unc:'0.5,1,2,5,10',
+           tileToken:'',mapKm:20,mapZ:13,
            tileStreet:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+           tileTopo:'https://tile.opentopomap.org/{z}/{x}/{y}.png',
            tileSat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+           tileSatTok:'https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token={token}',
            readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
@@ -819,15 +850,16 @@ const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,2
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Ressources:'*{type} | {callsign}*\n{picchange}\nPIC: {pic} \u00b7 Resting: {resting}\nBattery: {battery} \u00b7 Fuel cell: {fuelcell} \u00b7 Methanol: {methanol} \u00b7 Solar panel: {solar}\nCrew O\u2082: {o2crew} \u00b7 O\u2082 reserve: {o2}\n{o2detail}\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
+  MANPOS:'*{manpos} | {callsign}*\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{unc}\n{place}\n{maps}',
   Ballast:'*{type} | {callsign}*\n{ballast}\nMsg: {note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
   Other:'*{type} | {callsign}*\nMsg: {!note}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}'};
-const TPL_KEYS=['type','callsign','ballast','atcmsgtype','picchange','dir','station','freq','squawk','msg','pic','resting',
+const TPL_KEYS=['type','callsign','ballast','manpos','unc','atcmsgtype','picchange','dir','station','freq','squawk','msg','pic','resting',
   'battery','fuelcell','solar','methanol','o2crew','o2','o2detail','note','time','pos','posdm','place','location','alt','vs','tc','speed','maps','reporter','flight'];
 let CFG=Object.assign({},DEF,load(K_CFG,{}));
 let ENT=load(K_ENT,[]);
 let TOMB=load(K_TOMB,[]);
 let UI=Object.assign({type:'Ballast',act:'drop',adir:'RX',pic:'p1',rest:'',view:'form',
-                      waSel:{},repName:'',logF:'',alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
+                      waSel:{},repName:'',logF:'',mapKind:'street',alt:0,ready:100,fuel:'',solar:'',o2crew:'',bat:null,meth:null,o2bars:[],o2use:0,med:'sand',
                       lastAtc:{station:'',freq:'',squawk:''},lastDrop:{},lastInv:{},lastRes:{}},load(K_UI,{}));
 let GPS=null,GPSERR=null,SYNCING=false,LASTSYNC=null,UNLOCKED=false,LASTERR='';
 const DEV=(()=>{let d=localStorage.getItem('bsk.dev');if(!d){d='D'+Math.random().toString(36).slice(2,6).toUpperCase();localStorage.setItem('bsk.dev',d)}return d})();
@@ -865,7 +897,7 @@ const L={en:{
  handStepDown:'The role has been handed over. This device is now a follower.',
  devKickAsk:'Device {d} loses its access to the repository the next time it checks in. Its entries stay in the table.',
  devBlockedInfo:'The master has removed this device from the flight. Reporting still works; nothing is sent until a new setup arrives.',
- noRecipients:'No recipients set up', currentPic:'Current PIC', resting:'Resting',
+ noRecipients:'No recipients set up', sentWa:'sent to WhatsApp', currentPic:'Current PIC', resting:'Resting',
  nobody:'Nobody', noPilots:'No pilots named', reset:'Reset',
  export:'Export', format:'Format', destination:'Destination', download:'Download', share:'Share…', battery:'Battery', fuelCell:'Fuel cell', solarCell:'Solar Panel',
  on:'On', off:'Off', note:'Note', addPictures:'Add pictures', post:'Report to CC',
@@ -936,9 +968,9 @@ const L={en:{
  hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
  hMap:'Map and manual position', lMapKm:'Cache tiles within', lMapZ:'Cache up to zoom',
  lMapMax:'Positions shown on the map', lUnc:'Uncertainty steps', lTiles:'Tile sources',
- lTileStreet:'Street map', lTileSat:'Satellite',
+ lTileStreet:'Streets', lTileTopo:'Terrain', lTileSat:'Satellite',
  lMapHint:'Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.',
- lTileHint:'Both take {z}, {x} and {y}. The defaults need no key and carry their own attribution. A provider of your own goes here.',
+ lTileHint:'Both take {z}, {x}, {y} and {token}. A national orthophoto service — swisstopo, basemap.at, IGN — is sharper than any global layer within its own borders and needs no key, but stops at the frontier.',
  lGeo:'Place name with each position', lMethInit:'Methanol level at start',
  lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
  place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
@@ -965,15 +997,19 @@ const L={en:{
  shareTitle:'Share setup', copyLink:'Copy link', qrTooLong:'The link is too long for a code — copy it instead.', qrHint:'Scan this with the camera of the other device.', done:'Done',
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
  lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', lgManPos:'Manual position',
- reportPos:'Report Position', mapStreet:'Street', mapSat:'Satellite',
+ reportPos:'Report Position', mapStreet:'Streets', mapTopo:'Terrain', mapSat:'Satellite',
  rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
- manTitle:'Manual position', manAlt:'Altitude', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
+ manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
  manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
- tilesGot:'{n} map tiles kept for later', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
+ mapHold:'Hold this area', tilesHeld:'{n} new tiles held, {m} in this view',
+ tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
+ tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
+ lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
+ lMapKm:'Keep tiles within', lMapZ:'Keep up to zoom', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
  posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
  picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
@@ -1012,7 +1048,7 @@ const L={en:{
  handStepDown:'Die Rolle wurde übergeben. Dieses Gerät ist jetzt Follower.',
  devKickAsk:'Gerät {d} verliert beim nächsten Abgleich seinen Zugang zum Repository. Seine Einträge bleiben in der Tabelle.',
  devBlockedInfo:'Der Master hat dieses Gerät von der Fahrt entfernt. Melden geht weiter, gesendet wird nichts, bis eine neue Einrichtung eintrifft.',
- noRecipients:'Keine Empfänger hinterlegt', currentPic:'Aktueller PIC', resting:'Ruht',
+ noRecipients:'Keine Empfänger hinterlegt', sentWa:'an WhatsApp gesendet', currentPic:'Aktueller PIC', resting:'Ruht',
  nobody:'Niemand', noPilots:'Keine Piloten hinterlegt', reset:'Zurücksetzen',
  export:'Export', format:'Format', destination:'Ziel', download:'Herunterladen', share:'Teilen…', battery:'Batterie', fuelCell:'Brennstoffzelle', solarCell:'Solarpanel',
  on:'Ein', off:'Aus', note:'Notiz', addPictures:'Bilder anfügen', post:'An CC melden',
@@ -1084,9 +1120,9 @@ const L={en:{
  hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
  hMap:'Karte und Handposition', lMapKm:'Kacheln im Umkreis von', lMapZ:'Kacheln bis Zoomstufe',
  lMapMax:'Positionen auf der Karte', lUnc:'Stufen der Unsicherheit', lTiles:'Kartenquellen',
- lTileStreet:'Strassenkarte', lTileSat:'Satellit',
+ lTileStreet:'Strassen', lTileTopo:'Gelände', lTileSat:'Satellit',
  lMapHint:'Kacheln um die letzte gemeldete Position werden bei Verbindung im Hintergrund geholt, damit die Karte auch ohne Verbindung funktioniert. Eine ununterbrochene Reihe von Handpositionen wird immer vollständig gezeigt.',
- lTileHint:'Beide nehmen {z}, {x} und {y}. Die Vorgaben brauchen keinen Schlüssel und führen ihre Quellenangabe mit. Ein eigener Anbieter kommt hierher.',
+ lTileHint:'Beide nehmen {z}, {x}, {y} und {token}. Ein nationaler Orthofotodienst — swisstopo, basemap.at, IGN — ist im eigenen Land schärfer als jede weltweite Ebene und braucht keinen Schlüssel, hört aber an der Grenze auf.',
  lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
  lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
  place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
@@ -1114,15 +1150,19 @@ const L={en:{
  shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', qrTooLong:'Der Link ist zu lang für einen Code — bitte kopieren.', qrHint:'Mit der Kamera des anderen Geräts abfotografieren.', done:'Fertig',
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
  lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', lgManPos:'Manual position',
- reportPos:'Report Position', mapStreet:'Street', mapSat:'Satellite',
+ reportPos:'Report Position', mapStreet:'Streets', mapTopo:'Terrain', mapSat:'Satellite',
  rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
- manTitle:'Manual position', manAlt:'Altitude', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
+ manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
  manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
- tilesGot:'{n} map tiles kept for later', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
+ mapHold:'Hold this area', tilesHeld:'{n} new tiles held, {m} in this view',
+ tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
+ tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
+ lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
+ lMapKm:'Keep tiles within', lMapZ:'Keep up to zoom', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
  posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
  picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
@@ -1318,7 +1358,7 @@ function add(part){
    someone's wording to a version bump would be worse than a missing placeholder — but a kind
    of message that has no saved template at all falls through to the current default, so
    Ballast appeared when it was added without anybody having to reset anything. */
-const TPL_VER=5;
+const TPL_VER=6;
 function tplMigrate(){
   if(Number(CFG.tplVer)===TPL_VER){return}
   const c=CFG.tpl&&typeof CFG.tpl==='object'?Object.assign({},CFG.tpl):null;
@@ -1332,6 +1372,8 @@ function waVals(e){
     type:e.type||'', callsign:CFG.call||'', flight:e.flight_id||'', reporter:e.reporter||'',
     ballast:e.type==='Ballast'?line(e).h:'',
     atcmsgtype:e.type==='ATC'?(e.atc_dir==='TX'?'Tx':'Rx'):'',
+    manpos:t('lgManPos'),
+    unc:e.pos_unc_km?t('posUnc').replace('{n}',String(e.pos_unc_km)):'',
     picchange:e.crew_change?t('picChange'):'',
     dir:e.atc_dir==='TX'?'Sent':e.atc_dir==='RX'?'Received':'',
     station:e.atc_station||'', freq:e.atc_freq||'', squawk:e.atc_squawk||'', msg:e.atc_msg||'',
@@ -1348,7 +1390,7 @@ function waVals(e){
     location:String(e.place||'').replace(/^near\s+/i,''),
     alt:e.alt_ft==null?'':Math.round(e.alt_ft/10)*10+' ft',
     tc:e.tc_deg==null?'':'TC '+pad(Math.round(e.tc_deg),3),
-    speed:e.speed_kt==null?'':Number(e.speed_kt).toFixed(1)+' kn',
+    speed:e.speed_kt==null?'':Math.round(Number(e.speed_kt))+' kn',
     vs:e.vs_ms==null?'':(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s',
     maps:e.gps_fix?('https://maps.google.com/?q='+e.lat.toFixed(5)+','+e.lon.toFixed(5)):''
   };
@@ -1522,7 +1564,7 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked','geo',
-  'bagKg','readyKg','methInit','posMin','opsMin','mapKm','mapMax','mapZ','unc','tileStreet','tileSat','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
+  'bagKg','readyKg','methInit','posMin','opsMin','mapMax','unc','mapKm','mapZ','tileToken','tileStreet','tileTopo','tileSat','tileSatTok','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
   'atcName','atcNum','tpl','tplVer'];
 function setupPayload(withToken){
   const o={v:1,master_device:DEV,master_offer:String(CFG.handover||''),
@@ -1770,7 +1812,7 @@ function paintStatus(){
   if(GPS&&Date.now()-GPS.t<30000){
     const g=[];
     if(GPS.tc!=null)g.push(pad(Math.round(GPS.tc)%360,3)+'\u00b0');
-    if(GPS.sp!=null)g.push((GPS.sp*1.94384).toFixed(1)+' kn');
+    if(GPS.sp!=null)g.push(Math.round(GPS.sp*1.94384)+' kn');
     if(GPS.alt!=null)g.push(Math.round(GPS.alt*3.28084)+' ft');
     if(GPS.vs!=null)g.push((GPS.vs>=0?'+':'')+GPS.vs.toFixed(1)+' m/s');
     $('#hGps').textContent=g.join(' \u00b7 ');
@@ -1902,7 +1944,7 @@ function paintLog(){
   if(!l.length){box.innerHTML='<p class="none">'+esc(t('noEntries'))+'</p>';return}
   box.innerHTML=l.map(e=>{
     const {h,s}=line(e);
-    const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 WA':'')
+    const who=(e.reporter||e.source||e.device||'')+(e.whatsapp?' \u00b7 '+t('sentWa'):'')
       +(e.place?' \u00b7 '+e.place:'');
     return `<button class="entry" data-id="${esc(e.id)}"><span class="t num">${hm(e.ts_local||e.ts_utc)}</span>
       <span class="c"><b class="tag">${esc(e.type||'')}</b>${esc(h)}<i>${esc(who)}${s?' \u00b7 '+esc(s):''}</i></span>
@@ -2141,7 +2183,7 @@ function buildPrint(pick){
     const nav=[e.pos_lat?e.pos_lat+' '+e.pos_lon:'',
                e.alt_ft!=null?e.alt_ft+' ft':'',
                e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',
-               e.speed_kt!=null?Number(e.speed_kt).toFixed(1)+' kn':'',
+               e.speed_kt!=null?Math.round(Number(e.speed_kt))+' kn':'',
                e.vs_ms!=null?((e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s'):''
               ].filter(Boolean).join(' \u00b7 ');
     const newDay=(i===0||dayKey(rows[i-1])!==dayKey(e))
@@ -3236,8 +3278,25 @@ const lat2y=(lat,z)=>{const r=lat*Math.PI/180;
 const x2lon=(x,z)=>x/Math.pow(2,z)*360-180;
 const y2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/Math.pow(2,z);
   return 180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))};
-const tileUrl=(kind,z,x,y)=>String(kind==='sat'?(CFG.tileSat||DEF.tileSat):(CFG.tileStreet||DEF.tileStreet))
-  .replace('{z}',z).replace('{x}',x).replace('{y}',y);
+/* Three views, three sources. The satellite layer goes through Esri's keyed service when a
+   token is present and through the keyless one when it is not — the keyed route is the one
+   Esri asks for, the other is what works without an account. */
+function tileTpl(kind){
+  const tok=String(CFG.tileToken||'').trim();
+  if(kind==='sat')return tok?(CFG.tileSatTok||DEF.tileSatTok):(CFG.tileSat||DEF.tileSat);
+  if(kind==='topo')return CFG.tileTopo||DEF.tileTopo;
+  return CFG.tileStreet||DEF.tileStreet;
+}
+const tileUrl=(kind,z,x,y)=>String(tileTpl(kind))
+  .replace('{z}',z).replace('{x}',x).replace('{y}',y)
+  .replace('{token}',encodeURIComponent(String(CFG.tileToken||'')));
+const tilesReady=()=>true;
+const MAPKINDS=['street','topo','sat'];
+const tileAttr=k=>k==='sat'
+  ? 'Imagery \u00a9 Esri, Maxar, Earthstar Geographics'
+  : (k==='topo'
+     ? '\u00a9 OpenStreetMap contributors, SRTM \u00b7 \u00a9 OpenTopoMap (CC-BY-SA)'
+     : '\u00a9 OpenStreetMap contributors');
 
 /* great-circle distance and bearing, good enough over the few hundred kilometres of a flight */
 function gcDist(a,b,c,d){
@@ -3262,39 +3321,79 @@ function gcMove(lat,lon,brg,km){
 
 /* ── Tiles kept for later ────────────────────────────────────────── */
 const TILECACHE='basket-tiles';
-let TILEBUSY=false,TILEAT=null;
-async function prefetchTiles(lat,lon,quiet){
-  if(TILEBUSY||!navigator.onLine||!('caches'in window))return;
-  if(lat==null||lon==null)return;
-  const km=nz(CFG.mapKm)||75, zMax=Math.min(16,Math.max(8,nz(CFG.mapZ)||12));
-  if(TILEAT&&gcDist(TILEAT[0],TILEAT[1],lat,lon)<km/3)return;   /* still inside the last run */
-  TILEBUSY=true;TILEAT=[lat,lon];
+let HOLDBUSY=false;
+/* Every tile the map draws is kept by the service worker as it passes. On top of that the
+   crew can say, once, that this view should be held: the visible tiles at the zoom in use and
+   one step either side. That is a deliberate act by the person flying, not a background
+   harvester, which is what every tile provider's terms are actually about. */
+/* A ring of tiles around the last reported position, for the layer in use — small, throttled
+   and kept, so nothing is ever fetched twice. Twenty kilometres by default: that is the
+   distance a gas balloon covers in an hour or two, and it keeps the count in the low hundreds
+   rather than the thousands. */
+let RINGBUSY=false,RINGAT=null;
+async function ringCache(kind,quiet){
+  if(RINGBUSY||!navigator.onLine||!('caches'in window))return;
+  const p=lastFix();if(!p)return;
+  const km=nz(CFG.mapKm)||20, zMax=Math.min(16,Math.max(8,nz(CFG.mapZ)||13));
+  const key=kind+'|'+p.lat.toFixed(2)+','+p.lon.toFixed(2);
+  if(RINGAT===key)return;
+  RINGBUSY=true;RINGAT=key;
+  let got=0;
   try{
     const cache=await caches.open(TILECACHE);
-    let got=0,skipped=0;
     for(let z=8;z<=zMax;z++){
       const c=Math.pow(2,z);
-      const dx=km/(111.32*Math.cos(lat*Math.PI/180))/360*c;
-      const dy=km/111.32/360*c*1.4;
-      const x0=Math.floor(lon2x(lon,z)-dx),x1=Math.ceil(lon2x(lon,z)+dx);
-      const y0=Math.floor(lat2y(lat,z)-dy),y1=Math.ceil(lat2y(lat,z)+dy);
+      const dx=km/(111.32*Math.cos(p.lat*Math.PI/180))/360*c;
+      const dy=km/111.32/360*c*1.45;
+      const x0=Math.floor(lon2x(p.lon,z)-dx),x1=Math.ceil(lon2x(p.lon,z)+dx);
+      const y0=Math.floor(lat2y(p.lat,z)-dy),y1=Math.ceil(lat2y(p.lat,z)+dy);
       for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
-        if(x<0||y<0||x>=c||y>=c)continue;
-        if(got>=1200)break;                       /* a ceiling, so a wide radius cannot run away */
-        for(const kind of ['street','sat']){
-          const u=tileUrl(kind,z,x,y);
+        if(x<0||y<0||x>=c||y>=c||got>=400)continue;
+        const u=tileUrl(kind,z,x,y);
+        try{
+          if(await cache.match(u))continue;
+          const r=await fetch(u,{mode:'cors'});
+          if(r&&r.ok){await cache.put(u,r.clone());got++}
+        }catch(e){}
+        await new Promise(r=>setTimeout(r,120));
+      }
+    }
+    if(!quiet&&got)toast(t('tilesHeld').replace('{n}',String(got)).replace('{m}',String(km)+' km'));
+  }catch(e){}
+  finally{RINGBUSY=false}
+}
+async function holdArea(){
+  if(!MAP||HOLDBUSY||!navigator.onLine||!('caches'in window))return;
+  if(!tilesReady())return toast(t('tileNoToken'));
+  HOLDBUSY=true;
+  const btn=$('#mapHold');if(btn)btn.classList.add('busy');
+  const w=$('#mapWrap').clientWidth||390,h=$('#mapWrap').clientHeight||700;
+  let got=0,seen=0;
+  try{
+    const cache=await caches.open(TILECACHE);
+    for(const dz of [0,1,-1]){
+      const z=MAP.z+dz;
+      if(z<3||z>18)continue;
+      const f=Math.pow(2,dz), cx=MAP.cx*f, cy=MAP.cy*f, c=Math.pow(2,z);
+      const x0=Math.floor((cx-w/2)/TILE),x1=Math.floor((cx+w/2)/TILE);
+      const y0=Math.floor((cy-h/2)/TILE),y1=Math.floor((cy+h/2)/TILE);
+      for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+        if(y<0||y>=c)continue;
+        for(const kind of [MAP.kind]){
+          const u=tileUrl(kind,z,((x%c)+c)%c,y);
+          seen++;
           try{
-            if(await cache.match(u)){skipped++;continue}
+            if(await cache.match(u))continue;
             const r=await fetch(u,{mode:'cors'});
             if(r&&r.ok){await cache.put(u,r.clone());got++}
           }catch(e){}
-          await new Promise(r=>setTimeout(r,90));  /* gentle on the tile servers */
+          await new Promise(r=>setTimeout(r,60));
         }
       }
     }
-    if(!quiet&&got)toast(t('tilesGot').replace('{n}',String(got)));
+    toast(t('tilesHeld').replace('{n}',String(got)).replace('{m}',String(seen)));
   }catch(e){}
-  finally{TILEBUSY=false}
+  finally{HOLDBUSY=false;if(btn)btn.classList.remove('busy')}
 }
 
 /* ── The positions worth drawing ─────────────────────────────────── */
@@ -3317,7 +3416,7 @@ function mapOpen(){
   const pts=mapPoints();
   const last=pts[pts.length-1];
   const c=last?[last.lat,last.lon]:[46.95,7.44];
-  MAP={z:11,kind:'street',cx:lon2x(c[1],11)*TILE,cy:lat2y(c[0],11)*TILE,pick:null,pop:null,popT:null};
+  MAP={z:11,kind:(UI.mapKind||'street'),cx:lon2x(c[1],11)*TILE,cy:lat2y(c[0],11)*TILE,pick:null,pop:null,popT:null};
   $('#mapWrap').classList.remove('hide');
   document.body.classList.add('mapon');
   mapDraw();
@@ -3338,6 +3437,7 @@ const mapLatLon=(px,py)=>{
 
 function mapDraw(){
   if(!MAP)return;
+  $('#mapNote').classList.toggle('hide',tilesReady());
   const wrap=$('#mapWrap'),w=wrap.clientWidth||360,h=wrap.clientHeight||640;
   const cnt=$('#mapTiles');
   const c=Math.pow(2,MAP.z);
@@ -3429,7 +3529,7 @@ function mapInfo(i){
     +'<span>'+esc(p.pos_lat+' '+p.pos_lon)+'</span>'
     +'<span>'+(p.alt_ft!=null?esc(p.alt_ft+' ft'):'\u2014')
     +' \u00b7 '+(p.tc_deg!=null?esc(pad(p.tc_deg,3)+'\u00b0'):'\u2014')
-    +' \u00b7 '+(p.speed_kt!=null?esc(Number(p.speed_kt).toFixed(1)+' kn'):'\u2014')
+    +' \u00b7 '+(p.speed_kt!=null?esc(Math.round(Number(p.speed_kt))+' kn'):'\u2014')
     +' \u00b7 '+(p.vs_ms!=null?esc((p.vs_ms>=0?'+':'')+Number(p.vs_ms).toFixed(1)+' m/s'):'\u2014')+'</span>'
     +(p.pos_source==='manual'?'<span>'+esc(t('posManual'))+'</span>':'');
   const s=mapScreen(p.lat,p.lon);
@@ -3455,12 +3555,19 @@ function manOpen(){
     +'<div class="mp-grid">'
     +'<label>'+esc(t('manAlt'))+'<span class="sfx"><input type="number" id="manAlt" inputmode="numeric" value="'
       +(prev.alt_ft!=null?esc(prev.alt_ft):'')+'"><span>ft</span></span></label>'
-    +'<label>'+esc(t('manVs'))+'<span class="sfx"><input type="number" id="manVs" inputmode="decimal" step="0.1" value="'
-      +(prev.vs_ms!=null?esc(prev.vs_ms):'')+'"><span>m/s</span></span></label>'
-    +'<label>'+esc(t('manTc'))+'<span class="sfx"><input type="number" id="manTc" inputmode="numeric" value="'
-      +(prev.tc_deg!=null?esc(prev.tc_deg):'')+'"><span>\u00b0</span></span></label>'
-    +'<label>'+esc(t('manSp'))+'<span class="sfx"><input type="number" id="manSp" inputmode="decimal" step="0.1" value="'
-      +(prev.speed_kt!=null?esc(prev.speed_kt):'')+'"><span>kn</span></span></label>'
+    +'<label>'+esc(t('manTc'))+'<span class="sfx"><input type="text" id="manTc" inputmode="numeric" maxlength="3" value="'
+      +(prev.tc_deg!=null?esc(pad(prev.tc_deg,3)):'')+'"><span>\u00b0</span></span></label>'
+    +'</div>'
+    /* climb or sink is a choice, not a minus sign to be remembered in a moving basket */
+    +'<div class="mp-grid">'
+    +'<label>'+esc(t('manVs'))
+      +'<span class="vsrow"><span class="seg" id="manVsDir">'
+      +'<button data-v="up"'+((prev.vs_ms==null||prev.vs_ms>=0)?' class="on"':'')+'>'+esc(t('manClimb'))+'</button>'
+      +'<button data-v="dn"'+((prev.vs_ms!=null&&prev.vs_ms<0)?' class="on"':'')+'>'+esc(t('manSink'))+'</button></span>'
+      +'<span class="sfx"><input type="number" id="manVs" inputmode="decimal" step="0.1" min="0" value="'
+      +(prev.vs_ms!=null?esc(Math.abs(prev.vs_ms)):'')+'"><span>m/s</span></span></span></label>'
+    +'<label>'+esc(t('manSp'))+'<span class="sfx"><input type="number" id="manSp" inputmode="numeric" value="'
+      +(prev.speed_kt!=null?esc(Math.round(prev.speed_kt)):'')+'"><span>kn</span></span></label>'
     +'</div>'
     +'<p class="lab" id="manUncLab"></p>'
     +'<input type="range" id="manUnc" min="0" max="'+(steps.length-1)+'" step="1" value="1">'
@@ -3470,6 +3577,10 @@ function manOpen(){
     +' \u00b7 '+t('posUnc').replace('{n}',String(steps[Number($('#manUnc').value)]))};
   lab();
   $('#manUnc').oninput=lab;
+  $('#manVsDir').addEventListener('click',ev=>{
+    const b=ev.target.closest('button');if(!b)return;
+    $$('#manVsDir button').forEach(x=>x.classList.toggle('on',x===b));
+  });
   $('#manX').onclick=()=>p.classList.add('hide');
   $('#manPost').onclick=()=>manPost(steps);
   mapPanelSide();
@@ -3477,7 +3588,8 @@ function manOpen(){
 async function manPost(steps){
   const alt=$('#manAlt').value.trim(), vs=$('#manVs').value.trim();
   let useAlt=alt===''?null:Math.round(Number(alt));
-  let useVs=vs===''?null:Math.round(Number(vs)*10)/10;
+  const dn=$('#manVsDir')&&$('#manVsDir').querySelector('button[data-v="dn"].on');
+  let useVs=vs===''?null:(Math.round(Math.abs(Number(vs))*10)/10)*(dn?-1:1);
   if(alt===''||vs===''){
     /* altitude and rate of climb come off the barograph, so they are asked for twice before
        a position goes out without them */
@@ -3499,7 +3611,7 @@ async function manPost(steps){
     pos_lat:dms(lat,2)+(lat>=0?'N':'S'),pos_lon:dms(lon,3)+(lon>=0?'E':'W'),
     alt_ft:useAlt,vs_ms:useVs,
     tc_deg:tc===''?null:Math.round(Number(tc))%360,
-    speed_kt:sp===''?null:Math.round(Number(sp)*10)/10,
+    speed_kt:sp===''?null:Math.round(Number(sp)),
     pos_source:'manual',pos_unc_km:unc,gps_fix:false,
     note:'',whatsapp:'',whatsapp_to:''});
   const rc=recipients('Other');
@@ -3539,14 +3651,60 @@ async function reportPosition(){
 (function(){
   const wrap=$('#mapWrap');
   let drag=null;
+  /* two fingers: the tiles are scaled as they are while the gesture runs and the map is
+     redrawn at the nearest whole zoom when the fingers lift — a tile set has no half steps,
+     and stretching what is already there keeps the picture steady under the hand */
+  const PT=new Map();
+  let pinch=null;
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+  function pinchStart(){
+    const p=[...PT.values()];
+    pinch={d0:dist(p[0],p[1]),m:mid(p[0],p[1]),cx:MAP.cx,cy:MAP.cy,scale:1};
+    drag=null;
+  }
+  function pinchMove(){
+    const p=[...PT.values()];
+    if(p.length<2||!pinch)return;
+    pinch.scale=Math.max(0.35,Math.min(3,dist(p[0],p[1])/pinch.d0));
+    const r=wrap.getBoundingClientRect();
+    const ox=pinch.m.x-r.left, oy=pinch.m.y-r.top;
+    const tr='translate('+ox+'px,'+oy+'px) scale('+pinch.scale+') translate('+(-ox)+'px,'+(-oy)+'px)';
+    $('#mapTiles').style.transform=tr;
+    $('#mapSvg').style.transform=tr;
+  }
+  function pinchEnd(){
+    if(!pinch||!MAP){pinch=null;return}
+    const k=pinch.scale;
+    $('#mapTiles').style.transform='';$('#mapSvg').style.transform='';
+    const steps=Math.round(Math.log2(k));
+    pinch=null;
+    if(!steps){mapDraw();return}
+    const nz2=Math.max(3,Math.min(18,MAP.z+steps));
+    if(nz2===MAP.z){mapDraw();return}
+    const r=wrap.getBoundingClientRect();
+    const ll=mapLatLon(pinch2mx-r.left,pinch2my-r.top);
+    const f=Math.pow(2,nz2-MAP.z);
+    MAP.z=nz2;MAP.cx*=f;MAP.cy*=f;
+    /* keep the point between the fingers where it was */
+    const w=wrap.clientWidth,h=wrap.clientHeight;
+    MAP.cx=lon2x(ll[1],MAP.z)*TILE-(pinch2mx-r.left)+w/2;
+    MAP.cy=lat2y(ll[0],MAP.z)*TILE-(pinch2my-r.top)+h/2;
+    mapDraw();
+  }
+  let pinch2mx=0,pinch2my=0;
   wrap.addEventListener('pointerdown',ev=>{
     if(!MAP)return;
     if(ev.target.closest('#mapCtl')||ev.target.closest('#mapPuck')||ev.target.closest('#manPanel'))return;
+    PT.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    if(PT.size===2){pinch2mx=mid(...PT.values()).x;pinch2my=mid(...PT.values()).y;pinchStart();return}
     const onPick=!!ev.target.closest('#mapPick');
     drag={x:ev.clientX,y:ev.clientY,moved:0,pick:onPick,cx:MAP.cx,cy:MAP.cy};
     wrap.setPointerCapture&&wrap.setPointerCapture(ev.pointerId);
   });
   wrap.addEventListener('pointermove',ev=>{
+    if(PT.has(ev.pointerId))PT.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    if(pinch){pinchMove();return}
     if(!drag||!MAP)return;
     const dx=ev.clientX-drag.x, dy=ev.clientY-drag.y;
     drag.moved=Math.max(drag.moved,Math.abs(dx)+Math.abs(dy));
@@ -3560,6 +3718,8 @@ async function reportPosition(){
     }
   });
   wrap.addEventListener('pointerup',ev=>{
+    PT.delete(ev.pointerId);
+    if(pinch){if(PT.size<2)pinchEnd();return}
     if(!drag||!MAP){drag=null;return}
     const wasPick=drag.pick,moved=drag.moved;drag=null;
     if(moved>8)return;
@@ -3570,16 +3730,20 @@ async function reportPosition(){
     MAP.pick=mapLatLon(ev.clientX-r.left,ev.clientY-r.top);
     mapOverlay(wrap.clientWidth,wrap.clientHeight);
   });
-  wrap.addEventListener('pointercancel',()=>{drag=null});
+  wrap.addEventListener('pointercancel',ev=>{PT.delete(ev.pointerId);drag=null;if(pinch&&PT.size<2)pinchEnd()});
 
   $('#mapIn').onclick=()=>{if(MAP&&MAP.z<18){MAP.z++;MAP.cx*=2;MAP.cy*=2;mapDraw()}};
   $('#mapOut').onclick=()=>{if(MAP&&MAP.z>3){MAP.z--;MAP.cx/=2;MAP.cy/=2;mapDraw()}};
   $('#mapX').onclick=()=>mapClose();
-  pills('#mapKind',v=>{if(MAP){MAP.kind=v;mapDraw();paintAttr()}});
+  $('#mapHold').onclick=()=>holdArea();
+  $('#mapHold').title=t('mapHold');
+  $('#mapKind').addEventListener('click',ev=>{
+    const b=ev.target.closest('button');if(!b)return;
+    $$('#mapKind button').forEach(x=>x.classList.toggle('on',x===b));
+    if(MAP){MAP.kind=b.dataset.v;save(K_UI,(UI.mapKind=MAP.kind,UI));mapDraw();paintAttr();ringCache(MAP.kind,true)}
+  });
   function paintAttr(){
-    $('#mapAttr').textContent=(MAP&&MAP.kind==='sat')
-      ? 'Imagery \u00a9 Esri, Maxar, Earthstar Geographics'
-      : '\u00a9 OpenStreetMap contributors';
+    $('#mapAttr').textContent=tileAttr(MAP?MAP.kind:'street');
   }
   paintAttr();
   const _open=mapOpen;
@@ -3791,7 +3955,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',mapKm:'#sMapKm',mapMax:'#sMapMax',mapZ:'#sMapZ',unc:'#sUnc',tileStreet:'#sTileStreet',tileSat:'#sTileSat',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',mapMax:'#sMapMax',unc:'#sUnc',mapKm:'#sMapKm',mapZ:'#sMapZ',tileToken:'#sTileToken',tileStreet:'#sTileStreet',tileTopo:'#sTileTopo',tileSat:'#sTileSat',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){
@@ -3817,7 +3981,7 @@ function readO2Rows(){
           o2bar:bars.length?Math.round(bars.reduce((a,b)=>a+b,0)/bars.length):200};
 }
 function paintModeLab(){}
-const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth'};
+const TPLF={Ballast:'#tplBal',ATC:'#tplATC',Ressources:'#tplRes',Other:'#tplOth',MANPOS:'#tplMan'};
 function fillTplRows(){
   for(const k in TPLF)$(TPLF[k]).value=tplFor(k);
   $('#tplKeys').textContent='Placeholders: '+TPL_KEYS.map(k=>'{'+k+'}').join(' ')
@@ -3984,6 +4148,20 @@ async function showSettings(){
   await ask({title:t('showSet'),cancel:false,ok:t('close'),
     html:'<div class="settbl"><table>'+rows+'</table></div>'});
 }
+/* one tile from each source, so the answer comes from the server rather than from me */
+$('#btnTileTest').onclick=async()=>{
+  const note=$('#tileNote');
+  const tok=$('#sTileToken').value.trim()||CFG.tileToken||'';
+  const build=k=>String(k==='sat'?($('#sTileSat').value||DEF.tileSat):($('#sTileStreet').value||DEF.tileStreet))
+    .replace('{z}',9).replace('{x}',268).replace('{y}',180).replace('{token}',encodeURIComponent(tok));
+  note.textContent=t('checking');
+  const one=async k=>{
+    try{const r=await fetch(build(k),{mode:'cors',cache:'no-store'});return r.ok?'ok '+r.status:'\u2717 '+r.status}
+    catch(e){return '\u2717 '+(e.message||'failed').slice(0,24)}
+  };
+  const a=await one('street'), b=await one('sat');
+  note.textContent=t('tileOk').replace('{a}',a).replace('{b}',b);
+};
 $('#btnShowSet').onclick=showSettings;
 $('#btnMenu').addEventListener('click',()=>{if(CFG.role==='master')loadSeen()});
 $('#btnUnlock').onclick=async()=>{
