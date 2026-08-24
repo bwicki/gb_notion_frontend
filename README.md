@@ -783,6 +783,9 @@ data/<flight-id>.deleted.json  ids that were removed
 | `inv_bags`, `inv_ready_pct` | what the inventory was built from |
 | `atc_dir` | `RX` received, `TX` sent |
 | `atc_station`, `atc_freq`, `atc_squawk`, `atc_msg` | message content |
+| `pos_source` | `gps`, `manual` or `estimated` |
+| `pos_est_at` | when the estimate it was carried from was made |
+| `pos_unc_km` | how sure the crew was of a manual position, in kilometres |
 | `crew_change` | `yes` when the entry was filed as a handover of command |
 | `crew_pic`, `crew_rest` | crew state at the moment of the entry |
 | `vs_ms` | rate of climb in metres per second |
@@ -985,6 +988,68 @@ So when something you asked for is not there, the order to check is:
 
 `GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
 card in the repository yet. It disappears with the first one.
+
+## 14f. When the satellites are gone
+
+Jamming is not rare over parts of Europe, and a balloon that cannot say where it is becomes a
+problem for everyone. Two things follow from that.
+
+**Every kind of report goes out without a fix.** Ballast, ATC, resources, notes and the
+automatic position rows are all posted with the position fields simply left empty rather than
+refused; a POS row written with no fix says so — *Position · no GPS signal*. Nothing in the app
+waits for a satellite.
+
+**And a position can be given by eye.** *Report Position* sits under the picture and voice
+buttons on the Other screen. With a fix it asks first: report the satellite position, or place
+one by hand? The satellite answer writes an ordinary POS row and says *GPS position reported* —
+it does not disturb the rhythm of the automatic reports, it is simply one more row. With no fix
+the question is skipped and the map opens directly.
+
+### The map
+
+The app shrinks to a small draggable button carrying the tally mark, and beneath it a map fills
+the screen — street or satellite, with zoom buttons. It opens on the last reported position.
+
+- Every reported position is a dot with its time beside it: **blue from a satellite, red from
+  the eye**. Tapping one shows its altitude, track and rate of climb for ten seconds.
+- The dots are joined by the track flown, and from the last one the course is carried an hour
+  forward, taken from the line between the **last two reported positions** — whatever kind they
+  were — with cross ticks at 15, 30, 45 and 60 minutes.
+- The last twenty positions are shown, adjustable in the setup. **An unbroken run of manual
+  positions is always shown in full**, however long: that run is the whole picture when the
+  satellites are gone.
+- Tapping the map places a crosshair, which can then be dragged until it sits over the place the
+  crew believes it is.
+- Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
+  last known values because both can be read off the barograph; track and speed, which are
+  optional; and a slider for how sure the position is, in five steps drawn as a circle around
+  the marker. Leaving altitude or rate of climb empty asks once more — keep the previous values,
+  go back, or send without them.
+- The panel never covers the crosshair: it moves to the top of the screen when the marker sits
+  in the lower half.
+
+The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It goes to the
+table and to whichever WhatsApp recipients are ticked on the Other screen, and appears in that
+screen's Last Message panel. It can be picked or left out of a printout like any other kind.
+
+**Afterwards the estimate is carried forward.** With no fix, the next ATC or ballast report takes
+its position from the last manual one and marks it `(estimated at 2032Z)`, so nobody reads a
+terrestrial guess as a satellite one.
+
+### Tiles
+
+Map tiles come from outside — everything else in the app does not. While there is a connection,
+tiles within **75 km of the last reported position** are gathered quietly in the background, up
+to zoom 12, both layers; the radius, the zoom and the cap are in the setup. They are kept in a
+cache of their own that survives version changes, so the map still draws when the connection
+does not.
+
+The street layer is OpenStreetMap, the satellite layer Esri World Imagery; both need no key and
+carry their attribution on screen. **Both are used within the courtesy of their operators rather
+than a contract**: OpenStreetMap's tile policy asks that its tiles not be bulk-downloaded, which
+is why the gathering is throttled to roughly one tile a tenth of a second and capped. If you fly
+often enough for that to matter, put a provider of your own — MapTiler and Stadia both have free
+tiers — into *Tile sources* in the setup; the field takes any `{z}/{x}/{y}` template.
 
 ## 15. Version
 

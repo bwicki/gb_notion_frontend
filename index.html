@@ -367,6 +367,55 @@ html[data-theme="night"] #modal .go.okflash{background:#06200D;border-color:#1C5
 #btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 html[data-theme="night"] #btnPost.wait{background:#211803;border-color:#5E4708;color:#D8AC33}
 html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;color:#E2705F}
+#mapWrap{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:hidden;touch-action:none}
+#mapWrap.hide{display:none}
+body.mapon #app{visibility:hidden}
+#mapTiles{position:absolute;inset:0}
+#mapTiles img{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none}
+#mapSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#mapSvg .trk{fill:none;stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.85}
+#mapSvg .proj{fill:none;stroke:#1B3A6B;stroke-width:2;stroke-dasharray:7 5;stroke-opacity:.7}
+#mapSvg .tick{stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.8}
+#mapSvg .tlab{fill:#1B3A6B;font-size:10px;font-weight:600}
+#mapSvg .mgps{fill:#1B6BC0;stroke:#fff;stroke-width:2;pointer-events:auto}
+#mapSvg .mman{fill:#C0392B;stroke:#fff;stroke-width:2;pointer-events:auto}
+#mapSvg .unc{fill:#C0392B;fill-opacity:.10;stroke:#C0392B;stroke-opacity:.45;stroke-width:1.5}
+#mapSvg .mlab{fill:#111;font-size:10px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3}
+#mapPick{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;touch-action:none;z-index:6}
+#mapPick.hide{display:none}
+#mapPick svg{width:48px;height:48px;fill:none;stroke:#C0392B;stroke-width:2.5;
+  filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff)}
+#mapPop{position:absolute;z-index:8;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:8px 10px;font-size:11.5px;line-height:1.45;max-width:200px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18)}
+#mapPop.hide{display:none}
+#mapPop b{display:block;font-size:12px}
+#mapPop span{display:block;color:var(--muted)}
+#mapCtl{position:absolute;top:calc(10px + var(--safe-t));right:10px;z-index:7;display:flex;
+  flex-direction:column;gap:6px;align-items:flex-end}
+#mapCtl button{width:42px;height:42px;border:1px solid var(--line);border-radius:9px;
+  background:var(--card);font-size:19px;display:grid;place-items:center}
+#mapCtl .pills{background:var(--card);border-radius:9px}
+#mapAttr{position:absolute;left:8px;bottom:calc(6px + var(--safe-b));z-index:7;font-size:9.5px;
+  color:#333;background:rgba(255,255,255,.75);border-radius:5px;padding:2px 6px}
+#mapPuck{position:absolute;left:14px;top:calc(14px + var(--safe-t));z-index:9;width:56px;height:56px;
+  border-radius:16px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);touch-action:none}
+#mapPuck svg{width:34px;height:34px;fill:none;stroke-width:4;stroke-linecap:round}
+#manPanel{position:absolute;left:10px;right:10px;bottom:calc(10px + var(--safe-b));z-index:10;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:460px;margin:0 auto}
+#manPanel.top{bottom:auto;top:calc(78px + var(--safe-t))}
+#manPanel.hide{display:none}
+.mp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mp-head b{flex:1;font-size:13px}
+.mp-head button{width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.mp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.mp-grid label{font-size:10.5px;color:var(--muted);display:block}
+.mp-grid input{margin-top:2px}
+#manUnc{width:100%;margin:2px 0 10px;accent-color:var(--sel)}
+#manPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+#manPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #toast{position:fixed;right:14px;bottom:calc(104px + var(--safe-b));transform:translateY(10px);
   background:var(--sel);color:var(--sel-ink);border-radius:9px;padding:11px 17px;font-size:14px;
   opacity:0;pointer-events:none;transition:.18s;z-index:120;max-width:70vw;text-align:right}
@@ -502,6 +551,7 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           </div>
           <div class="thumbs" id="oThumbs"></div>
           <div class="voicebar" id="oVoice"></div>
+          <button class="go sec sm" id="btnRepPos" data-t="reportPos" style="margin-top:8px">Report Position</button>
         </div>
         <div class="f"><div class="links wa" id="waOth"></div></div>
       </div>
@@ -622,6 +672,31 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
           <input type="text" id="sMsgRx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
+        <h3 data-t="hMap">Map and manual position</h3>
+        <div class="f two">
+          <div><p class="lab" data-t="lMapKm">Cache tiles within</p>
+            <div class="sfx"><input type="number" id="sMapKm" inputmode="numeric" step="5" placeholder="75"><span>km</span></div></div>
+          <div><p class="lab" data-t="lMapZ">Cache up to zoom</p>
+            <input type="number" id="sMapZ" inputmode="numeric" step="1" placeholder="12"></div>
+        </div>
+        <div class="f two">
+          <div><p class="lab" data-t="lMapMax">Positions shown on the map</p>
+            <input type="number" id="sMapMax" inputmode="numeric" step="1" placeholder="20"></div>
+          <div><p class="lab" data-t="lUnc">Uncertainty steps</p>
+            <div class="sfx"><input type="text" id="sUnc" placeholder="0.5,1,2,5,10"><span>km</span></div></div>
+        </div>
+        <p class="hint" data-t="lMapHint">Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.</p>
+        <details class="fold" id="foldTiles">
+          <summary data-t="lTiles">Tile sources</summary>
+          <div class="in">
+            <div class="f"><p class="lab" data-t="lTileStreet">Street map</p>
+              <input type="text" id="sTileStreet" placeholder="https://tile.openstreetmap.org/{z}/{x}/{y}.png"></div>
+            <div class="f"><p class="lab" data-t="lTileSat">Satellite</p>
+              <input type="text" id="sTileSat" placeholder="https://…/{z}/{y}/{x}"></div>
+            <p class="hint" data-t="lTileHint">Both take {z}, {x} and {y}. The defaults need no key and carry their own attribution. A provider of your own goes here.</p>
+          </div>
+        </details>
+
         <h3 data-t="hRessources">Ressources</h3>
         <div class="f two">
           <div><p class="lab" data-t="lPosMin">Automatic position report every</p>
@@ -704,18 +779,39 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 
 <div id="puck" role="button" tabindex="0" aria-label="Open Basket Reporting"><b id="pTitle">Reporting</b><span class="num" id="pNum">—</span></div>
 <div id="modal"></div>
+<div id="mapWrap" class="hide">
+  <div id="mapTiles"></div>
+  <svg id="mapSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="mapPick" class="hide"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><path d="M24 2v10M24 36v10M2 24h10M36 24h10"/></svg></div>
+  <div id="mapPop" class="hide"></div>
+  <div id="mapCtl">
+    <div class="pills small" id="mapKind">
+      <button data-v="street" class="on" data-t="mapStreet">Street</button><button data-v="sat" data-t="mapSat">Satellite</button>
+    </div>
+    <button id="mapIn" aria-label="zoom in">+</button>
+    <button id="mapOut" aria-label="zoom out">−</button>
+    <button id="mapX" aria-label="close">✕</button>
+  </div>
+  <div id="mapAttr"></div>
+  <button id="mapPuck" aria-label="Report"><svg viewBox="0 0 48 48"><path d="M10 12v24M18 11v26M26 12v24M34 11v26" stroke="#1B3A6B"/><path d="M6 34 38 14" stroke="#C0392B"/></svg></button>
+  <div id="manPanel" class="hide"></div>
+</div>
 <div id="toast"></div>
 
 <script>
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260820-01';
+const APP_VERSION='v260824-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,25',
-           bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
+           bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,
+           mapKm:75,mapMax:20,mapZ:12,unc:'0.5,1,2,5,10',
+           tileStreet:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+           tileSat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+           readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
            fresh:0,tplVer:0,handover:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
@@ -838,6 +934,11 @@ const L={en:{
  lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
  hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
+ hMap:'Map and manual position', lMapKm:'Cache tiles within', lMapZ:'Cache up to zoom',
+ lMapMax:'Positions shown on the map', lUnc:'Uncertainty steps', lTiles:'Tile sources',
+ lTileStreet:'Street map', lTileSat:'Satellite',
+ lMapHint:'Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.',
+ lTileHint:'Both take {z}, {x} and {y}. The defaults need no key and carry their own attribution. A provider of your own goes here.',
  lGeo:'Place name with each position', lMethInit:'Methanol level at start',
  lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
  place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
@@ -863,7 +964,17 @@ const L={en:{
  inSync:'In sync, last at', reportingAs:'Reporting as', reportingAsLbl:'reporting as', notThePic:'not the PIC',
  shareTitle:'Share setup', copyLink:'Copy link', qrTooLong:'The link is too long for a code — copy it instead.', qrHint:'Scan this with the camera of the other device.', done:'Done',
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
- lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', picChange:'Change of PIC',
+ lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', lgManPos:'Manual position',
+ reportPos:'Report Position', mapStreet:'Street', mapSat:'Satellite',
+ rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
+ rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
+ manTitle:'Manual position', manAlt:'Altitude', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
+ manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
+ manPickFirst:'Tap the map first to place the position',
+ manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
+ manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
+ tilesGot:'{n} map tiles kept for later', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
+ posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
  picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
  lPosMin:'Automatic position report every', lOpsMin:'Ops Normal reminder after',
@@ -971,6 +1082,11 @@ const L={en:{
  lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
  lReadySteps:'Standard-Meldeschritte Schütte',
  hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
+ hMap:'Karte und Handposition', lMapKm:'Kacheln im Umkreis von', lMapZ:'Kacheln bis Zoomstufe',
+ lMapMax:'Positionen auf der Karte', lUnc:'Stufen der Unsicherheit', lTiles:'Kartenquellen',
+ lTileStreet:'Strassenkarte', lTileSat:'Satellit',
+ lMapHint:'Kacheln um die letzte gemeldete Position werden bei Verbindung im Hintergrund geholt, damit die Karte auch ohne Verbindung funktioniert. Eine ununterbrochene Reihe von Handpositionen wird immer vollständig gezeigt.',
+ lTileHint:'Beide nehmen {z}, {x} und {y}. Die Vorgaben brauchen keinen Schlüssel und führen ihre Quellenangabe mit. Ein eigener Anbieter kommt hierher.',
  lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
  lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
  place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
@@ -997,7 +1113,17 @@ const L={en:{
  inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', reportingAsLbl:'meldet als', notThePic:'nicht der PIC',
  shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', qrTooLong:'Der Link ist zu lang für einen Code — bitte kopieren.', qrHint:'Mit der Kamera des anderen Geräts abfotografieren.', done:'Fertig',
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
- lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', picChange:'Change of PIC',
+ lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', lgManPos:'Manual position',
+ reportPos:'Report Position', mapStreet:'Street', mapSat:'Satellite',
+ rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
+ rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
+ manTitle:'Manual position', manAlt:'Altitude', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
+ manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
+ manPickFirst:'Tap the map first to place the position',
+ manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
+ manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
+ tilesGot:'{n} map tiles kept for later', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
+ posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
  picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
@@ -1127,9 +1253,31 @@ function dms(v,w){
 }
 const dm=(v,w)=>{const a=Math.abs(v);let d=Math.floor(a),m=Math.round((a-d)*60);
   if(m===60){d++;m=0}return pad(d,w)+pad(m,2)};
+/* the last position anybody actually reported, whichever kind it was */
+function lastFix(kind){
+  const rows=chrono(ENT);
+  for(let i=rows.length-1;i>=0;i--){
+    const e=rows[i];
+    if(e.lat==null||e.lon==null)continue;
+    if(kind==='manual'&&e.pos_source!=='manual')continue;
+    if(kind==='gps'&&e.pos_source!=='gps')continue;
+    return e;
+  }
+  return null;
+}
 function gpsSnap(){
-  if(!GPS)return{lat:null,lon:null,pos_lat:'',pos_lon:'',alt_ft:null,tc_deg:null,speed_kt:null,vs_ms:null,
-    alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
+  if(!GPS){
+    /* With no fix the app falls back to the last manual position, marked as an estimate so
+       nobody mistakes a terrestrial guess for a satellite one. */
+    const m=lastFix('manual');
+    if(m&&m.lat!=null)return{lat:m.lat,lon:m.lon,pos_lat:m.pos_lat,pos_lon:m.pos_lon,
+      alt_ft:m.alt_ft,tc_deg:m.tc_deg,speed_kt:m.speed_kt,vs_ms:m.vs_ms,
+      pos_source:'estimated',pos_est_at:m.ts_utc,pos_unc_km:m.pos_unc_km,
+      alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
+    return{lat:null,lon:null,pos_lat:'',pos_lon:'',alt_ft:null,tc_deg:null,speed_kt:null,vs_ms:null,
+      pos_source:'',pos_est_at:'',pos_unc_km:null,
+      alt_gps_m:null,gps_acc_m:null,gps_age_s:null,gps_fix:false};
+  }
   return{lat:+GPS.lat.toFixed(6),lon:+GPS.lon.toFixed(6),
     pos_lat:dms(GPS.lat,2)+(GPS.lat>=0?'N':'S'),
     pos_lon:dms(GPS.lon,3)+(GPS.lon>=0?'E':'W'),
@@ -1139,6 +1287,7 @@ function gpsSnap(){
     vs_ms:GPS.vs==null?null:Math.round(GPS.vs*10)/10,
     alt_gps_m:GPS.alt==null?null:Math.round(GPS.alt),
     gps_acc_m:GPS.acc==null?null:Math.round(GPS.acc),
+    pos_source:'gps',pos_est_at:'',pos_unc_km:null,
     gps_age_s:Math.round((Date.now()-GPS.t)/1000),gps_fix:true};
 }
 function add(part){
@@ -1150,7 +1299,7 @@ function add(part){
     device:DEV,device_mode:CFG.mode,reporter:reporter(),source:'app',
     ts_utc:now.toISOString(),ts_local:localISO(now),
     type:'Other',ballast_action:'',ballast_delta_kg:null,ballast_abs_kg:null,
-    tc_deg:null,speed_kt:null,vs_ms:null,ballast_medium:'',
+    tc_deg:null,speed_kt:null,vs_ms:null,pos_source:'',pos_est_at:'',pos_unc_km:null,ballast_medium:'',
     sand_kg:null,water_kg:null,sand_left_kg:null,water_left_kg:null,total_ballast_kg:null,tally_diff_kg:null,inv_bags:null,inv_ready_pct:null,
     atc_dir:'',atc_station:'',atc_freq:'',atc_squawk:'',atc_msg:'',
     crew_pic:picName(),crew_rest:restName(),crew_change:'',res_battery_pct:null,res_fuel_cell:'',res_solar:'',
@@ -1192,8 +1341,9 @@ function waVals(e){
     methanol:(e.res_methanol_pct==null||e.res_methanol_pct==='')?'':e.res_methanol_pct+' %',
     o2crew:e.res_o2_crew||'', o2:e.res_o2||'', o2detail:e.res_o2_detail||'', note:e.note||'',
     time:String(e.ts_utc||'').slice(11,19)+'Z',
-    pos:e.gps_fix?(e.pos_lat+' '+e.pos_lon):'',
-    posdm:e.gps_fix?(dm(e.lat,2)+(e.lat>=0?'N':'S')+' '+dm(e.lon,3)+(e.lon>=0?'E':'W')):'',
+    pos:e.pos_lat?(e.pos_lat+' '+e.pos_lon+posTag(e)):'',
+    posdm:(e.lat!=null&&e.lon!=null)
+      ?(dm(e.lat,2)+(e.lat>=0?'N':'S')+' '+dm(e.lon,3)+(e.lon>=0?'E':'W')+posTag(e)):'',
     place:e.place||'',
     location:String(e.place||'').replace(/^near\s+/i,''),
     alt:e.alt_ft==null?'':Math.round(e.alt_ft/10)*10+' ft',
@@ -1202,6 +1352,14 @@ function waVals(e){
     vs:e.vs_ms==null?'':(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s',
     maps:e.gps_fix?('https://maps.google.com/?q='+e.lat.toFixed(5)+','+e.lon.toFixed(5)):''
   };
+}
+/* Where a position came from, said plainly: a terrestrial fix is not a satellite fix, and an
+   older estimate carried forward is neither. */
+function posTag(e){
+  if(e.pos_source==='manual')return ' ('+t('posManual')+')';
+  if(e.pos_source==='estimated'&&e.pos_est_at)
+    return ' ('+t('posEst').replace('{t}',String(e.pos_est_at).slice(11,16).replace(':','')+'Z')+')';
+  return '';
 }
 /* {key} drops its line when everything on it is empty; {!key} keeps the line and prints -
    so a message with nothing to say still shows the field */
@@ -1364,7 +1522,7 @@ const configured=()=>!!(CFG.repo&&CFG.token);
 
 /* everything a second device needs; per-device choices are deliberately left out */
 const SHARED=['repo','branch','dir','flight','call','p1','p2','init','steps','readySteps','blocked','geo',
-  'bagKg','readyKg','methInit','posMin','opsMin','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
+  'bagKg','readyKg','methInit','posMin','opsMin','mapKm','mapMax','mapZ','unc','tileStreet','tileSat','vfr','emerg','stations','msgRx','msgTx','o2','o2bar','o2bars',
   'atcName','atcNum','tpl','tplVer'];
 function setupPayload(withToken){
   const o={v:1,master_device:DEV,master_offer:String(CFG.handover||''),
@@ -1534,7 +1692,7 @@ async function ghPut(p,text,sha,msg){
 }
 const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
-  'pos_lat','pos_lon','alt_ft','place','tc_deg','speed_kt','vs_ms','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
+  'pos_lat','pos_lon','alt_ft','place','tc_deg','speed_kt','vs_ms','pos_source','pos_est_at','pos_unc_km','lat','lon','alt_gps_m','gps_acc_m','gps_age_s','gps_fix',
   'ballast_action','ballast_medium','ballast_delta_kg','ballast_abs_kg','sand_kg','water_kg','sand_left_kg','water_left_kg','total_ballast_kg','tally_diff_kg',
   'inv_bags','inv_ready_pct','atc_dir','atc_station','atc_freq','atc_squawk','atc_msg',
   'crew_pic','crew_rest','crew_change','res_battery_pct','res_fuel_cell','res_solar',
@@ -1708,10 +1866,13 @@ function line(e){
        it inside the message would print it twice */
     h=e.note||t('picChange');
     s='';
-  }else if(e.type==='POS'){
-    h=t('lgPos')+(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':'')
-      +(e.vs_ms!=null?' \u00b7 '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':'');
-    s=[e.pos_lat?e.pos_lat+' '+e.pos_lon:'',e.place||''].filter(Boolean).join(' \u00b7 ');
+  }else if(e.type==='POS'||e.type==='MANPOS'){
+    h=(e.type==='MANPOS'?t('lgManPos'):t('lgPos'))
+      +(e.pos_lat?'':' \u00b7 '+t('posNoGps'))
+      +(e.alt_ft!=null?' \u00b7 '+e.alt_ft+' ft':'')
+      +(e.vs_ms!=null?' \u00b7 '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':'')
+      +(e.pos_unc_km?' \u00b7 '+t('posUnc').replace('{n}',String(e.pos_unc_km)):'');
+    s=[e.pos_lat?e.pos_lat+' '+e.pos_lon+posTag(e):'',e.place||''].filter(Boolean).join(' \u00b7 ');
   }else{h=e.note||t('lgNote');s=''}
   return{h,s};
 }
@@ -1722,7 +1883,7 @@ const ST_FAIL='<svg viewBox="0 0 24 24" class="st-fail"><path d="M6 6l12 12M18 6
 const stIcon=e=>e.synced?ST_OK:(e.failed?ST_FAIL:ST_WAIT);
 /* the kinds present in this flight, with their counts, so the log can be read one kind at
    a time — an ATC-only reading of a long flight is otherwise a search through everything */
-const LOGKINDS=['Ballast','ATC','Ressources','Other','POS','PIC'];
+const LOGKINDS=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC'];
 function paintLogFilter(){
   const n={};ENT.forEach(e=>{n[e.type]=(n[e.type]||0)+1});
   const chips=[['',t('logAll')+' '+ENT.length]]
@@ -1819,12 +1980,15 @@ function ask(o){
       ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
       <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
         ${o.cancel===false?'':`<button class="go sec" data-a="0">${esc(o.cancel||t('cancel'))}</button>`}
+        ${o.extra?`<button class="go sec" data-a="2">${esc(o.extra)}</button>`:''}
         <button class="go ${o.danger?'warn':''}" data-a="1">${esc(o.ok||t('ok'))}</button>
       </div></div>`;
     m.classList.add('on');
     const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
     const done=v=>{m.classList.remove('on');m.innerHTML='';res(v)};
     if(o.cancel!==false)m.querySelector('[data-a="0"]').onclick=()=>done(null);
+    const ex=m.querySelector('[data-a="2"]');
+    if(ex)ex.onclick=()=>done('extra');
     const hb=m.querySelector('#mHead');
     if(hb&&o.headBtn)hb.onclick=()=>o.headBtn.act();
     m.querySelector('[data-a="1"]').onclick=ev=>{
@@ -1924,8 +2088,8 @@ async function docsMenu(){
 /* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
    Pagination is measured rather than guessed, so no entry is ever cut in half. */
 async function printSheet(){
-  const kinds=['Ballast','ATC','Ressources','Other','POS','PIC'];
-  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,PIC:true};
+  const kinds=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC'];
+  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,MANPOS:true,PIC:true};
   await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
     text:t('printPick'),
     html:'<div class="links wa" id="prK">'+kinds.map(k=>
@@ -2668,7 +2832,10 @@ function lastText(e){
 function paintLastBoxes(){
   for(const ty in LASTBOX){
     const box=$(LASTBOX[ty]);if(!box)continue;
-    const e=lastOf(ty);
+    /* a manual position is filed from the Other screen, so it belongs in that panel too */
+    const e=ty==='Other'
+      ? chrono(ENT).filter(x=>x.type==='Other'||x.type==='MANPOS').pop()
+      : lastOf(ty);
     box.querySelector('.lm-top').textContent=t('lastMessage')+' | '
       +(e?(e.reporter||e.device||'\u2014'):'\u2014')+' | '
       +(e?String(e.ts_utc).slice(11,19)+'Z':'\u2014')
@@ -3057,6 +3224,392 @@ async function opsAsk(){
   toast(t('opsArmed').replace('{n}',String(m)));
 }
 
+/* ── Map ─────────────────────────────────────────────────────────────
+   A slippy map written into the app rather than pulled from a library: the basket has no
+   connection to fetch one, and the whole point of this screen is that it works when the
+   satellites are being jammed. Tiles are the only thing that comes from outside, and those
+   are gathered in advance while there is still a link. */
+const TILE=256;
+const lon2x=(lon,z)=>(lon+180)/360*Math.pow(2,z);
+const lat2y=(lat,z)=>{const r=lat*Math.PI/180;
+  return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z)};
+const x2lon=(x,z)=>x/Math.pow(2,z)*360-180;
+const y2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+  return 180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))};
+const tileUrl=(kind,z,x,y)=>String(kind==='sat'?(CFG.tileSat||DEF.tileSat):(CFG.tileStreet||DEF.tileStreet))
+  .replace('{z}',z).replace('{x}',x).replace('{y}',y);
+
+/* great-circle distance and bearing, good enough over the few hundred kilometres of a flight */
+function gcDist(a,b,c,d){
+  const R=6371,p=Math.PI/180;
+  const dl=(c-a)*p,dg=(d-b)*p;
+  const h=Math.sin(dl/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(dg/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function gcBear(a,b,c,d){
+  const p=Math.PI/180;
+  const y=Math.sin((d-b)*p)*Math.cos(c*p);
+  const x=Math.cos(a*p)*Math.sin(c*p)-Math.sin(a*p)*Math.cos(c*p)*Math.cos((d-b)*p);
+  return (Math.atan2(y,x)/p+360)%360;
+}
+function gcMove(lat,lon,brg,km){
+  const R=6371,p=Math.PI/180,d=km/R;
+  const l1=lat*p,g1=lon*p,b=brg*p;
+  const l2=Math.asin(Math.sin(l1)*Math.cos(d)+Math.cos(l1)*Math.sin(d)*Math.cos(b));
+  const g2=g1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(l1),Math.cos(d)-Math.sin(l1)*Math.sin(l2));
+  return [l2/p,((g2/p)+540)%360-180];
+}
+
+/* ── Tiles kept for later ────────────────────────────────────────── */
+const TILECACHE='basket-tiles';
+let TILEBUSY=false,TILEAT=null;
+async function prefetchTiles(lat,lon,quiet){
+  if(TILEBUSY||!navigator.onLine||!('caches'in window))return;
+  if(lat==null||lon==null)return;
+  const km=nz(CFG.mapKm)||75, zMax=Math.min(16,Math.max(8,nz(CFG.mapZ)||12));
+  if(TILEAT&&gcDist(TILEAT[0],TILEAT[1],lat,lon)<km/3)return;   /* still inside the last run */
+  TILEBUSY=true;TILEAT=[lat,lon];
+  try{
+    const cache=await caches.open(TILECACHE);
+    let got=0,skipped=0;
+    for(let z=8;z<=zMax;z++){
+      const c=Math.pow(2,z);
+      const dx=km/(111.32*Math.cos(lat*Math.PI/180))/360*c;
+      const dy=km/111.32/360*c*1.4;
+      const x0=Math.floor(lon2x(lon,z)-dx),x1=Math.ceil(lon2x(lon,z)+dx);
+      const y0=Math.floor(lat2y(lat,z)-dy),y1=Math.ceil(lat2y(lat,z)+dy);
+      for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+        if(x<0||y<0||x>=c||y>=c)continue;
+        if(got>=1200)break;                       /* a ceiling, so a wide radius cannot run away */
+        for(const kind of ['street','sat']){
+          const u=tileUrl(kind,z,x,y);
+          try{
+            if(await cache.match(u)){skipped++;continue}
+            const r=await fetch(u,{mode:'cors'});
+            if(r&&r.ok){await cache.put(u,r.clone());got++}
+          }catch(e){}
+          await new Promise(r=>setTimeout(r,90));  /* gentle on the tile servers */
+        }
+      }
+    }
+    if(!quiet&&got)toast(t('tilesGot').replace('{n}',String(got)));
+  }catch(e){}
+  finally{TILEBUSY=false}
+}
+
+/* ── The positions worth drawing ─────────────────────────────────── */
+function mapPoints(){
+  const all=chrono(ENT).filter(e=>e.lat!=null&&e.lon!=null&&e.pos_source!=='estimated');
+  const max=Math.max(3,nz(CFG.mapMax)||20);
+  /* a continuous run of manual positions is shown in full — that run is the whole picture
+     when the satellites are gone, and cutting it would hide exactly what matters */
+  let keep=max;
+  let run=0;
+  for(let i=all.length-1;i>=0;i--){
+    if(all[i].pos_source==='manual')run++;else break;
+  }
+  keep=Math.max(keep,run+1);
+  return all.slice(-keep);
+}
+
+let MAP=null;
+function mapOpen(){
+  const pts=mapPoints();
+  const last=pts[pts.length-1];
+  const c=last?[last.lat,last.lon]:[46.95,7.44];
+  MAP={z:11,kind:'street',cx:lon2x(c[1],11)*TILE,cy:lat2y(c[0],11)*TILE,pick:null,pop:null,popT:null};
+  $('#mapWrap').classList.remove('hide');
+  document.body.classList.add('mapon');
+  mapDraw();
+}
+function mapClose(){
+  $('#mapWrap').classList.add('hide');
+  document.body.classList.remove('mapon');
+  MAP=null;
+}
+const mapScreen=(lat,lon)=>{
+  const w=$('#mapWrap').clientWidth,h=$('#mapWrap').clientHeight;
+  return [lon2x(lon,MAP.z)*TILE-MAP.cx+w/2, lat2y(lat,MAP.z)*TILE-MAP.cy+h/2];
+};
+const mapLatLon=(px,py)=>{
+  const w=$('#mapWrap').clientWidth,h=$('#mapWrap').clientHeight;
+  return [y2lat((MAP.cy+py-h/2)/TILE,MAP.z), x2lon((MAP.cx+px-w/2)/TILE,MAP.z)];
+};
+
+function mapDraw(){
+  if(!MAP)return;
+  const wrap=$('#mapWrap'),w=wrap.clientWidth||360,h=wrap.clientHeight||640;
+  const cnt=$('#mapTiles');
+  const c=Math.pow(2,MAP.z);
+  const x0=Math.floor((MAP.cx-w/2)/TILE),x1=Math.floor((MAP.cx+w/2)/TILE);
+  const y0=Math.floor((MAP.cy-h/2)/TILE),y1=Math.floor((MAP.cy+h/2)/TILE);
+  const want={};
+  let html='';
+  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+    if(y<0||y>=c)continue;
+    const xx=((x%c)+c)%c;
+    const left=Math.round(x*TILE-MAP.cx+w/2), top=Math.round(y*TILE-MAP.cy+h/2);
+    const u=tileUrl(MAP.kind,MAP.z,xx,y);
+    want[u]=1;
+    html+='<img src="'+esc(u)+'" style="left:'+left+'px;top:'+top+'px" alt="" loading="eager">';
+  }
+  cnt.innerHTML=html;
+  mapOverlay(w,h);
+}
+
+function mapOverlay(w,h){
+  const pts=mapPoints();
+  let d='',marks='',ticks='';
+  /* the track so far */
+  const xy=pts.map(p=>mapScreen(p.lat,p.lon));
+  for(let i=0;i<xy.length;i++)d+=(i?'L':'M')+xy[i][0].toFixed(1)+' '+xy[i][1].toFixed(1);
+  /* one hour ahead, from the last two positions that were actually reported */
+  if(pts.length>=2){
+    const a=pts[pts.length-2],b=pts[pts.length-1];
+    const km=gcDist(a.lat,a.lon,b.lat,b.lon);
+    const mins=(new Date(b.ts_utc)-new Date(a.ts_utc))/60000;
+    if(mins>0.5&&km>0.05){
+      const brg=gcBear(a.lat,a.lon,b.lat,b.lon), kmh=km/(mins/60);
+      let pd='M'+xy[xy.length-1][0].toFixed(1)+' '+xy[xy.length-1][1].toFixed(1);
+      for(let m=5;m<=60;m+=5){
+        const p=gcMove(b.lat,b.lon,brg,kmh*m/60),s=mapScreen(p[0],p[1]);
+        pd+='L'+s[0].toFixed(1)+' '+s[1].toFixed(1);
+      }
+      d+='';
+      ticks+='<path d="'+pd+'" class="proj"/>';
+      [15,30,45,60].forEach(m=>{
+        const p=gcMove(b.lat,b.lon,brg,kmh*m/60),s=mapScreen(p[0],p[1]);
+        const r=(brg+90)*Math.PI/180,len=m===60?11:7;
+        const dx=Math.sin(r)*len,dy=-Math.cos(r)*len;
+        ticks+='<path d="M'+(s[0]-dx).toFixed(1)+' '+(s[1]-dy).toFixed(1)
+              +'L'+(s[0]+dx).toFixed(1)+' '+(s[1]+dy).toFixed(1)+'" class="tick"/>';
+        ticks+='<text x="'+(s[0]+dx+4).toFixed(1)+'" y="'+(s[1]+dy).toFixed(1)+'" class="tlab">'+m+'</text>';
+      });
+    }
+  }
+  /* every reported position, blue from a satellite, red from the eye */
+  pts.forEach((p,i)=>{
+    const s=mapScreen(p.lat,p.lon);
+    const man=p.pos_source==='manual';
+    if(man&&p.pos_unc_km){
+      const km=Number(p.pos_unc_km);
+      const q=gcMove(p.lat,p.lon,90,km),qs=mapScreen(q[0],q[1]);
+      const rad=Math.abs(qs[0]-s[0]);
+      if(rad>3&&rad<600)marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unc"/>';
+    }
+    marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="6" class="'+(man?'mman':'mgps')+'" data-i="'+i+'"/>';
+    marks+='<text x="'+(s[0]+9).toFixed(1)+'" y="'+(s[1]-7).toFixed(1)+'" class="mlab">'
+          +esc(String(p.ts_utc).slice(11,16).replace(':',''))+'Z</text>';
+  });
+  $('#mapSvg').setAttribute('viewBox','0 0 '+w+' '+h);
+  $('#mapSvg').innerHTML='<path d="'+d+'" class="trk"/>'+ticks+marks;
+  /* the crosshair the crew drags to where they believe they are */
+  const pk=$('#mapPick');
+  if(MAP.pick){
+    const s=mapScreen(MAP.pick[0],MAP.pick[1]);
+    pk.style.left=s[0]+'px';pk.style.top=s[1]+'px';pk.classList.remove('hide');
+  }else pk.classList.add('hide');
+  mapPanelSide();
+}
+
+/* the panel keeps out of the way of the crosshair, whichever half it sits in */
+function mapPanelSide(){
+  const p=$('#manPanel');
+  if(!p||p.classList.contains('hide'))return;
+  const h=$('#mapWrap').clientHeight||640;
+  let low=false;
+  if(MAP&&MAP.pick){const s=mapScreen(MAP.pick[0],MAP.pick[1]);low=s[1]>h*0.55}
+  p.classList.toggle('top',low);
+}
+
+function mapInfo(i){
+  const p=mapPoints()[i];if(!p)return;
+  const box=$('#mapPop');
+  box.innerHTML='<b>'+esc(String(p.ts_utc).slice(11,19))+'Z</b>'
+    +'<span>'+esc(p.pos_lat+' '+p.pos_lon)+'</span>'
+    +'<span>'+(p.alt_ft!=null?esc(p.alt_ft+' ft'):'\u2014')
+    +' \u00b7 '+(p.tc_deg!=null?esc(pad(p.tc_deg,3)+'\u00b0'):'\u2014')
+    +' \u00b7 '+(p.speed_kt!=null?esc(Number(p.speed_kt).toFixed(1)+' kn'):'\u2014')
+    +' \u00b7 '+(p.vs_ms!=null?esc((p.vs_ms>=0?'+':'')+Number(p.vs_ms).toFixed(1)+' m/s'):'\u2014')+'</span>'
+    +(p.pos_source==='manual'?'<span>'+esc(t('posManual'))+'</span>':'');
+  const s=mapScreen(p.lat,p.lon);
+  box.style.left=Math.max(8,Math.min(($('#mapWrap').clientWidth||360)-190,s[0]-90))+'px';
+  box.style.top=Math.max(8,s[1]-92)+'px';
+  box.classList.remove('hide');
+  clearTimeout(MAP.popT);
+  MAP.popT=setTimeout(()=>box.classList.add('hide'),10000);
+}
+
+/* ── The manual report ───────────────────────────────────────────── */
+const uncSteps=()=>{
+  const a=String(CFG.unc||DEF.unc).split(/[^0-9.]+/).map(Number).filter(x=>x>0);
+  return a.length?a:[0.5,1,2,5,10];
+};
+function manOpen(){
+  if(!MAP||!MAP.pick)return toast(t('manPickFirst'));
+  const prev=lastFix()||{};
+  const steps=uncSteps();
+  const p=$('#manPanel');
+  p.innerHTML='<div class="mp-head"><b>'+esc(t('manTitle'))+'</b>'
+    +'<button id="manX" aria-label="close">\u2715</button></div>'
+    +'<div class="mp-grid">'
+    +'<label>'+esc(t('manAlt'))+'<span class="sfx"><input type="number" id="manAlt" inputmode="numeric" value="'
+      +(prev.alt_ft!=null?esc(prev.alt_ft):'')+'"><span>ft</span></span></label>'
+    +'<label>'+esc(t('manVs'))+'<span class="sfx"><input type="number" id="manVs" inputmode="decimal" step="0.1" value="'
+      +(prev.vs_ms!=null?esc(prev.vs_ms):'')+'"><span>m/s</span></span></label>'
+    +'<label>'+esc(t('manTc'))+'<span class="sfx"><input type="number" id="manTc" inputmode="numeric" value="'
+      +(prev.tc_deg!=null?esc(prev.tc_deg):'')+'"><span>\u00b0</span></span></label>'
+    +'<label>'+esc(t('manSp'))+'<span class="sfx"><input type="number" id="manSp" inputmode="decimal" step="0.1" value="'
+      +(prev.speed_kt!=null?esc(prev.speed_kt):'')+'"><span>kn</span></span></label>'
+    +'</div>'
+    +'<p class="lab" id="manUncLab"></p>'
+    +'<input type="range" id="manUnc" min="0" max="'+(steps.length-1)+'" step="1" value="1">'
+    +'<button class="go" id="manPost">'+esc(t('manPost'))+'</button>';
+  p.classList.remove('hide');
+  const lab=()=>{$('#manUncLab').textContent=t('manUnc')
+    +' \u00b7 '+t('posUnc').replace('{n}',String(steps[Number($('#manUnc').value)]))};
+  lab();
+  $('#manUnc').oninput=lab;
+  $('#manX').onclick=()=>p.classList.add('hide');
+  $('#manPost').onclick=()=>manPost(steps);
+  mapPanelSide();
+}
+async function manPost(steps){
+  const alt=$('#manAlt').value.trim(), vs=$('#manVs').value.trim();
+  let useAlt=alt===''?null:Math.round(Number(alt));
+  let useVs=vs===''?null:Math.round(Number(vs)*10)/10;
+  if(alt===''||vs===''){
+    /* altitude and rate of climb come off the barograph, so they are asked for twice before
+       a position goes out without them */
+    const prev=lastFix()||{};
+    const r=await ask({title:t('manTitle'),text:t('manConfirmAsk'),
+      ok:t('manKeepPrev'),cancel:t('manBack'),extra:t('manNoValues')});
+    if(r===null)return;                       /* back to the form */
+    if(r==='extra'){useAlt=alt===''?null:useAlt;useVs=vs===''?null:useVs}
+    else{if(alt==='')useAlt=prev.alt_ft==null?null:prev.alt_ft;
+         if(vs==='')useVs=prev.vs_ms==null?null:prev.vs_ms}
+  }
+  const lat=MAP.pick[0],lon=MAP.pick[1];
+  const tc=$('#manTc').value.trim(), sp=$('#manSp').value.trim();
+  const unc=steps[Number($('#manUnc').value)];
+  const btn=$('#manPost');
+  btn.disabled=true;btn.classList.add('busy');btn.textContent=t('waitConfirm');
+  const e=add({type:'MANPOS',
+    lat:+lat.toFixed(6),lon:+lon.toFixed(6),
+    pos_lat:dms(lat,2)+(lat>=0?'N':'S'),pos_lon:dms(lon,3)+(lon>=0?'E':'W'),
+    alt_ft:useAlt,vs_ms:useVs,
+    tc_deg:tc===''?null:Math.round(Number(tc))%360,
+    speed_kt:sp===''?null:Math.round(Number(sp)*10)/10,
+    pos_source:'manual',pos_unc_km:unc,gps_fix:false,
+    note:'',whatsapp:'',whatsapp_to:''});
+  const rc=recipients('Other');
+  if(rc.length){e.whatsapp='yes';e.whatsapp_to=rc.map(r=>r.n||r.p).join('; ');save(K_ENT,ENT)}
+  await confirmPost(e,null);
+  btn.classList.remove('busy');btn.classList.add('ok');btn.textContent=t('manDone');
+  setTimeout(async()=>{
+    $('#manPanel').classList.add('hide');
+    mapClose();
+    setType('Other');setView('form');
+    if(rc.length)waSend(e,rc);
+  },1200);
+}
+
+/* ── Report Position ─────────────────────────────────────────────── */
+async function reportPosition(){
+  const fresh=GPS&&Date.now()-GPS.t<120000;
+  if(fresh){
+    const r=await ask({title:t('rpTitle'),text:t('rpAsk'),
+      ok:t('rpGps'),cancel:t('cancel'),extra:t('rpMan')});
+    if(r===null)return;
+    if(r!=='extra'){
+      const e=add({type:'POS',note:''});
+      await confirmPost(e,null);
+      toast(t('rpGpsDone'));
+      setType('Other');
+      return;
+    }
+  }
+  mapOpen();
+}
+
+/* ── Map interaction ─────────────────────────────────────────────────
+   One surface, three gestures: drag the map, tap to place the crosshair, drag the crosshair
+   itself. Pointer events cover finger and mouse alike, which is what makes the same code
+   work on a phone in a basket and on an iPad on a table. */
+(function(){
+  const wrap=$('#mapWrap');
+  let drag=null;
+  wrap.addEventListener('pointerdown',ev=>{
+    if(!MAP)return;
+    if(ev.target.closest('#mapCtl')||ev.target.closest('#mapPuck')||ev.target.closest('#manPanel'))return;
+    const onPick=!!ev.target.closest('#mapPick');
+    drag={x:ev.clientX,y:ev.clientY,moved:0,pick:onPick,cx:MAP.cx,cy:MAP.cy};
+    wrap.setPointerCapture&&wrap.setPointerCapture(ev.pointerId);
+  });
+  wrap.addEventListener('pointermove',ev=>{
+    if(!drag||!MAP)return;
+    const dx=ev.clientX-drag.x, dy=ev.clientY-drag.y;
+    drag.moved=Math.max(drag.moved,Math.abs(dx)+Math.abs(dy));
+    if(drag.pick){
+      const r=wrap.getBoundingClientRect();
+      MAP.pick=mapLatLon(ev.clientX-r.left,ev.clientY-r.top);
+      mapOverlay(wrap.clientWidth,wrap.clientHeight);
+    }else{
+      MAP.cx=drag.cx-dx;MAP.cy=drag.cy-dy;
+      mapDraw();
+    }
+  });
+  wrap.addEventListener('pointerup',ev=>{
+    if(!drag||!MAP){drag=null;return}
+    const wasPick=drag.pick,moved=drag.moved;drag=null;
+    if(moved>8)return;
+    const hit=ev.target.closest&&ev.target.closest('[data-i]');
+    if(hit){mapInfo(Number(hit.dataset.i));return}
+    if(wasPick)return;
+    const r=wrap.getBoundingClientRect();
+    MAP.pick=mapLatLon(ev.clientX-r.left,ev.clientY-r.top);
+    mapOverlay(wrap.clientWidth,wrap.clientHeight);
+  });
+  wrap.addEventListener('pointercancel',()=>{drag=null});
+
+  $('#mapIn').onclick=()=>{if(MAP&&MAP.z<18){MAP.z++;MAP.cx*=2;MAP.cy*=2;mapDraw()}};
+  $('#mapOut').onclick=()=>{if(MAP&&MAP.z>3){MAP.z--;MAP.cx/=2;MAP.cy/=2;mapDraw()}};
+  $('#mapX').onclick=()=>mapClose();
+  pills('#mapKind',v=>{if(MAP){MAP.kind=v;mapDraw();paintAttr()}});
+  function paintAttr(){
+    $('#mapAttr').textContent=(MAP&&MAP.kind==='sat')
+      ? 'Imagery \u00a9 Esri, Maxar, Earthstar Geographics'
+      : '\u00a9 OpenStreetMap contributors';
+  }
+  paintAttr();
+  const _open=mapOpen;
+  window.mapOpen=function(){_open();paintAttr()};
+
+  /* the puck can be moved out of the way and opens the form where it stands */
+  const puck=$('#mapPuck');
+  let pd=null;
+  puck.addEventListener('pointerdown',ev=>{
+    pd={x:ev.clientX,y:ev.clientY,l:puck.offsetLeft,t:puck.offsetTop,moved:0};
+    puck.setPointerCapture&&puck.setPointerCapture(ev.pointerId);
+    ev.stopPropagation();
+  });
+  puck.addEventListener('pointermove',ev=>{
+    if(!pd)return;
+    const dx=ev.clientX-pd.x,dy=ev.clientY-pd.y;
+    pd.moved=Math.max(pd.moved,Math.abs(dx)+Math.abs(dy));
+    if(pd.moved>6){
+      puck.style.left=Math.max(4,Math.min(wrap.clientWidth-60,pd.l+dx))+'px';
+      puck.style.top=Math.max(4,Math.min(wrap.clientHeight-60,pd.t+dy))+'px';
+    }
+  });
+  puck.addEventListener('pointerup',ev=>{
+    const moved=pd?pd.moved:99;pd=null;ev.stopPropagation();
+    if(moved<=6)manOpen();
+  });
+})();
+$('#btnRepPos').onclick=()=>reportPosition();
+addEventListener('resize',()=>{if(MAP)mapDraw()});
+
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const ty=UI.type;let e=null;
@@ -3238,7 +3791,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',mapKm:'#sMapKm',mapMax:'#sMapMax',mapZ:'#sMapZ',unc:'#sUnc',tileStreet:'#sTileStreet',tileSat:'#sTileSat',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){

@@ -6,7 +6,7 @@
    fails is never activated — the app then keeps serving the previous version for ever,
    which is exactly the sort of fault that hides every other change. Each file is therefore
    cached on its own and a failure is noted and passed over. */
-const V = 'basket-reporting-v260820-01';
+const V = 'basket-reporting-v260824-01';
 
 /* the files the app cannot run without */
 const CORE = [
@@ -56,7 +56,8 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     const ks = await caches.keys();
-    await Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)));
+    /* the map tiles are gathered for a flight, not for a version — they outlive the shell */
+    await Promise.all(ks.filter(k => k !== V && k !== 'basket-tiles').map(k => caches.delete(k)));
     await self.clients.claim();
   })());
 });
@@ -70,7 +71,13 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (url.hostname === 'api.github.com') return;            // always live
   if (url.hostname === 'nominatim.openstreetmap.org') return;
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) {
+    /* map tiles: whatever was gathered beforehand is served first, so the map still draws
+       when the connection is gone — which is the whole reason it was gathered */
+    e.respondWith(caches.open('basket-tiles')
+      .then(c => c.match(e.request).then(r => r || fetch(e.request))));
+    return;
+  }
 
   /* network first, so a deploy takes effect at once; the cache carries the flight */
   e.respondWith(
