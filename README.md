@@ -1069,10 +1069,16 @@ Three views, chosen at the top right of the map and remembered between visits:
 | **Terrain** | OpenTopoMap — contours and relief, the most useful of the three for reading ground from the air |
 | **Satellite** | Esri World Imagery |
 
-None of them needs a key. An **ArcGIS access token** can be put in the setup all the same: with
-one, the satellite layer goes through the service Esri asks applications to use, with two
-million tiles a month at no cost; without one it uses Esri's keyless address, which works but
-is not guaranteed. All three templates can be pointed elsewhere in *Tile sources* — a national
+None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
+the satellite layer goes through the service Esri asks applications to use from the first start.
+It can be replaced in the setup at any time: Two million tiles a month cost nothing and pay-as-you-go stays off unless
+switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
+falls back to Esri's keyless address, which works but is not guaranteed.
+
+**A token in a public repository is readable by anyone.** That is the price of a single-file app
+with no server, and the remedy is on Esri's side rather than in the code: an API key can be tied
+to a referrer, so a copy of the key only works from your own address. It is worth setting in the
+ArcGIS console — under the key's settings, *Referrers* — and it costs nothing. All three templates can be pointed elsewhere in *Tile sources* — a national
 orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
 its own borders, and needs no key either.
 

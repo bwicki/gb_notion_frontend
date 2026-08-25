@@ -334,11 +334,15 @@ html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 /* two choices side by side, the way out underneath and across the full width */
 .sheetBtns.stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sheetBtns.stack .go{width:100%;font-size:12px;white-space:nowrap;padding:0 4px;letter-spacing:-.1px}
+/* both choices look alike: which one is the usual answer is a matter for the wording, not
+   for a black rectangle that pulls the thumb */
+.sheetBtns.stack [data-a="1"]{background:var(--field);color:var(--ink);border:1.5px solid var(--sel)}
 .sheetBtns.stack [data-a="1"]{order:1}
 .sheetBtns.stack [data-a="2"]{order:2}
 .sheetBtns.stack [data-a="0"]{grid-column:1 / -1;order:3}
 .sheetBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .sheetBtns .go+.go{margin-top:0}
+.mp-foot .go+.go{margin-top:0}
 .qrbox{display:grid;place-items:center;margin:10px 0 12px}
 .qrbox svg{width:240px;height:240px;max-width:100%;border:1px solid var(--line);border-radius:10px;
   background:#fff;padding:6px}
@@ -449,9 +453,9 @@ body.mapon #app{visibility:hidden}
   background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;
   box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:340px}
 #manPanel.low{top:auto;bottom:calc(10px + var(--safe-b))}
-.mp-foot{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.mp-foot .go{height:44px;font-size:14px}
-.mp-foot .go.sec{width:auto;padding:0 14px;font-size:12.5px}
+.mp-foot{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
+.mp-foot .go{height:44px;min-height:44px;margin:0;font-size:14px}
+.mp-foot .go.sec{width:auto;padding:0 16px;font-size:12.5px}
 .unclab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
   font-size:10.5px;color:var(--muted);margin:2px 0 0}
 .unclab b{font-size:13px;color:var(--ink);font-weight:600;white-space:nowrap}
@@ -872,14 +876,14 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-03';
+const APP_VERSION='v260825-04';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,25',
            bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,
            mapKm:75,mapMax:20,mapZ:12,unc:'0.5,1,2,5,10',
-           tileToken:'',mapKm:20,mapZ:13,
+           tileToken:'AAPTancvFykBZUUzSddIhh87Jng..uj3B0KwHu02CrYU2nHTHoQfliNEQrvkxEtAg1-FVWxdHgAnGsqNkH1hljksfuGPx9pCeqmPqJywlQrS7zA0kst-Yg8U2mo-9xkoNQPDeKmKYuZhzU2QCnkM6wBTfRCdC0M9V8EAFWkSDpOKq5K3NwLkQ7gumukNGSJieRpwubb3gbAXS40wAcu7OAMAi4UuhdzRubaVy8bnwbZBGJO7Ke8Ev1TkDgV5aKmFk6-QRh7B_YeZMU2q4yVnh3rZqk8WFivw_5z8.AT1_FFzMS1E8',mapKm:20,mapZ:13,
            tileStreet:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
            tileTopo:'https://tile.opentopomap.org/{z}/{x}/{y}.png',
            tileSat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -1043,7 +1047,7 @@ const L={en:{
  rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
+ manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Return to entry and complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -1196,7 +1200,7 @@ const L={en:{
  rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
+ manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Return to entry and complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -2071,7 +2075,9 @@ function ask(o){
     m.classList.add('on');
     const collect=()=>{const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value);return v};
     const done=v=>{m.classList.remove('on');m.innerHTML='';res(v)};
-    if(o.cancel!==false)m.querySelector('[data-a="0"]').onclick=()=>done(null);
+    /* the close cross and the cancel button are both a way out — binding only the first one
+       left the other dead */
+    m.querySelectorAll('[data-a="0"]').forEach(b=>{b.onclick=()=>done(null)});
     const ex=m.querySelector('[data-a="2"]');
     if(ex)ex.onclick=()=>done('extra');
     const hb=m.querySelector('#mHead');
@@ -3611,7 +3617,11 @@ function manOpen(){
     mapOverlay($('#mapWrap').clientWidth,$('#mapWrap').clientHeight);
   };
   lab();
-  $('#manUnc').oninput=lab;
+  /* the map is the point of the slider, so any keyboard still standing gets out of the way */
+  const shut=()=>{const a=document.activeElement;if(a&&a.blur&&a!==$('#manUnc'))a.blur()};
+  $('#manUnc').addEventListener('pointerdown',shut);
+  $('#manUnc').addEventListener('focus',shut);
+  $('#manUnc').oninput=()=>{shut();lab()};
   /* the arrow turns with the figure, so a wrong digit is visible before it is sent */
   const arrow=()=>{
     const v=parseFloat($('#manTc').value);
