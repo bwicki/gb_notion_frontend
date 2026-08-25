@@ -370,9 +370,9 @@ html[data-theme="night"] #btnPost.fail{background:#230A06;border-color:#61201A;c
 #mapWrap{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:hidden;touch-action:none}
 #mapWrap.hide{display:none}
 body.mapon #app{visibility:hidden}
-#mapTiles{position:absolute;inset:0}
+#mapTiles{position:absolute;inset:0;transform-origin:0 0}
 #mapTiles img{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none}
-#mapSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#mapSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transform-origin:0 0}
 #mapSvg .trk{fill:none;stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.85}
 #mapSvg .proj{fill:none;stroke:#1B3A6B;stroke-width:2;stroke-dasharray:7 5;stroke-opacity:.7}
 #mapSvg .tick{stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.8}
@@ -393,10 +393,22 @@ body.mapon #app{visibility:hidden}
 #mapPop b{display:block;font-size:12px}
 #mapPop span{display:block;color:var(--muted)}
 #mapCtl{position:absolute;top:calc(10px + var(--safe-t));right:10px;z-index:7;display:flex;
-  flex-direction:column;gap:6px;align-items:flex-end}
-#mapCtl button.busy{opacity:.5}
-#mapCtl button{width:42px;height:42px;border:1px solid var(--line);border-radius:9px;
-  background:var(--card);font-size:19px;display:grid;place-items:center}
+  flex-direction:column;gap:8px;align-items:flex-end}
+/* a plain list of choices and a pair of zoom keys, both small enough to leave the map visible */
+#mapKind{background:#fff;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:5px 8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.18)}
+#mapKind button{display:flex;align-items:center;gap:7px;height:26px;width:100%;
+  background:none;border:0;padding:0;font-size:12.5px;color:#111;white-space:nowrap}
+#mapKind i{width:13px;height:13px;border-radius:50%;border:1.5px solid #7a7a7a;flex:0 0 auto;
+  display:block;background:#fff}
+#mapKind button.on i{border-color:#1B6BC0;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 9px #1B6BC0}
+#mapZoom{background:#fff;border:1px solid rgba(0,0,0,.18);border-radius:8px;overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);width:38px}
+#mapZoom button{width:38px;height:36px;border:0;background:none;font-size:20px;line-height:1;
+  color:#111;display:grid;place-items:center}
+#mapZoom button:first-child{border-bottom:1px solid rgba(0,0,0,.15)}
+#mapX{width:38px;height:38px;border:1px solid rgba(0,0,0,.18);border-radius:8px;background:#fff;
+  color:#111;font-size:17px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:9px;
   overflow:hidden;height:34px}
 .seg.col{flex-direction:column;height:auto}
@@ -811,12 +823,15 @@ body.mapon #app{visibility:hidden}
   <div id="mapPick" class="hide"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><path d="M24 2v10M24 36v10M2 24h10M36 24h10"/></svg></div>
   <div id="mapPop" class="hide"></div>
   <div id="mapCtl">
-    <div class="seg col" id="mapKind">
-      <button data-v="street" class="on" data-t="mapStreet">Streets</button><button data-v="topo" data-t="mapTopo">Terrain</button><button data-v="sat" data-t="mapSat">Satellite</button>
+    <div id="mapKind">
+      <button data-v="street" class="on"><i></i><span data-t="mapStreet">Streets</span></button>
+      <button data-v="topo"><i></i><span data-t="mapTopo">Terrain</span></button>
+      <button data-v="sat"><i></i><span data-t="mapSat">Satellite</span></button>
     </div>
-    <button id="mapIn" aria-label="zoom in">+</button>
-    <button id="mapOut" aria-label="zoom out">−</button>
-    <button id="mapHold" data-t="mapHold" aria-label="hold this area">⤓</button>
+    <div id="mapZoom">
+      <button id="mapIn" aria-label="zoom in">+</button>
+      <button id="mapOut" aria-label="zoom out">−</button>
+    </div>
     <button id="mapX" aria-label="close">✕</button>
   </div>
   <div id="mapAttr"></div>
@@ -830,7 +845,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260824-05';
+const APP_VERSION='v260825-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1005,7 +1020,7 @@ const L={en:{
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
- mapHold:'Hold this area', tilesHeld:'{n} new tiles held, {m} in this view',
+  tilesHeld:'{n} new tiles held, {m} in this view',
  tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
  tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
  lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
@@ -1158,7 +1173,7 @@ const L={en:{
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
- mapHold:'Hold this area', tilesHeld:'{n} new tiles held, {m} in this view',
+  tilesHeld:'{n} new tiles held, {m} in this view',
  tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
  tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
  lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
@@ -3362,40 +3377,6 @@ async function ringCache(kind,quiet){
   }catch(e){}
   finally{RINGBUSY=false}
 }
-async function holdArea(){
-  if(!MAP||HOLDBUSY||!navigator.onLine||!('caches'in window))return;
-  if(!tilesReady())return toast(t('tileNoToken'));
-  HOLDBUSY=true;
-  const btn=$('#mapHold');if(btn)btn.classList.add('busy');
-  const w=$('#mapWrap').clientWidth||390,h=$('#mapWrap').clientHeight||700;
-  let got=0,seen=0;
-  try{
-    const cache=await caches.open(TILECACHE);
-    for(const dz of [0,1,-1]){
-      const z=MAP.z+dz;
-      if(z<3||z>18)continue;
-      const f=Math.pow(2,dz), cx=MAP.cx*f, cy=MAP.cy*f, c=Math.pow(2,z);
-      const x0=Math.floor((cx-w/2)/TILE),x1=Math.floor((cx+w/2)/TILE);
-      const y0=Math.floor((cy-h/2)/TILE),y1=Math.floor((cy+h/2)/TILE);
-      for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
-        if(y<0||y>=c)continue;
-        for(const kind of [MAP.kind]){
-          const u=tileUrl(kind,z,((x%c)+c)%c,y);
-          seen++;
-          try{
-            if(await cache.match(u))continue;
-            const r=await fetch(u,{mode:'cors'});
-            if(r&&r.ok){await cache.put(u,r.clone());got++}
-          }catch(e){}
-          await new Promise(r=>setTimeout(r,60));
-        }
-      }
-    }
-    toast(t('tilesHeld').replace('{n}',String(got)).replace('{m}',String(seen)));
-  }catch(e){}
-  finally{HOLDBUSY=false;if(btn)btn.classList.remove('busy')}
-}
-
 /* ── The positions worth drawing ─────────────────────────────────── */
 function mapPoints(){
   const all=chrono(ENT).filter(e=>e.lat!=null&&e.lon!=null&&e.pos_source!=='estimated');
@@ -3666,8 +3647,10 @@ async function reportPosition(){
   function pinchMove(){
     const p=[...PT.values()];
     if(p.length<2||!pinch)return;
-    pinch.scale=Math.max(0.35,Math.min(3,dist(p[0],p[1])/pinch.d0));
+    pinch.scale=Math.max(0.3,Math.min(4,dist(p[0],p[1])/pinch.d0));
     const r=wrap.getBoundingClientRect();
+    /* scaled about the point between the fingers — with the default origin at the element's
+       centre the picture slides away under the hand, most of all on a tall phone screen */
     const ox=pinch.m.x-r.left, oy=pinch.m.y-r.top;
     const tr='translate('+ox+'px,'+oy+'px) scale('+pinch.scale+') translate('+(-ox)+'px,'+(-oy)+'px)';
     $('#mapTiles').style.transform=tr;
@@ -3675,29 +3658,27 @@ async function reportPosition(){
   }
   function pinchEnd(){
     if(!pinch||!MAP){pinch=null;return}
-    const k=pinch.scale;
+    const k=pinch.scale, mx=pinch.m.x, my=pinch.m.y;
     $('#mapTiles').style.transform='';$('#mapSvg').style.transform='';
-    const steps=Math.round(Math.log2(k));
     pinch=null;
-    if(!steps){mapDraw();return}
-    const nz2=Math.max(3,Math.min(18,MAP.z+steps));
-    if(nz2===MAP.z){mapDraw();return}
     const r=wrap.getBoundingClientRect();
-    const ll=mapLatLon(pinch2mx-r.left,pinch2my-r.top);
-    const f=Math.pow(2,nz2-MAP.z);
-    MAP.z=nz2;MAP.cx*=f;MAP.cy*=f;
-    /* keep the point between the fingers where it was */
-    const w=wrap.clientWidth,h=wrap.clientHeight;
-    MAP.cx=lon2x(ll[1],MAP.z)*TILE-(pinch2mx-r.left)+w/2;
-    MAP.cy=lat2y(ll[0],MAP.z)*TILE-(pinch2my-r.top)+h/2;
+    const px=mx-r.left, py=my-r.top;
+    /* whatever lay under the middle of the fingers stays there, at whichever whole zoom the
+       gesture landed on */
+    const ll=mapLatLon(px,py);
+    const steps=Math.round(Math.log2(k));
+    const nz2=Math.max(3,Math.min(18,MAP.z+steps));
+    MAP.z=nz2;
+    const w=wrap.clientWidth||390,h=wrap.clientHeight||700;
+    MAP.cx=lon2x(ll[1],MAP.z)*TILE-px+w/2;
+    MAP.cy=lat2y(ll[0],MAP.z)*TILE-py+h/2;
     mapDraw();
   }
-  let pinch2mx=0,pinch2my=0;
   wrap.addEventListener('pointerdown',ev=>{
     if(!MAP)return;
     if(ev.target.closest('#mapCtl')||ev.target.closest('#mapPuck')||ev.target.closest('#manPanel'))return;
     PT.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
-    if(PT.size===2){pinch2mx=mid(...PT.values()).x;pinch2my=mid(...PT.values()).y;pinchStart();return}
+    if(PT.size===2){pinchStart();return}
     const onPick=!!ev.target.closest('#mapPick');
     drag={x:ev.clientX,y:ev.clientY,moved:0,pick:onPick,cx:MAP.cx,cy:MAP.cy};
     wrap.setPointerCapture&&wrap.setPointerCapture(ev.pointerId);
@@ -3735,8 +3716,6 @@ async function reportPosition(){
   $('#mapIn').onclick=()=>{if(MAP&&MAP.z<18){MAP.z++;MAP.cx*=2;MAP.cy*=2;mapDraw()}};
   $('#mapOut').onclick=()=>{if(MAP&&MAP.z>3){MAP.z--;MAP.cx/=2;MAP.cy/=2;mapDraw()}};
   $('#mapX').onclick=()=>mapClose();
-  $('#mapHold').onclick=()=>holdArea();
-  $('#mapHold').title=t('mapHold');
   $('#mapKind').addEventListener('click',ev=>{
     const b=ev.target.closest('button');if(!b)return;
     $$('#mapKind button').forEach(x=>x.classList.toggle('on',x===b));

@@ -1021,9 +1021,10 @@ the screen — street or satellite, with zoom buttons. It opens on the last repo
 - The last twenty positions are shown, adjustable in the setup. **An unbroken run of manual
   positions is always shown in full**, however long: that run is the whole picture when the
   satellites are gone.
-- The map pinches to zoom as well as taking the plus and minus buttons; during the gesture the
-  tiles are stretched as they are and the map redraws at the nearest whole zoom when the fingers
-  lift, which keeps the picture steady under the hand.
+- The map pinches to zoom as well as taking the plus and minus keys. **Whatever lies between
+  the fingers stays between the fingers** — during the gesture the tiles are stretched about
+  that point, and the map redraws at the nearest whole zoom when the fingers lift, holding the
+  same ground under the same spot on the glass.
 - Tapping the map places a crosshair, which can then be dragged until it sits over the place the
   crew believes it is.
 - Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
@@ -1065,10 +1066,11 @@ its own borders, and needs no key either.
 past. And a ring of tiles around the last reported position — **20 km by default, up to zoom
 13**, both adjustable — is gathered quietly while there is a connection, **for the layer in use
 only**, capped at 400 tiles a run and spaced about eight a second. Switching the view starts a
-ring for the new layer. **Hold this area** on the map takes the whole visible view at three
-zoom levels when you want a particular stretch for certain.
+ring for the new layer. Nothing is ever fetched twice: what is in the cache is skipped.
 
-Nothing is ever fetched twice: what is in the cache is skipped.
+Between the two there is no third mechanism to operate. Panning over a stretch of ground puts
+it in the cache because the map drew it; the ring keeps the surroundings of wherever the flight
+currently is. There is nothing to remember to press.
 
 **One thing to know about these sources.** OpenStreetMap and OpenTopoMap are run on donated
 hardware, and both ask that their tiles not be fetched in advance for offline use — the OSM
