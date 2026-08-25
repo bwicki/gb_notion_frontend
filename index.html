@@ -216,6 +216,7 @@ select:focus{outline:0;border-color:var(--sel)}
 .settbl td:first-child{color:var(--muted);width:44%}
 .settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
 .joinrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:end;margin-bottom:4px}
+.joinrow b.spent{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
 .joinrow b{font-size:29px;font-weight:700;letter-spacing:.16em;line-height:42px;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
 .joinrow .go{width:auto;padding:0 14px;height:42px;min-height:42px;margin:0;font-size:12.5px}
@@ -892,7 +893,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-11';
+const APP_VERSION='v260825-12';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -907,7 +908,7 @@ const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,2
            readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           fresh:0,tplVer:0,handover:'',joinUrl:'https://basket-join.balthasar.workers.dev',joinCode:'',joinId:'',joinAt:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,tplVer:0,handover:'',joinUrl:'https://basket-join.balthasar.workers.dev',joinCode:'',joinId:'',joinAt:'',joinUsed:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
@@ -992,7 +993,7 @@ const L={en:{
  quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
  joinTitle:'Join code', joinHint:'Six characters that carry this flight \u2014 setup, token and all \u2014 onto another device. The setup travels encrypted with the code itself, is held for a day, and is handed over once and then forgotten.',
  joinShow:'Show join code', joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for another {h}. One device can collect it, then it is gone.',
- joinNew:'New code', joinExpired:'This code has expired.', codeCopied:'Code copied',
+ joinNew:'New code', joinExpired:'This code has expired.', joinUsed:'Collected at {t}. A code serves one device.', codeCopied:'Code copied',
  joinMade:'The code is {c}. Read it to the other device, where it goes under Load current flight.',
  joinRevoked:'Code withdrawn', joinFailed:'The relay could not be reached.',
  joinNoUrl:'No relay address yet. It goes into the setup under GitHub connection \u2014 Join code relay.',
@@ -1156,7 +1157,7 @@ const L={en:{
  quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
  joinTitle:'Beitrittscode', joinHint:'Sechs Zeichen, die diese Fahrt — Einrichtung, Token und alles — auf ein anderes Gerät bringen. Die Einrichtung reist mit dem Code selbst verschlüsselt, liegt einen Tag bereit und wird einmal übergeben und dann vergessen.',
  joinShow:'Beitrittscode zeigen', joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch {h} gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
- joinNew:'Neuer Code', joinExpired:'Dieser Code ist abgelaufen.', codeCopied:'Code kopiert',
+ joinNew:'Neuer Code', joinExpired:'Dieser Code ist abgelaufen.', joinUsed:'Um {t} abgeholt. Ein Code dient einem Gerät.', codeCopied:'Code kopiert',
  joinMade:'Der Code lautet {c}. Dem anderen Gerät vorlesen, dort unter „Load current flight" eingeben.',
  joinRevoked:'Code widerrufen', joinFailed:'Die Übergabestelle war nicht erreichbar.',
  joinNoUrl:'Noch keine Adresse der Übergabestelle. Sie gehört in die Einstellungen unter GitHub-Verbindung — Join code relay.',
@@ -3945,7 +3946,7 @@ async function createJoinCode(){
     const r=await fetch(joinUrl()+'/join',{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({id:id,payload:payload})});
     if(!r.ok)throw new Error('HTTP '+r.status);
-    CFG.joinCode=code;CFG.joinId=id;CFG.joinAt=new Date().toISOString();save(K_CFG,CFG);
+    CFG.joinCode=code;CFG.joinId=id;CFG.joinAt=new Date().toISOString();CFG.joinUsed='';save(K_CFG,CFG);
     paintJoin();
     await info(t('joinTitle'),t('joinMade').replace('{c}',code));
   }catch(e){info(t('joinTitle'),t('joinFailed')+' '+(e.message||''))}
@@ -3953,7 +3954,7 @@ async function createJoinCode(){
 async function revokeJoinCode(){
   if(!CFG.joinId||!joinUrl())return;
   try{await fetch(joinUrl()+'/join?id='+encodeURIComponent(CFG.joinId),{method:'DELETE'})}catch(e){}
-  CFG.joinCode='';CFG.joinId='';CFG.joinAt='';save(K_CFG,CFG);
+  CFG.joinCode='';CFG.joinId='';CFG.joinAt='';CFG.joinUsed='';save(K_CFG,CFG);
   paintJoin();toast(t('joinRevoked'));
 }
 /* the same panel serves the setup and the menu, so it is built from one piece and addressed
@@ -3962,7 +3963,7 @@ const IC_CODE='<rect x="4" y="7" width="16" height="11" rx="2"/><path d="M8 12h1
 async function joinSheet(){
   await ask({title:t('joinTitle'),text:t('joinHint'),cancel:false,ok:t('close'),
     html:'<div class="joinwrap"></div>',
-    onMount:m=>{bindJoin(m.querySelector('.joinwrap'));paintJoin()}});
+    onMount:m=>{bindJoin(m.querySelector('.joinwrap'));paintJoin();checkJoinUsed()}});
 }
 const IC_COPY='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/>'
   +'<path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
@@ -3983,6 +3984,23 @@ function bindJoin(root){
     catch(e){toast(CFG.joinCode)}
   };
 }
+/* Asking after one's own code without taking it: the worker answers HEAD with present or gone.
+   A collected code is not deleted here but struck through, so the master can still see which
+   one was handed out and when. */
+let JOINCHK=0;
+async function checkJoinUsed(){
+  if(!CFG.joinCode||!CFG.joinId||Number(CFG.joinUsed)||!joinUrl())return;
+  if(!navigator.onLine||Date.now()-JOINCHK<20000)return;
+  JOINCHK=Date.now();
+  try{
+    const r=await fetch(joinUrl()+'/join?id='+encodeURIComponent(CFG.joinId),
+      {method:'HEAD',cache:'no-store'});
+    const state=r.headers&&r.headers.get?r.headers.get('x-basket-join'):null;
+    if(state==='gone'||r.status===404){
+      CFG.joinUsed=new Date().toISOString();save(K_CFG,CFG);paintJoin();
+    }
+  }catch(e){}
+}
 /* the remaining life is counted down rather than stated once — a code that says "a day" for
    twenty hours tells nobody when to make a new one */
 function joinLeft(){
@@ -3994,19 +4012,23 @@ function paintJoin(){
   const box=$('#joinBox');
   if(box)box.style.display=CFG.role==='master'?'':'none';
   const ms=joinLeft();
+  const used=!!CFG.joinUsed;
+  const spent=used||ms===0;                       /* collected or expired: no longer a way in */
   $$('.joinwrap').forEach(root=>{
     if(!root.querySelector('.jCode'))bindJoin(root);
-    const on=!!CFG.joinCode&&ms!==0;
-    root.querySelector('.jCode').textContent=on?CFG.joinCode:'\u2014';
-    root.querySelector('.jCopy').style.visibility=on?'':'hidden';
-    root.querySelector('.jRevoke').style.display=on?'':'none';
-    root.querySelector('.jMake').textContent=on?t('joinNew'):t('joinMake');
+    const code=root.querySelector('.jCode');
+    code.textContent=CFG.joinCode||'\u2014';
+    code.classList.toggle('spent',!!CFG.joinCode&&spent);
+    root.querySelector('.jCopy').style.visibility=(CFG.joinCode&&!spent)?'':'hidden';
+    root.querySelector('.jRevoke').style.display=(CFG.joinCode&&!spent)?'':'none';
+    root.querySelector('.jMake').textContent=CFG.joinCode?t('joinNew'):t('joinMake');
     root.querySelector('.jNote').textContent=!CFG.joinCode?''
-      :(ms===0?t('joinExpired')
-        :t('joinValid').replace('{h}',Math.floor(ms/3600000)+' h '+Math.floor(ms%3600000/60000)+' min'));
+      :(used?t('joinUsed').replace('{t}',String(CFG.joinUsed).slice(11,16)+'Z')
+        :(ms===0?t('joinExpired')
+          :t('joinValid').replace('{h}',Math.floor(ms/3600000)+' h '+Math.floor(ms%3600000/60000)+' min')));
   });
 }
-setInterval(()=>{if(CFG.joinCode)paintJoin()},30000);
+setInterval(()=>{if(CFG.joinCode){checkJoinUsed();paintJoin()}},30000);
 async function loadFlightByCode(){
   if(!joinUrl())return info(t('loadTitle'),t('joinNoUrl'));
   const raw=await ask({title:t('loadTitle'),text:t('loadAsk'),input:'text',ph:'XXXXXX',ok:t('ok')});

@@ -32,7 +32,8 @@ export default {
     const allow = env.ORIGIN || '*';
     const cors = {
       'Access-Control-Allow-Origin': allow,
-      'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,HEAD,POST,DELETE,OPTIONS',
+      'Access-Control-Expose-Headers': 'x-basket-join',
       'Access-Control-Allow-Headers': 'content-type',
       'Access-Control-Max-Age': '86400',
     };
@@ -59,6 +60,19 @@ export default {
         return json({ error: 'bad request' }, 400);
       await env.JOIN.put('j:' + pid, payload, { expirationTtl: TTL });
       return json({ ok: true, expires_in: TTL });
+    }
+
+    /* ── is it still there? ─────────────────────────────────────────
+       A look without taking: the master asks whether its code has been collected yet, and the
+       answer must not empty the letterbox. No counting of failures here either — this is the
+       owner checking on their own code, not somebody guessing at it. */
+    if (request.method === 'HEAD') {
+      if (!looksRight) return new Response(null, { status: 400, headers: cors });
+      const there = await env.JOIN.get('j:' + id);
+      return new Response(null, {
+        status: 204,
+        headers: { ...cors, 'x-basket-join': there ? 'present' : 'gone', 'cache-control': 'no-store' },
+      });
     }
 
     /* ── collect it, once ───────────────────────────────────────── */

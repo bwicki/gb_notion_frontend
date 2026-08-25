@@ -755,8 +755,14 @@ and the log, which it reads from GitHub as soon as it has the token.
 The setup travels **encrypted with the code itself**, so the relay that carries it holds a box
 it cannot open. It hands the box over **once** and deletes it, the code dies after a day,
 and *Revoke* kills it sooner. The panel counts the remaining life down by the minute rather
-than stating it once, a tap on the copy key puts the code on the clipboard, and once it has run
-out the code is struck and *New code* replaces *Create*. Twenty wrong guesses from one address and that address is shut out
+than stating it once, and a tap on the copy key puts the code on the clipboard.
+
+**A code that has been collected stays visible, greyed and struck through**, with the time it
+was taken: *Collected at 11:58Z. A code serves one device.* The master asks the relay every half
+minute whether its own code is still there — a look that does not take it — so the moment the
+other device has it, the panel says so. Copy and *Revoke* disappear, and *Create* becomes *New
+code*. An expired code is struck in the same way. Knowing which code was handed out, and when it
+was taken, is worth more than a tidy empty field. Twenty wrong guesses from one address and that address is shut out
 for an hour, which is what makes six characters enough.
 
 The relay is a small Cloudflare worker, free to run; `join-worker/worker.js` and the twenty
@@ -1168,7 +1174,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260825-11` is the eleventh build of 25 August 2026.
+smaller counter. `v260825-12` is the twelfth build of 25 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
