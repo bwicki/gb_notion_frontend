@@ -742,9 +742,11 @@ Two masters at once would overwrite each other's setup, so the change is deliber
 and confirmed at both ends. A declined offer is remembered and not asked again; the master can
 withdraw it by offering the role to somebody else, or by leaving it and carrying on.
 
-**A six-character code carries the whole flight.** *Load current flight* is in the menu on
-every device and beside *Synchronize data* in the setup, because the device that needs it is
-usually the one that has nothing yet. On the master, above the device list, is *Join code*, and
+**A six-character code carries the whole flight.** *Load current flight* is in the menu on every
+device and at the very top of the setup — on its own and across the full width where there is
+nothing else there yet, since a device with no flight has nothing else to press. *Synchronize data* only joins it once
+there is a table to synchronise — on a device just unpacked it would be a button with nothing
+behind it. Both are drawn the same way; neither is the loud one. On the master, above the device list, is *Join code*, and
 the same panel opens from the top right of the *Share setup* window. The master
 presses *Create*, reads six characters to the other device — `WUP9Q5`, in an alphabet with no O
 against 0 and no I against 1 — and that device has the flight: setup, token, presets, templates,
@@ -1166,7 +1168,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260825-09` is the eighth build of 25 August 2026.
+smaller counter. `v260825-11` is the eleventh build of 25 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

@@ -653,13 +653,12 @@ body.mapon #app{visibility:hidden}
   <!-- SETUP -->
   <section class="view" id="v-set">
     <div class="scroll">
-      <div id="syncBox" style="display:none">
-        <div class="f two btnrow">
-          <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
-          <button class="go sec" id="btnLoadFlight" data-t="loadTitle">Load current flight</button>
-        </div>
-        <p class="hint" style="margin-top:12px"><span data-t="syncHint">Sends what is waiting and reads the table back.</span> <span id="quotaNote"></span></p>
+      <div class="f two btnrow" id="loadRow">
+        <button class="go sec" id="btnSyncNow" data-t="syncNow" style="display:none">Synchronize data</button>
+        <button class="go sec" id="btnLoadFlight" data-t="loadTitle">Load current flight</button>
       </div>
+      <p class="hint" id="syncBox" style="display:none;margin-top:12px"><span data-t="syncHint">Sends what is waiting and reads the table back.</span> <span id="quotaNote"></span></p>
+      <p class="hint" id="loadHint" data-t="loadHint">A code from the master device brings this flight here.</p>
 
       <h3 data-t="hDevice">This device</h3>
       <div class="f"><div class="pnl" id="sMode">
@@ -893,7 +892,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-09';
+const APP_VERSION='v260825-11';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -998,7 +997,7 @@ const L={en:{
  joinRevoked:'Code withdrawn', joinFailed:'The relay could not be reached.',
  joinNoUrl:'No relay address yet. It goes into the setup under GitHub connection \u2014 Join code relay.',
  lJoinUrl:'Join code relay',
- loadTitle:'Load current flight', loadAsk:'Enter the six-character code from the master device.',
+ loadTitle:'Load current flight', loadHint:'A six-character code from the master device brings this flight here \u2014 setup, token and log.', loadAsk:'Enter the six-character code from the master device.',
  loadBadCode:'That code is not right.', loadNotFound:'No flight under that code. It may have been collected already, or expired.',
  loadLocked:'Too many attempts from here. Try again in an hour.',
  loadFound:'Flight {f} \u00b7 {c} \u00b7 repository {r}. This device becomes a follower and reads the log.',
@@ -1162,7 +1161,7 @@ const L={en:{
  joinRevoked:'Code widerrufen', joinFailed:'Die Übergabestelle war nicht erreichbar.',
  joinNoUrl:'Noch keine Adresse der Übergabestelle. Sie gehört in die Einstellungen unter GitHub-Verbindung — Join code relay.',
  lJoinUrl:'Übergabestelle für Beitrittscodes',
- loadTitle:'Laufende Fahrt übernehmen', loadAsk:'Den sechsstelligen Code vom Master-Gerät eingeben.',
+ loadTitle:'Laufende Fahrt übernehmen', loadHint:'Ein sechsstelliger Code vom Master-Gerät bringt diese Fahrt hierher — Einrichtung, Token und Logbuch.', loadAsk:'Den sechsstelligen Code vom Master-Gerät eingeben.',
  loadBadCode:'Dieser Code stimmt nicht.', loadNotFound:'Keine Fahrt unter diesem Code. Vielleicht schon abgeholt oder abgelaufen.',
  loadLocked:'Zu viele Versuche von hier. In einer Stunde nochmals.',
  loadFound:'Fahrt {f} · {c} · Repository {r}. Dieses Gerät wird Follower und liest das Logbuch.',
@@ -2095,7 +2094,7 @@ function paintInv(){
     +(ENT.some(e=>e.ballast_action==='count')||nz(CFG.init)>0
       ? `<br>Expected ${exp} kg · difference <b>${d>0?'+':''}${d} kg</b>` : '');
 }
-function paint(){adoptLast();paintReadout();paintLog();paintStatus();paintLastBoxes()}
+function paint(){adoptLast();paintReadout();paintLog();paintStatus();paintLastBoxes();paintSyncBox()}
 
 /* ── Modal ─────────────────────────────────────────────────────────── */
 function ask(o){
@@ -4353,7 +4352,16 @@ $('#devList').addEventListener('click',async ev=>{
   CFG.blocked=blocked;save(K_CFG,CFG);paintDevices();publishSetup();
 });
 function paintSyncBox(){
-  $('#syncBox').style.display=(CFG.role==='master'||Number(CFG.provisioned))?'':'none';
+  /* Load current flight belongs at the top of an empty setup above all — that is the device
+     that has nothing else to press. Synchronize data only appears once there is something to
+     synchronise. */
+  /* Synchronize data is only meaningful once there is a table to synchronise — on a device
+     that has just been unpacked it is a button with nothing behind it. */
+  const set=(CFG.role==='master'||Number(CFG.provisioned))&&configured()&&ENT.length>0;
+  $('#syncBox').style.display=set?'':'none';
+  $('#btnSyncNow').style.display=set?'':'none';
+  $('#loadHint').style.display=set?'none':'';
+  $('#loadRow').style.gridTemplateColumns=set?'':'1fr';
   $('#btnNewFlight').style.display=CFG.role==='master'?'':'none';
   paintDevices();paintJoin();
 }
