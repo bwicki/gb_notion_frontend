@@ -41,14 +41,15 @@ GitHub API, the map tiles, and — if you leave place names on — one lookup pe
 19. [The log](#19-the-log)
 20. [What the app writes](#20-what-the-app-writes)
 21. [Polling from Notion](#21-polling-from-notion)
-22. [Beginning a new flight](#22-beginning-a-new-flight)
-23. [Language](#23-language)
-24. [Keeping the crew on the current build](#24-keeping-the-crew-on-the-current-build)
-25. [When a change does not appear](#25-when-a-change-does-not-appear)
-26. [Limits worth knowing before takeoff](#26-limits-worth-knowing-before-takeoff)
-27. [Version](#27-version)
-28. [License](#28-license)
-29. [Files](#29-files)
+22. [The pre-flight check](#22-the-pre-flight-check)
+23. [Beginning a new flight](#23-beginning-a-new-flight)
+24. [Language](#24-language)
+25. [Keeping the crew on the current build](#25-keeping-the-crew-on-the-current-build)
+26. [When a change does not appear](#26-when-a-change-does-not-appear)
+27. [Limits worth knowing before takeoff](#27-limits-worth-knowing-before-takeoff)
+28. [Version](#28-version)
+29. [License](#29-license)
+30. [Files](#30-files)
 
 
 ## 1. The screen
@@ -167,8 +168,10 @@ Ressources entry says otherwise.
 An empty cylinder table on saving means the rows were never filled in, not that the bottles are
 gone: the previous entry is kept, the same rule that protects the GitHub token.
 
-The oxygen cylinders are a table of up to four, each with its volume and its pressure when
-full. Every input has its name above it and its unit inside it.
+The oxygen cylinders are a table of up to four, each with **its own** volume and pressure when
+full — a 2 litre at 200 bar beside a 10 litre at 325 are two different cylinders and are kept as
+such. Both fields take a comma as well as a point, since that is what a European keyboard offers
+first. Every input has its name above it and its unit inside it.
 
 Opening the **WhatsApp message layout** or the **GitHub connection** asks first — *Do you really
 want to change these settings?* Those two are where a slip costs a flight rather than a
@@ -1070,7 +1073,35 @@ GET https://raw.githubusercontent.com/<owner>/<repo>/main/data/<flight-id>.csv
 
 Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.
 
-## 22. Beginning a new flight
+## 22. The pre-flight check
+
+*Pre-flight check* in the menu, on the master only, and again by itself before the first entry
+of a new flight — where it has replaced the old reminder to go and verify the settings, which
+said that one should look without saying where.
+
+**It is not a list to tick off.** Ticking is something a crew does without looking; being told
+is not. The app checks twenty-six things itself and reports them in three states: a green dot
+for set and plausible, an amber triangle for present but worth a second look, a red cross for
+missing. Tapping any line goes to the place that fixes it.
+
+The three states matter more than they sound. Most real errors are not *empty* — a launch
+ballast left over from the last flight is set, plausible and wrong. So unchanged defaults are
+amber: station presets never edited, a device that has not reported, a join code still open.
+
+A few of the checks are ones nobody thinks of:
+
+- **Entries already in the log.** *Clear the log* exists for the test messages exchanged before
+  a flight; this is where it becomes visible that they are still there.
+- **The age of the GPS fix**, not merely whether there is one. A fix two minutes old is stale in
+  a balloon.
+- **A join code still open.** It carries the token, so an unrevoked one is worth knowing about.
+- **The write budget** already spent this hour, before a flight starts adding to it.
+
+Nothing here blocks anything. A balloon launches with a red cross beside the message templates
+if the crew decides so; the check reports, the crew decides. *Re-check* runs it again without
+closing.
+
+## 23. Beginning a new flight
 
 *Begin new flight* appears **only on the master**, at the foot of the unlocked settings, and asks
 for the master password
@@ -1094,7 +1125,7 @@ into today's flight under the new name.
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.
 
-## 23. Language
+## 24. Language
 
 Device mode, night colour, confirmation tone and language sit above the password, because they are personal
 preferences rather than flight settings and every crew member may want their own. A device
@@ -1112,7 +1143,7 @@ stays English: the column names, the values in `type`, the message templates. A 
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.
 
-## 24. Keeping the crew on the current build
+## 25. Keeping the crew on the current build
 
 The service worker takes a new version over the moment it is installed, and the app now looks
 for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
@@ -1124,7 +1155,7 @@ until it is closed and opened again — reloading a page inside it is not enough
 asked for seems not to have happened, check the version in the bottom right corner first, and
 close the app from the app switcher before opening it again.
 
-## 25. When a change does not appear
+## 26. When a change does not appear
 
 The service worker caches each file on its own and carries on past one that is missing. That
 sounds like housekeeping and is not: `cache.addAll()` rejects as a whole if a single request
@@ -1146,7 +1177,7 @@ So when something you asked for is not there, the order to check is:
 `GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
 card in the repository yet. It disappears with the first one.
 
-## 26. Limits worth knowing before takeoff
+## 27. Limits worth knowing before takeoff
 
 - **GPS in the background:** once the app is not in the foreground and the display locks,
   iPadOS suspends location updates. The app holds a wake lock while it is active. This records
@@ -1173,12 +1204,12 @@ the old.
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
 
-## 27. Version
+## 28. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260825-13` is the thirteenth build of 25 August 2026.
+smaller counter. `v260825-16` is the sixteenth build of 25 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
@@ -1187,7 +1218,7 @@ printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
-## 28. License
+## 29. License
 
 Custom license, © 2026 Wicki Aero GmbH.
 
@@ -1215,7 +1246,7 @@ from a CDN. The app talks to the GitHub API with your token, to the browser's ge
 service, and to the wa.me links you tap. That is the whole list, which is also why it works with
 no signal and why there is nothing to keep up to date but the app itself.
 
-## 29. Files
+## 30. Files
 
 | File | What it is |
 |---|---|

@@ -216,6 +216,29 @@ select:focus{outline:0;border-color:var(--sel)}
 .settbl td:first-child{color:var(--muted);width:44%}
 .settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
 .joinrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:end;margin-bottom:4px}
+/* a report, not a form: one line per thing checked, its state in the margin */
+.pf{max-height:56dvh;overflow-y:auto;margin:2px -4px 0}
+.pfg{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  margin:12px 4px 3px}
+.pfg:first-child{margin-top:2px}
+.pfrow{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:baseline;
+  width:100%;text-align:left;background:none;border:0;padding:5px 4px;
+  border-bottom:.5px solid var(--line-soft)}
+.pfrow i{font-style:normal;font-size:11px;line-height:1.3}
+.pfrow.ok i{color:#2E7D4F}
+.pfrow.warn i{color:#C9A227}
+.pfrow.bad i{color:#B5442F}
+.pfrow .pfl{font-size:12.5px;color:var(--ink)}
+.pfrow .pfv{font-size:12.5px;color:var(--muted);text-align:right;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+.pfrow em{grid-column:2 / -1;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px}
+.pfrow.bad em,.pfrow.warn em{color:#8a6d1f}
+html[data-theme="night"] .pfrow.ok i{color:#4FAF74}
+html[data-theme="night"] .pfrow.warn i{color:#D8AC33}
+html[data-theme="night"] .pfrow.bad i{color:#E2705F}
+html[data-theme="night"] .pfrow.bad em,html[data-theme="night"] .pfrow.warn em{color:#C9A227}
+.pfrow:active{background:var(--soft)}
+.pfsum{font-size:11.5px;color:var(--muted);text-align:center;margin:10px 0 0}
 .joinrow b.spent{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
 .joinrow b{font-size:29px;font-weight:700;letter-spacing:.16em;line-height:42px;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
@@ -249,7 +272,7 @@ select:focus{outline:0;border-color:var(--sel)}
   background:var(--field);font-size:13px;color:var(--muted)}
 .sumrow button.hide{display:none}
 .pills.g2{display:grid;grid-template-columns:repeat(2,1fr)}
-.pills.g2 button,.pills.g3 button{padding:0 4px;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pills.g2 button{padding:0 4px;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .links{display:flex;flex-wrap:wrap;gap:6px}
 .links button{padding:6px 10px;border-radius:14px;border:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
 .links.small button{padding:4px 9px;font-size:11.5px;border-radius:12px}
@@ -438,16 +461,6 @@ body.mapon #app{visibility:hidden}
 #mapZoom button:first-child{border-bottom:1px solid rgba(0,0,0,.15)}
 #mapX{width:38px;height:38px;border:1px solid rgba(0,0,0,.18);border-radius:8px;background:#fff;
   color:#111;font-size:17px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.18)}
-.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:9px;
-  overflow:hidden;height:34px}
-.seg.col{flex-direction:column;height:auto}
-.seg.col button{height:30px;justify-content:flex-start;border-bottom:.5px solid var(--line)}
-.seg.col button:last-child{border-bottom:0}
-.seg button{height:100%;padding:0 10px;font-size:11.5px;line-height:1;color:var(--muted);
-  background:transparent;border:0;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.seg button::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);flex:0 0 auto}
-.seg button.on{background:var(--sel);color:var(--sel-ink)}
-.seg button.on::before{border-color:var(--sel-ink);background:var(--sel-ink)}
 #mapNote{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);z-index:5;
   background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;
   font-size:12.5px;line-height:1.5;max-width:340px;margin:0 auto;text-align:center}
@@ -779,7 +792,7 @@ body.mapon #app{visibility:hidden}
         <p class="lab" data-t="lO2">O2 cylinders</p>
         <p class="hint" data-t="lO2hint">The bottles carried.</p>
         <div id="o2Rows"></div>
-        <input type="hidden" id="sO2"><input type="hidden" id="sO2bar">
+        
 
         <p class="hint" data-t="hintAuto">Entries are posted automatically.</p>
 
@@ -895,7 +908,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-13';
+const APP_VERSION='v260825-16';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -993,6 +1006,23 @@ const L={en:{
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
  quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
+ pfTitle:'Pre-flight check', pfAgain:'Re-check',
+ pfgFlight:'Flight', pfgDev:'Devices', pfgConn:'Connection', pfgLog:'Log',
+ pfgBal:'Ballast', pfgRes:'Resources', pfgCom:'Communication', pfgMap:'Position and map',
+ pfPilots:'Pilots', pfThisDevice:'This device', pfOthers:'Others on this flight',
+ pfBudget:'Write budget', pfVersion:'App version', pfEntries:'Entries', pfPending:'Waiting to send',
+ pfInv:'First inventory', pfFixAge:'Age of the fix',
+ pfSummary:'{b} missing \u00b7 {w} worth a look',
+ pfTokenSet:'set', pfCodeNone:'none open', pfCodeUsed:'collected',
+ pfCodeOpen:'still open \u2014 revoke it once the device has it',
+ pfOnePilot:'only one pilot named', pfAlone:'no other device has reported yet',
+ pfQuiet:'quiet for a while', pfTestRows:'test messages? Clear the log',
+ pfPendingHint:'nothing is lost, but the table on GitHub is behind',
+ pfNoInit:'without it the ballast count starts at zero', pfNoInv:'the count is an estimate until the first one',
+ pfNoO2:'no cylinders, so no reserve is figured', pfNoCo:'ATC entries will offer the chat picker only',
+ pfDefault:'never edited', pfNoFix:'the app works without one, positions stay empty',
+ pfStaleFix:'the last fix is old', pfNoFixYet:'no fix has arrived yet', pfNoKey:'the keyless route works but is not guaranteed',
+ pfUnlock:'Unlock the settings to change anything',
  joinTitle:'Join code', joinHint:'Six characters that carry this flight \u2014 setup, token and all \u2014 onto another device. The setup travels encrypted with the code itself, is held for a day, and is handed over once and then forgotten.',
  joinShow:'Show join code', joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for another {h}. One device can collect it, then it is gone.',
  joinNew:'New code', joinExpired:'This code has expired.', joinUsed:'Collected at {t}. A code serves one device.', codeCopied:'Code copied',
@@ -1005,8 +1035,8 @@ const L={en:{
  loadLocked:'Too many attempts from here. Try again in an hour.',
  loadFound:'Flight {f} \u00b7 {c} \u00b7 repository {r}. This device becomes a follower and reads the log.',
  loadDone:'Setup taken over, {n} entries read.', apply:'Apply',
- syncNow:'Synchronize data', syncHint:'Sends what is waiting and reads the whole table back.',
- syncDone:'Everything is in step. {r} rows on this device.',
+ syncNow:'Synchronize data', syncDone:'{s} sent, {n} entries in the table, {d} new.', syncLeft:'{n} still waiting.', syncHint:'Sends what is waiting and reads the whole table back.',
+ syncSame:'Everything is in step. {r} rows on this device.',
  syncPartly:'{n} rows could not be sent. {e}',
  connFailed:'No connection to the repository.', privateRepo:'private', publicRepo:'public',
  branch:'branch', branchOk:'branch exists', errBranch:'branch {b} does not exist yet — add a README to the repository',
@@ -1025,7 +1055,7 @@ const L={en:{
  newFlightOffline:'{q} entries have not reached GitHub and there is no connection. Starting a new flight now loses them.',
  newFlightDone:'New flight',
  firstByMaster:'New flight must be initiated by the master device.',
- verifySettings:'New flight initiated. Please verify that all settings are accurate.',
+ verifySettings:'New flight initiated. The pre-flight check follows \u2014 it reports what is set, what is missing and what is worth a second look.',
  waitConfirm:'\u2026 wait for confirmation', fPosted:'Reported to CC', fQueued:'Queued for later delivery (no internet connection currently)',
  fFailed:'Failed', fNoRepo:'Failed: no repository configured',
  methanol:'Methanol level', crewO2:'Crew on O\u2082', o2level:'O\u2082 Reserve',
@@ -1043,7 +1073,7 @@ const L={en:{
  lReadyKg:'Weight full standby ballast (Sch\u00fctte)', lSteps:'Standard dispense buttons',
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
  hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
- hMap:'Map and manual position', lMapKm:'Cache tiles within', lMapZ:'Cache up to zoom',
+ hMap:'Map and manual position',
  lMapMax:'Positions shown on the map', lUnc:'Uncertainty steps', lTiles:'Map sources and key',
  lTileStreet:'Streets', lTileTopo:'Terrain', lTileSat:'Satellite',
  lMapHint:'Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.',
@@ -1157,6 +1187,23 @@ const L={en:{
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
  quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
+ pfTitle:'Startprüfung', pfAgain:'Erneut prüfen',
+ pfgFlight:'Fahrt', pfgDev:'Geräte', pfgConn:'Verbindung', pfgLog:'Logbuch',
+ pfgBal:'Ballast', pfgRes:'Ressourcen', pfgCom:'Verständigung', pfgMap:'Position und Karte',
+ pfPilots:'Piloten', pfThisDevice:'Dieses Gerät', pfOthers:'Andere auf dieser Fahrt',
+ pfBudget:'Schreibbudget', pfVersion:'Fassung', pfEntries:'Einträge', pfPending:'Wartet auf Versand',
+ pfInv:'Erstes Inventar', pfFixAge:'Alter des Fixes',
+ pfSummary:'{b} fehlen \u00b7 {w} einen Blick wert',
+ pfTokenSet:'gesetzt', pfCodeNone:'keiner offen', pfCodeUsed:'abgeholt',
+ pfCodeOpen:'noch offen — widerrufen, sobald das Gerät ihn hat',
+ pfOnePilot:'nur ein Pilot eingetragen', pfAlone:'noch kein anderes Gerät hat gemeldet',
+ pfQuiet:'seit einer Weile still', pfTestRows:'Testmeldungen? Logbuch leeren',
+ pfPendingHint:'nichts geht verloren, aber die Tabelle auf GitHub hinkt nach',
+ pfNoInit:'ohne ihn beginnt die Ballastrechnung bei null', pfNoInv:'bis zum ersten bleibt der Bestand geschätzt',
+ pfNoO2:'ohne Flaschen wird keine Reserve gerechnet', pfNoCo:'ATC-Meldungen bieten dann nur die Chatauswahl',
+ pfDefault:'nie bearbeitet', pfNoFix:'die App läuft auch ohne, Positionen bleiben leer',
+ pfStaleFix:'der letzte Fix ist alt', pfNoFixYet:'noch kein Fix eingetroffen', pfNoKey:'der schlüssellose Weg geht, ist aber nicht zugesichert',
+ pfUnlock:'Zum Ändern die Einstellungen entsperren',
  joinTitle:'Beitrittscode', joinHint:'Sechs Zeichen, die diese Fahrt — Einrichtung, Token und alles — auf ein anderes Gerät bringen. Die Einrichtung reist mit dem Code selbst verschlüsselt, liegt einen Tag bereit und wird einmal übergeben und dann vergessen.',
  joinShow:'Beitrittscode zeigen', joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch {h} gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
  joinNew:'Neuer Code', joinExpired:'Dieser Code ist abgelaufen.', joinUsed:'Um {t} abgeholt. Ein Code dient einem Gerät.', codeCopied:'Code kopiert',
@@ -1169,8 +1216,8 @@ const L={en:{
  loadLocked:'Zu viele Versuche von hier. In einer Stunde nochmals.',
  loadFound:'Fahrt {f} · {c} · Repository {r}. Dieses Gerät wird Follower und liest das Logbuch.',
  loadDone:'Einrichtung übernommen, {n} Einträge gelesen.', apply:'Übernehmen',
- syncNow:'Daten abgleichen', syncHint:'Sendet, was wartet, und liest die ganze Tabelle zurück.',
- syncDone:'Alles im Gleichstand. {r} Zeilen auf diesem Gerät.',
+ syncNow:'Daten abgleichen', syncDone:'{s} gesendet, {n} Einträge in der Tabelle, {d} neu.', syncLeft:'{n} warten noch.', syncHint:'Sendet, was wartet, und liest die ganze Tabelle zurück.',
+ syncSame:'Alles im Gleichstand. {r} Zeilen auf diesem Gerät.',
  syncPartly:'{n} Zeilen liessen sich nicht senden. {e}',
  connFailed:'Keine Verbindung zum Repository.', privateRepo:'privat', publicRepo:'öffentlich',
  branch:'Branch', branchOk:'Branch vorhanden', errBranch:'Branch {b} existiert noch nicht — im Repository ein README anlegen',
@@ -1189,7 +1236,7 @@ const L={en:{
  newFlightOffline:'{q} Einträge haben GitHub nicht erreicht und es besteht keine Verbindung. Eine neue Fahrt jetzt verliert sie.',
  newFlightDone:'Neue Fahrt',
  firstByMaster:'Eine neue Fahrt muss vom Master-Gerät eröffnet werden.',
- verifySettings:'Neue Fahrt eröffnet. Bitte alle Einstellungen prüfen.',
+ verifySettings:'Neue Fahrt eröffnet. Es folgt die Startprüfung — sie zeigt, was gesetzt ist, was fehlt und was einen zweiten Blick verdient.',
  waitConfirm:'\u2026 warte auf Bestätigung', fPosted:'An CC gemeldet', fQueued:'Für später vorgemerkt (zurzeit keine Internetverbindung)',
  fFailed:'Fehlgeschlagen', fNoRepo:'Fehlgeschlagen: kein Repository eingerichtet',
  methanol:'Methanolstand', crewO2:'Crew an O\u2082', o2level:'O\u2082-Reserve',
@@ -1323,7 +1370,6 @@ function droppedTotal(){
 /* ── Entry helpers ─────────────────────────────────────────────────── */
 const p1n=()=>CFG.p1||'Pilot 1',p2n=()=>CFG.p2||'Pilot 2';
 const picName=()=>UI.pic==='p2'?p2n():p1n();
-const otherName=()=>UI.pic==='p2'?p1n():p2n();
 const restName=()=>UI.rest==='p1'?p1n():UI.rest==='p2'?p2n():'';
 const shared=()=>CFG.mode==='shared';
 /* On a shared device the button walks through everyone who might be filing: both pilots,
@@ -1796,7 +1842,6 @@ function notePut(){
   PUTLOG=PUTLOG.filter(x=>x>Date.now()-3600000);
   save('bsk.putlog',PUTLOG);
 }
-const writeBudgetLeft=()=>Math.max(0,WRITE_HOUR-writesIn(3600000));
 function budgetOk(){
   return Date.now()>=BACKOFF && writesIn(3600000)<WRITE_HOUR && writesIn(60000)<WRITE_MIN;
 }
@@ -2712,8 +2757,9 @@ async function openMenu(){
     license:''
   };
   IC.join='<path d="M9 12h6"/><path d="M8 8a4 4 0 0 0 0 8h2"/><path d="M16 8a4 4 0 0 1 0 8h-2"/>';
+  IC.pf='<path d="M9 11l2.5 2.5L16 8"/><rect x="4" y="4" width="16" height="16" rx="3"/>';
   const items=[['form',t('mReport')],['set',t('mSettings')],['docs',t('mDocs')]]
-    .concat(CFG.role==='master'?[['share',t('mShare')]]:[])
+    .concat(CFG.role==='master'?[['pf',t('pfTitle')],['share',t('mShare')]]:[])
     .concat([['join',t('loadTitle')],['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
     headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
@@ -2729,6 +2775,7 @@ async function openMenu(){
       else if(k==='docs')docsMenu();
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
+      else if(k==='pf')preflight();
       else if(k==='share')shareSheet();
       else if(k==='join')loadFlightByCode();
       else if(k==='about')window.open('readme.html','_blank','noopener');
@@ -4063,6 +4110,152 @@ async function loadFlightByCode(){
   }
 }
 
+/* ── Pre-flight check ────────────────────────────────────────────────
+   Not a list to tick off — a list the app fills in itself. Ticking is something a crew does
+   without looking; being told is not. Three states, because the errors that matter are rarely
+   "empty": a launch ballast left over from the last flight is set, plausible and wrong.
+
+   Nothing here blocks anything. It shows, the crew decides. */
+const PF_OK='ok', PF_WARN='warn', PF_BAD='bad';
+
+function pfClock(){
+  /* Every entry carries the clock of the device that wrote it, and the log is sorted by that.
+     A minute of drift interleaves two devices wrongly and nobody notices until the log is read
+     in earnest. */
+  if(!GPS||!GPS.t)return null;
+  return Math.round((Date.now()-GPS.t)/1000);   /* age of the fix, not the offset */
+}
+function pfTokenDays(){
+  const s=String(CFG.tokenExp||'').trim();
+  if(!s)return null;
+  const d=Math.round((new Date(s)-Date.now())/86400000);
+  return isFinite(d)?d:null;
+}
+const pfAge=iso=>iso?Math.floor((Date.now()-new Date(iso).getTime())/60000):null;
+function pfMins(m){
+  if(m==null)return '\u2014';
+  if(m<60)return m+' min';
+  return Math.floor(m/60)+' h '+(m%60)+' min';
+}
+
+function pfRows(){
+  const R=[];
+  const add=(group,label,value,state,hint,go)=>R.push({group,label,value,state,hint,go});
+  const G=k=>t(k);
+
+  /* ── Flight ─────────────────────────────────────────────────── */
+  add('pfgFlight',t('lFlight'),CFG.flight||'\u2014',CFG.flight?PF_OK:PF_BAD,'', 'set');
+  add('pfgFlight',t('lCall'),CFG.call||'\u2014',CFG.call?PF_OK:PF_BAD,'','set');
+  const crew=[CFG.p1,CFG.p2].filter(Boolean);
+  add('pfgFlight',t('pfPilots'),crew.join(' / ')||'\u2014',
+      crew.length===2?PF_OK:(crew.length?PF_WARN:PF_BAD),
+      crew.length<2?t('pfOnePilot'):'','set');
+  add('pfgFlight',t('hReporter'),reporter()||'\u2014',reporter()?PF_OK:PF_WARN,'','set');
+
+  /* ── Devices ────────────────────────────────────────────────── */
+  add('pfgDev',t('pfThisDevice'),
+      (CFG.role==='master'?t('master'):t('follower'))+' \u00b7 '
+      +(shared()?t('sharedDev'):t('personalDev')),PF_OK,'','set');
+  const others=deviceRoster().filter(d=>d.device!==DEV);
+  const last=others.map(d=>pfAge(d.last)).filter(x=>x!=null).sort((a,b)=>a-b)[0];
+  add('pfgDev',t('pfOthers'),
+      others.length?others.length+' \u00b7 '+(last==null?t('devNever'):pfMins(last)):'\u2014',
+      !others.length?PF_WARN:(last!=null&&last>120?PF_WARN:PF_OK),
+      others.length?(last>120?t('pfQuiet'):''):t('pfAlone'),'set');
+  add('pfgDev',t('joinTitle'),
+      CFG.joinCode?(CFG.joinUsed?t('pfCodeUsed'):CFG.joinCode):t('pfCodeNone'),
+      CFG.joinCode&&!CFG.joinUsed?PF_WARN:PF_OK,
+      CFG.joinCode&&!CFG.joinUsed?t('pfCodeOpen'):'','set');
+
+  /* ── Connection ─────────────────────────────────────────────── */
+  add('pfgConn','Repository',(CFG.repo||'\u2014')+' \u00b7 '+(CFG.branch||'main'),
+      CFG.repo?PF_OK:PF_BAD,'','set');
+  add('pfgConn','Token',CFG.token?t('pfTokenSet'):'\u2014',CFG.token?PF_OK:PF_BAD,'','set');
+  add('pfgConn',t('pfBudget'),writesIn(3600000)+' / '+WRITE_HOUR,
+      writesIn(3600000)>WRITE_HOUR*0.7?PF_WARN:PF_OK,'','set');
+  add('pfgConn',t('pfVersion'),APP_VERSION,PF_OK,'','');
+
+  /* ── Log ────────────────────────────────────────────────────── */
+  const un=ENT.filter(e=>!e.synced).length;
+  add('pfgLog',t('pfEntries'),String(ENT.length),
+      ENT.length?PF_WARN:PF_OK, ENT.length?t('pfTestRows'):'','docs');
+  if(un)add('pfgLog',t('pfPending'),String(un),PF_WARN,t('pfPendingHint'),'set');
+
+  /* ── Ballast ────────────────────────────────────────────────── */
+  add('pfgBal',t('lInit'),(nz(CFG.init)||0)+' kg',nz(CFG.init)>0?PF_OK:PF_WARN,
+      nz(CFG.init)>0?'':t('pfNoInit'),'set');
+  add('pfgBal',t('lBagKg')+' / '+t('schuette'),
+      (nz(CFG.bagKg)||0)+' kg / '+(nz(CFG.readyKg)||0)+' kg',PF_OK,'','set');
+  add('pfgBal',t('lSteps'),CFG.steps||DEF.steps,PF_OK,'','set');
+  const inv=chrono(ENT).filter(e=>e.ballast_action==='count').pop();
+  add('pfgBal',t('pfInv'),inv?String(inv.ts_utc).slice(11,16)+'Z':'\u2014',
+      inv?PF_OK:PF_BAD,inv?'':t('pfNoInv'),'form');
+
+  /* ── Resources ──────────────────────────────────────────────── */
+  const sz=o2Sizes();
+  add('pfgRes',t('lO2'),
+      sz.length?sz.map((l,i)=>l+'@'+o2FullBars()[i]).join(' \u00b7 ')+' \u2192 '+thou(o2Full())+' lit':'\u2014',
+      sz.length?PF_OK:PF_BAD,sz.length?'':t('pfNoO2'),'set');
+  add('pfgRes',t('lMethInit'),(nz(CFG.methInit)||0)+' %',PF_OK,'','set');
+  add('pfgRes',t('lPosMin'),nz(CFG.posMin)>0?nz(CFG.posMin)+' min':t('off'),PF_OK,'','set');
+  add('pfgRes',t('lOpsMin'),(nz(CFG.opsMin)||20)+' min',PF_OK,'','set');
+
+  /* ── Communication ──────────────────────────────────────────── */
+  const co=atcCo();
+  add('pfgCom',t('pAtcName'),co?(co.n+' \u00b7 '+co.p):'\u2014',co?PF_OK:PF_WARN,
+      co?'':t('pfNoCo'),'set');
+  add('pfgCom',t('lVfr')+' / '+t('lEmerg'),(CFG.vfr||'\u2014')+' \u00b7 '+(CFG.emerg||'\u2014'),
+      PF_OK,'','set');
+  add('pfgCom',t('lStations'),CFG.stations||DEF.stations,
+      (CFG.stations||DEF.stations)===DEF.stations?PF_WARN:PF_OK,
+      (CFG.stations||DEF.stations)===DEF.stations?t('pfDefault'):'','set');
+
+  /* ── Position and map ───────────────────────────────────────── */
+  const fix=GPS&&Date.now()-GPS.t<30000;
+  add('pfgMap','GPS',fix?('\u00b1 '+Math.round(GPS.acc||0)+' m'):t('gpsSearch'),
+      fix?PF_OK:PF_WARN,fix?'':t('pfNoFix'),'');
+  const age=pfClock();
+  add('pfgMap',t('pfFixAge'),age==null?'\u2014':age+' s',
+      age==null?PF_WARN:(age>120?PF_WARN:PF_OK),
+      age==null?t('pfNoFixYet'):(age>120?t('pfStaleFix'):''),'');
+  add('pfgMap',t('lTileToken'),String(CFG.tileToken||'').trim()?t('pfTokenSet'):'\u2014',
+      String(CFG.tileToken||'').trim()?PF_OK:PF_WARN,
+      String(CFG.tileToken||'').trim()?'':t('pfNoKey'),'set');
+  return R;
+}
+
+async function preflight(){
+  if(CFG.role!=='master')return info(t('pfTitle'),t('masterOnly'));
+  const rows=pfRows();
+  const bad=rows.filter(r=>r.state===PF_BAD).length;
+  const warn=rows.filter(r=>r.state===PF_WARN).length;
+  const ICON={ok:'\u25CF',warn:'\u25B2',bad:'\u2715'};
+  let html='<div class="pf">';
+  let group='';
+  rows.forEach((r,i)=>{
+    if(r.group!==group){group=r.group;html+='<p class="pfg">'+esc(t(group))+'</p>'}
+    html+='<button class="pfrow '+r.state+'" data-go="'+esc(r.go||'')+'">'
+      +'<i>'+ICON[r.state]+'</i>'
+      +'<span class="pfl">'+esc(r.label)+'</span>'
+      +'<span class="pfv">'+esc(r.value)+'</span>'
+      +(r.hint?'<em>'+esc(r.hint)+'</em>':'')+'</button>';
+  });
+  html+='</div><p class="pfsum">'
+    +esc(t('pfSummary').replace('{b}',String(bad)).replace('{w}',String(warn)))+'</p>';
+  const again=await ask({title:t('pfTitle'),cancel:t('pfAgain'),ok:t('close'),html:html,
+    onMount:m=>{m.querySelector('.pf').addEventListener('click',ev=>{
+      const b=ev.target.closest('.pfrow');if(!b||!b.dataset.go)return;
+      const go=b.dataset.go;
+      m.querySelector('[data-a="1"]').click();
+      setTimeout(()=>{
+        if(go==='set'){setView('set');if(!UNLOCKED)toast(t('pfUnlock'))}
+        else if(go==='docs')docsMenu();
+        else setView('form');
+      },140);
+    })}});
+  if(again===null)return preflight();     /* Re-check */
+}
+
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const ty=UI.type;let e=null;
@@ -4071,8 +4264,10 @@ $('#btnPost').onclick=async()=>{
   if(Number(CFG.fresh)&&!ENT.length){
     if(CFG.role!=='master'){await info(t('newFlight'),t('firstByMaster'));return}
     CFG.fresh=0;save(K_CFG,CFG);
+    /* the check replaces the old reminder: it says what to look at instead of saying to look */
     await info(t('newFlight'),t('verifySettings'));
-    setView('set');return;
+    await preflight();
+    return;
   }
   flash('busy');
   if(ty==='Ballast'){
@@ -4244,7 +4439,7 @@ function applyEdit(e,v){
 
 /* ── Settings ──────────────────────────────────────────────────────── */
 const SF={flight:'#sFlight',call:'#sCall',p1:'#sP1',p2:'#sP2',init:'#sInit',
-  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',mapMax:'#sMapMax',unc:'#sUnc',mapKm:'#sMapKm',mapZ:'#sMapZ',tileToken:'#sTileToken',tileStreet:'#sTileStreet',tileTopo:'#sTileTopo',tileSat:'#sTileSat',o2:'#sO2',o2bar:'#sO2bar',atcName:'#sAtcName',atcNum:'#sAtcNum',
+  bagKg:'#sBagKg',readyKg:'#sReadyKg',methInit:'#sMethInit',vfr:'#sVfr',emerg:'#sEmerg',stations:'#sStations',msgRx:'#sMsgRx',msgTx:'#sMsgTx',steps:'#sSteps',readySteps:'#sReady',posMin:'#sPosMin',opsMin:'#sOpsMin',mapMax:'#sMapMax',unc:'#sUnc',mapKm:'#sMapKm',mapZ:'#sMapZ',tileToken:'#sTileToken',tileStreet:'#sTileStreet',tileTopo:'#sTileTopo',tileSat:'#sTileSat',atcName:'#sAtcName',atcNum:'#sAtcNum',
   repo:'#sRepo',branch:'#sBranch',dir:'#sDir',token:'#sToken'};
 /* up to four cylinders, each with its volume and the pressure when full */
 function paintO2Rows(){
@@ -4254,16 +4449,19 @@ function paintO2Rows(){
     +'<span>'+esc(t('lFullBar'))+'</span></div>'
     +Array.from({length:4},(_,i)=>
       `<div class="o2set"><span>${esc(t('lCyl'))} ${i+1}</span>`
-      +`<div class="sfx"><input type="number" data-ov="${i}" inputmode="decimal" step="0.5" `
+      +`<div class="sfx"><input type="text" data-ov="${i}" inputmode="decimal" `
       +`value="${vols[i]==null?'':esc(vols[i])}" placeholder="–"><span>l</span></div>`
-      +`<div class="sfx"><input type="number" data-ob="${i}" inputmode="numeric" step="10" `
-      +`value="${vols[i]==null?'':esc(bar)}" placeholder="–"><span>bar</span></div></div>`).join('');
+      +`<div class="sfx"><input type="text" data-ob="${i}" inputmode="numeric" `
+      +`value="${vols[i]==null?'':esc(bars[i]||bar)}" placeholder="–"><span>bar</span></div></div>`).join('');
 }
+/* a comma is what a European keyboard offers first, and it must not turn 2,5 into 2 */
+const num=v=>parseFloat(String(v==null?'':v).replace(',','.').replace(/[^0-9.\-]/g,''));
 function readO2Rows(){
   const vols=[],bars=[];
   for(let i=0;i<4;i++){
-    const v=parseFloat(($('[data-ov="'+i+'"]')||{}).value);
-    const b=parseFloat(($('[data-ob="'+i+'"]')||{}).value);
+    const v=num(($('[data-ov="'+i+'"]')||{}).value);
+    const b=num(($('[data-ob="'+i+'"]')||{}).value);
+    /* every cylinder keeps its own full pressure; only a row left blank falls back */
     if(isFinite(v)&&v>0){vols.push(v);bars.push(isFinite(b)&&b>0?Math.round(b):200)}
   }
   return {o2:vols.join(','), o2bars:bars.join(','),
@@ -4461,6 +4659,28 @@ $('#btnTileTest').onclick=async()=>{
   note.textContent=t('tileOk').replace('{a}',a).replace('{b}',b);
 };
 $('#btnLoadFlight').onclick=loadFlightByCode;
+/* A full exchange on demand: forget what the last read said, push everything waiting, read the
+   whole table back, then say what happened. The button lost its handler in an earlier rebuild
+   of this block and had been a picture ever since. */
+$('#btnSyncNow').onclick=async()=>{
+  if(!configured())return info(t('syncNow'),t('fNoRepo'));
+  const b=$('#btnSyncNow'),was=b.textContent;
+  b.disabled=true;b.textContent=t('checking');
+  const before=ENT.length, pending=ENT.filter(e=>!e.synced).length;
+  for(const k in ETAG)delete ETAG[k];
+  try{
+    await sync(true,true,0,true);await waitSync();
+    await sync(true,false);await waitSync();
+  }catch(e){}
+  b.disabled=false;b.textContent=was;
+  paint();
+  const left=ENT.filter(e=>!e.synced).length;
+  await info(t('syncNow'),t('syncDone')
+    .replace('{s}',String(Math.max(0,pending-left)))
+    .replace('{n}',String(ENT.length))
+    .replace('{d}',String(Math.max(0,ENT.length-before)))
+    +(left?' '+t('syncLeft').replace('{n}',String(left)):''));
+};
 $('#btnShowSet').onclick=showSettings;
 $('#btnMenu').addEventListener('click',()=>{if(CFG.role==='master')loadSeen()});
 $('#btnUnlock').onclick=async()=>{
