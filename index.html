@@ -355,13 +355,17 @@ body.min .app{display:none}
 body.min{background:transparent}
 body.min #puck{display:block}
 
+#btnRepPos{background:var(--muted);color:var(--card);border:0}
+#btnRepPos:active{opacity:.82}
 #btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #modal .go.okflash{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 html[data-theme="night"] #modal .go.okflash{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 #btnPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #btnPost.wait{background:#FBF1D2;border:1px solid #E5CE86;color:#5A4306}
 #btnPost.fail{background:#F9DFDB;border:1px solid #E3ADA4;color:#6C2016;font-size:14px}
-html[data-theme="night"] #btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+html[data-theme="night"] #btnRepPos{background:var(--muted);color:var(--card);border:0}
+#btnRepPos:active{opacity:.82}
+#btnPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #modal .go.okflash{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 html[data-theme="night"] #modal .go.okflash{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
 #btnPost.ok{background:#06200D;border-color:#1C5A2F;color:#5CCE83}
@@ -379,8 +383,12 @@ body.mapon #app{visibility:hidden}
 #mapSvg .tlab{fill:#1B3A6B;font-size:10px;font-weight:600}
 #mapSvg .mgps{fill:#1B6BC0;stroke:#fff;stroke-width:2;pointer-events:auto}
 #mapSvg .mman{fill:#C0392B;stroke:#fff;stroke-width:2;pointer-events:auto}
-#mapSvg .unc{fill:#C0392B;fill-opacity:.08;stroke:#C0392B;stroke-opacity:.75;stroke-width:2;
-  stroke-dasharray:2 5;stroke-linecap:round}
+#mapSvg .unchalo{fill:none;stroke:#fff;stroke-width:5;stroke-opacity:.9}
+#mapSvg .unc{fill:#C0392B;fill-opacity:.07;stroke:#C0392B;stroke-width:2.5;
+  stroke-dasharray:6 6;stroke-linecap:round}
+#mapSvg .uncpick{fill:none;stroke:#C0392B;stroke-width:3;stroke-dasharray:8 6;
+  animation:uncblink 1.8s ease-in-out infinite}
+@keyframes uncblink{0%,100%{stroke-opacity:1}50%{stroke-opacity:.25}}
 #mapSvg .mlab{fill:#111;font-size:10px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3}
 #mapPick{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;touch-action:none;z-index:6}
 #mapPick.hide{display:none}
@@ -440,10 +448,18 @@ body.mapon #app{visibility:hidden}
 .mp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .mp-grid label{font-size:10.5px;color:var(--muted);display:block}
 .mp-grid input{margin-top:2px}
-.vsrow{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center;margin-top:2px}
-.vsrow .seg{height:44px}
-.vsrow .seg button{padding:0 8px;font-size:11px}
-#manUnc{width:100%;margin:2px 0 10px;accent-color:var(--sel)}
+.vsrow{display:grid;grid-template-columns:34px 1fr;gap:6px;align-items:center;margin-top:2px}
+.vsdir{display:grid;grid-template-rows:1fr 1fr;height:44px;border:1px solid var(--line);
+  border-radius:8px;overflow:hidden}
+.vsdir button{background:var(--field);border:0;font-size:10px;line-height:1;color:var(--muted);
+  display:grid;place-items:center}
+.vsdir button.on{background:var(--sel);color:var(--sel-ink)}
+.tclab{display:flex;align-items:center;gap:5px}
+.tclab svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.tclab svg.hide{display:none}
+#manUnc{width:100%;margin:2px 0 18px;accent-color:var(--sel)}
+#manPanel{touch-action:auto}
 #manPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #manPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #toast{position:fixed;right:14px;bottom:calc(104px + var(--safe-b));transform:translateY(10px);
@@ -581,7 +597,7 @@ body.mapon #app{visibility:hidden}
           </div>
           <div class="thumbs" id="oThumbs"></div>
           <div class="voicebar" id="oVoice"></div>
-          <button class="go sec sm" id="btnRepPos" data-t="reportPos" style="margin-top:8px">Report Position</button>
+          <button class="go sm" id="btnRepPos" data-t="reportPos" style="margin-top:8px">Report Position</button>
         </div>
         <div class="f"><div class="links wa" id="waOth"></div></div>
       </div>
@@ -845,7 +861,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-01';
+const APP_VERSION='v260825-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1013,10 +1029,10 @@ const L={en:{
  waTitle:'Send to WhatsApp', waRemaining:'Remaining recipients', copyText:'Copy text',
  lgResting:'resting', lgAwake:'both awake', lgInv:'Inventory', lgNote:'Note', lgPos:'Position', lgManPos:'Manual position',
  reportPos:'Report Position', mapStreet:'Streets', mapTopo:'Terrain', mapSat:'Satellite',
- rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
+ rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
+ manUnc:'How sure of this position', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -1166,10 +1182,10 @@ const L={en:{
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
  lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', lgManPos:'Manual position',
  reportPos:'Report Position', mapStreet:'Streets', mapTopo:'Terrain', mapSat:'Satellite',
- rpTitle:'Report Position', rpAsk:'A satellite fix is available. Report that, or place the position by hand on the map?',
+ rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'How sure of this position', manPost:'Report manual position to CC', manDone:'Reported to CC',
+ manUnc:'How sure of this position', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -2031,11 +2047,12 @@ function ask(o){
     const m=$('#modal');
     m.innerHTML=`<div class="sheet">
       <div class="sheetHead"><h4>${esc(o.title||'')}</h4>
+        ${o.closeX?`<button class="headbtn" data-a="0" aria-label="close">\u2715</button>`:''}
         ${o.headBtn?`<button class="headbtn" id="mHead" aria-label="${esc(o.headBtn.label||'')}"><svg viewBox="0 0 24 24">${o.headBtn.icon}</svg></button>`:''}
       </div>${o.text?`<p>${esc(o.text)}</p>`:''}
       ${o.html||''}
       ${o.input?`<input id="mIn" type="${o.input}" ${o.input==='password'?'inputmode="numeric"':''} value="${esc(o.value||'')}" placeholder="${esc(o.ph||'')}">`:''}
-      <div class="sheetBtns"${o.cancel===false?' style="grid-template-columns:1fr"':''}>
+      <div class="sheetBtns${o.stack?' stack':''}"${o.cancel===false&&!o.stack?' style="grid-template-columns:1fr"':''}>
         ${o.cancel===false?'':`<button class="go sec" data-a="0">${esc(o.cancel||t('cancel'))}</button>`}
         ${o.extra?`<button class="go sec" data-a="2">${esc(o.extra)}</button>`:''}
         <button class="go ${o.danger?'warn':''}" data-a="1">${esc(o.ok||t('ok'))}</button>
@@ -3476,12 +3493,22 @@ function mapOverlay(w,h){
       const km=Number(p.pos_unc_km);
       const q=gcMove(p.lat,p.lon,90,km),qs=mapScreen(q[0],q[1]);
       const rad=Math.abs(qs[0]-s[0]);
-      if(rad>3&&rad<600)marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unc"/>';
+      if(rad>3&&rad<600)marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unchalo"/>'
+        +'<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unc"/>';
     }
     marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="6" class="'+(man?'mman':'mgps')+'" data-i="'+i+'"/>';
     marks+='<text x="'+(s[0]+9).toFixed(1)+'" y="'+(s[1]-7).toFixed(1)+'" class="mlab">'
           +esc(String(p.ts_utc).slice(11,16).replace(':',''))+'Z</text>';
   });
+  /* while the form is open, the chosen uncertainty is drawn around the crosshair and follows
+     the slider, so the circle is a decision rather than a number */
+  if(MAP.pick&&MAP.uncKm){
+    const s0=mapScreen(MAP.pick[0],MAP.pick[1]);
+    const q=gcMove(MAP.pick[0],MAP.pick[1],90,MAP.uncKm),qs=mapScreen(q[0],q[1]);
+    const rad=Math.abs(qs[0]-s0[0]);
+    if(rad>3&&rad<900)marks+='<circle cx="'+s0[0].toFixed(1)+'" cy="'+s0[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unchalo"/>'
+      +'<circle cx="'+s0[0].toFixed(1)+'" cy="'+s0[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="uncpick"/>';
+  }
   $('#mapSvg').setAttribute('viewBox','0 0 '+w+' '+h);
   $('#mapSvg').innerHTML='<path d="'+d+'" class="trk"/>'+ticks+marks;
   /* the crosshair the crew drags to where they believe they are */
@@ -3536,17 +3563,20 @@ function manOpen(){
     +'<div class="mp-grid">'
     +'<label>'+esc(t('manAlt'))+'<span class="sfx"><input type="number" id="manAlt" inputmode="numeric" value="'
       +(prev.alt_ft!=null?esc(prev.alt_ft):'')+'"><span>ft</span></span></label>'
-    +'<label>'+esc(t('manTc'))+'<span class="sfx"><input type="text" id="manTc" inputmode="numeric" maxlength="3" value="'
+    +'<label><span class="tclab">'+esc(t('manTc'))
+      +'<svg id="manArrow" class="hide" viewBox="0 0 24 24"><path d="M12 3v18M12 3l-5 6M12 3l5 6"/></svg></span>'
+      +'<span class="sfx"><input type="text" id="manTc" inputmode="numeric" maxlength="3" value="'
       +(prev.tc_deg!=null?esc(pad(prev.tc_deg,3)):'')+'"><span>\u00b0</span></span></label>'
     +'</div>'
-    /* climb or sink is a choice, not a minus sign to be remembered in a moving basket */
     +'<div class="mp-grid">'
+    /* climb or sink is two keys, so the sign is a choice and the field stays large enough
+       to hit with a glove on */
     +'<label>'+esc(t('manVs'))
-      +'<span class="vsrow"><span class="seg" id="manVsDir">'
-      +'<button data-v="up"'+((prev.vs_ms==null||prev.vs_ms>=0)?' class="on"':'')+'>'+esc(t('manClimb'))+'</button>'
-      +'<button data-v="dn"'+((prev.vs_ms!=null&&prev.vs_ms<0)?' class="on"':'')+'>'+esc(t('manSink'))+'</button></span>'
-      +'<span class="sfx"><input type="number" id="manVs" inputmode="decimal" step="0.1" min="0" value="'
-      +(prev.vs_ms!=null?esc(Math.abs(prev.vs_ms)):'')+'"><span>m/s</span></span></span></label>'
+      +'<span class="vsrow"><span class="vsdir" id="manVsDir">'
+      +'<button data-v="up"'+((prev.vs_ms==null||prev.vs_ms>=0)?' class="on"':'')+' title="'+esc(t('manClimb'))+'">\u25B2</button>'
+      +'<button data-v="dn"'+((prev.vs_ms!=null&&prev.vs_ms<0)?' class="on"':'')+' title="'+esc(t('manSink'))+'">\u25BC</button></span>'
+      +'<span class="sfx"><input type="text" id="manVs" inputmode="decimal" value="'
+      +(prev.vs_ms!=null?esc(Math.abs(prev.vs_ms).toFixed(1)):'')+'"><span>m/s</span></span></span></label>'
     +'<label>'+esc(t('manSp'))+'<span class="sfx"><input type="number" id="manSp" inputmode="numeric" value="'
       +(prev.speed_kt!=null?esc(Math.round(prev.speed_kt)):'')+'"><span>kn</span></span></label>'
     +'</div>'
@@ -3554,36 +3584,60 @@ function manOpen(){
     +'<input type="range" id="manUnc" min="0" max="'+(steps.length-1)+'" step="1" value="1">'
     +'<button class="go" id="manPost">'+esc(t('manPost'))+'</button>';
   p.classList.remove('hide');
-  const lab=()=>{$('#manUncLab').textContent=t('manUnc')
-    +' \u00b7 '+t('posUnc').replace('{n}',String(steps[Number($('#manUnc').value)]))};
+  const lab=()=>{
+    const km=steps[Number($('#manUnc').value)];
+    $('#manUncLab').textContent=t('manUnc')+' \u00b7 '+t('posUnc').replace('{n}',String(km));
+    MAP.uncKm=km;
+    mapOverlay($('#mapWrap').clientWidth,$('#mapWrap').clientHeight);
+  };
   lab();
   $('#manUnc').oninput=lab;
+  /* the arrow turns with the figure, so a wrong digit is visible before it is sent */
+  const arrow=()=>{
+    const v=parseFloat($('#manTc').value);
+    const a=$('#manArrow');
+    if(!isFinite(v)){a.classList.add('hide');return}
+    a.classList.remove('hide');
+    a.style.transform='rotate('+(((v%360)+360)%360)+'deg)';
+  };
+  arrow();
+  $('#manTc').addEventListener('input',arrow);
+  $('#manVs').addEventListener('input',()=>{
+    const el=$('#manVs'),c=el.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
+    if(c!==el.value)el.value=c;
+  });
+  /* tapping a prefilled field means writing a new figure, not editing the old one */
+  ['#manAlt','#manTc','#manVs','#manSp'].forEach(sel=>{
+    const el=$(sel);
+    el.addEventListener('focus',()=>{setTimeout(()=>{try{el.select()}catch(e){}},0)});
+  });
   $('#manVsDir').addEventListener('click',ev=>{
     const b=ev.target.closest('button');if(!b)return;
     $$('#manVsDir button').forEach(x=>x.classList.toggle('on',x===b));
   });
-  $('#manX').onclick=()=>p.classList.add('hide');
+  $('#manX').onclick=()=>{p.classList.add('hide');MAP.uncKm=0;
+    mapOverlay($('#mapWrap').clientWidth,$('#mapWrap').clientHeight)};
   $('#manPost').onclick=()=>manPost(steps);
   mapPanelSide();
 }
 async function manPost(steps){
   const alt=$('#manAlt').value.trim(), vs=$('#manVs').value.trim();
-  let useAlt=alt===''?null:Math.round(Number(alt));
+  const tcv=$('#manTc').value.trim(), spv=$('#manSp').value.trim();
   const dn=$('#manVsDir')&&$('#manVsDir').querySelector('button[data-v="dn"].on');
+  let useAlt=alt===''?null:Math.round(Number(alt));
   let useVs=vs===''?null:(Math.round(Math.abs(Number(vs))*10)/10)*(dn?-1:1);
-  if(alt===''||vs===''){
-    /* altitude and rate of climb come off the barograph, so they are asked for twice before
-       a position goes out without them */
-    const prev=lastFix()||{};
-    const r=await ask({title:t('manTitle'),text:t('manConfirmAsk'),
-      ok:t('manKeepPrev'),cancel:t('manBack'),extra:t('manNoValues')});
-    if(r===null)return;                       /* back to the form */
-    if(r==='extra'){useAlt=alt===''?null:useAlt;useVs=vs===''?null:useVs}
-    else{if(alt==='')useAlt=prev.alt_ft==null?null:prev.alt_ft;
-         if(vs==='')useVs=prev.vs_ms==null?null:prev.vs_ms}
+  let useTc=tcv===''?null:Math.round(Number(tcv))%360;
+  let useSp=spv===''?null:Math.round(Number(spv));
+  let bare=false;
+  if(alt===''||vs===''||tcv===''||spv===''){
+    /* a position with no numbers beside it is still worth sending — but not by accident */
+    const r=await ask({title:t('manIncomplete'),text:t('manIncompleteAsk'),stack:true,
+      ok:t('manAsIs'),cancel:false,extra:t('manOnlyPos'),closeX:true});
+    if(r===null)return;
+    if(r==='extra')bare=true;
   }
+  if(bare){useAlt=null;useVs=null;useTc=null;useSp=null}
   const lat=MAP.pick[0],lon=MAP.pick[1];
-  const tc=$('#manTc').value.trim(), sp=$('#manSp').value.trim();
   const unc=steps[Number($('#manUnc').value)];
   const btn=$('#manPost');
   btn.disabled=true;btn.classList.add('busy');btn.textContent=t('waitConfirm');
@@ -3591,16 +3645,15 @@ async function manPost(steps){
     lat:+lat.toFixed(6),lon:+lon.toFixed(6),
     pos_lat:dms(lat,2)+(lat>=0?'N':'S'),pos_lon:dms(lon,3)+(lon>=0?'E':'W'),
     alt_ft:useAlt,vs_ms:useVs,
-    tc_deg:tc===''?null:Math.round(Number(tc))%360,
-    speed_kt:sp===''?null:Math.round(Number(sp)),
+    tc_deg:useTc,speed_kt:useSp,
     pos_source:'manual',pos_unc_km:unc,gps_fix:false,
     note:'',whatsapp:'',whatsapp_to:''});
   const rc=recipients('Other');
   if(rc.length){e.whatsapp='yes';e.whatsapp_to=rc.map(r=>r.n||r.p).join('; ');save(K_ENT,ENT)}
   await confirmPost(e,null);
-  btn.classList.remove('busy');btn.classList.add('ok');btn.textContent=t('manDone');
+  btn.classList.remove('busy');btn.classList.add('ok');btn.textContent=t('fPosted');
   setTimeout(async()=>{
-    $('#manPanel').classList.add('hide');
+    $('#manPanel').classList.add('hide');MAP&&(MAP.uncKm=0);
     mapClose();
     setType('Other');setView('form');
     if(rc.length)waSend(e,rc);
@@ -3611,7 +3664,7 @@ async function manPost(steps){
 async function reportPosition(){
   const fresh=GPS&&Date.now()-GPS.t<120000;
   if(fresh){
-    const r=await ask({title:t('rpTitle'),text:t('rpAsk'),
+    const r=await ask({title:t('rpTitle'),text:t('rpAsk'),stack:true,
       ok:t('rpGps'),cancel:t('cancel'),extra:t('rpMan')});
     if(r===null)return;
     if(r!=='extra'){

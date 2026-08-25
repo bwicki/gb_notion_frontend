@@ -1029,10 +1029,16 @@ the screen — street or satellite, with zoom buttons. It opens on the last repo
   crew believes it is.
 - Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
   last known values because both can be read off the barograph; track and speed, which are
-  optional; and a slider for how sure the position is, in five steps drawn as a dotted circle
-  around the marker. Climb and sink are a choice of two buttons rather than a minus sign to be
-  remembered with cold hands. Leaving altitude or rate of climb empty asks once more — keep the previous values,
-  go back, or send without them.
+  optional; and a slider for how sure the position is, in five steps. The circle for the step
+  chosen is drawn around the crosshair straight away and **blinks slowly**, following the
+  slider — so the choice is a picture of ground rather than a number. Climb and sink are two
+  small keys beside the figure rather than a minus sign to be remembered with cold hands, and a
+  **compass arrow beside the track turns with what is typed**, which shows a wrong digit before
+  it is sent. Every prefilled field is selected when tapped, so a new figure simply replaces the
+  old one.
+- Leaving any of altitude, track, speed or rate of climb empty asks once: *Send as is*, or
+  *Send only coordinates*, which clears the four and sends the position alone. - The circles are drawn dashed in red over a white halo, the same treatment as the crosshair, so
+  they stay legible over a dark satellite image.
 - The panel never covers the crosshair: it moves to the top of the screen when the marker sits
   in the lower half.
 
