@@ -317,7 +317,7 @@ h3:first-child{margin-top:14px}
 .fold .in{padding:12px 14px 14px;border-top:1px solid var(--line-soft)}
 .lock{padding:16px;border:1px dashed var(--line);border-radius:10px;margin:14px 0;font-size:13.5px;color:var(--muted);line-height:1.45}
 
-#modal{position:fixed;inset:0;background:rgba(10,12,14,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}
+#modal{position:fixed;inset:0;background:rgba(10,12,14,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:400}
 html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 #modal.on{display:flex}
 .sheet{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;max-width:400px;max-height:86dvh;overflow-y:auto}
@@ -331,6 +331,12 @@ html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 .headbtn:active{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .sheet h4{margin:0 0 8px;font-size:17px;font-weight:500}
 .sheet p{margin:0 0 12px;font-size:13.5px;color:var(--muted);line-height:1.45}
+/* two choices side by side, the way out underneath and across the full width */
+.sheetBtns.stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheetBtns.stack .go{width:100%;font-size:12px;white-space:nowrap;padding:0 4px;letter-spacing:-.1px}
+.sheetBtns.stack [data-a="1"]{order:1}
+.sheetBtns.stack [data-a="2"]{order:2}
+.sheetBtns.stack [data-a="0"]{grid-column:1 / -1;order:3}
 .sheetBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .sheetBtns .go+.go{margin-top:0}
 .qrbox{display:grid;place-items:center;margin:10px 0 12px}
@@ -377,16 +383,18 @@ body.mapon #app{visibility:hidden}
 #mapTiles{position:absolute;inset:0;transform-origin:0 0}
 #mapTiles img{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none}
 #mapSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transform-origin:0 0}
-#mapSvg .trk{fill:none;stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.85}
-#mapSvg .proj{fill:none;stroke:#1B3A6B;stroke-width:2;stroke-dasharray:7 5;stroke-opacity:.7}
-#mapSvg .tick{stroke:#1B3A6B;stroke-width:2.5;stroke-opacity:.8}
+/* one treatment for everything drawn over the map: a thin line with a white glow, legible
+   on a pale street map and on a dark satellite image alike */
+#mapSvg .trk,#mapSvg .proj,#mapSvg .tick,#mapSvg .unc,#mapSvg .uncpick{
+  filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff)}
+#mapSvg .trk{fill:none;stroke:#1B3A6B;stroke-width:2.5}
+#mapSvg .proj{fill:none;stroke:#1B3A6B;stroke-width:2;stroke-dasharray:7 5}
+#mapSvg .tick{stroke:#1B3A6B;stroke-width:2.5}
 #mapSvg .tlab{fill:#1B3A6B;font-size:10px;font-weight:600}
 #mapSvg .mgps{fill:#1B6BC0;stroke:#fff;stroke-width:2;pointer-events:auto}
 #mapSvg .mman{fill:#C0392B;stroke:#fff;stroke-width:2;pointer-events:auto}
-#mapSvg .unchalo{fill:none;stroke:#fff;stroke-width:5;stroke-opacity:.9}
-#mapSvg .unc{fill:#C0392B;fill-opacity:.07;stroke:#C0392B;stroke-width:2.5;
-  stroke-dasharray:6 6;stroke-linecap:round}
-#mapSvg .uncpick{fill:none;stroke:#C0392B;stroke-width:3;stroke-dasharray:8 6;
+#mapSvg .unc{fill:none;stroke:#C0392B;stroke-width:1.6;stroke-dasharray:5 6;stroke-linecap:round}
+#mapSvg .uncpick{fill:none;stroke:#C0392B;stroke-width:2;stroke-dasharray:6 6;
   animation:uncblink 1.8s ease-in-out infinite}
 @keyframes uncblink{0%,100%{stroke-opacity:1}50%{stroke-opacity:.25}}
 #mapSvg .mlab{fill:#111;font-size:10px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3}
@@ -437,15 +445,18 @@ body.mapon #app{visibility:hidden}
   border-radius:16px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;
   box-shadow:0 6px 18px rgba(0,0,0,.22);touch-action:none}
 #mapPuck svg{width:34px;height:34px;fill:none;stroke-width:4;stroke-linecap:round}
-#manPanel{position:absolute;left:10px;right:10px;bottom:calc(10px + var(--safe-b));z-index:10;
-  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:460px;margin:0 auto}
-#manPanel.top{bottom:auto;top:calc(78px + var(--safe-t))}
+#manPanel{position:absolute;left:10px;right:88px;top:calc(10px + var(--safe-t));bottom:auto;z-index:10;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:340px}
+#manPanel.low{top:auto;bottom:calc(10px + var(--safe-b))}
+.mp-foot{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.mp-foot .go{height:44px;font-size:14px}
+.mp-foot .go.sec{width:auto;padding:0 14px;font-size:12.5px}
+.unclab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  font-size:10.5px;color:var(--muted);margin:2px 0 0}
+.unclab b{font-size:13px;color:var(--ink);font-weight:600;white-space:nowrap}
 #manPanel.hide{display:none}
-.mp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.mp-head b{flex:1;font-size:13px}
-.mp-head button{width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--field)}
-.mp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.mp-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px}
 .mp-grid label{font-size:10.5px;color:var(--muted);display:block}
 .mp-grid input{margin-top:2px}
 .vsrow{display:grid;grid-template-columns:34px 1fr;gap:6px;align-items:center;margin-top:2px}
@@ -458,7 +469,7 @@ body.mapon #app{visibility:hidden}
 .tclab svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
 .tclab svg.hide{display:none}
-#manUnc{width:100%;margin:2px 0 18px;accent-color:var(--sel)}
+#manUnc{width:100%;margin:0 0 12px;accent-color:var(--sel)}
 #manPanel{touch-action:auto}
 #manPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #manPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
@@ -861,7 +872,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-02';
+const APP_VERSION='v260825-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1032,7 +1043,7 @@ const L={en:{
  rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'How sure of this position', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
+ manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -1185,7 +1196,7 @@ const L={en:{
  rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'How sure of this position', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
+ manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Please complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -3409,7 +3420,7 @@ function mapPoints(){
   return all.slice(-keep);
 }
 
-let MAP=null;
+let MAP=null,MAN0=null;
 function mapOpen(){
   const pts=mapPoints();
   const last=pts[pts.length-1];
@@ -3493,8 +3504,7 @@ function mapOverlay(w,h){
       const km=Number(p.pos_unc_km);
       const q=gcMove(p.lat,p.lon,90,km),qs=mapScreen(q[0],q[1]);
       const rad=Math.abs(qs[0]-s[0]);
-      if(rad>3&&rad<600)marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unchalo"/>'
-        +'<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unc"/>';
+      if(rad>3&&rad<600)marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unc"/>';
     }
     marks+='<circle cx="'+s[0].toFixed(1)+'" cy="'+s[1].toFixed(1)+'" r="6" class="'+(man?'mman':'mgps')+'" data-i="'+i+'"/>';
     marks+='<text x="'+(s[0]+9).toFixed(1)+'" y="'+(s[1]-7).toFixed(1)+'" class="mlab">'
@@ -3506,8 +3516,7 @@ function mapOverlay(w,h){
     const s0=mapScreen(MAP.pick[0],MAP.pick[1]);
     const q=gcMove(MAP.pick[0],MAP.pick[1],90,MAP.uncKm),qs=mapScreen(q[0],q[1]);
     const rad=Math.abs(qs[0]-s0[0]);
-    if(rad>3&&rad<900)marks+='<circle cx="'+s0[0].toFixed(1)+'" cy="'+s0[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="unchalo"/>'
-      +'<circle cx="'+s0[0].toFixed(1)+'" cy="'+s0[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="uncpick"/>';
+    if(rad>3&&rad<900)marks+='<circle cx="'+s0[0].toFixed(1)+'" cy="'+s0[1].toFixed(1)+'" r="'+rad.toFixed(1)+'" class="uncpick"/>';
   }
   $('#mapSvg').setAttribute('viewBox','0 0 '+w+' '+h);
   $('#mapSvg').innerHTML='<path d="'+d+'" class="trk"/>'+ticks+marks;
@@ -3525,9 +3534,9 @@ function mapPanelSide(){
   const p=$('#manPanel');
   if(!p||p.classList.contains('hide'))return;
   const h=$('#mapWrap').clientHeight||640;
-  let low=false;
-  if(MAP&&MAP.pick){const s=mapScreen(MAP.pick[0],MAP.pick[1]);low=s[1]>h*0.55}
-  p.classList.toggle('top',low);
+  let high=false;
+  if(MAP&&MAP.pick){const s=mapScreen(MAP.pick[0],MAP.pick[1]);high=s[1]<h*0.45}
+  p.classList.toggle('low',high);
 }
 
 function mapInfo(i){
@@ -3553,14 +3562,23 @@ const uncSteps=()=>{
   const a=String(CFG.unc||DEF.unc).split(/[^0-9.]+/).map(Number).filter(x=>x>0);
   return a.length?a:[0.5,1,2,5,10];
 };
+/* the last row that actually carried figures, whichever kind it was — an empty POS written
+   during a jamming spell is no use as a starting point */
+function lastVals(){
+  const rows=chrono(ENT);
+  for(let i=rows.length-1;i>=0;i--){
+    const e=rows[i];
+    if(e.alt_ft!=null||e.vs_ms!=null||e.tc_deg!=null||e.speed_kt!=null)return e;
+  }
+  return null;
+}
 function manOpen(){
   if(!MAP||!MAP.pick)return toast(t('manPickFirst'));
-  const prev=lastFix()||{};
+  const prev=lastVals()||{};
+  MAN0={alt:prev.alt_ft,vs:prev.vs_ms,tc:prev.tc_deg,sp:prev.speed_kt};
   const steps=uncSteps();
   const p=$('#manPanel');
-  p.innerHTML='<div class="mp-head"><b>'+esc(t('manTitle'))+'</b>'
-    +'<button id="manX" aria-label="close">\u2715</button></div>'
-    +'<div class="mp-grid">'
+  p.innerHTML='<div class="mp-grid">'
     +'<label>'+esc(t('manAlt'))+'<span class="sfx"><input type="number" id="manAlt" inputmode="numeric" value="'
       +(prev.alt_ft!=null?esc(prev.alt_ft):'')+'"><span>ft</span></span></label>'
     +'<label><span class="tclab">'+esc(t('manTc'))
@@ -3580,13 +3598,15 @@ function manOpen(){
     +'<label>'+esc(t('manSp'))+'<span class="sfx"><input type="number" id="manSp" inputmode="numeric" value="'
       +(prev.speed_kt!=null?esc(Math.round(prev.speed_kt)):'')+'"><span>kn</span></span></label>'
     +'</div>'
-    +'<p class="lab" id="manUncLab"></p>'
+    +'<p class="unclab"><span data-t="manUnc">'+esc(t('manUnc'))+'</span>'
+    +'<b id="manUncVal"></b></p>'
     +'<input type="range" id="manUnc" min="0" max="'+(steps.length-1)+'" step="1" value="1">'
-    +'<button class="go" id="manPost">'+esc(t('manPost'))+'</button>';
+    +'<div class="mp-foot"><button class="go" id="manPost">'+esc(t('manPost'))+'</button>'
+    +'<button class="go sec" id="manX">'+esc(t('close'))+'</button></div>';
   p.classList.remove('hide');
   const lab=()=>{
     const km=steps[Number($('#manUnc').value)];
-    $('#manUncLab').textContent=t('manUnc')+' \u00b7 '+t('posUnc').replace('{n}',String(km));
+    $('#manUncVal').textContent=t('posUnc').replace('{n}',String(km));
     MAP.uncKm=km;
     mapOverlay($('#mapWrap').clientWidth,$('#mapWrap').clientHeight);
   };
@@ -3602,9 +3622,12 @@ function manOpen(){
   };
   arrow();
   $('#manTc').addEventListener('input',arrow);
+  /* typed in tenths: 20 becomes 2.0, so the point costs no keystroke in a moving basket */
   $('#manVs').addEventListener('input',()=>{
-    const el=$('#manVs'),c=el.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
-    if(c!==el.value)el.value=c;
+    const el=$('#manVs');
+    const digits=el.value.replace(/[^0-9]/g,'').slice(0,4);
+    el.value=digits===''?'':(Number(digits)/10).toFixed(1);
+    try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}
   });
   /* tapping a prefilled field means writing a new figure, not editing the old one */
   ['#manAlt','#manTc','#manVs','#manSp'].forEach(sel=>{
@@ -3628,12 +3651,23 @@ async function manPost(steps){
   let useVs=vs===''?null:(Math.round(Math.abs(Number(vs))*10)/10)*(dn?-1:1);
   let useTc=tcv===''?null:Math.round(Number(tcv))%360;
   let useSp=spv===''?null:Math.round(Number(spv));
+  const empty=(alt===''||vs===''||tcv===''||spv==='');
+  /* nothing typed and nothing empty means the figures are the ones carried over from the last
+     report — true often enough to be worth a question, since a position an hour later with the
+     same altitude is usually an oversight rather than a reading */
+  const m0=MAN0||{};
+  const same=!empty
+    && useAlt===(m0.alt==null?null:Math.round(m0.alt))
+    && useTc===(m0.tc==null?null:Math.round(m0.tc)%360)
+    && useSp===(m0.sp==null?null:Math.round(m0.sp))
+    && useVs===(m0.vs==null?null:Math.round(m0.vs*10)/10);
   let bare=false;
-  if(alt===''||vs===''||tcv===''||spv===''){
-    /* a position with no numbers beside it is still worth sending — but not by accident */
-    const r=await ask({title:t('manIncomplete'),text:t('manIncompleteAsk'),stack:true,
-      ok:t('manAsIs'),cancel:false,extra:t('manOnlyPos'),closeX:true});
-    if(r===null)return;
+  if(empty||same){
+    const r=await ask({title:t('manIncomplete'),
+      text:empty?t('manIncompleteAsk'):t('manSameAsk'),
+      stack:true,closeX:true,
+      cancel:t('manComplete'),ok:t('manAsIs'),extra:t('manOnlyPos')});
+    if(r===null)return;                        /* back to the form, nothing sent */
     if(r==='extra')bare=true;
   }
   if(bare){useAlt=null;useVs=null;useTc=null;useSp=null}

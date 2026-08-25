@@ -1036,11 +1036,19 @@ the screen — street or satellite, with zoom buttons. It opens on the last repo
   **compass arrow beside the track turns with what is typed**, which shows a wrong digit before
   it is sent. Every prefilled field is selected when tapped, so a new figure simply replaces the
   old one.
-- Leaving any of altitude, track, speed or rate of climb empty asks once: *Send as is*, or
-  *Send only coordinates*, which clears the four and sends the position alone. - The circles are drawn dashed in red over a white halo, the same treatment as the crosshair, so
-  they stay legible over a dark satellite image.
-- The panel never covers the crosshair: it moves to the top of the screen when the marker sits
-  in the lower half.
+- The rate of climb is typed in tenths: `20` becomes `2.0`, so the decimal point costs no
+  keystroke.
+- Before sending, the app asks once if any of altitude, track, speed or rate of climb is
+  **empty**, and also if all four are still exactly the figures **carried over from the last
+  report** — an unchanged altitude an hour later is usually an oversight rather than a reading.
+  Three ways on: *Complete values* returns to the form, *Send as is* sends what stands there
+  without a second press, and *Send only coordinates* clears the four and sends the position
+  alone. - Track, projection, ticks and circles are all drawn thin with a white glow, the same treatment
+  as the crosshair, so they stay legible on a pale street map and on a dark satellite image
+  alike without shouting over the ground underneath.
+- The panel sits at the top of the screen, narrow enough to leave the map beside and below it,
+  and drops to the bottom when the crosshair is in the upper half. It has no title bar; *Report
+  to CC* and *Close* share the bottom line.
 
 The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It has a WhatsApp
 template of its own in the setup, goes to the table and to whichever recipients are ticked on
