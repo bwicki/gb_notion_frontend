@@ -464,6 +464,7 @@ body.mapon #app{visibility:hidden}
 #manPanel.low{top:auto;bottom:calc(10px + var(--safe-b))}
 .mp-foot{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
 .mp-foot .go{height:44px;min-height:44px;margin:0;font-size:14px}
+#manPost{background:var(--sel);color:var(--sel-ink);border:0}
 .mp-foot .go.sec{width:auto;padding:0 16px;font-size:12.5px}
 .unclab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
   font-size:10.5px;color:var(--muted);margin:2px 0 0}
@@ -484,6 +485,7 @@ body.mapon #app{visibility:hidden}
 .tclab svg.hide{display:none}
 #manUnc{width:100%;margin:0 0 12px;accent-color:var(--sel)}
 #manPanel{touch-action:auto}
+/* the same three states as the main post button, in the same colours */
 #manPost.busy{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 #manPost.ok{background:#DFF3E3;border:1px solid #A6D6B4;color:#12481F}
 #toast{position:fixed;right:14px;bottom:calc(104px + var(--safe-b));transform:translateY(10px);
@@ -745,36 +747,19 @@ body.mapon #app{visibility:hidden}
         <div class="f"><p class="lab" data-t="lMsgTx">Message presets — transmitted</p>
           <input type="text" id="sMsgTx" data-tp="pMsgs" placeholder="QNH,Ops Normal"></div>
         <h3 data-t="hMap">Map and manual position</h3>
-        <div class="f"><p class="lab" data-t="lTileToken">ArcGIS access token</p>
-          <input type="password" id="sTileToken" placeholder="AAPT…" autocomplete="off"></div>
-        <p class="hint" data-t="lTokenHint">Optional.</p>
         <div class="f two">
           <div><p class="lab" data-t="lMapKm">Keep tiles within</p>
             <div class="sfx"><input type="number" id="sMapKm" inputmode="numeric" step="5" placeholder="20"><span>km</span></div></div>
           <div><p class="lab" data-t="lMapZ">Keep up to zoom</p>
             <input type="number" id="sMapZ" inputmode="numeric" step="1" placeholder="13"></div>
         </div>
-        <button class="go sec" id="btnTileTest" data-t="tileTest">Check the tile sources</button>
-        <p class="hint" id="tileNote"></p>
         <div class="f two">
           <div><p class="lab" data-t="lMapMax">Positions shown on the map</p>
             <input type="number" id="sMapMax" inputmode="numeric" step="1" placeholder="20"></div>
           <div><p class="lab" data-t="lUnc">Uncertainty steps</p>
             <div class="sfx"><input type="text" id="sUnc" placeholder="0.5,1,2,5,10"><span>km</span></div></div>
         </div>
-        <p class="hint" data-t="lMapHint">Every tile the map draws is kept for later, and Hold this area on the map keeps the whole view at three zoom levels. A run of manual positions is always shown in full on the map, however long it is.</p>
-        <details class="fold" id="foldTiles">
-          <summary data-t="lTiles">Tile sources</summary>
-          <div class="in">
-            <div class="f"><p class="lab" data-t="lTileTopo">Terrain</p>
-              <input type="text" id="sTileTopo" placeholder="https://tile.opentopomap.org/{z}/{x}/{y}.png"></div>
-            <div class="f"><p class="lab" data-t="lTileStreet">Street map</p>
-              <input type="text" id="sTileStreet" placeholder="https://…/{z}/{y}/{x}?token={token}"></div>
-            <div class="f"><p class="lab" data-t="lTileSat">Satellite</p>
-              <input type="text" id="sTileSat" placeholder="https://…/{z}/{y}/{x}"></div>
-            <p class="hint" data-t="lTileHint">Both take {z}, {x} and {y}. The defaults need no key and carry their own attribution. A provider of your own goes here.</p>
-          </div>
-        </details>
+        <p class="hint" data-t="lMapHint">Every tile the map draws is kept for later. A run of manual positions is always shown in full on the map, however long it is.</p>
 
         <h3 data-t="hRessources">Ressources</h3>
         <div class="f two">
@@ -834,7 +819,24 @@ body.mapon #app{visibility:hidden}
           </div>
         </details>
 
-        <div id="joinBox" style="display:none">
+        <details class="fold" id="foldTiles">
+          <summary data-t="lTiles">Map sources and key</summary>
+          <div class="in">
+            <p class="hint" data-t="lTileHint">Set once and left alone.</p>
+            <div class="f"><p class="lab" data-t="lTileToken">ArcGIS access token</p>
+              <input type="password" id="sTileToken" placeholder="AAPT&#8230;" autocomplete="off"></div>
+            <div class="f"><p class="lab" data-t="lTileStreet">Streets</p>
+              <input type="text" id="sTileStreet" placeholder="https://&#8230;/{z}/{x}/{y}.png"></div>
+            <div class="f"><p class="lab" data-t="lTileTopo">Terrain</p>
+              <input type="text" id="sTileTopo" placeholder="https://&#8230;/{z}/{x}/{y}.png"></div>
+            <div class="f"><p class="lab" data-t="lTileSat">Satellite</p>
+              <input type="text" id="sTileSat" placeholder="https://&#8230;/{z}/{y}/{x}?token={token}"></div>
+            <button class="go sec" id="btnTileTest" data-t="tileTest">Check the tile sources</button>
+            <p class="hint" id="tileNote"></p>
+          </div>
+        </details>
+
+      <div id="joinBox" style="display:none">
         <h3 data-t="joinTitle">Join code</h3>
         <p class="hint" data-t="joinHint">Six characters that carry this flight onto another device.</p>
         <div class="joinwrap"></div>
@@ -893,7 +895,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-12';
+const APP_VERSION='v260825-13';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1042,10 +1044,10 @@ const L={en:{
  lReadySteps:'Standard standby (Sch\u00fctte) reporting units',
  hRessources:'Ressources', lO2:'O\u2082 cylinders', lO2hint:'The cylinders carried, with the volume of each and the pressure when full. The reserve is figured from these: volume times pressure, summed, gives litres of O\u2082 at one bar. Leave a row empty and that cylinder is never asked for.',
  hMap:'Map and manual position', lMapKm:'Cache tiles within', lMapZ:'Cache up to zoom',
- lMapMax:'Positions shown on the map', lUnc:'Uncertainty steps', lTiles:'Tile sources',
+ lMapMax:'Positions shown on the map', lUnc:'Uncertainty steps', lTiles:'Map sources and key',
  lTileStreet:'Streets', lTileTopo:'Terrain', lTileSat:'Satellite',
  lMapHint:'Tiles around the last reported position are fetched in the background while there is a connection, so the map still works when there is none. A run of manual positions is always shown in full, however long it is.',
- lTileHint:'Both take {z}, {x}, {y} and {token}. A national orthophoto service — swisstopo, basemap.at, IGN — is sharper than any global layer within its own borders and needs no key, but stops at the frontier.',
+ lTileHint:'Set once and left alone. All three take {z}, {x}, {y} and {token}. A national orthophoto service — swisstopo, basemap.at, IGN — is sharper than any global layer within its own borders and needs no key, but stops at the frontier.',
  lGeo:'Place name with each position', lMethInit:'Methanol level at start',
  lGeoHint:'Off by default. When on, each position is turned once into a readable place — "near Szeged/HU" — through OpenStreetMap\'s public service. That means the coordinates of the entry leave the device, and it only works with a link; without one the field stays empty and nothing else changes.',
  place:'Place', lVol:'Volume', lFullBar:'Full pressure', lCyl:'Cylinder',
@@ -1206,10 +1208,10 @@ const L={en:{
  lReadySteps:'Standard-Meldeschritte Schütte',
  hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
  hMap:'Karte und Handposition', lMapKm:'Kacheln behalten im Umkreis', lMapZ:'Behalten bis Zoomstufe',
- lMapMax:'Positionen auf der Karte', lUnc:'Stufen der Unsicherheit', lTiles:'Kartenquellen',
+ lMapMax:'Positionen auf der Karte', lUnc:'Stufen der Unsicherheit', lTiles:'Kartenquellen und Schlüssel',
  lTileStreet:'Strassen', lTileTopo:'Gelände', lTileSat:'Satellit',
  lMapHint:'Kacheln um die letzte gemeldete Position werden bei Verbindung im Hintergrund geholt, damit die Karte auch ohne Verbindung funktioniert. Eine ununterbrochene Reihe von Handpositionen wird immer vollständig gezeigt.',
- lTileHint:'Beide nehmen {z}, {x}, {y} und {token}. Ein nationaler Orthofotodienst — swisstopo, basemap.at, IGN — ist im eigenen Land schärfer als jede weltweite Ebene und braucht keinen Schlüssel, hört aber an der Grenze auf.',
+ lTileHint:'Einmal gesetzt und dann in Ruhe gelassen. Alle drei nehmen {z}, {x}, {y} und {token}. Ein nationaler Orthofotodienst — swisstopo, basemap.at, IGN — ist im eigenen Land schärfer als jede weltweite Ebene und braucht keinen Schlüssel, hört aber an der Grenze auf.',
  lGeo:'Ortsangabe zu jeder Position', lMethInit:'Methanolstand beim Start',
  lGeoHint:'Standardmässig aus. Eingeschaltet wird jede Position einmal in eine lesbare Ortsangabe übersetzt — „near Szeged/HU" — über den öffentlichen Dienst von OpenStreetMap. Damit verlassen die Koordinaten des Eintrags das Gerät, und es geht nur mit Verbindung; ohne bleibt das Feld leer und sonst ändert sich nichts.',
  place:'Ort', lVol:'Volumen', lFullBar:'Fülldruck', lCyl:'Flasche',
@@ -4279,7 +4281,7 @@ function readTplRows(){
   return out;
 }
 /* the message layout and the connection are the two places where a slip is expensive */
-[['#foldTpl',null],['#foldGit',null]].forEach(([sel])=>{
+[['#foldTpl',null],['#foldGit',null],['#foldTiles',null]].forEach(([sel])=>{
   const d2=$(sel);
   d2.addEventListener('toggle',async()=>{
     if(!d2.open||d2.dataset.ack)return;
@@ -4298,7 +4300,7 @@ function fillSetup(){
 function lockSettings(){
   UNLOCKED=false;$('#setLocked').style.display='';$('#setOpen').style.display='none';
   $('#btnSave').disabled=true;$('#setNote').textContent=t('locked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
-  ['#foldGit','#foldWa','#foldTpl'].forEach(x=>{$(x).open=false;delete $(x).dataset.ack});
+  ['#foldGit','#foldWa','#foldTpl','#foldTiles'].forEach(x=>{$(x).open=false;delete $(x).dataset.ack});
 }
 /* The button belongs to the master and to whoever the master invited. A device that was
    typed up by hand is not part of that chain and would only cause confusion here. */

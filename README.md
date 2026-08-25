@@ -570,7 +570,11 @@ Three views, chosen at the top right of the map and remembered between visits:
 
 None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
 the satellite layer goes through the service Esri asks applications to use from the first start.
-It can be replaced in the setup at any time: Two million tiles a month cost nothing and pay-as-you-go stays off unless
+It can be replaced in the setup, in the folded section **Map sources and key** at the very
+bottom, which asks *Do you really want to change these settings?* before it opens — the same
+guard as the GitHub connection and the message templates. What is adjusted from one flight to
+the next — how far tiles are kept, how many positions the map shows, the uncertainty steps —
+stays in the open under *Map and manual position*: Two million tiles a month cost nothing and pay-as-you-go stays off unless
 switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
 falls back to Esri's keyless address, which works but is not guaranteed.
 
@@ -1174,7 +1178,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260825-12` is the twelfth build of 25 August 2026.
+smaller counter. `v260825-13` is the thirteenth build of 25 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
