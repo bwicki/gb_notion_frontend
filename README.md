@@ -554,6 +554,24 @@ Two masters at once would overwrite each other's setup, so the change is deliber
 and confirmed at both ends. A declined offer is remembered and not asked again; the master can
 withdraw it by offering the role to somebody else, or by leaving it and carrying on.
 
+**A six-character code carries the whole flight.** Beside *Synchronize data* at the top of the
+setup is *Load current flight*; on the master, above the device list, is *Join code*. The master
+presses *Create*, reads six characters to the other device — `WUP9Q5`, in an alphabet with no O
+against 0 and no I against 1 — and that device has the flight: setup, token, presets, templates,
+and the log, which it reads from GitHub as soon as it has the token.
+
+The setup travels **encrypted with the code itself**, so the relay that carries it holds a box
+it cannot open. It hands the box over **once** and deletes it, the code dies after a day,
+and *Revoke* kills it sooner. Twenty wrong guesses from one address and that address is shut out
+for an hour, which is what makes six characters enough.
+
+The relay is a small Cloudflare worker, free to run; `join-worker/worker.js` and the twenty
+minutes of setup are described in the setup guide. Without it the code buttons say so and the
+link and QR code work as before.
+
+**Anyone holding the code holds your GitHub token** until it expires — the code is exactly as
+confidential as the token inside it.
+
 **Devices on this flight** sits below the GitHub connection on the master. It is read from two
 places: the entries themselves — who wrote, from which device, when, how many rows — and a small
 card every device leaves in `data/_seen/`, at most once every half hour. Without that card a
@@ -1029,7 +1047,7 @@ the screen — street or satellite, with zoom buttons. It opens on the last repo
   crew believes it is.
 - Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
   last known values because both can be read off the barograph; track and speed, which are
-  optional; and a slider for how sure the position is, in five steps. The circle for the step
+  optional; and a slider for the estimated position uncertainty, in five steps. The circle for the step
   chosen is drawn around the crosshair straight away and **blinks slowly**, following the
   slider — so the choice is a picture of ground rather than a number. Climb and sink are two
   small keys beside the figure rather than a minus sign to be remembered with cold hands, and a

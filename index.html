@@ -215,6 +215,9 @@ select:focus{outline:0;border-color:var(--sel)}
 .settbl td{padding:4px 6px;border-bottom:.5px solid var(--line-soft);vertical-align:top}
 .settbl td:first-child{color:var(--muted);width:44%}
 .settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
+.joinrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:4px}
+.joinrow b{font-size:26px;letter-spacing:.14em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.joinrow .go{width:auto;padding:0 14px;height:42px;font-size:12.5px}
 .devrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
   padding:8px 0;border-bottom:.5px solid var(--line-soft)}
 .devrow b{display:block;font-size:13px;font-weight:400}
@@ -646,7 +649,10 @@ body.mapon #app{visibility:hidden}
   <section class="view" id="v-set">
     <div class="scroll">
       <div id="syncBox" style="display:none">
-        <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
+        <div class="f two btnrow">
+          <button class="go" id="btnSyncNow" data-t="syncNow">Synchronize data</button>
+          <button class="go sec" id="btnLoadFlight" data-t="loadTitle">Load current flight</button>
+        </div>
         <p class="hint" style="margin-top:12px"><span data-t="syncHint">Sends what is waiting and reads the table back.</span> <span id="quotaNote"></span></p>
       </div>
 
@@ -803,10 +809,10 @@ body.mapon #app{visibility:hidden}
           <div class="in">
             <p class="lab" data-t="hintTpl">One template per message type.</p>
             <div class="f"><p class="lab">Ballast</p><textarea id="tplBal" style="min-height:104px"></textarea></div>
-            <div class="f"><p class="lab">MANPOS</p><textarea id="tplMan" style="min-height:104px"></textarea></div>
             <div class="f"><p class="lab">ATC</p><textarea id="tplATC" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Ressources</p><textarea id="tplRes" style="min-height:118px"></textarea></div>
             <div class="f"><p class="lab">Other</p><textarea id="tplOth" style="min-height:88px"></textarea></div>
+            <div class="f"><p class="lab">MANPOS</p><textarea id="tplMan" style="min-height:104px"></textarea></div>
             <p class="hint" id="tplKeys"></p>
             <button class="go sm sec" id="btnTplReset" data-t="resetDefault">Reset to default</button>
           </div>
@@ -823,7 +829,16 @@ body.mapon #app{visibility:hidden}
           </div>
         </details>
 
-        <div id="devBox" style="display:none">
+        <div id="joinBox" style="display:none">
+        <h3 data-t="joinTitle">Join code</h3>
+        <p class="hint" data-t="joinHint">Six characters that carry this flight onto another device.</p>
+        <div class="joinrow"><b id="joinCode">\u2014</b>
+          <button class="go sec" id="btnJoinMake" data-t="joinMake">Create</button>
+          <button class="go sec" id="btnJoinRevoke" data-t="joinRevoke" style="display:none">Revoke</button></div>
+        <p class="hint" id="joinNote"></p>
+      </div>
+
+      <div id="devBox" style="display:none">
           <h3 data-t="hDevices">Devices on this flight</h3>
           <p class="hint" data-t="hintDevices">Seen through the entries they wrote.</p>
           <div id="devList"></div>
@@ -876,7 +891,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-04';
+const APP_VERSION='v260825-07';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -891,7 +906,7 @@ const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,2
            readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           fresh:0,tplVer:0,handover:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,tplVer:0,handover:'',joinUrl:'https://basket-join.balthasar.workers.dev',joinCode:'',joinId:'',joinAt:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
@@ -974,6 +989,17 @@ const L={en:{
  quotaNote:'GitHub budget: {w} of {m} writes used this hour, {r} requests left on the token.',
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
  quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
+ joinTitle:'Join code', joinHint:'Six characters that carry this flight \u2014 setup, token and all \u2014 onto another device. The setup travels encrypted with the code itself, is held for a day, and is handed over once and then forgotten.',
+ joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for about {h} more hours. One device can collect it, then it is gone.',
+ joinMade:'The code is {c}. Read it to the other device, where it goes under Load current flight.',
+ joinRevoked:'Code withdrawn', joinFailed:'The relay could not be reached.',
+ joinNoUrl:'No relay address yet. It goes into the setup under GitHub connection \u2014 Join code relay.',
+ lJoinUrl:'Join code relay',
+ loadTitle:'Load current flight', loadAsk:'Enter the six-character code from the master device.',
+ loadBadCode:'That code is not right.', loadNotFound:'No flight under that code. It may have been collected already, or expired.',
+ loadLocked:'Too many attempts from here. Try again in an hour.',
+ loadFound:'Flight {f} \u00b7 {c} \u00b7 repository {r}. This device becomes a follower and reads the log.',
+ loadDone:'Setup taken over, {n} entries read.', apply:'Apply',
  syncNow:'Synchronize data', syncHint:'Sends what is waiting and reads the whole table back.',
  syncDone:'Everything is in step. {r} rows on this device.',
  syncPartly:'{n} rows could not be sent. {e}',
@@ -1047,7 +1073,7 @@ const L={en:{
  rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
  rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
  manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Return to entry and complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
+ manUnc:'Estimated position uncertainty', manPost:'Report to CC', manIncomplete:'Complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Return to entry and complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
  manPickFirst:'Tap the map first to place the position',
  manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
  manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
@@ -1126,6 +1152,17 @@ const L={en:{
  quotaNote:'GitHub-Budget: {w} von {m} Schreibvorgängen in dieser Stunde, {r} Anfragen auf dem Token übrig.',
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
  quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
+ joinTitle:'Beitrittscode', joinHint:'Sechs Zeichen, die diese Fahrt — Einrichtung, Token und alles — auf ein anderes Gerät bringen. Die Einrichtung reist mit dem Code selbst verschlüsselt, liegt einen Tag bereit und wird einmal übergeben und dann vergessen.',
+ joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch etwa {h} Stunden gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
+ joinMade:'Der Code lautet {c}. Dem anderen Gerät vorlesen, dort unter „Load current flight" eingeben.',
+ joinRevoked:'Code widerrufen', joinFailed:'Die Übergabestelle war nicht erreichbar.',
+ joinNoUrl:'Noch keine Adresse der Übergabestelle. Sie gehört in die Einstellungen unter GitHub-Verbindung — Join code relay.',
+ lJoinUrl:'Übergabestelle für Beitrittscodes',
+ loadTitle:'Laufende Fahrt übernehmen', loadAsk:'Den sechsstelligen Code vom Master-Gerät eingeben.',
+ loadBadCode:'Dieser Code stimmt nicht.', loadNotFound:'Keine Fahrt unter diesem Code. Vielleicht schon abgeholt oder abgelaufen.',
+ loadLocked:'Zu viele Versuche von hier. In einer Stunde nochmals.',
+ loadFound:'Fahrt {f} · {c} · Repository {r}. Dieses Gerät wird Follower und liest das Logbuch.',
+ loadDone:'Einrichtung übernommen, {n} Einträge gelesen.', apply:'Übernehmen',
  syncNow:'Daten abgleichen', syncHint:'Sendet, was wartet, und liest die ganze Tabelle zurück.',
  syncDone:'Alles im Gleichstand. {r} Zeilen auf diesem Gerät.',
  syncPartly:'{n} Zeilen liessen sich nicht senden. {e}',
@@ -1164,7 +1201,7 @@ const L={en:{
  lReadyKg:'Gewicht volle Schütte', lSteps:'Standard-Abwurftasten',
  lReadySteps:'Standard-Meldeschritte Schütte',
  hRessources:'Ressourcen', lO2:'O\u2082-Flaschen', lO2hint:'Die mitgeführten Flaschen, je mit Volumen und Fülldruck. Daraus wird die Reserve gerechnet: Volumen mal Druck, aufsummiert, ergibt Liter O\u2082 bei einem bar. Eine leere Zeile heisst, dass diese Flasche nie abgefragt wird.',
- hMap:'Karte und Handposition', lMapKm:'Kacheln im Umkreis von', lMapZ:'Kacheln bis Zoomstufe',
+ hMap:'Karte und Handposition', lMapKm:'Kacheln behalten im Umkreis', lMapZ:'Behalten bis Zoomstufe',
  lMapMax:'Positionen auf der Karte', lUnc:'Stufen der Unsicherheit', lTiles:'Kartenquellen',
  lTileStreet:'Strassen', lTileTopo:'Gelände', lTileSat:'Satellit',
  lMapHint:'Kacheln um die letzte gemeldete Position werden bei Verbindung im Hintergrund geholt, damit die Karte auch ohne Verbindung funktioniert. Eine ununterbrochene Reihe von Handpositionen wird immer vollständig gezeigt.',
@@ -1195,23 +1232,23 @@ const L={en:{
  inSync:'Synchron, zuletzt um', reportingAs:'Meldet als', reportingAsLbl:'meldet als', notThePic:'nicht der PIC',
  shareTitle:'Einrichtung weitergeben', copyLink:'Link kopieren', qrTooLong:'Der Link ist zu lang für einen Code — bitte kopieren.', qrHint:'Mit der Kamera des anderen Geräts abfotografieren.', done:'Fertig',
  waTitle:'An WhatsApp senden', waRemaining:'Übrige Empfänger', copyText:'Text kopieren',
- lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', lgManPos:'Manual position',
- reportPos:'Report Position', mapStreet:'Streets', mapTopo:'Terrain', mapSat:'Satellite',
- rpTitle:'Report Position', rpAsk:'Report the current GPS position, or report a manually selected location?',
- rpGps:'Report GPS position', rpMan:'Report manual position', rpGpsDone:'GPS position reported',
- manTitle:'Manual position', manAlt:'Altitude AMSL', manClimb:'Climb', manSink:'Sink', manVs:'Vertical speed', manTc:'Track', manSp:'Speed',
- manUnc:'Estimated position tolerance', manPost:'Report to CC', manIncomplete:'Complete values', manIncompleteAsk:'Altitude, track, speed or rate of climb is still empty.', manAsIs:'Send as is', manComplete:'Return to entry and complete values', manSameAsk:'The figures are still the ones carried over from the last report.', manOnlyPos:'Send only coordinates', manDone:'Reported to CC',
- manPickFirst:'Tap the map first to place the position',
- manConfirmAsk:'Altitude and vertical speed can be read off the barograph and belong in the report. Keep the previous values, or send without them?',
- manKeepPrev:'Confirm previous values', manBack:'Return', manNoValues:'Continue without',
-  tilesHeld:'{n} new tiles held, {m} in this view',
- tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
- tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
- lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
- lMapKm:'Keep tiles within', lMapZ:'Keep up to zoom', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
- posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
- picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
- picChangeYes:'Report the change', picNew:'PIC Change, new: {b}', picPosted:'PIC change posted', picChangeNo:'Just the reading',
+ lgResting:'ruht', lgAwake:'beide wach', lgInv:'Inventar', lgNote:'Notiz', lgPos:'Position', lgManPos:'Position von Hand',
+ reportPos:'Position melden', mapStreet:'Strassen', mapTopo:'Gelände', mapSat:'Satellit',
+ rpTitle:'Position melden', rpAsk:'Die aktuelle GPS-Position melden, oder einen von Hand gewählten Ort?',
+ rpGps:'GPS-Position melden', rpMan:'Position von Hand melden', rpGpsDone:'GPS-Position gemeldet',
+ manTitle:'Position von Hand', manAlt:'Höhe AMSL', manClimb:'Steigen', manSink:'Sinken', manVs:'Vertikalgeschwindigkeit', manTc:'Kurs', manSp:'Fahrt',
+ manUnc:'Geschätzte Positionsunsicherheit', manPost:'An CC melden', manIncomplete:'Werte vervollständigen', manIncompleteAsk:'Höhe, Kurs, Fahrt oder Steigrate ist noch leer.', manAsIs:'So senden', manComplete:'Zurück zur Eingabe und ergänzen', manSameAsk:'Die Werte sind noch die aus der letzten Meldung übernommenen.', manOnlyPos:'Nur Koordinaten senden', manDone:'An CC gemeldet',
+ manPickFirst:'Zuerst auf die Karte tippen, um die Position zu setzen',
+ manConfirmAsk:'Höhe und Vertikalgeschwindigkeit lassen sich am Barografen ablesen und gehören in die Meldung.',
+ manKeepPrev:'Bisherige Werte übernehmen', manBack:'Zurück', manNoValues:'Ohne Werte weiter',
+  tilesHeld:'{n} neue Kacheln vorgehalten, {m} im Umkreis',
+ tileTest:'Kartenquellen prüfen', tileNoToken:'Die Karte braucht ein ArcGIS-Zugangstoken. Es ist kostenlos und gehört in die Einstellungen unter Karte und Handposition.',
+ tileOk:'Strasse {a} \u00b7 Satellit {b}', lTileToken:'ArcGIS-Zugangstoken',
+ lTokenHint:'Freiwillig. Ohne Token nutzt die Satellitenebene den schlüssellosen Dienst von Esri; er funktioniert, ist aber nicht zugesichert.',
+ posManual:'von Hand', posEst:'geschätzt um {t}', posNoGps:'kein GPS-Signal',
+ posUnc:'\u00b1 {n} km', picChange:'PIC-Wechsel',
+ picChangeAsk:'Das Kommando wechselt von {a} auf {b}. Soll das gemeldet werden?',
+ picChangeYes:'Wechsel melden', picNew:'PIC-Wechsel, neu: {b}', picPosted:'PIC-Wechsel gemeldet', picChangeNo:'Nur die Werte',
  lPosMin:'Automatische Positionsmeldung alle', lOpsMin:'Ops-Normal-Erinnerung nach',
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
@@ -3850,6 +3887,117 @@ async function reportPosition(){
 $('#btnRepPos').onclick=()=>reportPosition();
 addEventListener('resize',()=>{if(MAP)mapDraw()});
 
+/* ── Join code ───────────────────────────────────────────────────────
+   Six characters, spoken over a radio or a telephone, that carry a whole flight onto another
+   device. What travels through the relay is the setup encrypted with the code itself, so the
+   relay is a letterbox and not a confidant: it holds a box it cannot open, hands it over once,
+   and forgets it.
+
+   The alphabet leaves out the characters that are misheard or misread — no O against 0, no I
+   against 1 — which matters when the code is read aloud in a hangar. */
+const JOIN_A='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const joinUrl=()=>String(CFG.joinUrl||'').replace(/\/+$/,'');
+function makeCode(){
+  const a=new Uint8Array(6);crypto.getRandomValues(a);
+  return [...a].map(x=>JOIN_A[x%JOIN_A.length]).join('');
+}
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function codeId(code){
+  const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('basket-join:'+code));
+  return hex(d).slice(0,32);
+}
+async function codeKey(code,salt){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt:salt,iterations:200000,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function sealSetup(code,obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await codeKey(code,salt);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,
+    new TextEncoder().encode(JSON.stringify(obj)));
+  const all=new Uint8Array(16+12+ct.byteLength);
+  all.set(salt,0);all.set(iv,16);all.set(new Uint8Array(ct),28);
+  return btoa(String.fromCharCode(...all));
+}
+async function openSetup(code,b64){
+  const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const key=await codeKey(code,raw.slice(0,16));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:raw.slice(16,28)},key,raw.slice(28));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+async function createJoinCode(){
+  if(!joinUrl())return info(t('joinTitle'),t('joinNoUrl'));
+  if(!configured())return info(t('joinTitle'),t('enterRepoToken'));
+  const code=makeCode();
+  try{
+    const id=await codeId(code);
+    const payload=await sealSetup(code,setupPayload(true));
+    const r=await fetch(joinUrl()+'/join',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({id:id,payload:payload})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    CFG.joinCode=code;CFG.joinId=id;CFG.joinAt=new Date().toISOString();save(K_CFG,CFG);
+    paintJoin();
+    await info(t('joinTitle'),t('joinMade').replace('{c}',code));
+  }catch(e){info(t('joinTitle'),t('joinFailed')+' '+(e.message||''))}
+}
+async function revokeJoinCode(){
+  if(!CFG.joinId||!joinUrl())return;
+  try{await fetch(joinUrl()+'/join?id='+encodeURIComponent(CFG.joinId),{method:'DELETE'})}catch(e){}
+  CFG.joinCode='';CFG.joinId='';CFG.joinAt='';save(K_CFG,CFG);
+  paintJoin();toast(t('joinRevoked'));
+}
+function paintJoin(){
+  const box=$('#joinBox');if(!box)return;
+  box.style.display=CFG.role==='master'?'':'none';
+  const c=$('#joinCode');
+  if(!c)return;
+  if(CFG.joinCode){
+    const age=CFG.joinAt?Math.max(0,24-Math.floor((Date.now()-new Date(CFG.joinAt))/3600000)):0;
+    c.textContent=CFG.joinCode;
+    $('#joinNote').textContent=t('joinValid').replace('{h}',String(age));
+    $('#btnJoinRevoke').style.display='';
+  }else{
+    c.textContent='\u2014';
+    $('#joinNote').textContent='';
+    $('#btnJoinRevoke').style.display='none';
+  }
+}
+async function loadFlightByCode(){
+  if(!joinUrl())return info(t('loadTitle'),t('joinNoUrl'));
+  const raw=await ask({title:t('loadTitle'),text:t('loadAsk'),input:'text',ph:'XXXXXX',ok:t('ok')});
+  if(raw===null)return;
+  const code=String(raw||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+  if(code.length!==6)return info(t('loadTitle'),t('loadBadCode'));
+  try{
+    const id=await codeId(code);
+    const r=await fetch(joinUrl()+'/join?id='+encodeURIComponent(id),{cache:'no-store'});
+    if(r.status===404)return info(t('loadTitle'),t('loadNotFound'));
+    if(r.status===429)return info(t('loadTitle'),t('loadLocked'));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const o=await openSetup(code,(await r.json()).payload);
+    const ok=await ask({title:t('loadTitle'),ok:t('apply'),cancel:t('cancel'),
+      text:t('loadFound').replace('{f}',o.flight||'\u2014').replace('{c}',o.call||'\u2014')
+        .replace('{r}',o.repo||'\u2014')});
+    if(!ok)return;
+    applyShared(o);
+    if(o.token)CFG.token=o.token;
+    CFG.role='follower';CFG.provisioned=1;CFG.joinCode='';CFG.joinId='';
+    ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
+    for(const k in ETAG)delete ETAG[k];
+    save(K_CFG,CFG);
+    fillSetup();paintSyncBox();paintJoin();lockSettings();paint();
+    /* the log is not carried in the code — with the setup in hand the device simply reads it */
+    if(configured()&&navigator.onLine){await sync(true,false);await waitSync()}
+    await info(t('loadTitle'),t('loadDone').replace('{n}',String(ENT.length)));
+  }catch(e){
+    info(t('loadTitle'),/decrypt|operation/i.test(e.message||'')?t('loadBadCode'):t('joinFailed')+' '+(e.message||''));
+  }
+}
+
 /* ── Post ──────────────────────────────────────────────────────────── */
 $('#btnPost').onclick=async()=>{
   const ty=UI.type;let e=null;
@@ -4165,7 +4313,7 @@ $('#devList').addEventListener('click',async ev=>{
 function paintSyncBox(){
   $('#syncBox').style.display=(CFG.role==='master'||Number(CFG.provisioned))?'':'none';
   $('#btnNewFlight').style.display=CFG.role==='master'?'':'none';
-  paintDevices();
+  paintDevices();paintJoin();
 }
 function paintRepHint(){
   $('#sReporterOpen').value=CFG.reporter||'';
@@ -4238,6 +4386,9 @@ $('#btnTileTest').onclick=async()=>{
   const a=await one('street'), b=await one('sat');
   note.textContent=t('tileOk').replace('{a}',a).replace('{b}',b);
 };
+$('#btnJoinMake').onclick=createJoinCode;
+$('#btnJoinRevoke').onclick=revokeJoinCode;
+$('#btnLoadFlight').onclick=loadFlightByCode;
 $('#btnShowSet').onclick=showSettings;
 $('#btnMenu').addEventListener('click',()=>{if(CFG.role==='master')loadSeen()});
 $('#btnUnlock').onclick=async()=>{
