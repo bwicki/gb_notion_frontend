@@ -215,9 +215,14 @@ select:focus{outline:0;border-color:var(--sel)}
 .settbl td{padding:4px 6px;border-bottom:.5px solid var(--line-soft);vertical-align:top}
 .settbl td:first-child{color:var(--muted);width:44%}
 .settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
-.joinrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:4px}
-.joinrow b{font-size:26px;letter-spacing:.14em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.joinrow .go{width:auto;padding:0 14px;height:42px;font-size:12.5px}
+.joinrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:end;margin-bottom:4px}
+.joinrow b{font-size:29px;font-weight:700;letter-spacing:.16em;line-height:42px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.joinrow .go{width:auto;padding:0 14px;height:42px;min-height:42px;margin:0;font-size:12.5px}
+.iconbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:9px;background:var(--field);
+  display:grid;place-items:center}
+.iconbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
 .devrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
   padding:8px 0;border-bottom:.5px solid var(--line-soft)}
 .devrow b{display:block;font-size:13px;font-weight:400}
@@ -832,10 +837,7 @@ body.mapon #app{visibility:hidden}
         <div id="joinBox" style="display:none">
         <h3 data-t="joinTitle">Join code</h3>
         <p class="hint" data-t="joinHint">Six characters that carry this flight onto another device.</p>
-        <div class="joinrow"><b id="joinCode">\u2014</b>
-          <button class="go sec" id="btnJoinMake" data-t="joinMake">Create</button>
-          <button class="go sec" id="btnJoinRevoke" data-t="joinRevoke" style="display:none">Revoke</button></div>
-        <p class="hint" id="joinNote"></p>
+        <div class="joinwrap"></div>
       </div>
 
       <div id="devBox" style="display:none">
@@ -891,7 +893,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260825-07';
+const APP_VERSION='v260825-08';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -990,7 +992,8 @@ const L={en:{
  quotaHold:'Holding back to stay inside the GitHub write budget — the entries stay queued.',
  quotaHit:'GitHub asked for a pause. Sending resumes on its own.',
  joinTitle:'Join code', joinHint:'Six characters that carry this flight \u2014 setup, token and all \u2014 onto another device. The setup travels encrypted with the code itself, is held for a day, and is handed over once and then forgotten.',
- joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for about {h} more hours. One device can collect it, then it is gone.',
+ joinShow:'Show join code', joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for another {h}. One device can collect it, then it is gone.',
+ joinNew:'New code', joinExpired:'This code has expired.', codeCopied:'Code copied',
  joinMade:'The code is {c}. Read it to the other device, where it goes under Load current flight.',
  joinRevoked:'Code withdrawn', joinFailed:'The relay could not be reached.',
  joinNoUrl:'No relay address yet. It goes into the setup under GitHub connection \u2014 Join code relay.',
@@ -1153,7 +1156,8 @@ const L={en:{
  quotaHold:'Zurückgehalten, um im GitHub-Schreibbudget zu bleiben — die Einträge bleiben in der Warteschlange.',
  quotaHit:'GitHub hat um eine Pause gebeten. Das Senden läuft von selbst weiter.',
  joinTitle:'Beitrittscode', joinHint:'Sechs Zeichen, die diese Fahrt — Einrichtung, Token und alles — auf ein anderes Gerät bringen. Die Einrichtung reist mit dem Code selbst verschlüsselt, liegt einen Tag bereit und wird einmal übergeben und dann vergessen.',
- joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch etwa {h} Stunden gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
+ joinShow:'Beitrittscode zeigen', joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch {h} gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
+ joinNew:'Neuer Code', joinExpired:'Dieser Code ist abgelaufen.', codeCopied:'Code kopiert',
  joinMade:'Der Code lautet {c}. Dem anderen Gerät vorlesen, dort unter „Load current flight" eingeben.',
  joinRevoked:'Code widerrufen', joinFailed:'Die Übergabestelle war nicht erreichbar.',
  joinNoUrl:'Noch keine Adresse der Übergabestelle. Sie gehört in die Einstellungen unter GitHub-Verbindung — Join code relay.',
@@ -2625,6 +2629,7 @@ async function shareSheet(){
     return link;
   };
   await ask({title:t('shareTitle'),cancel:false,ok:t('copyLink'),
+    headBtn:CFG.role==='master'?{icon:IC_CODE,label:t('joinShow'),act:()=>setTimeout(joinSheet,140)}:null,
     text:'Open this link on the other device. It carries the flight, the pilots, the ballast '
       +'figures, the WhatsApp recipients and the message templates, and sets that device to '
       +'Follower. Its own reporter name, device mode and colours stay untouched. '
@@ -2704,9 +2709,10 @@ async function openMenu(){
     about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h0" stroke-width="2.2"/>',
     license:''
   };
+  IC.join='<path d="M9 12h6"/><path d="M8 8a4 4 0 0 0 0 8h2"/><path d="M16 8a4 4 0 0 1 0 8h-2"/>';
   const items=[['form',t('mReport')],['set',t('mSettings')],['docs',t('mDocs')]]
     .concat(CFG.role==='master'?[['share',t('mShare')]]:[])
-    .concat([['about',t('mAbout')]]);
+    .concat([['join',t('loadTitle')],['about',t('mAbout')]]);
   await ask({title:t('menu'),cancel:false,ok:t('close'),
     headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
              act:()=>setTheme(isNight()?'day':'night',true)},
@@ -2722,6 +2728,7 @@ async function openMenu(){
       else if(k==='pull'){delete ETAG[paths().json];sync(false,false)}
       else if(k==='sync')sync(false,true);
       else if(k==='share')shareSheet();
+      else if(k==='join')loadFlightByCode();
       else if(k==='about')window.open('readme.html','_blank','noopener');
     })}});
 }
@@ -3950,22 +3957,57 @@ async function revokeJoinCode(){
   CFG.joinCode='';CFG.joinId='';CFG.joinAt='';save(K_CFG,CFG);
   paintJoin();toast(t('joinRevoked'));
 }
-function paintJoin(){
-  const box=$('#joinBox');if(!box)return;
-  box.style.display=CFG.role==='master'?'':'none';
-  const c=$('#joinCode');
-  if(!c)return;
-  if(CFG.joinCode){
-    const age=CFG.joinAt?Math.max(0,24-Math.floor((Date.now()-new Date(CFG.joinAt))/3600000)):0;
-    c.textContent=CFG.joinCode;
-    $('#joinNote').textContent=t('joinValid').replace('{h}',String(age));
-    $('#btnJoinRevoke').style.display='';
-  }else{
-    c.textContent='\u2014';
-    $('#joinNote').textContent='';
-    $('#btnJoinRevoke').style.display='none';
-  }
+/* the same panel serves the setup and the menu, so it is built from one piece and addressed
+   by class rather than by id — two copies of an id would leave one of them dead */
+const IC_CODE='<rect x="4" y="7" width="16" height="11" rx="2"/><path d="M8 12h1M11.5 12h1M15 12h1"/>';
+async function joinSheet(){
+  await ask({title:t('joinTitle'),text:t('joinHint'),cancel:false,ok:t('close'),
+    html:'<div class="joinwrap"></div>',
+    onMount:m=>{bindJoin(m.querySelector('.joinwrap'));paintJoin()}});
 }
+const IC_COPY='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/>'
+  +'<path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+function joinHtml(){
+  return '<div class="joinrow"><b class="jCode">\u2014</b>'
+    +'<button class="iconbtn jCopy" aria-label="copy">'+IC_COPY+'</button>'
+    +'<button class="go sec jMake">'+esc(t('joinMake'))+'</button>'
+    +'<button class="go sec jRevoke">'+esc(t('joinRevoke'))+'</button></div>'
+    +'<p class="hint jNote"></p>';
+}
+function bindJoin(root){
+  root.innerHTML=joinHtml();
+  root.querySelector('.jMake').onclick=createJoinCode;
+  root.querySelector('.jRevoke').onclick=revokeJoinCode;
+  root.querySelector('.jCopy').onclick=async()=>{
+    if(!CFG.joinCode)return;
+    try{await navigator.clipboard.writeText(CFG.joinCode);toast(t('codeCopied'))}
+    catch(e){toast(CFG.joinCode)}
+  };
+}
+/* the remaining life is counted down rather than stated once — a code that says "a day" for
+   twenty hours tells nobody when to make a new one */
+function joinLeft(){
+  if(!CFG.joinCode||!CFG.joinAt)return null;
+  const ms=24*3600000-(Date.now()-new Date(CFG.joinAt).getTime());
+  return ms>0?ms:0;
+}
+function paintJoin(){
+  const box=$('#joinBox');
+  if(box)box.style.display=CFG.role==='master'?'':'none';
+  const ms=joinLeft();
+  $$('.joinwrap').forEach(root=>{
+    if(!root.querySelector('.jCode'))bindJoin(root);
+    const on=!!CFG.joinCode&&ms!==0;
+    root.querySelector('.jCode').textContent=on?CFG.joinCode:'\u2014';
+    root.querySelector('.jCopy').style.visibility=on?'':'hidden';
+    root.querySelector('.jRevoke').style.display=on?'':'none';
+    root.querySelector('.jMake').textContent=on?t('joinNew'):t('joinMake');
+    root.querySelector('.jNote').textContent=!CFG.joinCode?''
+      :(ms===0?t('joinExpired')
+        :t('joinValid').replace('{h}',Math.floor(ms/3600000)+' h '+Math.floor(ms%3600000/60000)+' min'));
+  });
+}
+setInterval(()=>{if(CFG.joinCode)paintJoin()},30000);
 async function loadFlightByCode(){
   if(!joinUrl())return info(t('loadTitle'),t('joinNoUrl'));
   const raw=await ask({title:t('loadTitle'),text:t('loadAsk'),input:'text',ph:'XXXXXX',ok:t('ok')});
@@ -4386,8 +4428,6 @@ $('#btnTileTest').onclick=async()=>{
   const a=await one('street'), b=await one('sat');
   note.textContent=t('tileOk').replace('{a}',a).replace('{b}',b);
 };
-$('#btnJoinMake').onclick=createJoinCode;
-$('#btnJoinRevoke').onclick=revokeJoinCode;
 $('#btnLoadFlight').onclick=loadFlightByCode;
 $('#btnShowSet').onclick=showSettings;
 $('#btnMenu').addEventListener('click',()=>{if(CFG.role==='master')loadSeen()});

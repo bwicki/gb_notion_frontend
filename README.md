@@ -554,15 +554,19 @@ Two masters at once would overwrite each other's setup, so the change is deliber
 and confirmed at both ends. A declined offer is remembered and not asked again; the master can
 withdraw it by offering the role to somebody else, or by leaving it and carrying on.
 
-**A six-character code carries the whole flight.** Beside *Synchronize data* at the top of the
-setup is *Load current flight*; on the master, above the device list, is *Join code*. The master
+**A six-character code carries the whole flight.** *Load current flight* is in the menu on
+every device and beside *Synchronize data* in the setup, because the device that needs it is
+usually the one that has nothing yet. On the master, above the device list, is *Join code*, and
+the same panel opens from the top right of the *Share setup* window. The master
 presses *Create*, reads six characters to the other device — `WUP9Q5`, in an alphabet with no O
 against 0 and no I against 1 — and that device has the flight: setup, token, presets, templates,
 and the log, which it reads from GitHub as soon as it has the token.
 
 The setup travels **encrypted with the code itself**, so the relay that carries it holds a box
 it cannot open. It hands the box over **once** and deletes it, the code dies after a day,
-and *Revoke* kills it sooner. Twenty wrong guesses from one address and that address is shut out
+and *Revoke* kills it sooner. The panel counts the remaining life down by the minute rather
+than stating it once, a tap on the copy key puts the code on the clipboard, and once it has run
+out the code is struck and *New code* replaces *Create*. Twenty wrong guesses from one address and that address is shut out
 for an hour, which is what makes six characters enough.
 
 The relay is a small Cloudflare worker, free to run; `join-worker/worker.js` and the twenty
