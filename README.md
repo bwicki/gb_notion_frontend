@@ -1,17 +1,55 @@
 # GB Notion Frontend — Basket Reporting
 
-An offline version of the Basket Reporting form for use in the basket during a gas balloon
-flight. Same four message types as the Tally form, same submit action, but it keeps working
-without signal, stamps every entry with time and GPS position, carries the ballast figure
-forward across all devices, and lets several people report in parallel.
+The reporting form for the basket of a gas balloon. It keeps working without a signal, stamps
+every entry with the time and the position, carries the ballast figure forward across all
+devices, and lets several people report in parallel.
 
-Every entry is written to a JSON and a CSV file in a GitHub repository. Notion polls those
-files. The app reads the same files back every five seconds, so each device always shows the
-complete flight.
+Seven kinds of entry — **Ballast, ATC, Ressources, Other**, and the three the app writes itself,
+**POS**, **MANPOS** and **PIC** — go into a JSON and a CSV file in a GitHub repository. Notion
+reads those files. Every device reads them back every five seconds, so each shows the complete
+flight.
 
-No build step, no dependencies, no external requests other than to the GitHub API.
+When the satellites are jammed, a position can be given by eye on a map that works without a
+connection. When there is no link at all, everything is filed on the device and goes out by
+itself when the link returns.
+
+One HTML file, no build step, no dependencies. Nothing leaves the device except calls to the
+GitHub API, the map tiles, and — if you leave place names on — one lookup per position.
 
 ---
+
+## Contents
+
+ 1. [The screen](#1-the-screen)
+ 2. [Set up](#2-set-up)
+ 3. [Install on the iPad](#3-install-on-the-ipad)
+ 4. [Floating over other apps](#4-floating-over-other-apps)
+ 5. [Who is reporting](#5-who-is-reporting)
+ 6. [Ballast](#6-ballast)
+ 7. [ATC, Ressources, Other](#7-atc-ressources-other)
+ 8. [Position](#8-position)
+ 9. [Automatic position reports](#9-automatic-position-reports)
+10. [The Ops Normal clock](#10-the-ops-normal-clock)
+11. [Place names](#11-place-names)
+12. [When the satellites are gone](#12-when-the-satellites-are-gone)
+13. [WhatsApp](#13-whatsapp)
+14. [Master and followers](#14-master-and-followers)
+15. [Several devices at once](#15-several-devices-at-once)
+16. [What carries over](#16-what-carries-over)
+17. [Sending, and what happens without a link](#17-sending-and-what-happens-without-a-link)
+18. [Working without a link, and GitHub's limits](#18-working-without-a-link-and-github-s-limits)
+19. [The log](#19-the-log)
+20. [What the app writes](#20-what-the-app-writes)
+21. [Polling from Notion](#21-polling-from-notion)
+22. [Beginning a new flight](#22-beginning-a-new-flight)
+23. [Language](#23-language)
+24. [Keeping the crew on the current build](#24-keeping-the-crew-on-the-current-build)
+25. [When a change does not appear](#25-when-a-change-does-not-appear)
+26. [Limits worth knowing before takeoff](#26-limits-worth-knowing-before-takeoff)
+27. [Version](#27-version)
+28. [License](#28-license)
+29. [Files](#29-files)
+
 
 ## 1. The screen
 
@@ -194,20 +232,6 @@ until it is switched back. Changing the PIC on the Ressources tab moves the defa
 
 Each row also records `device_mode`, so it is possible to tell afterwards which reporting
 regime a row came from.
-
-## 5a. Position
-
-The position on every row is the fix of the device that made the entry, taken at the moment of
-posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
-re-stamped. Three columns carry it in short notation: `pos_lat` as `484532N`, `pos_lon` as
-`0072345E`, and `alt_ft` as WGS84 altitude in feet. The decimal degrees and metres stay
-alongside for map links and for anything that needs the raw value.
-
-Track and ground speed come with every entry. iOS and Android supply both with the fix once the
-device is moving; when they do not, the app derives them from the previous fix, requiring at
-least three seconds and five metres between the two so that a stationary basket does not
-produce a random course. Both fields stay empty rather than guessing when neither source is
-available. The header carries the live values under the flight number.
 
 ## 6. Ballast
 
@@ -412,7 +436,171 @@ The reporter is named because the entry may well have come from the other pilot'
 panel is read from the table, not from what this device happens to remember. A follow-up call
 never has to be reconstructed from memory, and never depends on who made the last one.
 
-## 8. WhatsApp
+## 8. Position
+
+The position on every row is the fix of the device that made the entry, taken at the moment of
+posting. Rows merged in from another iPad keep that iPad's position — nothing is ever
+re-stamped. Three columns carry it in short notation: `pos_lat` as `484532N`, `pos_lon` as
+`0072345E`, and `alt_ft` as WGS84 altitude in feet. The decimal degrees and metres stay
+alongside for map links and for anything that needs the raw value.
+
+Track and ground speed come with every entry. iOS and Android supply both with the fix once the
+device is moving; when they do not, the app derives them from the previous fix, requiring at
+least three seconds and five metres between the two so that a stationary basket does not
+produce a random course. Both fields stay empty rather than guessing when neither source is
+available. The header carries the live values under the flight number.
+
+## 9. Automatic position reports
+
+Set an interval under *Ressources* in the setup and the app writes a **POS** row on its own at
+that rhythm — position, place, altitude and rate of climb — so the track of the flight survives
+the hours when nobody has a hand free. `0` turns it off, which is the default. POS rows go into
+the table and the printout like any other kind and can be filtered out of a printout on their
+own.
+
+## 10. The Ops Normal clock
+
+Send a transmitted call whose message contains *Ops Normal* and the app asks whether to keep the
+time. Pressing *Remind me* turns the button green and holds it for a second reading *Confirmed*,
+the same signal the post button gives, before the window closes: *Remind of the next Ops Normal in how many minutes?*, twenty by default and changeable in
+the window. When it falls due there is a tone and a message. It is the one call that has to
+happen on a clock, and the one most easily forgotten in weather.
+
+## 11. Place names
+
+On by default, and a setting of its own under *Ressources*. Switched on, each entry's position
+is turned once into something a reader can place — `near Szeged/HU` — which then appears under
+the position in the WhatsApp message, in the log, in the printout and in a `place` column.
+
+It appears as `{place}` — `near Szeged/HU` — and as `{location}` for the bare `Szeged/HU`, in
+the heading of the Last Message panel after the time, in the log, in the printout and in a
+`place` column. A message on its way to WhatsApp waits up to two and a half seconds for the
+lookup rather than going out without it; beyond that it leaves anyway, because a message that
+arrives is worth more than a place name.
+
+Lookups are queued one at a time with a second between them, as the service asks. A failure is
+not remembered — the next entry in the same square kilometre tries again — while an answer is,
+so a long flight costs a few dozen requests rather than one per entry.
+
+**Two things to weigh before switching it off.** The lookup goes to OpenStreetMap's public
+service, so the coordinates of the entry leave the device; and it only works with a link. There
+is no offline place database that would fit in a web app. Failures are silent by design: the
+entry is written immediately and the place is filled in afterwards if an answer arrives, so a
+lost lookup costs nothing but an empty field.
+
+Answers are cached on a coarse grid — about a kilometre — so a long flight costs a few dozen
+requests rather than one per entry, which keeps well inside what the service asks of its users.
+
+## 12. When the satellites are gone
+
+Jamming is not rare over parts of Europe, and a balloon that cannot say where it is becomes a
+problem for everyone. Two things follow from that.
+
+**Every kind of report goes out without a fix.** Ballast, ATC, resources, notes and the
+automatic position rows are all posted with the position fields simply left empty rather than
+refused; a POS row written with no fix says so — *Position · no GPS signal*. Nothing in the app
+waits for a satellite.
+
+**And a position can be given by eye.** *Report Position* sits under the picture and voice
+buttons on the Other screen. With a fix it asks first: report the satellite position, or place
+one by hand? The satellite answer writes an ordinary POS row and says *GPS position reported* —
+it does not disturb the rhythm of the automatic reports, it is simply one more row. With no fix
+the question is skipped and the map opens directly.
+
+### The map
+
+The app shrinks to a small draggable button carrying the tally mark, and beneath it a map fills
+the screen — street or satellite, with zoom buttons. It opens on the last reported position.
+
+- Every reported position is a dot with its time beside it: **blue from a satellite, red from
+  the eye**. Tapping one shows its altitude, track and rate of climb for ten seconds.
+- The dots are joined by the track flown, and from the last one the course is carried an hour
+  forward, taken from the line between the **last two reported positions** — whatever kind they
+  were — with cross ticks at 15, 30, 45 and 60 minutes.
+- The last twenty positions are shown, adjustable in the setup. **An unbroken run of manual
+  positions is always shown in full**, however long: that run is the whole picture when the
+  satellites are gone.
+- The map pinches to zoom as well as taking the plus and minus keys. **Whatever lies between
+  the fingers stays between the fingers** — during the gesture the tiles are stretched about
+  that point, and the map redraws at the nearest whole zoom when the fingers lift, holding the
+  same ground under the same spot on the glass.
+- Tapping the map places a crosshair, which can then be dragged until it sits over the place the
+  crew believes it is.
+- Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
+  last known values because both can be read off the barograph; track and speed, which are
+  optional; and a slider for the estimated position uncertainty, in five steps. The circle for the step
+  chosen is drawn around the crosshair straight away and **blinks slowly**, following the
+  slider — so the choice is a picture of ground rather than a number. Climb and sink are two
+  small keys beside the figure rather than a minus sign to be remembered with cold hands, and a
+  **compass arrow beside the track turns with what is typed**, which shows a wrong digit before
+  it is sent. Every prefilled field is selected when tapped, so a new figure simply replaces the
+  old one.
+- The rate of climb is typed in tenths: `20` becomes `2.0`, so the decimal point costs no
+  keystroke.
+- Before sending, the app asks once if any of altitude, track, speed or rate of climb is
+  **empty**, and also if all four are still exactly the figures **carried over from the last
+  report** — an unchanged altitude an hour later is usually an oversight rather than a reading.
+  Three ways on: *Complete values* returns to the form, *Send as is* sends what stands there
+  without a second press, and *Send only coordinates* clears the four and sends the position
+  alone. - Track, projection, ticks and circles are all drawn thin with a white glow, the same treatment
+  as the crosshair, so they stay legible on a pale street map and on a dark satellite image
+  alike without shouting over the ground underneath.
+- The panel sits at the top of the screen, narrow enough to leave the map beside and below it,
+  and drops to the bottom when the crosshair is in the upper half. It has no title bar; *Report
+  to CC* and *Close* share the bottom line.
+
+The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It has a WhatsApp
+template of its own in the setup, goes to the table and to whichever recipients are ticked on
+the Other screen, and appears in that
+screen's Last Message panel. It can be picked or left out of a printout like any other kind.
+
+**Afterwards the estimate is carried forward.** With no fix, the next ATC or ballast report takes
+its position from the last manual one and marks it `(estimated at 2032Z)`, so nobody reads a
+terrestrial guess as a satellite one.
+
+### Tiles
+
+Three views, chosen at the top right of the map and remembered between visits:
+
+| View | Source |
+|---|---|
+| **Streets** | OpenStreetMap standard tiles |
+| **Terrain** | OpenTopoMap — contours and relief, the most useful of the three for reading ground from the air |
+| **Satellite** | Esri World Imagery |
+
+None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
+the satellite layer goes through the service Esri asks applications to use from the first start.
+It can be replaced in the setup at any time: Two million tiles a month cost nothing and pay-as-you-go stays off unless
+switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
+falls back to Esri's keyless address, which works but is not guaranteed.
+
+**A token in a public repository is readable by anyone.** That is the price of a single-file app
+with no server, and the remedy is on Esri's side rather than in the code: an API key can be tied
+to a referrer, so a copy of the key only works from your own address. It is worth setting in the
+ArcGIS console — under the key's settings, *Referrers* — and it costs nothing. All three templates can be pointed elsewhere in *Tile sources* — a national
+orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
+its own borders, and needs no key either.
+
+**Tiles are kept two ways.** Everything the map draws is held by the service worker on its way
+past. And a ring of tiles around the last reported position — **20 km by default, up to zoom
+13**, both adjustable — is gathered quietly while there is a connection, **for the layer in use
+only**, capped at 400 tiles a run and spaced about eight a second. Switching the view starts a
+ring for the new layer. Nothing is ever fetched twice: what is in the cache is skipped.
+
+Between the two there is no third mechanism to operate. Panning over a stretch of ground puts
+it in the cache because the map drew it; the ring keeps the surroundings of wherever the flight
+currently is. There is nothing to remember to press.
+
+**One thing to know about these sources.** OpenStreetMap and OpenTopoMap are run on donated
+hardware, and both ask that their tiles not be fetched in advance for offline use — the OSM
+policy says so in as many words, and OpenTopoMap has far less capacity than OSM. Private,
+non-commercial use does not exempt anyone from that; the policies are about server load, not
+about money. What it does change is the scale: one crew, a few flights a year, a few hundred
+tiles a flight, is the load of a person looking at a map for a few minutes. That is the reason
+for the small radius, the cap and the pacing. If a layer ever stops answering, that is what has
+happened, and a keyed provider in *Tile sources* is the answer.
+
+## 13. WhatsApp
 
 All four forms list the recipients at the foot — on Ballast below both the drop and the
 inventory panel, since an inventory is as worth sending as a drop, under *Also send to WhatsApp* —
@@ -530,7 +718,7 @@ The row records `whatsapp` = `yes` and `whatsapp_to` with the names, so the tabl
 entries were meant to go out. Whether they were actually sent happens inside WhatsApp and
 cannot be recorded here.
 
-## 8a. Master and followers
+## 14. Master and followers
 
 **The master owns the setup and the log; the followers own their reporting.** That is the whole
 division. Entries can only be changed or deleted on the master — a follower that taps a row is
@@ -626,23 +814,36 @@ apply the change within about thirty seconds with a note on screen. Rename a pil
 new flight on the master and the crew follows without anyone opening a setup screen. Exactly
 one device may be the master; two would overwrite each other's publication.
 
-## 7b. Automatic position reports
+## 15. Several devices at once
 
-Set an interval under *Ressources* in the setup and the app writes a **POS** row on its own at
-that rhythm — position, place, altitude and rate of climb — so the track of the flight survives
-the hours when nobody has a hand free. `0` turns it off, which is the default. POS rows go into
-the table and the printout like any other kind and can be filtered out of a printout on their
-own.
+Every row carries `reporter` (who entered it), `device` (which iPad) and `source` (`app` for
+this tool).
 
-## 7c. The Ops Normal clock
+Sending is a merge, never an overwrite: the app reads the file on GitHub, merges it with what
+is held locally by `id`, recalculates the ballast column over the whole set, and writes the
+result back. If another device wrote in the meantime, GitHub rejects the write and the app
+retries with the fresh version, up to three times.
 
-Send a transmitted call whose message contains *Ops Normal* and the app asks whether to keep the
-time. Pressing *Remind me* turns the button green and holds it for a second reading *Confirmed*,
-the same signal the post button gives, before the window closes: *Remind of the next Ops Normal in how many minutes?*, twenty by default and changeable in
-the window. When it falls due there is a tone and a message. It is the one call that has to
-happen on a clock, and the one most easily forgotten in weather.
+**The table is played back every five seconds.** A drop made on one iPad shows up on the other
+within a few seconds, and the ballast figure accounts for both. A device that joins mid-flight,
+or whose local copy was cleared, gets the whole flight back with *Reload* in the log screen.
 
-## 8b. What carries over
+Polling that often is affordable because the app sends a conditional request: when nothing has
+changed, GitHub answers 304 with no body, and a 304 does not count against the hourly limit of
+5000 requests. Only an actual change costs a request. Polling pauses while the app is in the
+background.
+
+**Tally rows.** Anything appended to the same JSON file appears in the app and in the ballast
+calculation, provided it carries at least `id`, `ts_utc` and `type`. Give Tally-sourced rows
+`reporter: "Tally"` and `source: "tally"` so it is visible where they came from. A ballast row
+may be relative (`ballast_delta_kg`, negative for a drop) or an inventory
+(`ballast_action: "count"` with `total_ballast_kg`, which resets the running total).
+
+**Deletions** are shared through `data/<flight-id>.deleted.json`, holding the ids that were
+removed with the time and the person who removed them. Every device applies that list, so a
+deleted row does not reappear from another iPad's copy, and the main table stays clean.
+
+## 16. What carries over
 
 Every form arrives holding what was reported last time, greyed and dashed: the station,
 frequency and squawk of the last call, the kilograms of the last drop, the bags and litres of
@@ -664,7 +865,7 @@ The footer names the last entry, its reporter and its kind, plus the state of th
 `last msg 21:04:37Z/AW/Ballast | upload ✓` when everything has reached GitHub, `✗ 3` when three
 are still queued.
 
-## 9. Sending, and what happens without a link
+## 17. Sending, and what happens without a link
 
 There is nothing to switch on. Pressing **Report to CC** writes the entry to the device and
 sends it straight away. If there is no connection the entry is held in a queue — the header
@@ -694,7 +895,7 @@ three. The heading beside the callsign carries the span: `Wed 20 May 2026` for a
 `Wed 20 May 2026 - Fri 22 May 2026` when it went further. Dates follow the UTC clock, like every
 time in the log, so a launch at 23:40 local does not appear to belong to the wrong day. A day
 heading never stands alone at the foot of a page — it travels with the first entry under it. Every page carries the flight in its heading with the mark on
-the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260813-20` on the left
+the right, and a footer reading `printed 2026-08-13 09:45Z by A. Wicki · v260825-08` on the left
 and `Page 2 / 3` on the right.
 
 The document is named
@@ -707,42 +908,47 @@ Pagination is measured: the app takes the real height of a sheet, subtracts the 
 footer and the margins, and fills each page with as many rows as actually fit. Where a browser
 gives no measurements it falls back to a fixed count rather than putting one entry per page.
 
-*Send now* in the menu forces an attempt, and *Reload from GitHub* pulls the table without
-writing. Neither is needed in normal use. *Export the table* asks for the format first — CSV or
+*Synchronize data* at the top of the setup forces an attempt, and *Reload log* pulls the table without
+writing. Neither is needed in normal use. *Export the log* asks for the format first — CSV or
 JSON — and then for the destination: *Download* puts the file in the browser's downloads,
 *Share…* hands it to the system share sheet, which on an iPad is the way into Files, Mail or a
 chat. Share only appears where the browser supports handing over files.
 
-## 10. Several devices at once
+## 18. Working without a link, and GitHub's limits
 
-Every row carries `reporter` (who entered it), `device` (which iPad) and `source` (`app` for
-this tool).
+**The app is complete offline.** Its own files are cached, so it opens with no connection at
+all; entries are written to the device first and only then offered to GitHub. Without a link an
+entry is filed, marked with a straw check in the log and in the footer, and the post button says
+*Queued for later delivery*. Reporting continues unaffected — ballast, ATC, crew, notes, the
+automatic position reports, everything. When the connection returns, the queue goes out on its
+own, in order, and the checks turn green without anyone pressing anything.
 
-Sending is a merge, never an overwrite: the app reads the file on GitHub, merges it with what
-is held locally by `id`, recalculates the ballast column over the whole set, and writes the
-result back. If another device wrote in the meantime, GitHub rejects the write and the app
-retries with the fresh version, up to three times.
+**GitHub's numbers, and what the app does about them.** A personal token is allowed 5,000
+requests an hour, and a conditional read that answers `304 Not Modified` costs nothing at all —
+so the five-second poll is effectively free. The real constraint is the secondary limit on
+writing: **80 write requests a minute and 500 an hour**, counted across everything the account
+does.
 
-**The table is played back every five seconds.** A drop made on one iPad shows up on the other
-within a few seconds, and the ballast figure accounts for both. A device that joins mid-flight,
-or whose local copy was cleared, gets the whole flight back with *Reload* in the log screen.
+Four things keep the app inside that:
 
-Polling that often is affordable because the app sends a conditional request: when nothing has
-changed, GitHub answers 304 with no body, and a 304 does not count against the hourly limit of
-5000 requests. Only an actual change costs a request. Polling pauses while the app is in the
-background.
+- One push carries every waiting entry, so three drops in a minute cost one write, not three.
+- Writes are spaced at least a second apart, as GitHub asks, and background pushes wait ten
+  seconds between bursts — stretching to eighteen and then thirty as the hour's budget is spent.
+- The CSV is written at most once a minute rather than on every entry, which halves the count.
+  The JSON, which Notion reads, is always current.
+- Writes are counted over a rolling hour and stopped at 440. Entries then stay queued and go out
+  as the hour rolls on. If GitHub asks for a pause anyway, the `retry-after` it sends is obeyed.
 
-**Tally rows.** Anything appended to the same JSON file appears in the app and in the ballast
-calculation, provided it carries at least `id`, `ts_utc` and `type`. Give Tally-sourced rows
-`reporter: "Tally"` and `source: "tally"` so it is visible where they came from. A ballast row
-may be relative (`ballast_delta_kg`, negative for a drop) or an inventory
-(`ballast_action: "count"` with `total_ballast_kg`, which resets the running total).
+The setup shows where you stand: *GitHub budget: 12 of 440 writes used this hour, 4,900 requests
+left on the token.*
 
-**Deletions** are shared through `data/<flight-id>.deleted.json`, holding the ids that were
-removed with the time and the person who removed them. Every device applies that list, so a
-deleted row does not reappear from another iPad's copy, and the main table stays clean.
+**Upgrading the GitHub account does not help.** Free and Pro have exactly the same 5,000
+requests an hour for a personal token; the higher 15,000 applies only to a GitHub App owned by
+an Enterprise Cloud organisation, which is a different kind of integration altogether. There is
+nothing to buy here, and with the measures above nothing to buy it for: a flight making an entry
+a minute for twenty hours uses well under half the hourly write budget.
 
-## 11. The log
+## 19. The log
 
 *Log* in the menu opens it: the whole flight, newest first, with time,
 content, reporter and a dot showing whether the row has been sent. Nothing else — transfer and
@@ -776,7 +982,7 @@ the sequence the change was made.
 Deleting asks twice, states what is being removed and who recorded it, and warns that the
 deletion is shared with the other devices.
 
-## 12. What the app writes
+## 20. What the app writes
 
 ```
 data/<flight-id>.json          the table
@@ -830,7 +1036,7 @@ data/<flight-id>.deleted.json  ids that were removed
 existing Notion select options match without editing. To change it, edit the four `data-t`
 attributes in `index.html` and the matching strings in the post handler.
 
-## 13. Polling from Notion
+## 21. Polling from Notion
 
 **GitHub API — immediate, recommended**
 
@@ -852,7 +1058,83 @@ GET https://raw.githubusercontent.com/<owner>/<repo>/main/data/<flight-id>.csv
 
 Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.
 
-## 14. Limits worth knowing before takeoff
+## 22. Beginning a new flight
+
+*Begin new flight* appears **only on the master**, at the foot of the unlocked settings, and asks
+for the master password
+`5678`, then for the name of the new flight, then twice for confirmation — naming how many
+entries the old flight holds and how many of them are still queued.
+
+**Nothing is moved and nothing is overwritten.** The old flight's files are named after it, so
+they simply stay where they are; they are recorded in `data/_flights.json` with the time they
+were closed, the number of rows and who closed them, which gives you an index of the season.
+Before closing, whatever is still queued is sent one last time. If there is no connection and
+rows are still waiting, the app says so and asks again before going on — those rows would be
+lost, because clearing the local table is what makes the new flight start empty.
+
+The new flight ID is published to the followers along with the rest of the setup. A follower
+that sees the flight change files its own table away under `bsk.archive.<flight>` on the device
+and then clears it, so nobody carries yesterday's entries
+into today's flight under the new name.
+
+**The first entry of a flight belongs to the master.** A follower trying to make it is told
+*New flight must be initiated by the master device*; the master is reminded once that the flight
+has been opened and asked to look over the settings, and the setup screen opens for that. From
+the second entry on, anyone reports.
+
+## 23. Language
+
+Device mode, night colour, confirmation tone and language sit above the password, because they are personal
+preferences rather than flight settings and every crew member may want their own. A device
+whose holder does not know the settings password is a **follower** on a **personal device** —
+that is what the app assumes when the master question is declined, and neither can be changed
+without the password.
+
+The setup switches the interface between English and German, above the password, because it is
+a personal preference rather than a flight setting and every crew member may want a different
+one.
+
+Every label, button, hint, dialog and message in the app follows the switch. **Only the
+interface changes:** everything written to GitHub and everything sent to WhatsApp
+stays English: the column names, the values in `type`, the message templates. A table that
+changed language depending on who happened to make the entry would be unusable, and the ATC
+coordinator should not have to guess which language the next message arrives in.
+
+## 24. Keeping the crew on the current build
+
+The service worker takes a new version over the moment it is installed, and the app now looks
+for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
+When one has arrived it says so: *A newer version is ready — close the app and open it again.*
+
+That message is the answer to a confusion worth knowing about. **What you see on screen may not
+be what is in the repository.** An installed web app keeps running the version it started with
+until it is closed and opened again — reloading a page inside it is not enough. If a change you
+asked for seems not to have happened, check the version in the bottom right corner first, and
+close the app from the app switcher before opening it again.
+
+## 25. When a change does not appear
+
+The service worker caches each file on its own and carries on past one that is missing. That
+sounds like housekeeping and is not: `cache.addAll()` rejects as a whole if a single request
+fails, and a worker whose installation fails is never activated — the app then keeps serving the
+**previous version indefinitely**, and every change made since is invisible. One icon missing
+from the server is enough. The install now notes what it could not fetch in the console and
+takes over anyway.
+
+So when something you asked for is not there, the order to check is:
+
+1. The version in the bottom right corner. If it is not the one you deployed, nothing else
+   matters yet.
+2. The browser console for `404` on any file of the app. A missing file means the upload was
+   incomplete — the `icons` folder is the usual one, because a drag-and-drop upload does not
+   always carry a folder with it.
+3. Close the installed app from the app switcher and open it again. A reload inside it is not
+   enough.
+
+`GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
+card in the repository yet. It disappears with the first one.
+
+## 26. Limits worth knowing before takeoff
 
 - **GPS in the background:** once the app is not in the foreground and the display locks,
   iPadOS suspends location updates. The app holds a wake lock while it is active. This records
@@ -879,256 +1161,12 @@ the old.
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
 
-## 13c. Place names
-
-On by default, and a setting of its own under *Ressources*. Switched on, each entry's position
-is turned once into something a reader can place — `near Szeged/HU` — which then appears under
-the position in the WhatsApp message, in the log, in the printout and in a `place` column.
-
-It appears as `{place}` — `near Szeged/HU` — and as `{location}` for the bare `Szeged/HU`, in
-the heading of the Last Message panel after the time, in the log, in the printout and in a
-`place` column. A message on its way to WhatsApp waits up to two and a half seconds for the
-lookup rather than going out without it; beyond that it leaves anyway, because a message that
-arrives is worth more than a place name.
-
-Lookups are queued one at a time with a second between them, as the service asks. A failure is
-not remembered — the next entry in the same square kilometre tries again — while an answer is,
-so a long flight costs a few dozen requests rather than one per entry.
-
-**Two things to weigh before switching it off.** The lookup goes to OpenStreetMap's public
-service, so the coordinates of the entry leave the device; and it only works with a link. There
-is no offline place database that would fit in a web app. Failures are silent by design: the
-entry is written immediately and the place is filled in afterwards if an answer arrives, so a
-lost lookup costs nothing but an empty field.
-
-Answers are cached on a coarse grid — about a kilometre — so a long flight costs a few dozen
-requests rather than one per entry, which keeps well inside what the service asks of its users.
-
-## 14a. Language
-
-Device mode, night colour, confirmation tone and language sit above the password, because they are personal
-preferences rather than flight settings and every crew member may want their own. A device
-whose holder does not know the settings password is a **follower** on a **personal device** —
-that is what the app assumes when the master question is declined, and neither can be changed
-without the password.
-
-The setup switches the interface between English and German, above the password, because it is
-a personal preference rather than a flight setting and every crew member may want a different
-one.
-
-Every label, button, hint, dialog and message in the app follows the switch. **Only the
-interface changes:** everything written to GitHub and everything sent to WhatsApp
-stays English: the column names, the values in `type`, the message templates. A table that
-changed language depending on who happened to make the entry would be unusable, and the ATC
-coordinator should not have to guess which language the next message arrives in.
-
-## 14b. Beginning a new flight
-
-*Begin new flight* appears **only on the master**, at the foot of the unlocked settings, and asks
-for the master password
-`5678`, then for the name of the new flight, then twice for confirmation — naming how many
-entries the old flight holds and how many of them are still queued.
-
-**Nothing is moved and nothing is overwritten.** The old flight's files are named after it, so
-they simply stay where they are; they are recorded in `data/_flights.json` with the time they
-were closed, the number of rows and who closed them, which gives you an index of the season.
-Before closing, whatever is still queued is sent one last time. If there is no connection and
-rows are still waiting, the app says so and asks again before going on — those rows would be
-lost, because clearing the local table is what makes the new flight start empty.
-
-The new flight ID is published to the followers along with the rest of the setup. A follower
-that sees the flight change files its own table away under `bsk.archive.<flight>` on the device
-and then clears it, so nobody carries yesterday's entries
-into today's flight under the new name.
-
-**The first entry of a flight belongs to the master.** A follower trying to make it is told
-*New flight must be initiated by the master device*; the master is reminded once that the flight
-has been opened and asked to look over the settings, and the setup screen opens for that. From
-the second entry on, anyone reports.
-
-## 14c. Working without a link, and GitHub's limits
-
-**The app is complete offline.** Its own files are cached, so it opens with no connection at
-all; entries are written to the device first and only then offered to GitHub. Without a link an
-entry is filed, marked with a straw check in the log and in the footer, and the post button says
-*Queued for later delivery*. Reporting continues unaffected — ballast, ATC, crew, notes, the
-automatic position reports, everything. When the connection returns, the queue goes out on its
-own, in order, and the checks turn green without anyone pressing anything.
-
-**GitHub's numbers, and what the app does about them.** A personal token is allowed 5,000
-requests an hour, and a conditional read that answers `304 Not Modified` costs nothing at all —
-so the five-second poll is effectively free. The real constraint is the secondary limit on
-writing: **80 write requests a minute and 500 an hour**, counted across everything the account
-does.
-
-Four things keep the app inside that:
-
-- One push carries every waiting entry, so three drops in a minute cost one write, not three.
-- Writes are spaced at least a second apart, as GitHub asks, and background pushes wait ten
-  seconds between bursts — stretching to eighteen and then thirty as the hour's budget is spent.
-- The CSV is written at most once a minute rather than on every entry, which halves the count.
-  The JSON, which Notion reads, is always current.
-- Writes are counted over a rolling hour and stopped at 440. Entries then stay queued and go out
-  as the hour rolls on. If GitHub asks for a pause anyway, the `retry-after` it sends is obeyed.
-
-The setup shows where you stand: *GitHub budget: 12 of 440 writes used this hour, 4,900 requests
-left on the token.*
-
-**Upgrading the GitHub account does not help.** Free and Pro have exactly the same 5,000
-requests an hour for a personal token; the higher 15,000 applies only to a GitHub App owned by
-an Enterprise Cloud organisation, which is a different kind of integration altogether. There is
-nothing to buy here, and with the measures above nothing to buy it for: a flight making an entry
-a minute for twenty hours uses well under half the hourly write budget.
-
-## 14d. Keeping the crew on the current build
-
-The service worker takes a new version over the moment it is installed, and the app now looks
-for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
-When one has arrived it says so: *A newer version is ready — close the app and open it again.*
-
-That message is the answer to a confusion worth knowing about. **What you see on screen may not
-be what is in the repository.** An installed web app keeps running the version it started with
-until it is closed and opened again — reloading a page inside it is not enough. If a change you
-asked for seems not to have happened, check the version in the bottom right corner first, and
-close the app from the app switcher before opening it again.
-
-## 14e. When a change does not appear
-
-The service worker caches each file on its own and carries on past one that is missing. That
-sounds like housekeeping and is not: `cache.addAll()` rejects as a whole if a single request
-fails, and a worker whose installation fails is never activated — the app then keeps serving the
-**previous version indefinitely**, and every change made since is invisible. One icon missing
-from the server is enough. The install now notes what it could not fetch in the console and
-takes over anyway.
-
-So when something you asked for is not there, the order to check is:
-
-1. The version in the bottom right corner. If it is not the one you deployed, nothing else
-   matters yet.
-2. The browser console for `404` on any file of the app. A missing file means the upload was
-   incomplete — the `icons` folder is the usual one, because a drag-and-drop upload does not
-   always carry a folder with it.
-3. Close the installed app from the app switcher and open it again. A reload inside it is not
-   enough.
-
-`GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
-card in the repository yet. It disappears with the first one.
-
-## 14f. When the satellites are gone
-
-Jamming is not rare over parts of Europe, and a balloon that cannot say where it is becomes a
-problem for everyone. Two things follow from that.
-
-**Every kind of report goes out without a fix.** Ballast, ATC, resources, notes and the
-automatic position rows are all posted with the position fields simply left empty rather than
-refused; a POS row written with no fix says so — *Position · no GPS signal*. Nothing in the app
-waits for a satellite.
-
-**And a position can be given by eye.** *Report Position* sits under the picture and voice
-buttons on the Other screen. With a fix it asks first: report the satellite position, or place
-one by hand? The satellite answer writes an ordinary POS row and says *GPS position reported* —
-it does not disturb the rhythm of the automatic reports, it is simply one more row. With no fix
-the question is skipped and the map opens directly.
-
-### The map
-
-The app shrinks to a small draggable button carrying the tally mark, and beneath it a map fills
-the screen — street or satellite, with zoom buttons. It opens on the last reported position.
-
-- Every reported position is a dot with its time beside it: **blue from a satellite, red from
-  the eye**. Tapping one shows its altitude, track and rate of climb for ten seconds.
-- The dots are joined by the track flown, and from the last one the course is carried an hour
-  forward, taken from the line between the **last two reported positions** — whatever kind they
-  were — with cross ticks at 15, 30, 45 and 60 minutes.
-- The last twenty positions are shown, adjustable in the setup. **An unbroken run of manual
-  positions is always shown in full**, however long: that run is the whole picture when the
-  satellites are gone.
-- The map pinches to zoom as well as taking the plus and minus keys. **Whatever lies between
-  the fingers stays between the fingers** — during the gesture the tiles are stretched about
-  that point, and the map redraws at the nearest whole zoom when the fingers lift, holding the
-  same ground under the same spot on the glass.
-- Tapping the map places a crosshair, which can then be dragged until it sits over the place the
-  crew believes it is.
-- Tapping the floating button opens the report: altitude and rate of climb, prefilled from the
-  last known values because both can be read off the barograph; track and speed, which are
-  optional; and a slider for the estimated position uncertainty, in five steps. The circle for the step
-  chosen is drawn around the crosshair straight away and **blinks slowly**, following the
-  slider — so the choice is a picture of ground rather than a number. Climb and sink are two
-  small keys beside the figure rather than a minus sign to be remembered with cold hands, and a
-  **compass arrow beside the track turns with what is typed**, which shows a wrong digit before
-  it is sent. Every prefilled field is selected when tapped, so a new figure simply replaces the
-  old one.
-- The rate of climb is typed in tenths: `20` becomes `2.0`, so the decimal point costs no
-  keystroke.
-- Before sending, the app asks once if any of altitude, track, speed or rate of climb is
-  **empty**, and also if all four are still exactly the figures **carried over from the last
-  report** — an unchanged altitude an hour later is usually an oversight rather than a reading.
-  Three ways on: *Complete values* returns to the form, *Send as is* sends what stands there
-  without a second press, and *Send only coordinates* clears the four and sends the position
-  alone. - Track, projection, ticks and circles are all drawn thin with a white glow, the same treatment
-  as the crosshair, so they stay legible on a pale street map and on a dark satellite image
-  alike without shouting over the ground underneath.
-- The panel sits at the top of the screen, narrow enough to leave the map beside and below it,
-  and drops to the bottom when the crosshair is in the upper half. It has no title bar; *Report
-  to CC* and *Close* share the bottom line.
-
-The result is a **MANPOS** row, marked `(manual)` wherever its position appears. It has a WhatsApp
-template of its own in the setup, goes to the table and to whichever recipients are ticked on
-the Other screen, and appears in that
-screen's Last Message panel. It can be picked or left out of a printout like any other kind.
-
-**Afterwards the estimate is carried forward.** With no fix, the next ATC or ballast report takes
-its position from the last manual one and marks it `(estimated at 2032Z)`, so nobody reads a
-terrestrial guess as a satellite one.
-
-### Tiles
-
-Three views, chosen at the top right of the map and remembered between visits:
-
-| View | Source |
-|---|---|
-| **Streets** | OpenStreetMap standard tiles |
-| **Terrain** | OpenTopoMap — contours and relief, the most useful of the three for reading ground from the air |
-| **Satellite** | Esri World Imagery |
-
-None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
-the satellite layer goes through the service Esri asks applications to use from the first start.
-It can be replaced in the setup at any time: Two million tiles a month cost nothing and pay-as-you-go stays off unless
-switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
-falls back to Esri's keyless address, which works but is not guaranteed.
-
-**A token in a public repository is readable by anyone.** That is the price of a single-file app
-with no server, and the remedy is on Esri's side rather than in the code: an API key can be tied
-to a referrer, so a copy of the key only works from your own address. It is worth setting in the
-ArcGIS console — under the key's settings, *Referrers* — and it costs nothing. All three templates can be pointed elsewhere in *Tile sources* — a national
-orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
-its own borders, and needs no key either.
-
-**Tiles are kept two ways.** Everything the map draws is held by the service worker on its way
-past. And a ring of tiles around the last reported position — **20 km by default, up to zoom
-13**, both adjustable — is gathered quietly while there is a connection, **for the layer in use
-only**, capped at 400 tiles a run and spaced about eight a second. Switching the view starts a
-ring for the new layer. Nothing is ever fetched twice: what is in the cache is skipped.
-
-Between the two there is no third mechanism to operate. Panning over a stretch of ground puts
-it in the cache because the map drew it; the ring keeps the surroundings of wherever the flight
-currently is. There is nothing to remember to press.
-
-**One thing to know about these sources.** OpenStreetMap and OpenTopoMap are run on donated
-hardware, and both ask that their tiles not be fetched in advance for offline use — the OSM
-policy says so in as many words, and OpenTopoMap has far less capacity than OSM. Private,
-non-commercial use does not exempt anyone from that; the policies are about server load, not
-about money. What it does change is the scale: one crew, a few flights a year, a few hundred
-tiles a flight, is the load of a person looking at a map for a few minutes. That is the reason
-for the small radius, the cap and the pacing. If a layer ever stops answering, that is what has
-happened, and a keyed provider in *Tile sources* is the answer.
-
-## 15. Version
+## 27. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260820-01` is the first build of 20 August 2026.
+smaller counter. `v260825-09` is the eighth build of 25 August 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
@@ -1137,7 +1175,7 @@ printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
-## 16. License
+## 28. License
 
 Custom license, © 2026 Wicki Aero GmbH.
 
@@ -1165,18 +1203,20 @@ from a CDN. The app talks to the GitHub API with your token, to the browser's ge
 service, and to the wa.me links you tap. That is the whole list, which is also why it works with
 no signal and why there is nothing to keep up to date but the app itself.
 
-## 17. Files
+## 29. Files
 
-```
-index.html                  the complete app
-manifest.webmanifest        Home Screen installation
-sw.js                       offline cache
-readme.html                 this document, opened from the menu
-Basket-Reporting-Manual.pdf this document, for printing
-SETUP.md / setup.html       the GitHub and Notion setup guide
-Setup-data-repository.pdf   the setup guide, laid out for printing and handing over
-LICENSE / license.html      the licence
-favicon.ico                 multi-resolution favicon
-icons/                      app icons and favicons
-data/                       destination folder for flight files
-```
+| File | What it is |
+|---|---|
+| `index.html` | the whole app — markup, style, logic, the QR encoder and the map |
+| `sw.js` | the service worker: keeps the app available offline and holds the map tiles |
+| `manifest.webmanifest` | name, colours and icons for the home screen |
+| `icons/`, `favicon.ico`, `logo.png` | the tally mark in every size a device asks for, and the club logo for the printout |
+| `readme.html`, `setup.html`, `notion.html`, `license.html` | this manual, the setup guide, the Notion guide and the licence, as pages |
+| `README.md`, `SETUP.md`, `NOTION.md`, `LICENSE` | the sources those pages are made from |
+| `Basket-Reporting-Manual.pdf`, `Setup-data-repository.pdf`, `Notion-integration.pdf` | the same three documents to print |
+| `notion-sync/sync.mjs`, `notion-sync/notion-sync.yml` | the script and workflow that push the table into Notion — they belong in the **data** repository |
+| `join-worker/worker.js` | the Cloudflare worker that carries a join code — it belongs in Cloudflare, not in either repository |
+| `.nojekyll` | keeps GitHub Pages from rebuilding the folder |
+
+Everything except the first four is documentation or lives elsewhere: the app runs on
+`index.html`, `sw.js`, `manifest.webmanifest` and `icons/`.
