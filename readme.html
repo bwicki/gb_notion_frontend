@@ -486,8 +486,8 @@ a locked screen and the app being closed and reopened. Beginning a new flight cl
 <h3 id="being-told">Being told</h3>
 <p>Five minutes before the time, the device sounds twice and says <strong>"Report Ops Normal in five
 minutes."</strong> At the time itself it sounds three times, says <strong>"Report Ops Normal now"</strong> and opens a
-window. If the call still has not gone out it repeats every two minutes for half an hour, then
-gives up and leaves the red counter standing.</p>
+window. If the call still has not gone out it repeats every two minutes for ten minutes, then
+gives up and leaves the red counter standing — past that the crew has heard it.</p>
 <p>In German the two sentences are <em>Ops Normal in fünf Minuten melden</em> and <em>Ops Normal jetzt melden</em>;
 the language follows the app's own setting.</p>
 <p><em>Ops Normal alarm</em> in the setup has three positions — <em>Off</em>, <em>Tone</em>, <em>Tone + voice</em>, the last of
@@ -1307,7 +1307,7 @@ the old.</li>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261017-01</code> is the first build of 17 October 2026.</p>
+smaller counter. <code>v261017-02</code> is the second build of 17 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

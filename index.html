@@ -929,7 +929,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261017-01';
+const APP_VERSION='v261017-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -3501,8 +3501,9 @@ function paintOps(){
       if(!$('#modal').classList.contains('on'))
         info(t('opsTitle'),t('opsDue').replace('{n}',String(nz(CFG.opsMin)||20)));
       else toast(t('opsVNow'));
-    }else if(now-Number(CFG.opsRep||0)>=120000&&now-due<1800000){
-      /* still not reported: once every two minutes, for half an hour, then it gives up */
+    }else if(now-Number(CFG.opsRep||0)>=120000&&now-due<600000){
+      /* still not reported: once every two minutes, for ten minutes, then it gives up and
+         leaves the red counter standing — past that the crew has heard it */
       CFG.opsRep=now;save(K_CFG,CFG);opsAlarm(t('opsVNow'),3);
     }
   }

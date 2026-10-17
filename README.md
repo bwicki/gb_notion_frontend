@@ -496,8 +496,8 @@ a locked screen and the app being closed and reopened. Beginning a new flight cl
 
 Five minutes before the time, the device sounds twice and says **"Report Ops Normal in five
 minutes."** At the time itself it sounds three times, says **"Report Ops Normal now"** and opens a
-window. If the call still has not gone out it repeats every two minutes for half an hour, then
-gives up and leaves the red counter standing.
+window. If the call still has not gone out it repeats every two minutes for ten minutes, then
+gives up and leaves the red counter standing — past that the crew has heard it.
 
 In German the two sentences are *Ops Normal in fünf Minuten melden* and *Ops Normal jetzt melden*;
 the language follows the app's own setting.
@@ -1260,7 +1260,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261017-01` is the first build of 17 October 2026.
+smaller counter. `v261017-02` is the second build of 17 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
