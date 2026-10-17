@@ -214,6 +214,21 @@ select:focus{outline:0;border-color:var(--sel)}
 .pnl{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;min-height:44px;
   border:1px solid var(--line);border-radius:9px;background:var(--field)}
 .pnl.pnl3{grid-template-columns:1fr 1fr 1fr}
+.pnl.pnl4{grid-template-columns:1fr 1fr 1fr 1fr}
+.pnl.pnl4 button{font-size:11px}
+/* the archive list: long enough to need its own scroll inside the sheet */
+.arclist{max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  border:1px solid var(--line);border-radius:10px;background:var(--field);margin:4px 0 2px}
+.arclist button{display:block;width:100%;text-align:left;padding:10px 12px;
+  border-bottom:1px solid var(--line-soft)}
+.arclist button:last-child{border-bottom:0}
+.arclist button:active{background:var(--soft)}
+.arclist b{display:block;font-size:14.5px;font-weight:600;line-height:1.25}
+.arclist i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+.arclist .cur{color:var(--ink);font-weight:600}
+.arcempty{padding:14px 12px;font-size:12.5px;color:var(--muted)}
+.arcrecap{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 14px}
+.arcrecap span{color:var(--carry)}
 .pnl button{border-radius:6px;font-size:12.5px;color:var(--muted);min-height:36px;
   overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px}
 .pnl button.on{background:var(--sel);color:var(--sel-ink)}
@@ -694,6 +709,10 @@ body.mapon #app{visibility:hidden}
       <p class="hint" id="syncBox" style="display:none;margin-top:12px"><span data-t="syncHint">Sends what is waiting and reads the table back.</span> <span id="quotaNote"></span></p>
       <p class="hint" id="loadHint" data-t="loadHint">A code from the master device brings this flight here.</p>
 
+      <h3 data-t="hArchive">Flight archive</h3>
+      <div class="f"><button class="go sec" id="btnArchive" data-t="archOpen">Open flight archive</button></div>
+      <p class="hint" data-t="archHint">Every flight this repository holds, to print, export, or carry into Google Earth.</p>
+
       <h3 data-t="hDevice">This device</h3>
       <div class="f"><div class="pnl" id="sMode">
         <button data-v="personal" data-t="personalDev">Personal device</button>
@@ -929,7 +948,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261017-02';
+const APP_VERSION='v261017-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1149,6 +1168,14 @@ const L={en:{
  opsStop:'Stop reminder', opsOff:'Ops Normal reminder stopped',
  opsV5:'Report Ops Normal in five minutes', opsVNow:'Report Ops Normal now',
  opsSnd:'Ops Normal alarm', sndTone:'Tone', sndVoice:'Tone + voice',
+ hArchive:'Flight archive', archOpen:'Open flight archive',
+ archHint:'Every flight this repository holds, to print, export, or carry into Google Earth.',
+ archPick:'Pick a flight.', archLoading:'Reading\u2026', archNone:'No flights in the repository yet.',
+ archNoRepo:'No repository is set up on this device, so there is nothing to read.',
+ archCurrent:'current flight', archMissing:'file missing', archEmpty:'That flight holds no entries.',
+ archWithPos:'{n} with a position', back:'Back',
+ exGeo:'Track and one point per entry, for Google My Maps and other GIS tools.',
+ exKml:'For Google Earth: altitude as a 3D trace, the time slider over the flight, and the whole message in each balloon.',
  pfSndHint:'The countdown will run, but nothing will be heard when it falls due.',
  lOpsHint:'The reminder runs in the header as a countdown. Five minutes before it falls due and at the moment itself the device sounds and says so.'
 ,
@@ -1336,6 +1363,14 @@ const L={en:{
  opsStop:'Erinnerung stoppen', opsOff:'Ops-Normal-Erinnerung gestoppt',
  opsV5:'Ops Normal in fünf Minuten melden', opsVNow:'Ops Normal jetzt melden',
  opsSnd:'Ops-Normal-Alarm', sndTone:'Ton', sndVoice:'Ton + Ansage',
+ hArchive:'Fahrtenarchiv', archOpen:'Fahrtenarchiv öffnen',
+ archHint:'Alle Fahrten in diesem Repository — zum Drucken, Exportieren oder für Google Earth.',
+ archPick:'Fahrt auswählen.', archLoading:'Wird gelesen\u2026', archNone:'Noch keine Fahrten im Repository.',
+ archNoRepo:'Auf diesem Gerät ist kein Repository eingerichtet, es gibt nichts zu lesen.',
+ archCurrent:'laufende Fahrt', archMissing:'Datei fehlt', archEmpty:'Diese Fahrt enthält keine Einträge.',
+ archWithPos:'{n} mit Position', back:'Zurück',
+ exGeo:'Spur und ein Punkt je Eintrag, für Google My Maps und andere GIS-Werkzeuge.',
+ exKml:'Für Google Earth: Höhe als 3D-Spur, Zeitregler über die Fahrt und die ganze Meldung in jeder Sprechblase.',
  pfSndHint:'Der Countdown läuft, aber bei Fälligkeit ist nichts zu hören.',
  lOpsHint:'Die Erinnerung läuft als Countdown in der Kopfzeile. Fünf Minuten vor Ablauf und im Moment der Fälligkeit ertönt ein Signal mit Ansage.'
 ,
@@ -2308,6 +2343,16 @@ async function docsMenu(){
 }
 /* A printable log: pick the kinds, then a paginated A4 page is built in its own window.
    Pagination is measured rather than guessed, so no entry is ever cut in half. */
+/* Print and export used to read the live log directly. They now read whatever set they are
+   handed, so the same code serves a flight that ended last summer. SRC is null while the
+   live log is the subject and holds an archived flight while one is open. */
+let SRC=null;
+const srcRows  =()=>SRC?SRC.rows:ENT;
+const srcFlight=()=>SRC?(SRC.flight||''):(CFG.flight||'');
+const srcCall  =()=>SRC?(SRC.call||''):(CFG.call||'');
+/* restores the previous subject even when the dialog is abandoned */
+async function withSource(src,fn){const prev=SRC;SRC=src;try{return await fn()}finally{SRC=prev}}
+
 async function printSheet(){
   const kinds=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC'];
   let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,MANPOS:true,PIC:true};
@@ -2324,18 +2369,18 @@ async function printSheet(){
     }});
 }
 function buildPrint(pick){
-  const rows=chrono(ENT).filter(e=>pick[e.type]);
+  const rows=chrono(srcRows()).filter(e=>pick[e.type]);
   if(!rows.length){toast(t('noEntries'));return}
   const w=window.open('','_blank');
   if(!w){toast(t('popupBlocked'));return}
   const esc2=x=>String(x==null?'':x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  const title=(CFG.flight||'Flight')+(CFG.call?' \u00b7 '+CFG.call:'');
+  const title=(srcFlight()||'Flight')+(srcCall()?' \u00b7 '+srcCall():'');
   const now=new Date();
   const stamp=now.toISOString().slice(0,10)+' '+now.toISOString().slice(11,16)+'Z';
   /* the document name is what a print-to-PDF ends up called, so it carries the whole story */
   const stampShort=now.toISOString().slice(2,10).replace(/-/g,'')+' '
     +now.toISOString().slice(11,16).replace(':','')+'Z';
-  const docName='Log '+(CFG.call||'')+' '+(CFG.flight||'')+' printed '+stampShort
+  const docName='Log '+srcCall()+' '+srcFlight()+' printed '+stampShort
     +' ('+Object.keys(pick).filter(k=>pick[k]).join(', ')+')';
   const printedBy=t('printedBy').replace('{when}',stamp).replace('{who}',reporter());
   const kinds=Object.keys(pick).filter(k=>pick[k]).join(', ');
@@ -2466,23 +2511,296 @@ function buildPrint(pick){
   setTimeout(go,150);
 }
 
+/* ── The flight archive ─────────────────────────────────────────────
+   Every flight ever reported is already in the repository; until now nothing showed it.
+   Two sources are merged, because neither alone is complete: `_flights.json`, which the app
+   writes when a flight is closed and which carries who closed it, and the directory listing,
+   which finds flights that predate that index — and the one in progress. */
+async function ghList(dir){
+  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(dir)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
+    {headers:hdr(),cache:'no-store'});
+  if(r.status===404)return[];
+  if(!r.ok)throw new Error('GET '+r.status);
+  const j=await r.json();
+  return Array.isArray(j)?j:[];
+}
+async function archiveList(){
+  const d=(CFG.dir||'data').replace(/^\/|\/$/g,'');
+  const by={};
+  const put=(id,o)=>{if(!id)return;by[id]=Object.assign({flight:id},by[id]||{},o)};
+  /* the index first: it is the only place that knows who closed a flight and when */
+  try{
+    const g=await ghGet(d+'/_flights.json');
+    const list=g.text?JSON.parse(g.text):[];
+    if(Array.isArray(list))list.forEach(x=>put(x.flight,
+      {closed_at:x.closed_at,rows:x.rows,closed_by:x.closed_by,json:x.json,indexed:1}));
+  }catch(e){}
+  /* then the directory, which cannot be out of date */
+  const files=await ghList(d);
+  files.forEach(f=>{
+    if(f.type!=='file')return;
+    const n=f.name;
+    if(!/\.json$/i.test(n))return;
+    if(n==='_flights.json'||/\.deleted\.json$/i.test(n))return;
+    put(n.replace(/\.json$/i,''),{json:d+'/'+n,size:f.size,onDisk:1});
+  });
+  if(CFG.flight)put(CFG.flight,{current:1});
+  const out=Object.keys(by).map(k=>by[k]);
+  /* newest first; a flight with no closing date sorts by its own identifier */
+  out.sort((a,b)=>{
+    if(a.current!==b.current)return a.current?-1:1;
+    const x=a.closed_at||'',y=b.closed_at||'';
+    if(x&&y)return x<y?1:-1;
+    if(x||y)return x?-1:1;
+    return a.flight<b.flight?1:-1;
+  });
+  return out;
+}
+/* the rows of one flight, from the repository, or from this device when it is the live one */
+async function archiveRows(it){
+  if(it.current&&ENT.length)return{rows:chrono(ENT),call:CFG.call||''};
+  const g=await ghGet(it.json);
+  const list=g.text?JSON.parse(g.text):[];
+  if(!Array.isArray(list)||!list.length)throw new Error(t('archEmpty'));
+  return{rows:chrono(list),call:(list[0]&&list[0].callsign)||''};
+}
+const dayOf=x=>String(x||'').slice(0,10);
+function archSpan(it){
+  const bits=[];
+  if(it.current)bits.push(t('archCurrent'));
+  if(it.closed_at)bits.push(dayOf(it.closed_at));
+  if(it.rows!=null)bits.push(it.rows+' '+t('rows'));
+  if(it.closed_by)bits.push(it.closed_by);
+  if(!it.onDisk&&!it.current)bits.push(t('archMissing'));
+  return bits.join(' \u00b7 ');
+}
+async function openArchive(){
+  if(!configured()){info(t('hArchive'),t('archNoRepo'));return}
+  let list=null,err=null;
+  const draw=m=>{
+    const box=m.querySelector('#arcBox');if(!box)return;
+    if(err){box.innerHTML='<p class="arcempty">'+esc(err)+'</p>';return}
+    if(!list){box.innerHTML='<p class="arcempty">'+esc(t('archLoading'))+'</p>';return}
+    if(!list.length){box.innerHTML='<p class="arcempty">'+esc(t('archNone'))+'</p>';return}
+    box.innerHTML=list.map((it,i)=>'<button data-i="'+i+'">'
+      +'<b'+(it.current?' class="cur"':'')+'>'+esc(it.flight)+'</b>'
+      +'<i>'+esc(archSpan(it))+'</i></button>').join('');
+  };
+  await ask({title:t('hArchive'),cancel:false,ok:t('close'),closeX:true,
+    text:t('archPick'),
+    html:'<div class="arclist" id="arcBox"></div>',
+    onMount:async(m,close)=>{
+      draw(m);
+      try{list=await archiveList()}catch(e){err=String(e.message||e)}
+      draw(m);
+      m.querySelector('#arcBox').addEventListener('click',ev=>{
+        const b=ev.target.closest('button[data-i]');if(!b||!list)return;
+        const it=list[Number(b.dataset.i)];
+        close();setTimeout(()=>openFlight(it),60);
+      });
+    }});
+}
+/* one flight, held to one side: the live log is never replaced by what is opened here */
+async function openFlight(it){
+  let got=null;
+  try{
+    toast(t('archLoading'));
+    got=await archiveRows(it);
+  }catch(e){info(t('hArchive'),String(e.message||e));return}
+  const src={rows:got.rows,flight:it.flight,call:got.call};
+  const first=got.rows[0],last=got.rows[got.rows.length-1];
+  const span=dayOf(first.ts_utc)===dayOf(last.ts_utc)
+    ? dayOf(first.ts_utc)
+    : dayOf(first.ts_utc)+' \u2013 '+dayOf(last.ts_utc);
+  const kinds={};got.rows.forEach(e=>kinds[e.type]=(kinds[e.type]||0)+1);
+  const withPos=got.rows.filter(e=>posOf(e)).length;
+  /* two lines, because the kinds alone can be longer than the rest put together */
+  const recap='<p class="arcrecap">'
+    +esc([span,got.rows.length+' '+t('rows'),
+          t('archWithPos').replace('{n}',String(withPos))].join(' \u00b7 '))
+    +'<br><span>'+esc(Object.keys(kinds).map(k=>k+' '+kinds[k]).join(' \u00b7 '))+'</span></p>';
+  let acted=false;
+  const r=await ask({title:it.flight+(got.call?' \u00b7 '+got.call:''),
+    cancel:t('back'),ok:t('close'),closeX:true,
+    html:recap+'<div class="menu">'
+      +'<button class="go sec sm" id="afPrint">'+esc(t('mPrint'))+'</button>'
+      +'<button class="go sec sm" id="afExp">'+esc(t('export'))+'</button></div>',
+    onMount:(m,close)=>{
+      m.querySelector('#afPrint').onclick=()=>{acted=true;close();
+        setTimeout(()=>withSource(src,()=>printSheet()),60)};
+      m.querySelector('#afExp').onclick=()=>{acted=true;close();
+        setTimeout(()=>withSource(src,()=>exportSheet()),60)};
+    }});
+  /* Back returns to the list; Close and the cross leave the archive altogether */
+  if(!acted&&r===null)setTimeout(openArchive,60);
+}
+
+/* ── Carrying a flight out of the app ───────────────────────────────
+   A log is a line on a map as much as it is a list of calls, and the two places this crew
+   would look at one are Google My Maps, which reads GeoJSON, and Google Earth, which does
+   not — Earth wants KML. So both are written, from the same rows.
+
+   Every entry goes out, including the ones made before the first fix. Those have no
+   coordinates, and neither format is given invented ones: in GeoJSON they carry a null
+   geometry, in KML they sit in a folder of their own, readable in the sidebar, absent from
+   the globe. */
+const posOf=e=>(e.lat!=null&&e.lon!=null)?{lat:Number(e.lat),lon:Number(e.lon)}:null;
+const altM=e=>e.alt_gps_m!=null?Number(e.alt_gps_m)
+            :(e.alt_ft!=null?Number(e.alt_ft)*0.3048:null);
+/* what an entry says, in one piece, for a popup or a property */
+function rowText(e){
+  const DOT=' \u00b7 ';
+  const nav=[e.alt_ft!=null?e.alt_ft+' ft':'',
+             e.tc_deg!=null?pad(e.tc_deg,3)+'\u00b0':'',
+             e.speed_kt!=null?Math.round(Number(e.speed_kt))+' kn':'',
+             e.vs_ms!=null?((e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s'):''
+            ].filter(Boolean).join(DOT);
+  return{msg:lastText(e),nav:nav,
+    who:[e.reporter||e.device||'',e.pos_source&&e.pos_source!=='gps'?e.pos_source:'']
+          .filter(Boolean).join(DOT)};
+}
+function rowProps(e,i){
+  const x=rowText(e);
+  const p={n:i+1,time_utc:e.ts_utc,type:e.type,reporter:e.reporter||e.device||'',
+           message:x.msg};
+  if(e.alt_ft!=null)p.altitude_ft=Number(e.alt_ft);
+  if(e.tc_deg!=null)p.track_deg=Number(e.tc_deg);
+  if(e.speed_kt!=null)p.speed_kt=Number(e.speed_kt);
+  if(e.vs_ms!=null)p.vs_ms=Number(e.vs_ms);
+  if(e.place)p.place=e.place;
+  if(e.pos_source)p.position_source=e.pos_source;
+  if(e.pos_unc_km!=null)p.position_uncertainty_km=Number(e.pos_unc_km);
+  if(e.total_ballast_kg!=null)p.ballast_on_board_kg=Number(e.total_ballast_kg);
+  if(e.ballast_delta_kg!=null)p.ballast_dropped_kg=Number(e.ballast_delta_kg);
+  if(e.atc_station)p.atc_station=e.atc_station;
+  if(e.atc_freq)p.atc_freq=e.atc_freq;
+  if(e.crew_pic)p.pic=e.crew_pic;
+  return p;
+}
+function toGeoJson(rows){
+  /* the track stays two-dimensional: GeoJSON's readers ignore height anyway, and a line
+     that mixes two- and three-value positions trips some of them up. Height rides on the
+     individual points, and the 3D story is KML's job. */
+  const track=[];
+  rows.forEach(e=>{const p=posOf(e);if(!p)return;track.push([p.lon,p.lat])});
+  const feats=[];
+  if(track.length>1)feats.push({type:'Feature',
+    properties:{name:(srcFlight()||'Flight')+' track',kind:'track',
+      from:rows[0]&&rows[0].ts_utc,to:rows[rows.length-1]&&rows[rows.length-1].ts_utc,
+      points:track.length},
+    geometry:{type:'LineString',coordinates:track}});
+  rows.forEach((e,i)=>{
+    const p=posOf(e),a=altM(e);
+    feats.push({type:'Feature',properties:rowProps(e,i),
+      geometry:p?{type:'Point',
+        coordinates:a==null?[p.lon,p.lat]:[p.lon,p.lat,+a.toFixed(1)]}:null});
+  });
+  return JSON.stringify({type:'FeatureCollection',
+    properties:{flight:srcFlight(),callsign:srcCall(),generator:'Basket Reporting '+APP_VERSION},
+    features:feats},null,1);
+}
+/* KML colours are aabbggrr, not rrggbb — the one detail that silently turns blue into
+   orange. No icon file is named, so Earth tints its own pin and the file needs nothing
+   from the network. */
+const KMLC={Ballast:'ff008cff',ATC:'ffdc641e',Ressources:'ff50a028',Other:'ff827d78',
+            POS:'ffe6aa5a',MANPOS:'ff283cc8',PIC:'ffb4468c'};
+const xe=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cdata=x=>'<![CDATA['+String(x==null?'':x).replace(/]]>/g,']]&gt;')+']]>';
+function toKml(rows){
+  const name=(srcFlight()||'Flight')+(srcCall()?' \u00b7 '+srcCall():'');
+  const styles=Object.keys(KMLC).map(k=>
+    '<Style id="s'+k+'"><IconStyle><color>'+KMLC[k]+'</color><scale>1.05</scale></IconStyle>'
+    +'<LabelStyle><scale>0.8</scale></LabelStyle></Style>').join('');
+  const line=(pts,mode)=>'<LineString><tessellate>1</tessellate>'
+    +(mode==='absolute'?'<extrude>1</extrude><altitudeMode>absolute</altitudeMode>'
+                       :'<altitudeMode>clampToGround</altitudeMode>')
+    +'<coordinates>'+pts.join(' ')+'</coordinates></LineString>';
+  const air=[],ground=[];
+  rows.forEach(e=>{const p=posOf(e);if(!p)return;
+    const a=altM(e);
+    ground.push(p.lon+','+p.lat+',0');
+    if(a!=null)air.push(p.lon+','+p.lat+','+a.toFixed(1));
+  });
+  const span=rows.length
+    ? '<TimeSpan><begin>'+xe(rows[0].ts_utc)+'</begin><end>'+xe(rows[rows.length-1].ts_utc)+'</end></TimeSpan>'
+    : '';
+  let out='<?xml version="1.0" encoding="UTF-8"?>\n'
+    +'<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'
+    +'<name>'+xe(name)+'</name>'
+    +'<description>'+cdata('Basket Reporting '+APP_VERSION+' \u00b7 '+rows.length+' entries')+'</description>'
+    +styles
+    +'<Style id="sAir"><LineStyle><color>ff2a4ee0</color><width>2.2</width></LineStyle>'
+    +'<PolyStyle><color>332a4ee0</color></PolyStyle></Style>'
+    +'<Style id="sGnd"><LineStyle><color>96827d78</color><width>1.6</width></LineStyle></Style>';
+  if(air.length>1)out+='<Placemark><name>Track (altitude)</name>'
+    +'<visibility>1</visibility>'+span+'<styleUrl>#sAir</styleUrl>'+line(air,'absolute')+'</Placemark>';
+  if(ground.length>1)out+='<Placemark><name>Track (ground)</name>'
+    +'<visibility>0</visibility>'+span+'<styleUrl>#sGnd</styleUrl>'+line(ground,'ground')+'</Placemark>';
+  /* one folder per kind, so a crowded flight can be thinned out in Earth's sidebar */
+  const kinds=[];rows.forEach(e=>{if(kinds.indexOf(e.type)<0)kinds.push(e.type)});
+  const noPos=[];
+  kinds.forEach(k=>{
+    const mk=[];
+    rows.forEach((e,i)=>{
+      if(e.type!==k)return;
+      const p=posOf(e),a=altM(e),x=rowText(e);
+      const desc='<p style="font:13px/1.45 sans-serif">'
+        +'<b>'+xe(x.msg||e.type)+'</b><br>'
+        +xe(String(e.ts_utc).replace('T',' ').slice(0,19))+'Z'
+        +(x.who?' \u00b7 '+xe(x.who):'')
+        +(x.nav?'<br>'+xe(x.nav):'')
+        +(e.place?'<br>'+xe(e.place):'')
+        +'</p>';
+      const pm='<Placemark><name>'+xe(String(e.ts_utc).slice(11,16)+'Z '+e.type)+'</name>'
+        +'<description>'+cdata(desc)+'</description>'
+        +'<TimeStamp><when>'+xe(e.ts_utc)+'</when></TimeStamp>'
+        +'<styleUrl>#s'+k+'</styleUrl>'
+        +(p?'<Point>'+(a==null?'<altitudeMode>clampToGround</altitudeMode>'
+                             :'<extrude>1</extrude><altitudeMode>absolute</altitudeMode>')
+            +'<coordinates>'+p.lon+','+p.lat+','+(a==null?0:a.toFixed(1))
+            +'</coordinates></Point>':'')
+        +'</Placemark>';
+      (p?mk:noPos).push(pm);
+    });
+    if(mk.length)out+='<Folder><name>'+xe(k)+' ('+mk.length+')</name>'+mk.join('')+'</Folder>';
+  });
+  if(noPos.length)out+='<Folder><name>Without position ('+noPos.length+')</name>'
+    +'<visibility>1</visibility><description>'
+    +cdata('Entries made before a fix was available. They carry no coordinates, and none have been invented.')
+    +'</description>'+noPos.join('')+'</Folder>';
+  return out+'</Document></kml>\n';
+}
+
 async function exportSheet(){
   let fmt='csv';
+  const base=()=>srcFlight()||'flightlog';
   const build=()=>fmt==='csv'
-    ? {text:toCsv(chrono(ENT)),name:(CFG.flight||'flightlog')+'.csv',mime:'text/csv'}
-    : {text:JSON.stringify(chrono(ENT),null,1),name:(CFG.flight||'flightlog')+'.json',mime:'application/json'};
+    ? {text:toCsv(chrono(srcRows())),name:base()+'.csv',mime:'text/csv'}
+    : fmt==='json'
+    ? {text:JSON.stringify(chrono(srcRows()),null,1),name:base()+'.json',mime:'application/json'}
+    : fmt==='geojson'
+    ? {text:toGeoJson(chrono(srcRows())),name:base()+'.geojson',mime:'application/geo+json'}
+    : {text:toKml(chrono(srcRows())),name:base()+'.kml',mime:'application/vnd.google-earth.kml+xml'};
   const canShare=!!(navigator.canShare&&navigator.share);
   await ask({title:t('export'),cancel:false,ok:t('close'),
-    text:ENT.length+' '+t('rows'),
-    html:'<p class="lab">'+esc(t('format'))+'</p><div class="pnl" id="exFmt">'
-      +'<button data-v="csv" class="on">CSV</button><button data-v="json">JSON</button></div>'
+    text:srcRows().length+' '+t('rows'),
+    html:'<p class="lab">'+esc(t('format'))+'</p><div class="pnl pnl4" id="exFmt">'
+      +'<button data-v="csv" class="on">CSV</button><button data-v="json">JSON</button>'
+      +'<button data-v="geojson">GeoJSON</button><button data-v="kml">KML</button></div>'
+      +'<p class="hint" id="exHint"></p>'
       +'<p class="lab" style="margin-top:14px">'+esc(t('destination'))+'</p>'
       +'<div class="menu"><button class="go sec sm" id="exDl">'+esc(t('download'))+'</button>'
       +(canShare?'<button class="go sec sm" id="exSh">'+esc(t('share'))+'</button>':'')+'</div>',
     onMount:(m,close)=>{
+      const hint=m.querySelector('#exHint');
+      const paintHint=()=>{hint.textContent=
+        fmt==='geojson'?t('exGeo'):fmt==='kml'?t('exKml'):''};
+      paintHint();
       m.querySelector('#exFmt').addEventListener('click',ev=>{
         const b=ev.target.closest('button');if(!b)return;fmt=b.dataset.v;
         [...ev.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+        paintHint();
       });
       m.querySelector('#exDl').onclick=()=>{const f=build();dl(f.text,f.name,f.mime);close()};
       const sh=m.querySelector('#exSh');
@@ -4765,6 +5083,7 @@ $('#btnTileTest').onclick=async()=>{
   note.textContent=t('tileOk').replace('{a}',a).replace('{b}',b);
 };
 $('#btnLoadFlight').onclick=loadFlightByCode;
+$('#btnArchive').onclick=openArchive;
 /* A full exchange on demand: forget what the last read said, push everything waiting, read the
    whole table back, then say what happened. The button lost its handler in an earlier rebuild
    of this block and had been a picture ever since. */

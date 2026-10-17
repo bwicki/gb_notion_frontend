@@ -64,19 +64,20 @@ GitHub API, the map tiles, and — if you leave place names on — one lookup pe
 <li><a href="#15-several-devices-at-once">Several devices at once</a></li>
 <li><a href="#16-what-carries-over">What carries over</a></li>
 <li><a href="#17-sending-and-what-happens-without-a-link">Sending, and what happens without a link</a></li>
-<li><a href="#18-working-without-a-link-and-github-s-limits">Working without a link, and GitHub's limits</a></li>
+<li><a href="#18-working-without-a-link-and-githubs-limits">Working without a link, and GitHub's limits</a></li>
 <li><a href="#19-the-log">The log</a></li>
 <li><a href="#20-what-the-app-writes">What the app writes</a></li>
-<li><a href="#21-polling-from-notion">Polling from Notion</a></li>
-<li><a href="#22-the-pre-flight-check">The pre-flight check</a></li>
-<li><a href="#23-beginning-a-new-flight">Beginning a new flight</a></li>
-<li><a href="#24-language">Language</a></li>
-<li><a href="#25-keeping-the-crew-on-the-current-build">Keeping the crew on the current build</a></li>
-<li><a href="#26-when-a-change-does-not-appear">When a change does not appear</a></li>
-<li><a href="#27-limits-worth-knowing-before-takeoff">Limits worth knowing before takeoff</a></li>
-<li><a href="#28-version">Version</a></li>
-<li><a href="#29-license">License</a></li>
-<li><a href="#30-files">Files</a></li>
+<li><a href="#21-the-flight-archive">The flight archive</a></li>
+<li><a href="#22-polling-from-notion">Polling from Notion</a></li>
+<li><a href="#23-the-pre-flight-check">The pre-flight check</a></li>
+<li><a href="#24-beginning-a-new-flight">Beginning a new flight</a></li>
+<li><a href="#25-language">Language</a></li>
+<li><a href="#26-keeping-the-crew-on-the-current-build">Keeping the crew on the current build</a></li>
+<li><a href="#27-when-a-change-does-not-appear">When a change does not appear</a></li>
+<li><a href="#28-limits-worth-knowing-before-takeoff">Limits worth knowing before takeoff</a></li>
+<li><a href="#29-version">Version</a></li>
+<li><a href="#30-license">License</a></li>
+<li><a href="#31-files">Files</a></li>
 </ol>
 <h2 id="1-the-screen">1. The screen</h2>
 <p>The whole app fits one phone screen without scrolling, and its outline is always visible.
@@ -1180,7 +1181,68 @@ data/&lt;flight-id&gt;.deleted.json  ids that were removed
 <p><code>type</code> deliberately uses the spelling from the Tally form, including <code>Ressources</code>, so the
 existing Notion select options match without editing. To change it, edit the four <code>data-t</code>
 attributes in <code>index.html</code> and the matching strings in the post handler.</p>
-<h2 id="21-polling-from-notion">21. Polling from Notion</h2>
+<h2 id="21-the-flight-archive">21. The flight archive</h2>
+<p>Every flight ever reported is already in the repository. This is where they can be looked at
+again — from the setup screen, under <em>Flight archive</em>, on any device that has the repository
+and the token. Reading an archive changes nothing, so it needs no master password.</p>
+<h3 id="the-list">The list</h3>
+<p>Two sources are merged, because neither alone is complete. <code>_flights.json</code> is written when a
+flight is closed and knows the date and who closed it. The directory listing of <code>data/</code> cannot
+be out of date and finds flights that were flown before that index existed. The flight in
+progress is added from the device itself, marked <em>current flight</em>, and sits at the top; the
+rest follow newest first.</p>
+<p>A flight whose file has been removed from the repository but which the index still remembers
+is shown with <em>file missing</em> rather than quietly dropped — a log that has gone astray is worth
+knowing about.</p>
+<h3 id="what-can-be-done-with-one">What can be done with one</h3>
+<p>Tapping a flight reads its table from GitHub into a view of its own. <strong>The flight in progress
+is never touched by this</strong> — an old flight is held to one side, printed or exported, and let
+go again.</p>
+<p>The two buttons are the ones already known from the menu, pointed at the flight that is open:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Print the log</strong></td>
+<td>the same printout as always, with the kinds to include, broken by day, club logo on the first sheet</td>
+</tr>
+<tr>
+<td><strong>Export</strong></td>
+<td>CSV, JSON, GeoJSON or KML</td>
+</tr>
+</tbody>
+</table>
+<p><em>Back</em> returns to the list, <em>Close</em> leaves the archive.</p>
+<h3 id="geojson-and-kml">GeoJSON and KML</h3>
+<p>Two formats, because the two places this crew would look at a flight do not read the same one.
+Google My Maps reads <strong>GeoJSON</strong>. Google Earth does not — it reads <strong>KML</strong>.</p>
+<p>The GeoJSON holds the track as a single line and one point per entry, with every figure the
+entry carried as a property: time, kind, reporter, the message itself, altitude, course, speed,
+rate of climb, place name, how the position was obtained, and the ballast figures where there
+are any. The track line is deliberately flat — GeoJSON's readers ignore height, and a line that
+mixes two- and three-value positions trips some of them up. Height rides on the points.</p>
+<p>The KML is the one to open in Google Earth, and it carries rather more:</p>
+<ul>
+<li>the track as a <strong>3D trace</strong> at the recorded altitude, extruded down to the ground, so the
+  flight hangs in the air where it actually was. A flat ground track is included as well,
+  switched off, for when the 3D line is in the way</li>
+<li>a <strong>timestamp on every entry</strong>, so Earth's time slider runs over the flight and will play it</li>
+<li>the <strong>whole message</strong> in the balloon that opens when a pin is clicked, with the time, who
+  reported it, the navigation line and the place name</li>
+<li>a <strong>folder per kind</strong> — Ballast, ATC, Ressources, Other, POS, MANPOS, PIC — each in its own
+  colour, so a crowded flight can be thinned out in Earth's sidebar</li>
+</ul>
+<p>Entries made before the first fix have no coordinates, and none are invented for them. In the
+GeoJSON they carry a null geometry; in the KML they sit in a folder called <em>Without position</em>,
+readable in the sidebar, absent from the globe. Nothing is left out of either file.</p>
+<p>The file is named after the flight — <code>GBX-2608-24.kml</code> — and goes through the same <em>Download</em>
+or <em>Share</em> as the other exports.</p>
+<h2 id="22-polling-from-notion">22. Polling from Notion</h2>
 <p><strong>GitHub API — immediate, recommended</strong></p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/contents/data/&lt;flight-id&gt;.json
 Authorization: Bearer &lt;token&gt;
@@ -1193,7 +1255,7 @@ produces duplicates.</p>
 <pre><code>GET https://raw.githubusercontent.com/&lt;owner&gt;/&lt;repo&gt;/main/data/&lt;flight-id&gt;.csv
 </code></pre>
 <p>Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.</p>
-<h2 id="22-the-pre-flight-check">22. The pre-flight check</h2>
+<h2 id="23-the-pre-flight-check">23. The pre-flight check</h2>
 <p><em>Pre-flight check</em> in the menu, on the master only, and again by itself before the first entry
 of a new flight — where it has replaced the old reminder to go and verify the settings, which
 said that one should look without saying where.</p>
@@ -1216,7 +1278,7 @@ amber: station presets never edited, a device that has not reported, a join code
 <p>Nothing here blocks anything. A balloon launches with a red cross beside the message templates
 if the crew decides so; the check reports, the crew decides. <em>Re-check</em> runs it again without
 closing.</p>
-<h2 id="23-beginning-a-new-flight">23. Beginning a new flight</h2>
+<h2 id="24-beginning-a-new-flight">24. Beginning a new flight</h2>
 <p><em>Begin new flight</em> appears <strong>only on the master</strong>, at the foot of the unlocked settings, and asks
 for the master password
 <code>5678</code>, then for the name of the new flight, then twice for confirmation — naming how many
@@ -1235,7 +1297,7 @@ into today's flight under the new name.</p>
 <em>New flight must be initiated by the master device</em>; the master is reminded once that the flight
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.</p>
-<h2 id="24-language">24. Language</h2>
+<h2 id="25-language">25. Language</h2>
 <p>Device mode, night colour, confirmation tone and language sit above the password, because they are personal
 preferences rather than flight settings and every crew member may want their own. A device
 whose holder does not know the settings password is a <strong>follower</strong> on a <strong>personal device</strong> —
@@ -1249,7 +1311,7 @@ interface changes:</strong> everything written to GitHub and everything sent to 
 stays English: the column names, the values in <code>type</code>, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.</p>
-<h2 id="25-keeping-the-crew-on-the-current-build">25. Keeping the crew on the current build</h2>
+<h2 id="26-keeping-the-crew-on-the-current-build">26. Keeping the crew on the current build</h2>
 <p>The service worker takes a new version over the moment it is installed, and the app now looks
 for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
 When one has arrived it says so: <em>A newer version is ready — close the app and open it again.</em></p>
@@ -1258,7 +1320,7 @@ be what is in the repository.</strong> An installed web app keeps running the ve
 until it is closed and opened again — reloading a page inside it is not enough. If a change you
 asked for seems not to have happened, check the version in the bottom right corner first, and
 close the app from the app switcher before opening it again.</p>
-<h2 id="26-when-a-change-does-not-appear">26. When a change does not appear</h2>
+<h2 id="27-when-a-change-does-not-appear">27. When a change does not appear</h2>
 <p>The service worker caches each file on its own and carries on past one that is missing. That
 sounds like housekeeping and is not: <code>cache.addAll()</code> rejects as a whole if a single request
 fails, and a worker whose installation fails is never activated — the app then keeps serving the
@@ -1277,7 +1339,7 @@ takes over anyway.</p>
 </ol>
 <p><code>GET .../data/_seen?ref=main 404</code> in the console is not a fault: it says no device has left its
 card in the repository yet. It disappears with the first one.</p>
-<h2 id="27-limits-worth-knowing-before-takeoff">27. Limits worth knowing before takeoff</h2>
+<h2 id="28-limits-worth-knowing-before-takeoff">28. Limits worth knowing before takeoff</h2>
 <ul>
 <li><strong>GPS in the background:</strong> once the app is not in the foreground and the display locks,
   iPadOS suspends location updates. The app holds a wake lock while it is active. This records
@@ -1303,18 +1365,18 @@ the old.</li>
 - <strong>The pill floats inside the app only</strong> on phones and tablets — see section 4. Slide Over on
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.</p>
-<h2 id="28-version">28. Version</h2>
+<h2 id="29-version">29. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261017-02</code> is the second build of 17 October 2026.</p>
+smaller counter. <code>v261017-03</code> is the third build of 17 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the
 printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
-<h2 id="29-license">29. License</h2>
+<h2 id="30-license">30. License</h2>
 <p>Custom license, © 2026 Wicki Aero GmbH.</p>
 <p><strong><a href="license.html">Read the full licence</a></strong> — it opens in a window of its own, and the same text
 sits in <code>LICENSE</code> in the repository.</p>
@@ -1334,7 +1396,7 @@ are your records, not part of the licensed software.</p>
 from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
 service, and to the wa.me links you tap. That is the whole list, which is also why it works with
 no signal and why there is nothing to keep up to date but the app itself.</p>
-<h2 id="30-files">30. Files</h2>
+<h2 id="31-files">31. Files</h2>
 <table>
 <thead>
 <tr>

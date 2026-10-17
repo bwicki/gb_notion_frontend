@@ -37,19 +37,20 @@ GitHub API, the map tiles, and — if you leave place names on — one lookup pe
 15. [Several devices at once](#15-several-devices-at-once)
 16. [What carries over](#16-what-carries-over)
 17. [Sending, and what happens without a link](#17-sending-and-what-happens-without-a-link)
-18. [Working without a link, and GitHub's limits](#18-working-without-a-link-and-github-s-limits)
+18. [Working without a link, and GitHub's limits](#18-working-without-a-link-and-githubs-limits)
 19. [The log](#19-the-log)
 20. [What the app writes](#20-what-the-app-writes)
-21. [Polling from Notion](#21-polling-from-notion)
-22. [The pre-flight check](#22-the-pre-flight-check)
-23. [Beginning a new flight](#23-beginning-a-new-flight)
-24. [Language](#24-language)
-25. [Keeping the crew on the current build](#25-keeping-the-crew-on-the-current-build)
-26. [When a change does not appear](#26-when-a-change-does-not-appear)
-27. [Limits worth knowing before takeoff](#27-limits-worth-knowing-before-takeoff)
-28. [Version](#28-version)
-29. [License](#29-license)
-30. [Files](#30-files)
+21. [The flight archive](#21-the-flight-archive)
+22. [Polling from Notion](#22-polling-from-notion)
+23. [The pre-flight check](#23-the-pre-flight-check)
+24. [Beginning a new flight](#24-beginning-a-new-flight)
+25. [Language](#25-language)
+26. [Keeping the crew on the current build](#26-keeping-the-crew-on-the-current-build)
+27. [When a change does not appear](#27-when-a-change-does-not-appear)
+28. [Limits worth knowing before takeoff](#28-limits-worth-knowing-before-takeoff)
+29. [Version](#29-version)
+30. [License](#30-license)
+31. [Files](#31-files)
 
 
 ## 1. The screen
@@ -1102,7 +1103,69 @@ data/<flight-id>.deleted.json  ids that were removed
 existing Notion select options match without editing. To change it, edit the four `data-t`
 attributes in `index.html` and the matching strings in the post handler.
 
-## 21. Polling from Notion
+## 21. The flight archive
+
+Every flight ever reported is already in the repository. This is where they can be looked at
+again — from the setup screen, under *Flight archive*, on any device that has the repository
+and the token. Reading an archive changes nothing, so it needs no master password.
+
+### The list
+
+Two sources are merged, because neither alone is complete. `_flights.json` is written when a
+flight is closed and knows the date and who closed it. The directory listing of `data/` cannot
+be out of date and finds flights that were flown before that index existed. The flight in
+progress is added from the device itself, marked *current flight*, and sits at the top; the
+rest follow newest first.
+
+A flight whose file has been removed from the repository but which the index still remembers
+is shown with *file missing* rather than quietly dropped — a log that has gone astray is worth
+knowing about.
+
+### What can be done with one
+
+Tapping a flight reads its table from GitHub into a view of its own. **The flight in progress
+is never touched by this** — an old flight is held to one side, printed or exported, and let
+go again.
+
+The two buttons are the ones already known from the menu, pointed at the flight that is open:
+
+| | |
+|---|---|
+| **Print the log** | the same printout as always, with the kinds to include, broken by day, club logo on the first sheet |
+| **Export** | CSV, JSON, GeoJSON or KML |
+
+*Back* returns to the list, *Close* leaves the archive.
+
+### GeoJSON and KML
+
+Two formats, because the two places this crew would look at a flight do not read the same one.
+Google My Maps reads **GeoJSON**. Google Earth does not — it reads **KML**.
+
+The GeoJSON holds the track as a single line and one point per entry, with every figure the
+entry carried as a property: time, kind, reporter, the message itself, altitude, course, speed,
+rate of climb, place name, how the position was obtained, and the ballast figures where there
+are any. The track line is deliberately flat — GeoJSON's readers ignore height, and a line that
+mixes two- and three-value positions trips some of them up. Height rides on the points.
+
+The KML is the one to open in Google Earth, and it carries rather more:
+
+- the track as a **3D trace** at the recorded altitude, extruded down to the ground, so the
+  flight hangs in the air where it actually was. A flat ground track is included as well,
+  switched off, for when the 3D line is in the way
+- a **timestamp on every entry**, so Earth's time slider runs over the flight and will play it
+- the **whole message** in the balloon that opens when a pin is clicked, with the time, who
+  reported it, the navigation line and the place name
+- a **folder per kind** — Ballast, ATC, Ressources, Other, POS, MANPOS, PIC — each in its own
+  colour, so a crowded flight can be thinned out in Earth's sidebar
+
+Entries made before the first fix have no coordinates, and none are invented for them. In the
+GeoJSON they carry a null geometry; in the KML they sit in a folder called *Without position*,
+readable in the sidebar, absent from the globe. Nothing is left out of either file.
+
+The file is named after the flight — `GBX-2608-24.kml` — and goes through the same *Download*
+or *Share* as the other exports.
+
+## 22. Polling from Notion
 
 **GitHub API — immediate, recommended**
 
@@ -1124,7 +1187,7 @@ GET https://raw.githubusercontent.com/<owner>/<repo>/main/data/<flight-id>.csv
 
 Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.
 
-## 22. The pre-flight check
+## 23. The pre-flight check
 
 *Pre-flight check* in the menu, on the master only, and again by itself before the first entry
 of a new flight — where it has replaced the old reminder to go and verify the settings, which
@@ -1152,7 +1215,7 @@ Nothing here blocks anything. A balloon launches with a red cross beside the mes
 if the crew decides so; the check reports, the crew decides. *Re-check* runs it again without
 closing.
 
-## 23. Beginning a new flight
+## 24. Beginning a new flight
 
 *Begin new flight* appears **only on the master**, at the foot of the unlocked settings, and asks
 for the master password
@@ -1176,7 +1239,7 @@ into today's flight under the new name.
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.
 
-## 24. Language
+## 25. Language
 
 Device mode, night colour, confirmation tone and language sit above the password, because they are personal
 preferences rather than flight settings and every crew member may want their own. A device
@@ -1194,7 +1257,7 @@ stays English: the column names, the values in `type`, the message templates. A 
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.
 
-## 25. Keeping the crew on the current build
+## 26. Keeping the crew on the current build
 
 The service worker takes a new version over the moment it is installed, and the app now looks
 for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
@@ -1206,7 +1269,7 @@ until it is closed and opened again — reloading a page inside it is not enough
 asked for seems not to have happened, check the version in the bottom right corner first, and
 close the app from the app switcher before opening it again.
 
-## 26. When a change does not appear
+## 27. When a change does not appear
 
 The service worker caches each file on its own and carries on past one that is missing. That
 sounds like housekeeping and is not: `cache.addAll()` rejects as a whole if a single request
@@ -1228,7 +1291,7 @@ So when something you asked for is not there, the order to check is:
 `GET .../data/_seen?ref=main 404` in the console is not a fault: it says no device has left its
 card in the repository yet. It disappears with the first one.
 
-## 27. Limits worth knowing before takeoff
+## 28. Limits worth knowing before takeoff
 
 - **GPS in the background:** once the app is not in the foreground and the display locks,
   iPadOS suspends location updates. The app holds a wake lock while it is active. This records
@@ -1255,12 +1318,12 @@ the old.
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.
 
-## 28. Version
+## 29. Version
 
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261017-02` is the second build of 17 October 2026.
+smaller counter. `v261017-03` is the third build of 17 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
@@ -1269,7 +1332,7 @@ printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
 
-## 29. License
+## 30. License
 
 Custom license, © 2026 Wicki Aero GmbH.
 
@@ -1297,7 +1360,7 @@ from a CDN. The app talks to the GitHub API with your token, to the browser's ge
 service, and to the wa.me links you tap. That is the whole list, which is also why it works with
 no signal and why there is nothing to keep up to date but the app itself.
 
-## 30. Files
+## 31. Files
 
 | File | What it is |
 |---|---|
