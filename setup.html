@@ -30,15 +30,15 @@ a{color:inherit}
 
 .nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
-<p class="nav2"><a href="readme.html">Manual</a> · Setup guide · <a href="notion.html">Notion</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
-<h1>Setup — data repository, token and Notion polling</h1>
+<p class="nav2">Setup guide · <a href="readme.html">Manual</a> · <a href="notion.html">Notion</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
+<h1 id="setup-data-repository-token-and-notion-polling">Setup — data repository, token and Notion polling</h1>
 <p>Everything the app needs on the GitHub side, and how Notion reads the result. The same material,
 laid out for printing and handing to whoever built the Notion integration, is in
 <strong>Setup-data-repository.pdf</strong> in the repository. Do this once per
 season, not once per flight. Twenty minutes, no command line.</p>
 <p>The app itself is documented separately in <a href="readme.html">the manual</a>.</p>
 <hr />
-<h2>1. Why a second repository</h2>
+<h2 id="1-why-a-second-repository">1. Why a second repository</h2>
 <p>The app writes the flight table straight into a repository through the GitHub Contents API.
 Every entry is two commits — one for the JSON, one for the CSV.</p>
 <p>If those commits land in the repository that GitHub Pages builds from, <strong>every entry triggers a
@@ -71,7 +71,7 @@ every flight are readable by anyone who finds the URL. Private keeps them behind
 Notion can poll a private repository perfectly well through the API — only the
 <code>raw.githubusercontent.com</code> shortcut stops working. Unless you want the flights to be openly
 followable, make it private.</p>
-<h2>2. Create the data repository</h2>
+<h2 id="2-create-the-data-repository">2. Create the data repository</h2>
 <ol>
 <li>github.com → <strong>New repository</strong></li>
 <li>Name: <code>gb_flight_data</code></li>
@@ -82,7 +82,7 @@ followable, make it private.</p>
 <li>Create repository</li>
 </ol>
 <p>Nothing else. The app creates the <code>data/</code> folder and the files inside it on its own.</p>
-<h2>3. Create the token</h2>
+<h2 id="3-create-the-token">3. Create the token</h2>
 <p>Fine-grained tokens are scoped to single repositories, which is what you want here: a token
 that can write flight logs and nothing else.</p>
 <p><strong>Go straight to the page.</strong> GitHub has been renaming this corner of the settings — where the
@@ -94,7 +94,7 @@ address has not moved:</p>
 and leaves only the repository to pick:</p>
 <pre><code>https://github.com/settings/personal-access-tokens/new?name=basket-write-2026&amp;expires_in=180&amp;contents=write
 </code></pre>
-<ol>
+<ol start="4">
 <li><strong>Token name</strong>: something you will recognise later, e.g. <code>basket-reporting-2026</code></li>
 <li><strong>Expiration</strong>: set it to shortly after the season, not "no expiration". A token that
    expires is a token you cannot forget about.</li>
@@ -151,7 +151,7 @@ and leaves only the repository to pick:</p>
 </tbody>
 </table>
 <p>The token looks like <code>github_pat_</code> followed by about eighty characters.</p>
-<h3>Where the token ends up</h3>
+<h3 id="where-the-token-ends-up">Where the token ends up</h3>
 <p>On each device, in the browser's local storage, unencrypted. That is a deliberate trade: no
 server, no account, no login, and the app works with no signal. The consequences:</p>
 <ul>
@@ -164,7 +164,7 @@ server, no account, no login, and the app works with no signal. The consequences
 <p>If that is not acceptable, put a Cloudflare Worker in front of the GitHub API holding the token
 server-side, and point <code>API</code> in <code>index.html</code> at the Worker. The app never needs to know the
 token in that arrangement.</p>
-<h2>4. Enter it in the app</h2>
+<h2 id="4-enter-it-in-the-app">4. Enter it in the app</h2>
 <p>On the device that will be the <strong>master</strong> — normally the pilot in command's iPad:</p>
 <ol>
 <li>Menu → <strong>Settings</strong> → <em>Unlock settings</em>, password <code>1234</code></li>
@@ -177,7 +177,7 @@ token in that arrangement.</p>
 <li><strong>Save settings</strong></li>
 </ol>
 <p>The other devices do not need any of this typed again — see section 6.</p>
-<h2>5. First flight, and what appears</h2>
+<h2 id="5-first-flight-and-what-appears">5. First flight, and what appears</h2>
 <p>Set a flight ID, post one entry. Within a few seconds the data repository contains:</p>
 <pre><code>data/&lt;flight-id&gt;.json          the table, every row, sorted by time
 data/&lt;flight-id&gt;.csv           the same rows as CSV
@@ -187,7 +187,7 @@ data/_setup.json               the shared setup the followers read
 <p>The file names come from the flight ID with anything that is not a letter, digit, hyphen or
 underscore replaced by a hyphen. <code>GB 2026/01</code> becomes <code>GB-2026-01.json</code>.</p>
 <p>No workflow, no Action, no build step. The app is the only writer.</p>
-<h2>6. Adding the other crew members</h2>
+<h2 id="6-adding-the-other-crew-members">6. Adding the other crew members</h2>
 <p><strong>How a device becomes the master:</strong> it knows the master password, <strong>5678</strong>. On its first
 start every device is asked <em>Is this the master device?</em> — the password makes it the master,
 <em>Join as follower</em> makes it a follower, and a device set up through an invitation link is a
@@ -218,7 +218,7 @@ screen. A follower can still be unlocked and edited locally, but the next public
 master wins.</p>
 <p><strong>Two masters would fight</strong> over <code>_setup.json</code> and each undo the other. Exactly one device is
 the master.</p>
-<h2>7. Polling from Notion</h2>
+<h2 id="7-polling-from-notion">7. Polling from Notion</h2>
 <p><strong>The endpoint to use</strong>, private or public repository alike:</p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/gb_flight_data/contents/data/&lt;flight-id&gt;.json
 Authorization: Bearer &lt;token&gt;
@@ -242,7 +242,7 @@ archive or hide the rows whose ids appear there.</p>
 </code></pre>
 <p>No token needed, but it sits behind a CDN with roughly a five-minute cache. Fine for working
 through a flight afterwards, too slow to follow one live.</p>
-<h2>8. Checklist before a flight</h2>
+<h2 id="8-checklist-before-a-flight">8. Checklist before a flight</h2>
 <ul>
 <li>[ ] Token not expired — check the date on GitHub</li>
 <li>[ ] Master shows <em>Check connection</em> naming the data repository</li>
@@ -253,7 +253,7 @@ through a flight afterwards, too slow to follow one live.</p>
 <li>[ ] Test entry deleted afterwards, so the flight starts empty</li>
 <li>[ ] Start ballast entered, or the first inventory planned for before launch</li>
 </ul>
-<h2>9. When something does not arrive</h2>
+<h2 id="9-when-something-does-not-arrive">9. When something does not arrive</h2>
 <p><strong>The header says <code>no repository</code></strong> — repository or token missing in the settings on that
 device.</p>
 <p><strong>Entries stay <code>queued</code></strong> — no connection, or the token has expired or been revoked. <em>Send now</em>

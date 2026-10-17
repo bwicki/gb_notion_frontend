@@ -29,7 +29,7 @@ GitHub API, the map tiles, and — if you leave place names on — one lookup pe
  7. [ATC, Ressources, Other](#7-atc-ressources-other)
  8. [Position](#8-position)
  9. [Automatic position reports](#9-automatic-position-reports)
-10. [The Ops Normal clock](#10-the-ops-normal-clock)
+10. [The Ops Normal clock](#10-the-ops-normal-clock) · [The countdown](#the-countdown) · [Being told](#being-told)
 11. [Place names](#11-place-names)
 12. [When the satellites are gone](#12-when-the-satellites-are-gone)
 13. [WhatsApp](#13-whatsapp)
@@ -75,7 +75,9 @@ it sits beside a red, amber or green dot: green under 15 metres, amber under 50,
 that or with no fix at all. The rate of climb is figured from the altitude
 of two fixes at least five seconds apart and smoothed, because the raw difference between two
 consumer fixes jumps far too much to read. Before a fix it reads `GPS searching`; with a fix but no
-movement the course and speed fall away and only the accuracy remains. Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
+movement the course and speed fall away and only the accuracy remains. When an Ops Normal
+reminder is running, a framed countdown stands to the right of the navigation line — the largest
+figure in the header, described in [section 10](#10-the-ops-normal-clock). Then two buttons: menu and minimise. Below it, flush against the header, sit the four message types; the kilograms on
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.
@@ -466,8 +468,57 @@ own.
 Send a transmitted call whose message contains *Ops Normal* and the app asks whether to keep the
 time. Pressing *Remind me* turns the button green and holds it for a second reading *Confirmed*,
 the same signal the post button gives, before the window closes: *Remind of the next Ops Normal in how many minutes?*, twenty by default and changeable in
-the window. When it falls due there is a tone and a message. It is the one call that has to
-happen on a clock, and the one most easily forgotten in weather.
+the window. It is the one call that has to happen on a clock, and the one most easily forgotten
+in weather.
+
+### The countdown
+
+Once the time is kept, a framed counter appears in the header, between the flight identifier and
+the menu, counting down in minutes and seconds. It is deliberately the largest figure up there.
+
+It changes as the time runs out:
+
+| | |
+|---|---|
+| **Plain** | more than five minutes to go |
+| **Amber** | inside the last five minutes |
+| **Red, blinking, with a `+`** | the time has passed, and it counts up from there |
+
+Tap the counter to set a new interval, or to stop the reminder altogether — while one is running
+the left-hand button in that window reads *Stop reminder* instead of *No reminder*. Posting
+another transmitted *Ops Normal* offers the same window again, so the ordinary way to restart the
+clock is simply to make the call.
+
+The counter is kept as the moment it falls due, not as a running timer, so it survives a reload,
+a locked screen and the app being closed and reopened. Beginning a new flight clears it.
+
+### Being told
+
+Five minutes before the time, the device sounds twice and says **"Report Ops Normal in five
+minutes."** At the time itself it sounds three times, says **"Report Ops Normal now"** and opens a
+window. If the call still has not gone out it repeats every two minutes for half an hour, then
+gives up and leaves the red counter standing.
+
+In German the two sentences are *Ops Normal in fünf Minuten melden* and *Ops Normal jetzt melden*;
+the language follows the app's own setting.
+
+*Ops Normal alarm* in the setup has three positions — *Off*, *Tone*, *Tone + voice*, the last of
+them the default. Changing it plays the alarm once, so a muted device is discovered on the ground
+rather than at altitude; the pre-flight check also lists the setting and marks it amber when it is
+off. The alarm is separate from the *Confirmation tone* that follows each posted entry, and
+turning that one off leaves the alarm alone.
+
+Two things are worth knowing. A browser will not make a sound, or speak, until the page has been
+touched once — the first touch anywhere wakes both, and in practice that happens long before the
+first reminder. And a phone that has put the app into the background, rather than merely dimmed
+the screen, stops running the app's clock; the warning then arrives when the app is next in front,
+which is why the screen is kept awake while the app is open.
+
+If the reminder falls due while another window is open, the app sounds and shows the sentence as a
+short message instead of a window, rather than closing whatever was waiting underneath.
+
+If the app is opened again inside the last five minutes — closed over that window, or the device
+asleep — it does not announce a figure that is no longer true. It simply shows the amber counter.
 
 ## 11. Place names
 
@@ -1209,7 +1260,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v260826-01` is the first build of 26 August 2026.
+smaller counter. `v261017-01` is the first build of 17 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

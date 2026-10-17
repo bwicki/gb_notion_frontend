@@ -30,12 +30,12 @@ a{color:inherit}
 
 .nav2{font-size:13px;color:var(--muted);margin:0 0 22px}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
-<p class="nav2"><a href="readme.html">Manual</a> · <a href="setup.html">Setup guide</a> · Notion · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
-<h1>Getting the flight table into Notion</h1>
+<p class="nav2">Notion · <a href="readme.html">Manual</a> · <a href="setup.html">Setup guide</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
+<h1 id="getting-the-flight-table-into-notion">Getting the flight table into Notion</h1>
 <p>For whoever builds and runs the Notion side. It answers one question first, because the
 answer decides everything else.</p>
 <hr />
-<h2>Can Notion fetch this by itself?</h2>
+<h2 id="can-notion-fetch-this-by-itself">Can Notion fetch this by itself?</h2>
 <p><strong>Plain Notion cannot.</strong> Database automations in Notion trigger on things that happen <em>inside</em>
 Notion — a page created, a property changed, a date reached. There is no native automation that
 says "every five minutes, fetch this URL and write the rows into a database". The GitHub
@@ -86,7 +86,7 @@ schedule — every 15 minutes, hourly, daily. They need the Business plan and th
 a flight being followed live, a quarter of an hour is too coarse; for an archive built after
 landing it would do.</p>
 <hr />
-<h2>What the app writes</h2>
+<h2 id="what-the-app-writes">What the app writes</h2>
 <p>One file per flight, in the data repository, always the complete table:</p>
 <pre><code>data/&lt;flight-id&gt;.json          every row, sorted by ts_utc
 data/&lt;flight-id&gt;.csv           the same rows as CSV
@@ -97,8 +97,8 @@ data/_flights.json             an index of closed flights
 <p>Each row carries a stable <code>id</code> (a UUID). <strong>Upsert on that id. Never append.</strong> The file holds the
 whole table, not a delta; an integration that appends will double the table on its second run.</p>
 <hr />
-<h2>Route 1, step by step</h2>
-<h3>1. A Notion database</h3>
+<h2 id="route-1-step-by-step">Route 1, step by step</h2>
+<h3 id="1-a-notion-database">1. A Notion database</h3>
 <p>Create a database in the workspace. Give it a <strong>Name</strong> column of type <em>title</em> — the script puts
 the row's <code>id</code> there, and that is what makes the upsert work. Then add whichever of these you
 want; the script skips any column that does not exist and says so in the run log rather than
@@ -225,7 +225,7 @@ failing:</p>
 </table>
 <p><strong>Keep the Edited column.</strong> The script uses it to tell an unchanged row from a corrected one, and
 that is what keeps a run from rewriting two hundred pages every time.</p>
-<h3>2. A Notion integration</h3>
+<h3 id="2-a-notion-integration">2. A Notion integration</h3>
 <ol>
 <li>notion.com/my-integrations → <strong>New integration</strong>, internal, in the right workspace</li>
 <li>Capabilities: <strong>Read content</strong>, <strong>Update content</strong>, <strong>Insert content</strong></li>
@@ -234,30 +234,30 @@ that is what keeps a run from rewriting two hundred pages every time.</p>
 </ol>
 <p>Without step 4 the integration cannot see the database, and every call answers 404. It is the
 step people miss.</p>
-<h3>3. The database id</h3>
+<h3 id="3-the-database-id">3. The database id</h3>
 <p>From the database URL:</p>
 <pre><code>https://www.notion.so/workspace/8f2c1a04b7e34f6d9a5c0e1b2d3f4a5b?v=...
                                └───────── the 32 characters you need ─────────┘
 </code></pre>
-<h3>4. The files, in the data repository</h3>
+<h3 id="4-the-files-in-the-data-repository">4. The files, in the data repository</h3>
 <pre><code>notion-sync/sync.mjs                    the script
 .github/workflows/notion-sync.yml       the workflow (from notion-sync/notion-sync.yml)
 </code></pre>
 <p>The workflow file has to sit at <code>.github/workflows/</code>, the script wherever the workflow points —
 <code>notion-sync/</code> in the supplied version.</p>
-<h3>5. Two secrets</h3>
+<h3 id="5-two-secrets">5. Two secrets</h3>
 <p>Repository → Settings → Secrets and variables → Actions → <strong>New repository secret</strong></p>
 <pre><code>NOTION_TOKEN      ntn_...
 NOTION_DATABASE   8f2c1a04b7e34f6d9a5c0e1b2d3f4a5b
 </code></pre>
-<h3>6. Run it once by hand</h3>
+<h3 id="6-run-it-once-by-hand">6. Run it once by hand</h3>
 <p>Actions → <em>Notion sync</em> → <strong>Run workflow</strong>. The log ends with a line like</p>
 <pre><code>rows 128 · created 128 · updated 0 · archived 0
 </code></pre>
 <p>From then on it runs on its own: every commit the app makes starts it, and a quarter-hourly
 schedule catches anything a failed run missed.</p>
 <hr />
-<h2>What the script does, and what it costs</h2>
+<h2 id="what-the-script-does-and-what-it-costs">What the script does, and what it costs</h2>
 <p>It reads the flight files, drops the rows listed in the tombstone file, fetches the pages already
 in the database once, and then writes only what changed — a new row is created, a corrected row
 is patched, an unchanged row costs no request at all. A row the crew deleted is <strong>archived</strong>
@@ -271,7 +271,7 @@ uses a little over an hour of that budget. If that becomes tight, remove the <co
 leave the schedule — the table is complete in every run, so a fifteen-minute rhythm loses
 nothing but immediacy.</p>
 <hr />
-<h2>Route 3, if no code is wanted at all</h2>
+<h2 id="route-3-if-no-code-is-wanted-at-all">Route 3, if no code is wanted at all</h2>
 <p>Make, Zapier, n8n and Notion's own API Connector can all do this without a repository. The shape
 is the same in each: a scheduled HTTP request, then a Notion upsert.</p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/gb_flight_data/contents/data/&lt;flight-id&gt;.json
@@ -284,7 +284,7 @@ with the content base64-encoded inside. Iterate the array, upsert on <code>id</c
 than the service allows. Send <code>If-None-Match</code> with the previous ETag if the tool supports it —
 an unchanged file then answers <code>304</code> and costs nothing against the GitHub rate limit.</p>
 <hr />
-<h2>When rows do not arrive</h2>
+<h2 id="when-rows-do-not-arrive">When rows do not arrive</h2>
 <table>
 <thead>
 <tr>

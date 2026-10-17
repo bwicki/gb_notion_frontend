@@ -79,6 +79,23 @@ header .id{font-size:12px;line-height:1.25;color:var(--muted);white-space:nowrap
 header button{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px}
 header button.on{background:var(--sel);color:var(--sel-ink)}
 header svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* the Ops Normal countdown — the one thing in the header that has to be read at a glance,
+   so it gets a frame of its own and changes colour as the time runs out */
+.opsbox{flex:0 0 auto;display:none;flex-direction:column;align-items:center;gap:0;
+  padding:3px 7px 4px;border-radius:9px;
+  border:1.4px solid var(--line);background:var(--field);line-height:1}
+.opsbox.on{display:flex}
+.opsbox b{font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
+.opsbox span{font-size:19px;font-weight:700;color:var(--ink);margin-top:2px}
+.opsbox.soon{border-color:#C9A227;background:#FAF2D8}
+.opsbox.soon b,.opsbox.soon span{color:#7E6310}
+.opsbox.late{border-color:#B5442F;background:#F7E1DC;animation:opsflash 1s steps(1,end) infinite}
+.opsbox.late b,.opsbox.late span{color:#8E2F1E}
+@keyframes opsflash{50%{background:var(--field);border-color:var(--line-soft)}}
+html[data-theme="night"] .opsbox.soon{border-color:#D8AC33;background:#1A1203}
+html[data-theme="night"] .opsbox.soon b,html[data-theme="night"] .opsbox.soon span{color:#D8AC33}
+html[data-theme="night"] .opsbox.late{border-color:#E2705F;background:#1E0703}
+html[data-theme="night"] .opsbox.late b,html[data-theme="night"] .opsbox.late span{color:#E2705F}
 
 .body{flex:1 1 auto;min-height:0;display:flex}
 .view{display:none;flex:1;min-width:0;flex-direction:column}
@@ -515,6 +532,7 @@ body.mapon #app{visibility:hidden}
   <div class="hleft"><span class="clock num" id="hClock">--:--:--Z</span>
     <span class="clock num" id="hBal"></span></div>
   <div class="hinfo"><span class="id" id="hId">—</span><span class="id num" id="hGps"></span></div>
+  <div class="opsbox" id="hOps" role="button" tabindex="0" aria-label="Ops Normal"><b>OPS</b><span class="num" id="hOpsT">--:--</span></div>
   <button id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button id="btnMin" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M20 4l-6 6M14 10V5M14 10h5M4 20l6-6M10 14v5M10 14H5"/></svg></button>
 </header>
@@ -704,6 +722,8 @@ body.mapon #app{visibility:hidden}
         </div></div>
       <div class="f"><p class="lab" data-t="tone">Confirmation tone</p>
         <div class="pnl" id="sBeep"><button data-v="0" data-t="off">Off</button><button data-v="1" data-t="on">On</button></div></div>
+      <div class="f"><p class="lab" data-t="opsSnd">Ops Normal alarm</p>
+        <div class="pnl pnl3" id="sOpsSnd"><button data-v="0" data-t="off">Off</button><button data-v="1" data-t="sndTone">Tone</button><button data-v="2" data-t="sndVoice">Tone + voice</button></div></div>
 
       <div id="setLocked">
         <p class="lock" data-t="lockText">The rest of the setup is protected so a flight in progress cannot be overwritten by mistake.</p>
@@ -782,6 +802,7 @@ body.mapon #app{visibility:hidden}
             <div class="sfx"><input type="number" id="sOpsMin" inputmode="numeric" step="5" placeholder="20"><span>min</span></div></div>
         </div>
         <p class="hint" data-t="lPosHint">0 turns the automatic report off.</p>
+        <p class="hint" data-t="lOpsHint">The reminder runs in the header as a countdown.</p>
         <div class="f"><p class="lab" data-t="lGeo">Place name with each position</p>
           <div class="pnl" id="sGeo">
             <button data-v="0" data-t="off">Off</button><button data-v="1" data-t="on">On</button>
@@ -908,7 +929,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v260826-01';
+const APP_VERSION='v261017-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -923,7 +944,7 @@ const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,2
            readySteps:'0,10,25,50,75,100',o2:'',o2bar:200,vfr:'7000',emerg:'7500,7600,7700',stations:'Info,Radar,Tower,Control,Approach,[unclear]',
            msgRx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',
            msgTx:'Initial call,Position report,QNH,Ops Normal,Level clearance,Squawk,Freq change,Leaving freq',lang:'en',role:'',mode:'personal',reporter:'',atcName:'ATC Coordinator',atcNum:'',
-           fresh:0,tplVer:0,handover:'',joinUrl:'https://basket-join.balthasar.workers.dev',joinCode:'',joinId:'',joinAt:'',joinUsed:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',wa:[],
+           fresh:0,tplVer:0,handover:'',joinUrl:'https://basket-join.balthasar.workers.dev',joinCode:'',joinId:'',joinAt:'',joinUsed:'',blocked:[],repo:'bwicki/gb_flight_data',branch:'main',dir:'data',token:'',beep:1,provisioned:0,theme:'',night:'red',opsSnd:2,wa:[],
            tpl:null};
 const TPL={
   ATC:'*{type} | {callsign}*\n{atcmsgtype} \u00b7 Station: {station}\nFREQ: {freq} \u00b7 SQ: {squawk}\nMsg: {!msg}\n{time} \u00b7 {pos} \u00b7 {alt} \u00b7 {tc} \u00b7 {speed} \u00b7 {vs}\n{place}\n{maps}',
@@ -1124,7 +1145,12 @@ const L={en:{
  lPosHint:'0 turns the automatic report off. With a number, a POS row is written at that interval with position, altitude and rate of climb — the track of the flight survives even when nobody has a hand free.',
  opsTitle:'Ops Normal', opsText:'Remind of the next Ops Normal in how many minutes?',
  opsSet:'Remind me', opsConfirmed:'Confirmed', opsNo:'No reminder', opsArmed:'Reminder set for {n} min',
- opsDue:'Ops Normal is due — {n} minutes since the last one.'
+ opsDue:'Ops Normal is due — {n} minutes since the last one.',
+ opsStop:'Stop reminder', opsOff:'Ops Normal reminder stopped',
+ opsV5:'Report Ops Normal in five minutes', opsVNow:'Report Ops Normal now',
+ opsSnd:'Ops Normal alarm', sndTone:'Tone', sndVoice:'Tone + voice',
+ pfSndHint:'The countdown will run, but nothing will be heard when it falls due.',
+ lOpsHint:'The reminder runs in the header as a countdown. Five minutes before it falls due and at the moment itself the device sounds and says so.'
 ,
  roleTitle:'Is this the master device?',
  roleText:'One device in the crew owns the flight setup and publishes it to the others. If this is that device, enter the master password. If you are joining someone else\'s flight, choose Join as follower — you will be sent the setup.',
@@ -1306,7 +1332,12 @@ const L={en:{
  lPosHint:'0 schaltet die automatische Meldung aus. Mit einer Zahl wird in diesem Takt eine POS-Zeile geschrieben, mit Position, Höhe und Steigrate — so bleibt die Spur der Fahrt auch dann erhalten, wenn niemand eine Hand frei hat.',
  opsTitle:'Ops Normal', opsText:'In wie vielen Minuten an das nächste Ops Normal erinnern?',
  opsSet:'Erinnern', opsConfirmed:'Bestätigt', opsNo:'Keine Erinnerung', opsArmed:'Erinnerung in {n} min',
- opsDue:'Ops Normal ist fällig — {n} Minuten seit der letzten Meldung.'
+ opsDue:'Ops Normal ist fällig — {n} Minuten seit der letzten Meldung.',
+ opsStop:'Erinnerung stoppen', opsOff:'Ops-Normal-Erinnerung gestoppt',
+ opsV5:'Ops Normal in fünf Minuten melden', opsVNow:'Ops Normal jetzt melden',
+ opsSnd:'Ops-Normal-Alarm', sndTone:'Ton', sndVoice:'Ton + Ansage',
+ pfSndHint:'Der Countdown läuft, aber bei Fälligkeit ist nichts zu hören.',
+ lOpsHint:'Die Erinnerung läuft als Countdown in der Kopfzeile. Fünf Minuten vor Ablauf und im Moment der Fälligkeit ertönt ein Signal mit Ansage.'
 ,
  roleTitle:'Ist dies das Master-Gerät?',
  roleText:'Ein Gerät der Crew besitzt die Einrichtung der Fahrt und gibt sie an die anderen weiter. Ist dies dieses Gerät, gib das Master-Passwort ein. Steigst du in die Fahrt eines anderen ein, wähle Als Follower beitreten — die Einrichtung wird dir zugeschickt.',
@@ -1678,13 +1709,24 @@ let WL=null;
 async function wake(){try{if('wakeLock'in navigator&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>WL=null)}}catch(e){}}
 document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&wake());
 let AC=null;
-function beep(){if(!Number(CFG.beep))return;try{
+function tone(f,gain,dur){try{
   AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended')AC.resume();
   const o=AC.createOscillator(),g=AC.createGain();
-  o.frequency.value=880;g.gain.value=.06;o.connect(g);g.connect(AC.destination);o.start();
-  g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.12);o.stop(AC.currentTime+.13)}catch(e){}}
+  o.frequency.value=f;g.gain.value=gain;o.connect(g);g.connect(AC.destination);o.start();
+  g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+dur);o.stop(AC.currentTime+dur+.02)}catch(e){}}
+function beep(){if(!Number(CFG.beep))return;tone(880,.06,.12)}
+/* A browser will not make a sound, or speak, until the page has been touched once. The first
+   touch anywhere wakes both, so that the alarm hours later is not the first attempt. */
+let PRIMED=0;
+document.addEventListener('pointerdown',()=>{
+  if(PRIMED)return;PRIMED=1;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}
+  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
+},{capture:true});
 function tick(){const d=new Date();
-  $('#hClock').textContent=pad(d.getUTCHours(),2)+':'+pad(d.getUTCMinutes(),2)+':'+pad(d.getUTCSeconds(),2)+'Z'}
+  $('#hClock').textContent=pad(d.getUTCHours(),2)+':'+pad(d.getUTCMinutes(),2)+':'+pad(d.getUTCSeconds(),2)+'Z';
+  paintOps()}
 setInterval(tick,1000);tick();
 
 /* ── GitHub, multi-device merge ────────────────────────────────────── */
@@ -1763,7 +1805,7 @@ function applyShared(o){
     ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
     UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};save(K_UI,UI);
     for(const k in ETAG)delete ETAG[k];
-    CFG.fresh=1;
+    CFG.fresh=1;opsClear(1);
   }
   SHARED.forEach(k=>{
     if(o[k]===undefined)return;
@@ -3392,21 +3434,80 @@ function posTick(){
 /* ── Ops Normal reminder ────────────────────────────────────────────
    The one call that has to happen on a clock. After sending it, the app offers to keep
    the time for you. */
-let OPST=null;
+/* The reminder is kept as the moment it falls due, not as a timer object: a timer dies with
+   the page, and the one call that must not be missed should survive a reload, a locked screen
+   and a browser that quietly stops running scripts in the background. Everything else —
+   the countdown, the two warnings — is worked out from that one timestamp on every tick. */
 async function opsAsk(){
+  const running=Number(CFG.opsDue)>0;
   const r=await ask({title:t('opsTitle'),text:t('opsText'),input:'number',
-    value:String(nz(CFG.opsMin)||20),ph:'20',ok:t('opsSet'),cancel:t('opsNo'),
+    value:String(nz(CFG.opsMin)||20),ph:'20',ok:t('opsSet'),
+    cancel:running?t('opsStop'):t('opsNo'),
     okFlash:t('opsConfirmed')});
-  if(r===null)return;
+  if(r===null){if(running)opsClear();return}
   const m=Math.max(1,Math.min(240,parseInt(r,10)||20));
-  CFG.opsMin=m;save(K_CFG,CFG);
-  clearTimeout(OPST);
-  OPST=setTimeout(()=>{
-    beep();
-    info(t('opsTitle'),t('opsDue').replace('{n}',String(m)));
-  },m*60000);
+  CFG.opsMin=m;opsArm(m);
   toast(t('opsArmed').replace('{n}',String(m)));
 }
+function opsArm(m){
+  CFG.opsDue=Date.now()+m*60000;
+  /* a reminder shorter than the warning itself has nothing to warn about in advance */
+  CFG.opsW5=(m<=5)?CFG.opsDue:0;
+  CFG.opsW0=0;CFG.opsRep=0;
+  save(K_CFG,CFG);paintOps();
+}
+function opsClear(quiet){
+  CFG.opsDue=0;CFG.opsW5=0;CFG.opsW0=0;CFG.opsRep=0;
+  save(K_CFG,CFG);paintOps();
+  if(!quiet)toast(t('opsOff'));
+}
+/* Sound first, words after: the tone carries across a basket in the open and does not depend
+   on a speech engine being present, the sentence says which of the two moments it is. */
+function opsAlarm(say,n){
+  const snd=CFG.opsSnd==null?2:Number(CFG.opsSnd);
+  if(!snd)return;
+  for(let i=0;i<n;i++)setTimeout(()=>tone(1046,.14,.22),i*300);
+  if(snd<2||!say)return;
+  setTimeout(()=>{try{
+    const u=new SpeechSynthesisUtterance(say);
+    u.lang=(CFG.lang==='de')?'de-DE':'en-GB';u.rate=.95;u.volume=1;
+    const v=(speechSynthesis.getVoices()||[]).find(x=>x.lang&&x.lang.slice(0,2)===u.lang.slice(0,2));
+    if(v)u.voice=v;
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  }catch(e){}},n*300+150);
+}
+function paintOps(){
+  const box=$('#hOps');if(!box)return;
+  const due=Number(CFG.opsDue)||0;
+  if(!due){box.classList.remove('on','soon','late');return}
+  const ms=due-Date.now(),late=ms<=0;
+  const s=Math.floor(Math.abs(ms)/1000),mm=Math.floor(s/60);
+  $('#hOpsT').textContent=(late?'+':'')+(mm>99?'99':pad(mm,2))+':'+pad(s%60,2);
+  box.classList.add('on');
+  box.classList.toggle('soon',!late&&ms<=300000);
+  box.classList.toggle('late',late);
+  /* five minutes out. Arriving inside the window late — the app was closed over it — latches
+     it without saying a figure that is no longer true. */
+  if(!late&&ms<=300000&&Number(CFG.opsW5)!==due){
+    if(ms>240000)opsAlarm(t('opsV5'),2);
+    CFG.opsW5=due;save(K_CFG,CFG);
+  }
+  if(late){
+    const now=Date.now();
+    if(Number(CFG.opsW0)!==due){
+      CFG.opsW0=due;CFG.opsRep=now;save(K_CFG,CFG);
+      opsAlarm(t('opsVNow'),3);
+      /* a window on top of an open one would strand whatever is waiting underneath */
+      if(!$('#modal').classList.contains('on'))
+        info(t('opsTitle'),t('opsDue').replace('{n}',String(nz(CFG.opsMin)||20)));
+      else toast(t('opsVNow'));
+    }else if(now-Number(CFG.opsRep||0)>=120000&&now-due<1800000){
+      /* still not reported: once every two minutes, for half an hour, then it gives up */
+      CFG.opsRep=now;save(K_CFG,CFG);opsAlarm(t('opsVNow'),3);
+    }
+  }
+}
+$('#hOps').addEventListener('click',opsAsk);
 
 /* ── Map ─────────────────────────────────────────────────────────────
    A slippy map written into the app rather than pulled from a library: the basket has no
@@ -4199,6 +4300,9 @@ function pfRows(){
   add('pfgRes',t('lMethInit'),(nz(CFG.methInit)||0)+' %',PF_OK,'','set');
   add('pfgRes',t('lPosMin'),nz(CFG.posMin)>0?nz(CFG.posMin)+' min':t('off'),PF_OK,'','set');
   add('pfgRes',t('lOpsMin'),(nz(CFG.opsMin)||20)+' min',PF_OK,'','set');
+  const snd=CFG.opsSnd==null?2:Number(CFG.opsSnd);
+  add('pfgRes',t('opsSnd'),[t('off'),t('sndTone'),t('sndVoice')][snd]||t('off'),
+      snd?PF_OK:PF_WARN,snd?'':t('pfSndHint'),'set');
 
   /* ── Communication ──────────────────────────────────────────── */
   const co=atcCo();
@@ -4492,7 +4596,7 @@ $('#btnTplReset').onclick=()=>{for(const k in TPLF)$(TPLF[k]).value=TPL[k];toast
 function fillSetup(){
   for(const k in SF)$(SF[k]).value=CFG[k]==null?'':CFG[k];
   if(!nz(CFG.init))$('#sInit').value='';
-  mark('#sBeep',CFG.beep);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sGeo',String(Number(CFG.geo)||0));mark('#sNight',CFG.night);mark('#sRole',CFG.role);
+  mark('#sBeep',CFG.beep);mark('#sOpsSnd',CFG.opsSnd==null?2:CFG.opsSnd);mark('#sMode',CFG.mode);mark('#sLang',CFG.lang||'en');mark('#sGeo',String(Number(CFG.geo)||0));mark('#sNight',CFG.night);mark('#sRole',CFG.role);
   paintO2Rows();paintModeLab();fillTplRows();
 }
 function lockSettings(){
@@ -4615,6 +4719,7 @@ function settingsRows(){
     ['Mode',CFG.mode==='shared'?t('sharedDev'):t('personalDev')],
     [t('hLanguage'),(CFG.lang||'en').toUpperCase()],
     [t('nightColour'),CFG.night||'red'],[t('tone'),yn(CFG.beep)],
+    [t('opsSnd'),[t('off'),t('sndTone'),t('sndVoice')][CFG.opsSnd==null?2:Number(CFG.opsSnd)]||t('off')],
     [t('hBallast'),''],
     [t('lInit'),(nz(CFG.init)||0)+' kg'],[t('lBagKg'),(nz(CFG.bagKg)||0)+' kg'],
     [t('lReadyKg'),(nz(CFG.readyKg)||0)+' kg'],[t('lSteps'),CFG.steps||'\u2014'],
@@ -4694,6 +4799,8 @@ $('#btnUnlock').onclick=async()=>{
   $('#btnSave').disabled=false;$('#setNote').textContent=t('unlocked')+' \u00b7 '+t(CFG.role==='master'?'master':'follower');
 };
 pills('#sBeep',v=>{CFG.beep=Number(v);save(K_CFG,CFG);beep()});
+/* the alarm is heard once here, so nobody discovers in the basket that the device is muted */
+pills('#sOpsSnd',v=>{CFG.opsSnd=Number(v);save(K_CFG,CFG);if(Number(v))opsAlarm(t('opsVNow'),1)});
 pills('#sGeo',v=>{CFG.geo=Number(v);save(K_CFG,CFG)});
 pills('#sLang',v=>{CFG.lang=v;save(K_CFG,CFG);applyLang();paintCrew();paintWaChecks();paintReady();paintInv();paint()});
 /* The mode moved out of the locked part of the setup and its handler was left behind: it
@@ -4789,7 +4896,7 @@ $('#btnNewFlight').onclick=async()=>{
   }
 
   archiveLocal(CFG.flight);
-  CFG.flight=next;CFG.fresh=1;save(K_CFG,CFG);
+  CFG.flight=next;CFG.fresh=1;save(K_CFG,CFG);opsClear(1);
   ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
   UI.adopted='';UI.lastAtc={station:'',freq:'',squawk:''};UI.lastDrop={};UI.lastInv={};UI.lastRes={};
   UI.o2bars=[];UI.meth=null;UI.rest='';save(K_UI,UI);
