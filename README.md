@@ -623,20 +623,38 @@ Three views, chosen at the top right of the map and remembered between visits:
 | **Terrain** | OpenTopoMap — contours and relief, the most useful of the three for reading ground from the air |
 | **Satellite** | Esri World Imagery |
 
-None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
-the satellite layer goes through the service Esri asks applications to use from the first start.
-It can be replaced in the setup, in the folded section **Map sources and key** at the very
-bottom, which asks *Do you really want to change these settings?* before it opens — the same
-guard as the GitHub connection and the message templates. What is adjusted from one flight to
-the next — how far tiles are kept, how many positions the map shows, the uncertainty steps —
-stays in the open under *Map and manual position*: Two million tiles a month cost nothing and pay-as-you-go stays off unless
-switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
-falls back to Esri's keyless address, which works but is not guaranteed.
+Streets and Terrain need no key at all. Satellite does, and **the key is no longer carried in
+the app**: the field starts empty, and without one the satellite layer falls back to Esri's
+keyless address, which works but is not guaranteed.
 
-**A token in a public repository is readable by anyone.** That is the price of a single-file app
-with no server, and the remedy is on Esri's side rather than in the code: an API key can be tied
-to a referrer, so a copy of the key only works from your own address. It is worth setting in the
-ArcGIS console — under the key's settings, *Referrers* — and it costs nothing. All three templates can be pointed elsewhere in *Tile sources* — a national
+The key is entered once, on the master, in the folded section **Map sources and key** at the very
+bottom of the setup, which asks *Do you really want to change these settings?* before it opens —
+the same guard as the GitHub connection and the message templates. It then travels to the other
+devices with *Share setup* and in a join code, like the rest of the setup. **After changing it,
+press Share setup**, or the followers keep the old one and their satellite view goes dark. What
+is adjusted from one flight to the next — how far tiles are kept, how many positions the map
+shows, the uncertainty steps — stays in the open under *Map and manual position*. Two million
+tiles a month cost nothing and pay-as-you-go stays off unless switched on, so there is nothing to
+run up; a flight uses a few hundred.
+
+**Why the key left the source.** Anything in a single-file app with no server is readable by
+anyone who opens the page, a key included. The remedy is on Esri's side: a key can be tied to a
+**referrer**, so a copy of it only works from your own address. Since 18 October 2026 the key
+used here is restricted to `https://reporting.wicki.aero`, and it is kept out of the repository
+as well — belt and braces.
+
+Three things follow from that restriction, and all three will look like a broken map if they are
+forgotten:
+
+- Opening the app from **any other address** — the old GitHub Pages address, a file opened from
+  disk — makes Esri refuse the key. Streets and Terrain carry on; only Satellite goes blank.
+- **Moving to a different domain** means the referrer has to be changed in the ArcGIS console,
+  under the key's settings, *Referrers*. Changing it **invalidates the key**: a new one must be
+  generated, entered in the setup, and shared with *Share setup*.
+- A device that still holds an **old, invalidated key** is worse off than one with an empty
+  field — the app takes the keyed route and is turned away. Empty beats wrong.
+
+All three templates can be pointed elsewhere in *Tile sources* — a national
 orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
 its own borders, and needs no key either.
 
@@ -1323,7 +1341,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261017-03` is the third build of 17 October 2026.
+smaller counter. `v261018-01` is the first build of 18 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

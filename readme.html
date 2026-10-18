@@ -608,19 +608,35 @@ terrestrial guess as a satellite one.</p>
 </tr>
 </tbody>
 </table>
-<p>None of them needs a key of yours to be typed in: the app ships with an ArcGIS access token, so
-the satellite layer goes through the service Esri asks applications to use from the first start.
-It can be replaced in the setup, in the folded section <strong>Map sources and key</strong> at the very
-bottom, which asks <em>Do you really want to change these settings?</em> before it opens — the same
-guard as the GitHub connection and the message templates. What is adjusted from one flight to
-the next — how far tiles are kept, how many positions the map shows, the uncertainty steps —
-stays in the open under <em>Map and manual position</em>: Two million tiles a month cost nothing and pay-as-you-go stays off unless
-switched on, so there is nothing to run up; a flight uses a few hundred. Emptying the field
-falls back to Esri's keyless address, which works but is not guaranteed.</p>
-<p><strong>A token in a public repository is readable by anyone.</strong> That is the price of a single-file app
-with no server, and the remedy is on Esri's side rather than in the code: an API key can be tied
-to a referrer, so a copy of the key only works from your own address. It is worth setting in the
-ArcGIS console — under the key's settings, <em>Referrers</em> — and it costs nothing. All three templates can be pointed elsewhere in <em>Tile sources</em> — a national
+<p>Streets and Terrain need no key at all. Satellite does, and <strong>the key is no longer carried in
+the app</strong>: the field starts empty, and without one the satellite layer falls back to Esri's
+keyless address, which works but is not guaranteed.</p>
+<p>The key is entered once, on the master, in the folded section <strong>Map sources and key</strong> at the very
+bottom of the setup, which asks <em>Do you really want to change these settings?</em> before it opens —
+the same guard as the GitHub connection and the message templates. It then travels to the other
+devices with <em>Share setup</em> and in a join code, like the rest of the setup. <strong>After changing it,
+press Share setup</strong>, or the followers keep the old one and their satellite view goes dark. What
+is adjusted from one flight to the next — how far tiles are kept, how many positions the map
+shows, the uncertainty steps — stays in the open under <em>Map and manual position</em>. Two million
+tiles a month cost nothing and pay-as-you-go stays off unless switched on, so there is nothing to
+run up; a flight uses a few hundred.</p>
+<p><strong>Why the key left the source.</strong> Anything in a single-file app with no server is readable by
+anyone who opens the page, a key included. The remedy is on Esri's side: a key can be tied to a
+<strong>referrer</strong>, so a copy of it only works from your own address. Since 18 October 2026 the key
+used here is restricted to <code>https://reporting.wicki.aero</code>, and it is kept out of the repository
+as well — belt and braces.</p>
+<p>Three things follow from that restriction, and all three will look like a broken map if they are
+forgotten:</p>
+<ul>
+<li>Opening the app from <strong>any other address</strong> — the old GitHub Pages address, a file opened from
+  disk — makes Esri refuse the key. Streets and Terrain carry on; only Satellite goes blank.</li>
+<li><strong>Moving to a different domain</strong> means the referrer has to be changed in the ArcGIS console,
+  under the key's settings, <em>Referrers</em>. Changing it <strong>invalidates the key</strong>: a new one must be
+  generated, entered in the setup, and shared with <em>Share setup</em>.</li>
+<li>A device that still holds an <strong>old, invalidated key</strong> is worse off than one with an empty
+  field — the app takes the keyed route and is turned away. Empty beats wrong.</li>
+</ul>
+<p>All three templates can be pointed elsewhere in <em>Tile sources</em> — a national
 orthophoto service such as swisstopo, basemap.at or IGN is sharper than any global layer inside
 its own borders, and needs no key either.</p>
 <p><strong>Tiles are kept two ways.</strong> Everything the map draws is held by the service worker on its way
@@ -1369,7 +1385,7 @@ the old.</li>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261017-03</code> is the third build of 17 October 2026.</p>
+smaller counter. <code>v261018-01</code> is the first build of 18 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

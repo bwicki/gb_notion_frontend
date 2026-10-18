@@ -948,14 +948,14 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261017-03';
+const APP_VERSION='v261018-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
 const DEF={flight:'',call:'',p1:'Pilot 1',p2:'Pilot 2',init:0,steps:'1,5,10,15,25',
            bagKg:10,readyKg:30,methInit:100,geo:1,o2bars:'',posMin:0,opsMin:20,
            mapMax:20,unc:'0.5,1,2,5,10',
-           tileToken:'AAPTancvFykBZUUzSddIhh87Jng..uj3B0KwHu02CrYU2nHTHoQfliNEQrvkxEtAg1-FVWxdHgAnGsqNkH1hljksfuGPx9pCeqmPqJywlQrS7zA0kst-Yg8U2mo-9xkoNQPDeKmKYuZhzU2QCnkM6wBTfRCdC0M9V8EAFWkSDpOKq5K3NwLkQ7gumukNGSJieRpwubb3gbAXS40wAcu7OAMAi4UuhdzRubaVy8bnwbZBGJO7Ke8Ev1TkDgV5aKmFk6-QRh7B_YeZMU2q4yVnh3rZqk8WFivw_5z8.AT1_FFzMS1E8',mapKm:20,mapZ:13,
+           tileToken:'',mapKm:20,mapZ:13,
            tileStreet:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
            tileTopo:'https://tile.opentopomap.org/{z}/{x}/{y}.png',
            tileSat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -1155,7 +1155,7 @@ const L={en:{
   tilesHeld:'{n} new tiles held, {m} in this view',
  tileTest:'Check the tile sources', tileNoToken:'The map needs an ArcGIS access token. It is free, takes five minutes, and goes into the setup under Map and manual position.',
  tileOk:'Street {a} \u00b7 Satellite {b}', lTileToken:'ArcGIS access token',
- lTokenHint:'Optional. Without one the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. With a token from a free ArcGIS Location Platform account it goes through the service Esri asks applications to use, with two million tiles a month at no cost.',
+ lTokenHint:'Optional, and no longer carried in the app itself. Left empty, the satellite layer uses Esri\'s keyless service, which works but is not guaranteed. A key from a free ArcGIS Location Platform account goes through the service Esri asks applications to use, with two million tiles a month at no cost. Tie the key to a referrer in the ArcGIS console so a copy of it works only from this app\'s own address, and after changing it here press Share setup, or the followers keep the old one.',
  lMapKm:'Keep tiles within', lMapZ:'Keep up to zoom', posManual:'manual', posEst:'estimated at {t}', posNoGps:'no GPS signal',
  posUnc:'\u00b1 {n} km', picChange:'Change of PIC',
  picChangeAsk:'The pilot in command changes from {a} to {b}. Report it?',
@@ -1350,7 +1350,7 @@ const L={en:{
   tilesHeld:'{n} neue Kacheln vorgehalten, {m} im Umkreis',
  tileTest:'Kartenquellen prüfen', tileNoToken:'Die Karte braucht ein ArcGIS-Zugangstoken. Es ist kostenlos und gehört in die Einstellungen unter Karte und Handposition.',
  tileOk:'Strasse {a} \u00b7 Satellit {b}', lTileToken:'ArcGIS-Zugangstoken',
- lTokenHint:'Freiwillig. Ohne Token nutzt die Satellitenebene den schlüssellosen Dienst von Esri; er funktioniert, ist aber nicht zugesichert.',
+ lTokenHint:'Freiwillig, und nicht mehr in der App selbst mitgeführt. Bleibt das Feld leer, nutzt die Satellitenebene den schlüssellosen Dienst von Esri; er funktioniert, ist aber nicht zugesichert. Ein Schlüssel aus einem kostenlosen ArcGIS-Location-Platform-Konto geht über den Dienst, den Esri für Anwendungen vorsieht, mit zwei Millionen Kacheln im Monat gratis. Binde den Schlüssel in der ArcGIS-Konsole an einen Referrer, damit eine Kopie nur von der eigenen Adresse der App aus funktioniert — und drücke nach einer Änderung hier Share setup, sonst behalten die Follower den alten.',
  posManual:'von Hand', posEst:'geschätzt um {t}', posNoGps:'kein GPS-Signal',
  posUnc:'\u00b1 {n} km', picChange:'PIC-Wechsel',
  picChangeAsk:'Das Kommando wechselt von {a} auf {b}. Soll das gemeldet werden?',
