@@ -217,7 +217,7 @@ select:focus{outline:0;border-color:var(--sel)}
 .pnl.pnl4{grid-template-columns:1fr 1fr 1fr 1fr}
 .pnl.pnl4 button{font-size:11px}
 /* the archive list: long enough to need its own scroll inside the sheet */
-.arclist{max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+.arclist{max-height:calc(var(--vvh,100dvh) * 0.44);overflow-y:auto;-webkit-overflow-scrolling:touch;
   border:1px solid var(--line);border-radius:10px;background:var(--field);margin:4px 0 2px}
 .arclist button{display:block;width:100%;text-align:left;padding:10px 12px;
   border-bottom:1px solid var(--line-soft)}
@@ -242,14 +242,14 @@ select:focus{outline:0;border-color:var(--sel)}
 .lvlgrid button{min-height:46px;border:1px solid var(--line);border-radius:9px;
   background:var(--field);font-size:14px}
 .lvlgrid button.on{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
-.settbl{max-height:58vh;overflow:auto;margin-top:2px}
+.settbl{max-height:calc(var(--vvh,100dvh) * 0.56);overflow:auto;margin-top:2px}
 .settbl table{width:100%;border-collapse:collapse;font-size:12px}
 .settbl td{padding:4px 6px;border-bottom:.5px solid var(--line-soft);vertical-align:top}
 .settbl td:first-child{color:var(--muted);width:44%}
 .settbl tr.sh td{font-weight:600;color:var(--ink);padding-top:11px;border-bottom:1px solid var(--line)}
 .joinrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:end;margin-bottom:4px}
 /* a report, not a form: one line per thing checked, its state in the margin */
-.pf{max-height:56dvh;overflow-y:auto;margin:2px -4px 0}
+.pf{max-height:calc(var(--vvh,100dvh) * 0.54);overflow-y:auto;margin:2px -4px 0}
 .pfg{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
   margin:12px 4px 3px}
 .pfg:first-child{margin-top:2px}
@@ -381,10 +381,19 @@ h3:first-child{margin-top:14px}
 .fold .in{padding:12px 14px 14px;border-top:1px solid var(--line-soft)}
 .lock{padding:16px;border:1px dashed var(--line);border-radius:10px;margin:14px 0;font-size:13.5px;color:var(--muted);line-height:1.45}
 
-#modal{position:fixed;inset:0;background:rgba(10,12,14,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:400}
+/* A soft keyboard on Android does not shrink the page, it covers it. A window centred in the
+   page would then sit half behind the keys — which is where the Ops Normal minutes and the
+   master password ended up. So the window is laid out in the visual viewport: the part of the
+   screen actually on view. --vvh and --vvt are kept up to date from the script; without that
+   API the old full-height behaviour remains. */
+#modal{position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100dvh);
+  background:rgba(10,12,14,.5);display:none;align-items:center;justify-content:center;
+  padding:18px;z-index:400}
 html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 #modal.on{display:flex}
-.sheet{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;max-width:400px;max-height:86dvh;overflow-y:auto}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;
+  width:100%;max-width:400px;max-height:calc(var(--vvh,100dvh) - 36px);overflow-y:auto;
+  overscroll-behavior:contain}
 /* the title row of a window: heading on the left, one optional square button on the right */
 .sheetHead{display:flex;align-items:flex-start;gap:10px;margin-bottom:2px}
 .sheetHead h4{flex:1;min-width:0;margin:0}
@@ -411,7 +420,7 @@ html[data-theme="night"] #modal{background:rgba(0,0,0,.75)}
 .qrbox svg{width:240px;height:240px;max-width:100%;border:1px solid var(--line);border-radius:10px;
   background:#fff;padding:6px}
 .waPre{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px;
-  font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:34dvh;overflow-y:auto;
+  font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:calc(var(--vvh,100dvh) * 0.32);overflow-y:auto;
   -webkit-user-select:text;user-select:text;margin-bottom:12px}
 .waList{display:grid;gap:8px}
 .menu{display:grid;gap:8px}
@@ -948,7 +957,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261018-01';
+const APP_VERSION='v261018-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1740,6 +1749,30 @@ if(navigator.geolocation)navigator.geolocation.watchPosition(
          tc:tc,sp:sp,vs:VS,t:now};GPSERR=null;paintStatus()},
   e=>{GPSERR=e.code===1?'location off':'no fix';paintStatus()},
   {enableHighAccuracy:true,maximumAge:4000,timeout:20000});
+/* The visual viewport is what the person can actually see: smaller than the page while a
+   keyboard is up, and offset while the page is pinched or scrolled under it. Both numbers go
+   into CSS so the modal can be sized and placed by them. */
+(function(){
+  const vv=window.visualViewport;if(!vv)return;
+  const r=document.documentElement;
+  let raf=0;
+  const sync=()=>{
+    raf=0;
+    r.style.setProperty('--vvh',vv.height+'px');
+    r.style.setProperty('--vvt',(vv.offsetTop||0)+'px');
+    /* the field being typed into stays in view as the keyboard grows */
+    const m=document.getElementById('modal');
+    if(m&&m.classList.contains('on')){
+      const a=document.activeElement;
+      if(a&&a!==document.body&&m.contains(a))
+        try{a.scrollIntoView({block:'nearest'})}catch(e){}
+    }
+  };
+  const queue=()=>{if(!raf)raf=requestAnimationFrame(sync)};
+  vv.addEventListener('resize',queue);
+  vv.addEventListener('scroll',queue);
+  sync();
+})();
 let WL=null;
 async function wake(){try{if('wakeLock'in navigator&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>WL=null)}}catch(e){}}
 document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&wake());

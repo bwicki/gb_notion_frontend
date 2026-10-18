@@ -104,6 +104,13 @@ figure in the header, described in <a href="#10-the-ops-normal-clock">section 10
 board appear under them only on the Ballast tab, where they are relevant. There is no logo and
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.</p>
+<p><strong>Windows sit in the part of the screen you can actually see.</strong> A soft keyboard on Android
+does not shrink the page, it covers it — so a window centred in the page ends up half behind
+the keys, which is where the Ops Normal minutes and the master password used to go. Every
+window is therefore laid out in the visual viewport: it shrinks and moves with the keyboard,
+the field being typed into is kept in view, and anything scrollable inside it — the flight
+archive, the settings recap, the pre-flight list, a message preview — measures itself against
+the same visible height. A browser without that capability behaves as before.</p>
 <p>Everything that is not reporting lives behind the menu, and the menu is a list of <strong>places</strong>
 rather than a list of actions: <em>Return to Reporting Screen …</em> with a back arrow at the top,
 <em>Open log</em>, <em>Settings</em>, <em>Log — reload, print, export</em>, <em>Share setup with another device</em> on the
@@ -1385,7 +1392,7 @@ the old.</li>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261018-01</code> is the first build of 18 October 2026.</p>
+smaller counter. <code>v261018-02</code> is the second build of 18 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

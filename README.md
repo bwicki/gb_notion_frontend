@@ -83,6 +83,14 @@ board appear under them only on the Ballast tab, where they are relevant. There 
 no title inside the app — the home screen icon already says what this is, and the room is
 better spent on the form.
 
+**Windows sit in the part of the screen you can actually see.** A soft keyboard on Android
+does not shrink the page, it covers it — so a window centred in the page ends up half behind
+the keys, which is where the Ops Normal minutes and the master password used to go. Every
+window is therefore laid out in the visual viewport: it shrinks and moves with the keyboard,
+the field being typed into is kept in view, and anything scrollable inside it — the flight
+archive, the settings recap, the pre-flight list, a message preview — measures itself against
+the same visible height. A browser without that capability behaves as before.
+
 Everything that is not reporting lives behind the menu, and the menu is a list of **places**
 rather than a list of actions: *Return to Reporting Screen …* with a back arrow at the top,
 *Open log*, *Settings*, *Log — reload, print, export*, *Share setup with another device* on the
@@ -1341,7 +1349,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261018-01` is the first build of 18 October 2026.
+smaller counter. `v261018-02` is the second build of 18 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
