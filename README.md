@@ -1160,8 +1160,42 @@ The two buttons are the ones already known from the menu, pointed at the flight 
 |---|---|
 | **Print the log** | the same printout as always, with the kinds to include, broken by day, club logo on the first sheet |
 | **Export** | CSV, JSON, GeoJSON or KML |
+| **Delete flight** | takes it out of the archive for good — the master only, and never the flight in progress |
 
 *Back* returns to the list, *Close* leaves the archive.
+
+### Deleting one
+
+Every crew makes a few flights while it is still learning the app, and they sit near the top
+of the list for ever. **Delete flight** is for those. It appears only on a master, and only on
+a flight that is not the one being written to — to delete the current flight, close it first
+under *New flight*, which is what puts it in the archive in the first place.
+
+It asks for the master password, then twice more, because what goes cannot be fetched back
+from inside the app:
+
+- the flight's **log** (`FLIGHT.json`), its **spreadsheet** (`FLIGHT.csv`) and its
+  **tombstones** (`FLIGHT.deleted.json`), whichever of them are there
+- its **line in the index** (`_flights.json`), so it stops appearing in the list
+- the copy **this device** kept of it when the flight was closed
+
+Two things stay, and the second window says so. What **Notion** has already taken stays in
+Notion: that is a different database, and nothing here reaches into it. And the **commits**
+stay in the repository's history — deleting a file writes a commit that removes it, it does
+not unwrite the ones that put it there. Somebody with the write token and `git` can still read
+an old version. For a flight that must really be gone, the repository's history has to be
+rewritten, which is a job for a workstation and not for a basket.
+
+A file that is already missing is not an error, and one that GitHub refuses is reported by
+name rather than passed over, so a half-finished delete says which half it finished. When
+anything is left behind, the line in the index and the copy on this device **stay** — a
+pointer to a file that is still there is worth more than a tidy list.
+
+One subtlety worth knowing, because it decides what the button lets you near: a flight is
+matched by its **file name**, not by the identifier you typed. `GB 2026 01` and `GB-2026-01`
+are written to the same files, so the app treats them as the same flight and refuses to
+delete either while one of them is the live one. This is also a good reason to keep
+identifiers to letters, digits, dashes and underscores.
 
 ### GeoJSON and KML
 
@@ -1457,7 +1491,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261031-04` is the fourth build of 31 October 2026.
+smaller counter. `v261031-05` is the fifth build of 31 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

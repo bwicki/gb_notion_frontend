@@ -995,7 +995,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261031-04';
+const APP_VERSION='v261031-05';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1251,6 +1251,16 @@ const L={en:{
  archPick:'Pick a flight.', archLoading:'Reading\u2026', archNone:'No flights in the repository yet.',
  archNoRepo:'No repository is set up on this device, so there is nothing to read.',
  archCurrent:'current flight', archMissing:'file missing', archEmpty:'That flight holds no entries.',
+ archDel:'Delete flight', archDelCurrent:'This is the flight being written to. Close it first, under New flight, and it can be deleted afterwards.',
+ archDelOffline:'Deleting a flight needs the repository, so it needs a connection.',
+ archDelPass:'{f} is to be deleted from the repository. The master password, please.',
+ archDelNone:'{f} has no files left in the repository. Nothing to delete.',
+ archDelWarn1:'{f} \u2014 {k} files, {n} entries. The log, the spreadsheet and the line in the index all go.',
+ archDelWarn2:'Gone from the archive for good. What Notion has already taken stays in Notion, and the commits stay in the repository\u2019s history.',
+ archDelBusy:'Deleting {f}\u2026',
+ archDelDone:'{f} deleted \u2014 {n} files, and its line in the index.',
+ archDelBare:'{f} deleted \u2014 {n} files. It had no line in the index.',
+ archDelPart:'{f} \u2014 {n} files deleted, and the line in the index kept while these are still there:',
  archWithPos:'{n} with a position', back:'Back',
  exGeo:'Track and one point per entry, for Google My Maps and other GIS tools.',
  exKml:'For Google Earth: altitude as a 3D trace, the time slider over the flight, and the whole message in each balloon.',
@@ -1477,6 +1487,16 @@ const L={en:{
  archPick:'Fahrt auswählen.', archLoading:'Wird gelesen\u2026', archNone:'Noch keine Fahrten im Repository.',
  archNoRepo:'Auf diesem Gerät ist kein Repository eingerichtet, es gibt nichts zu lesen.',
  archCurrent:'laufende Fahrt', archMissing:'Datei fehlt', archEmpty:'Diese Fahrt enthält keine Einträge.',
+ archDel:'Fahrt l\u00f6schen', archDelCurrent:'Das ist die Fahrt, in die gerade geschrieben wird. Schliess sie zuerst unter Neue Fahrt ab, danach l\u00e4sst sie sich l\u00f6schen.',
+ archDelOffline:'Eine Fahrt zu l\u00f6schen braucht das Repository, also eine Verbindung.',
+ archDelPass:'{f} soll aus dem Repository gel\u00f6scht werden. Bitte das Master-Passwort.',
+ archDelNone:'Von {f} liegt keine Datei mehr im Repository. Nichts zu l\u00f6schen.',
+ archDelWarn1:'{f} \u2014 {k} Dateien, {n} Eintr\u00e4ge. Das Protokoll, die Tabelle und die Zeile im Index gehen alle weg.',
+ archDelWarn2:'Endg\u00fcltig weg aus dem Archiv. Was Notion schon \u00fcbernommen hat, bleibt in Notion, und die Commits bleiben in der Historie des Repositorys.',
+ archDelBusy:'{f} wird gel\u00f6scht\u2026',
+ archDelDone:'{f} gel\u00f6scht \u2014 {n} Dateien, und die Zeile im Index.',
+ archDelBare:'{f} gel\u00f6scht \u2014 {n} Dateien. Eine Zeile im Index hatte sie nicht.',
+ archDelPart:'{f} \u2014 {n} Dateien gel\u00f6scht; die Zeile im Index bleibt, solange diese noch da sind:',
  archWithPos:'{n} mit Position', back:'Zurück',
  exGeo:'Spur und ein Punkt je Eintrag, für Google My Maps und andere GIS-Werkzeuge.',
  exKml:'Für Google Earth: Höhe als 3D-Spur, Zeitregler über die Fahrt und die ganze Meldung in jeder Sprechblase.',
@@ -1906,7 +1926,12 @@ const ghToken=()=>viewing()?String(CFG.tokenView||''):String(CFG.token||'');
 const hdr=()=>({Authorization:'Bearer '+ghToken(),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'});
 const b64e=s=>{const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x)};
 const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob((s||'').replace(/\s/g,'')),c=>c.charCodeAt(0)));
-const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
+/* A flight's identifier is whatever was typed into it, and file names take only some of
+   that. One place turns the one into the other, so that what is written, what is archived
+   on the device and what a delete aims at can never drift apart: two flights whose
+   identifiers differ only in a space would otherwise share one set of files. */
+const slugOf=f=>String(f||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
+const paths=f=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=slugOf(f===undefined?CFG.flight:f);
   return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`,del:`${d}/${b}.deleted.json`}};
 const viewing=()=>CFG.role==='viewer';
 /* what a viewer's device calls itself, in the four places that have to say it */
@@ -1965,7 +1990,7 @@ async function publishSetup(){
 function archiveLocal(flight){
   if(!ENT.length)return;
   try{
-    const key='bsk.archive.'+String(flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
+    const key='bsk.archive.'+slugOf(flight);
     localStorage.setItem(key,JSON.stringify({flight:flight,closed_at:new Date().toISOString(),
       rows:ENT.length,entries:ENT}));
   }catch(e){}
@@ -2084,6 +2109,32 @@ async function ghPut(p,text,sha,msg){
   if(r.status===409||r.status===422){delete ETAG[p];throw Object.assign(new Error('conflict'),{conflict:true})}
   if(!r.ok)throw new Error('PUT '+r.status+' '+(await r.text()).slice(0,90));
   delete ETAG[p];
+}
+/* Taking a file out again. To GitHub this is the same kind of thing as writing one — a
+   commit — so it carries the same budget, the same second between writes and the same
+   backoff. A file that has already gone is not an error: it answers 404, and that is the
+   state we were asking for. */
+async function ghDel(p,sha,msg){
+  if(viewing())throw new Error(t('vNoWrite'));
+  if(!budgetOk())throw Object.assign(new Error(t('quotaHold')),{hold:true});
+  const wait=1100-(Date.now()-LASTPUT);
+  if(wait>0)await sleep(wait);
+  LASTPUT=Date.now();
+  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}`,{method:'DELETE',headers:hdr(),
+    body:JSON.stringify({message:msg,sha:sha,branch:CFG.branch||'main'})});
+  notePut();
+  const rem=r.headers&&r.headers.get&&r.headers.get('x-ratelimit-remaining');
+  if(rem!=null)RATE=Number(rem);
+  if(r.status===403||r.status===429){
+    const ra=(r.headers&&r.headers.get&&r.headers.get('retry-after'))||60;
+    BACKOFF=Date.now()+Math.max(60,Number(ra)||60)*1000;
+    delete ETAG[p];
+    throw Object.assign(new Error(t('quotaHit')),{hold:true});
+  }
+  delete ETAG[p];
+  if(r.status===404)return false;
+  if(!r.ok)throw new Error('DELETE '+r.status+' '+(await r.text()).slice(0,90));
+  return true;
 }
 const parse=t=>{try{const v=JSON.parse(t);return Array.isArray(v)?v:[]}catch(e){return[]}};
 const COLS=['flight_id','callsign','seq','device','device_mode','reporter','source','ts_utc','ts_local','type',
@@ -2845,19 +2896,92 @@ async function openFlight(it){
           t('archWithPos').replace('{n}',String(withPos))].join(' \u00b7 '))
     +'<br><span>'+esc(Object.keys(kinds).map(k=>k+' '+kinds[k]).join(' \u00b7 '))+'</span></p>';
   let acted=false;
+  /* A master looking at a viewer's screen is still a master, which is exactly why the
+     preview has to be asked as well: the whole point of that screen is to show what somebody
+     else sees, and they see no way to delete anything. The flight being written to is matched
+     by its file name, not by its identifier — the two differ as soon as one holds a space. */
+  const canDrop=!viewing()&&!PRV&&CFG.role==='master'&&slugOf(it.flight)!==slugOf(CFG.flight);
   const r=await ask({title:it.flight+(got.call?' \u00b7 '+got.call:''),
     cancel:t('back'),ok:t('close'),closeX:true,
     html:recap+'<div class="menu">'
       +'<button class="go sec sm" id="afPrint">'+esc(t('mPrint'))+'</button>'
-      +'<button class="go sec sm" id="afExp">'+esc(t('export'))+'</button></div>',
+      +'<button class="go sec sm" id="afExp">'+esc(t('export'))+'</button>'
+      /* only a master, and never the flight being written to */
+      +(canDrop?'<button class="go sec sm" id="afDel">'+esc(t('archDel'))+'</button>':'')
+      +'</div>',
     onMount:(m,close)=>{
       m.querySelector('#afPrint').onclick=()=>{acted=true;close();
         setTimeout(()=>withSource(src,()=>printSheet()),60)};
       m.querySelector('#afExp').onclick=()=>{acted=true;close();
         setTimeout(()=>withSource(src,()=>exportSheet()),60)};
+      /* every way out of a delete comes back to the list, the way Back does — a refusal
+         should not cost the archive */
+      const afd=m.querySelector('#afDel');
+      if(afd)afd.onclick=()=>{acted=true;close();
+        setTimeout(async()=>{await deleteFlight(it);openArchive()},60)};
     }});
   /* Back returns to the list; Close and the cross leave the archive altogether */
   if(!acted&&r===null)setTimeout(openArchive,60);
+}
+/* Taking a flight out of the archive for good. The reason it exists is the handful of
+   flights every crew makes while it is still learning the app: they sit near the top of the
+   list for ever and nobody wants to see them there.
+   What goes: that flight's own files in the repository — the log, the spreadsheet, the
+   tombstones — its line in the index, and the copy this device kept of it. What stays:
+   whatever Notion has already taken, because that is another database altogether, and the
+   commits in the repository's history, because deleting a file does not unwrite it.
+   The current flight is refused: its files are being written to while you read this. */
+async function deleteFlight(it){
+  if(viewing()||CFG.role!=='master')return;
+  if(slugOf(it.flight)===slugOf(CFG.flight))return info(t('archDel'),t('archDelCurrent'));
+  if(!configured()||!navigator.onLine)return info(t('archDel'),t('archDelOffline'));
+  const pw=await ask({title:t('masterPassTitle'),text:t('archDelPass').replace('{f}',it.flight),
+    input:'password',ph:'\u2022\u2022\u2022\u2022',ok:t('ok')});
+  if(pw===null)return;
+  if(pw!==MASTER_PASS)return toast(t('wrongPass'));
+  const d=(CFG.dir||'data').replace(/^\/|\/$/g,'');
+  const base=slugOf(it.flight),p=paths(it.flight);
+  const mine=[p.json,p.csv,p.del].map(x=>x.slice(d.length+1));
+  /* the directory listing carries every file's sha, which a delete needs and which would
+     otherwise mean downloading the whole log to learn one line of it */
+  let files=[];
+  try{files=(await ghList(d)).filter(f=>f.type==='file'&&mine.includes(f.name))}
+  catch(e){return info(t('archDel'),String(e.message||e))}
+  if(!files.length)return info(t('archDel'),t('archDelNone').replace('{f}',it.flight));
+  if(!await confirm2(
+    {title:t('archDel'),text:t('archDelWarn1').replace('{f}',it.flight)
+      .replace('{k}',String(files.length))
+      .replace('{n}',it.rows!=null?String(it.rows):'?'),ok:t('archDel')},
+    {title:t('archDel'),text:t('archDelWarn2').replace('{f}',it.flight),ok:t('archDel')}))return;
+  /* three files, a second apart as GitHub asks, and the index after them: long enough that
+     silence would look like nothing happening */
+  toast(t('archDelBusy').replace('{f}',it.flight));
+  const gone=[],kept=[];
+  for(const f of files){
+    try{await ghDel(d+'/'+f.name,f.sha,'flight removed \u00b7 '+it.flight);gone.push(f.name)}
+    catch(e){kept.push(f.name+' \u2014 '+(e.message||e))}
+  }
+  /* the index last, and only if the files really went: while one of them is still there, the
+     line that points at it is worth more than a tidy index */
+  let idxGone=false;
+  if(!kept.length)try{
+    const idx=d+'/_flights.json';
+    const g=await ghGet(idx);
+    const list=parse(g.text).filter(x=>!x||x.flight!==it.flight);
+    if(g.sha){await ghPut(idx,JSON.stringify(list,null,1),g.sha,'flight removed \u00b7 '+it.flight);idxGone=true}
+  }catch(e){kept.push('_flights.json \u2014 '+(e.message||e))}
+  /* the copy this device kept when the flight was closed goes with the rest, and stays for
+     the same reason the index line does when something was left behind */
+  if(!kept.length)try{localStorage.removeItem('bsk.archive.'+base)}catch(e){}
+  for(const k in ETAG)delete ETAG[k];
+  const said=(kept.length?t('archDelPart'):(idxGone?t('archDelDone'):t('archDelBare')))
+    .replace('{f}',it.flight).replace('{n}',String(gone.length));
+  /* what GitHub refused is listed one to a line, in the block the file already has for text
+     that has to keep its own shape */
+  await (kept.length
+    ? ask({title:t('archDel'),text:said,cancel:false,ok:t('close'),
+           html:'<div class="waPre">'+esc(kept.join('\n'))+'</div>'})
+    : info(t('archDel'),said));
 }
 
 /* ── Carrying a flight out of the app ───────────────────────────────
@@ -5149,7 +5273,7 @@ async function editEntry(id){
       :`<input data-k="${k}" type="${t}" ${t==='number'?'inputmode="decimal" step="0.5"':''} value="${esc(val(k))}">`)+'</div>').join('')
     +`<p class="lab">${esc(e.type)}${e.ballast_action?' · '+esc(e.ballast_action):''} · ${esc(hm(e.ts_local||e.ts_utc))} · ${esc(e.reporter||e.device||'')}`
     +(e.pos_lat?` · ${esc(e.pos_lat)} ${esc(e.pos_lon)}${e.alt_ft!=null?' '+e.alt_ft+' ft':''}${e.vs_ms!=null?' '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':''}`:'')+`</p>`
-    +`<button class="go sec sm" id="mDel" style="margin-top:10px">'+esc(t('deleteEntry'))+'</button>`;
+    +`<button class="go sec sm" id="mDel" style="margin-top:10px">${esc(t('deleteEntry'))}</button>`;
   const r=await ask({title:t('editEntry'),html,ok:t('save'),cancel:t('close'),onMount:(m,close)=>{
     m.querySelector('#mDel').onclick=async()=>{
       close();
