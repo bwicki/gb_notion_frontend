@@ -252,15 +252,16 @@ select:focus{outline:0;border-color:var(--sel)}
 html[data-role="viewer"] #btnMin,
 html[data-role="viewer"] #hBal,
 html[data-role="viewer"] #hGps{display:none}
-.devrow.viewer b{font-weight:600}
-.arcview{padding:0 var(--pad)}
 .arcview .arclist{max-height:none;border:0;background:none;margin:0}
 .arcview .arclist button{border-bottom:1px solid var(--line-soft)}
 .archead{display:flex;align-items:baseline;gap:8px;margin:14px 0 8px}
 .archead h3{margin:0;flex:1}
-/* a flight chosen for a viewer code, ticked the way the pre-flight list marks a row */
-.arclist button .tick{float:right;font-size:13px;color:var(--muted)}
-.arclist button.pick .tick{color:var(--ink)}
+/* a flight chosen for a viewer code: the same tick the print picker uses, and the same
+   class the rest of the app uses for a thing that is selected */
+.arclist.multi button{position:relative;padding-right:32px}
+.arclist.multi button::after{content:"\2713";position:absolute;right:12px;top:50%;
+  transform:translateY(-50%);font-size:11px;opacity:.22;line-height:1}
+.arclist.multi button.on::after{opacity:1}
 /* a report, not a form: one line per thing checked, its state in the margin */
 .pf{max-height:calc(var(--vvh,100dvh) * 0.54);overflow-y:auto;margin:2px -4px 0}
 .pfg{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
@@ -301,6 +302,7 @@ html[data-theme="night"] .pfrow.bad em,html[data-theme="night"] .pfrow.warn em{c
 .devrow button{padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:11.5px;color:#B5442F}
 .devrow button[data-act="hand"],.devrow button[data-act="promote"]{color:var(--ink)}
 .devrow .self{font-size:10.5px;color:var(--muted);padding-right:4px}
+.devrow.viewer b{font-weight:600}
 .o2head{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;font-size:10px;color:var(--muted);margin-bottom:3px}
 .o2set{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px}
 .o2set>span{font-size:12px;color:var(--muted)}
@@ -984,7 +986,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261031-01';
+const APP_VERSION='v261031-02';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1100,8 +1102,8 @@ const L={en:{
  pfStaleFix:'the last fix is old', pfNoFixYet:'no fix has arrived yet', pfNoKey:'the keyless route works but is not guaranteed',
  pfUnlock:'Unlock the settings to change anything',
  joinTitle:'Join code', joinHint:'Six characters, encrypted with the code itself. A follower code carries this flight \u2014 setup, token and all \u2014 onto another crew device; it lives a day and is handed over once. A viewer code carries read-only access to the archive to somebody outside the crew, for as long as you choose.',
- joinShow:'Show join code', joinMake:'Create', joinRevoke:'Revoke', joinValid:'Valid for another {h}. One device can collect it, then it is gone.',
- joinNew:'New code', joinExpired:'This code has expired.', joinUsed:'Collected at {t}. A code serves one device.', codeCopied:'Code copied',
+ joinShow:'Show join code', joinMake:'Follower code', joinRevoke:'Revoke', joinValid:'Valid for another {h}. One device can collect it, then it is gone.',
+ joinNew:'New follower code', joinExpired:'This code has expired.', joinUsed:'Collected at {t}. A code serves one device.', codeCopied:'Code copied',
  joinMade:'The code is {c}. Read it to the other device, where it goes under Load current flight.',
  joinRevoked:'Code withdrawn', joinFailed:'The relay could not be reached.',
  joinNoUrl:'No relay address yet. It goes into the setup under GitHub connection \u2014 Join code relay.',
@@ -1204,8 +1206,7 @@ const L={en:{
  opsStop:'Stop reminder', opsOff:'Ops Normal reminder stopped',
  opsV5:'Report Ops Normal in five minutes', opsVNow:'Report Ops Normal now',
  opsSnd:'Ops Normal alarm', sndTone:'Tone', sndVoice:'Tone + voice',
- vTitle:'Viewer code', vMake:'Viewer code', vMakeF:'Follower code', vNewF:'New follower code',
- archNoDetail:'no details recorded',
+ vTitle:'Viewer code', vMake:'Viewer code', archNoDetail:'no details recorded',
  vAsk:'A code that lets somebody outside the crew read the archive — and nothing else.',
  vCreate:'Create code', vFor:'For whom', vForPh:'A name, so the list makes sense',
  vValid:'Valid for', vT1d:'1 day', vT10d:'10 days', vT30d:'30 days', vTforever:'No limit',
@@ -1217,7 +1218,7 @@ const L={en:{
  vFound:'Archive of {c}, repository {r}. Readable until {v}. This device will show the archive and nothing else.',
  vExpired:'That viewer code has run out.', vExpiredShort:'run out',
  vRemoved:'This viewer code has been withdrawn.',
- vRole:'Viewer', vScope:'{n} flights', vUntil:'to {d}',
+ vRole:'Viewer', vUntil:'to {d}',
  vTaken:'collected {n}\u00d7', vNotTaken:'not collected yet',
  vTokenHint:'A second fine-grained token on the same repository, with Contents set to Read-only. A viewer code carries this one instead of the token above, so a viewer cannot write even if the token is dug out of their device.',
  pTokenView:'Read-only token (viewers)',
@@ -1316,8 +1317,8 @@ const L={en:{
  pfStaleFix:'der letzte Fix ist alt', pfNoFixYet:'noch kein Fix eingetroffen', pfNoKey:'der schlüssellose Weg geht, ist aber nicht zugesichert',
  pfUnlock:'Zum Ändern die Einstellungen entsperren',
  joinTitle:'Beitrittscode', joinHint:'Sechs Zeichen, mit dem Code selbst verschlüsselt. Ein Follower-Code bringt diese Fahrt — Einrichtung, Token und alles — auf ein weiteres Crew-Gerät; er lebt einen Tag und wird einmal übergeben. Ein Viewer-Code bringt lesenden Zugang zum Archiv zu jemandem ausserhalb der Crew, so lange du willst.',
- joinShow:'Beitrittscode zeigen', joinMake:'Erzeugen', joinRevoke:'Widerrufen', joinValid:'Noch {h} gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
- joinNew:'Neuer Code', joinExpired:'Dieser Code ist abgelaufen.', joinUsed:'Um {t} abgeholt. Ein Code dient einem Gerät.', codeCopied:'Code kopiert',
+ joinShow:'Beitrittscode zeigen', joinMake:'Follower-Code', joinRevoke:'Widerrufen', joinValid:'Noch {h} gültig. Ein Gerät kann ihn abholen, danach ist er fort.',
+ joinNew:'Neuer Follower-Code', joinExpired:'Dieser Code ist abgelaufen.', joinUsed:'Um {t} abgeholt. Ein Code dient einem Gerät.', codeCopied:'Code kopiert',
  joinMade:'Der Code lautet {c}. Dem anderen Gerät vorlesen, dort unter „Load current flight" eingeben.',
  joinRevoked:'Code widerrufen', joinFailed:'Die Übergabestelle war nicht erreichbar.',
  joinNoUrl:'Noch keine Adresse der Übergabestelle. Sie gehört in die Einstellungen unter GitHub-Verbindung — Join code relay.',
@@ -1421,8 +1422,7 @@ const L={en:{
  opsStop:'Erinnerung stoppen', opsOff:'Ops-Normal-Erinnerung gestoppt',
  opsV5:'Ops Normal in fünf Minuten melden', opsVNow:'Ops Normal jetzt melden',
  opsSnd:'Ops-Normal-Alarm', sndTone:'Ton', sndVoice:'Ton + Ansage',
- vTitle:'Viewer-Code', vMake:'Viewer-Code', vMakeF:'Follower-Code', vNewF:'Neuer Follower-Code',
- archNoDetail:'keine Angaben',
+ vTitle:'Viewer-Code', vMake:'Viewer-Code', archNoDetail:'keine Angaben',
  vAsk:'Ein Code, mit dem jemand ausserhalb der Crew das Archiv lesen kann — und sonst nichts.',
  vCreate:'Code erzeugen', vFor:'Für wen', vForPh:'Ein Name, damit die Liste etwas sagt',
  vValid:'Gültig für', vT1d:'1 Tag', vT10d:'10 Tage', vT30d:'30 Tage', vTforever:'Unbegrenzt',
@@ -1434,7 +1434,7 @@ const L={en:{
  vFound:'Archiv von {c}, Repository {r}. Lesbar bis {v}. Dieses Gerät zeigt das Archiv und sonst nichts.',
  vExpired:'Dieser Viewer-Code ist abgelaufen.', vExpiredShort:'abgelaufen',
  vRemoved:'Dieser Viewer-Code wurde zurückgezogen.',
- vRole:'Viewer', vScope:'{n} Fahrten', vUntil:'bis {d}',
+ vRole:'Viewer', vUntil:'bis {d}',
  vTaken:'{n}\u00d7 abgeholt', vNotTaken:'noch nicht abgeholt',
  vTokenHint:'Ein zweites Fine-grained Token auf demselben Repository, bei dem Contents auf Read-only steht. Ein Viewer-Code trägt dieses statt des Tokens darüber — so kann ein Viewer auch dann nicht schreiben, wenn er das Token aus seinem Gerät holt.',
  pTokenView:'Lesetoken (Viewer)',
@@ -1880,6 +1880,8 @@ const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob((s||'').replace(/\s/
 const paths=()=>{const d=(CFG.dir||'data').replace(/^\/|\/$/g,''),b=(CFG.flight||'flight').replace(/[^A-Za-z0-9_-]/g,'-');
   return{json:`${d}/${b}.json`,csv:`${d}/${b}.csv`,del:`${d}/${b}.deleted.json`}};
 const viewing=()=>CFG.role==='viewer';
+/* what a viewer's device calls itself, in the four places that have to say it */
+const vWho=()=>(CFG.call?CFG.call+' \u00b7 ':'')+t('vRole');
 const configured=()=>!!(CFG.repo&&ghToken());
 
 /* everything a second device needs; per-device choices are deliberately left out */
@@ -2132,7 +2134,7 @@ function paintStatus(){
   /* a viewer has no flight of its own, and the rest of this is painted onto screens it
      never sees */
   if(viewing()){
-    $('#hId').textContent=(CFG.call?CFG.call+' \u00b7 ':'')+t('vRole');
+    $('#hId').textContent=vWho();
     $('#hGps').textContent='';
     return;
   }
@@ -2692,8 +2694,11 @@ function archSpan(it){
   if(!it.onDisk&&!it.current)bits.push(t('archMissing'));
   return bits.length?bits.join(' \u00b7 '):t('archNoDetail');
 }
-function archRows(list){
-  return list.map((it,i)=>'<button data-i="'+i+'">'
+/* one row, wherever a flight is listed: the archive, the viewer's screen, and the picker in
+   the viewer-code window, which marks what is chosen rather than what is tapped */
+function archRows(list,pick){
+  return list.map((it,i)=>'<button '
+    +(pick?'data-f="'+esc(it.flight)+'"'+(pick[it.flight]?' class="on"':''):'data-i="'+i+'"')+'>'
     +'<b'+(it.current?' class="cur"':'')+'>'+esc(it.flight)+'</b>'
     +'<i>'+esc(archSpan(it))+'</i></button>').join('');
 }
@@ -2718,7 +2723,7 @@ async function viewerAllowed(){
 async function paintArchView(){
   const box=$('#archList'),note=$('#archNote');
   if(!box)return;
-  $('#archFoot').textContent=(CFG.call?CFG.call+' \u00b7 ':'')+t('vRole');
+  $('#archFoot').textContent=vWho();
   note.textContent=t('archLoading');box.innerHTML='';ARCHV=[];
   const allowed=await viewerAllowed();
   if(allowed!==true){note.textContent=allowed;return}
@@ -2728,14 +2733,14 @@ async function paintArchView(){
     list=list.filter(it=>CFG.vflights.indexOf(it.flight)>=0);
   if(!list.length){note.textContent=t('archNone');return}
   ARCHV=list;
-  note.textContent=t('vScope').replace('{n}',String(list.length))
+  note.textContent=t('vNFlights').replace('{n}',String(list.length))
     +(CFG.vexp?' \u00b7 '+t('vUntil').replace('{d}',dayOf(CFG.vexp)):'');
   box.innerHTML=archRows(list);
 }
 function applyViewer(){
   document.documentElement.dataset.role=viewing()?'viewer':'';
   if(!viewing())return;
-  $('#hId').textContent=(CFG.call?CFG.call+' \u00b7 ':'')+t('vRole');
+  $('#hId').textContent=vWho();
   setView('arch');
   paintArchView();
 }
@@ -3279,7 +3284,7 @@ function setView(v){
   if(viewing())v='arch';
   UI.view=v;save(K_UI,UI);
   $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
-  $('#btnMenu').classList.toggle('on',v!=='form');
+  $('#btnMenu').classList.toggle('on',v!=='form'&&!viewing());
   /* the switch belongs where settings are made, not on the screen used in flight */
   if(v!=='set')lockSettings();
   if(v==='log'&&configured()&&navigator.onLine)sync(true,false);
@@ -3316,8 +3321,7 @@ async function openMenu(){
   await ask({title:t('menu'),cancel:false,ok:t('close'),
     headBtn:{icon:isNight()?IC_DAY:IC_NIGHT,label:isNight()?t('mDay'):t('mNight'),
              act:()=>setTheme(isNight()?'day':'night',true)},
-    text:(viewing()?(CFG.call?CFG.call+' · ':'')+t('vRole')
-                   :ENT.length+' rows on this device')+' · '+APP_VERSION,
+    text:(viewing()?vWho():ENT.length+' rows on this device')+' \u00b7 '+APP_VERSION,
     html:'<div class="menu">'+items.map(([k,l])=>
       `<button class="go ${k===(viewing()?'arch':'form')?'':'sec'} sm" data-m="${k}"><svg viewBox="0 0 24 24">${IC[k]||''}</svg>${esc(l)}</button>`
       ).join('')+'</div>',
@@ -4651,9 +4655,7 @@ async function createViewerCode(){
        '<button data-v="'+v+'"'+(v===ttl?' class="on"':'')+'>'+esc(t('vT'+k))+'</button>').join('')+'</div>'
     +'<p class="lab" style="margin-top:14px">'+esc(t('vFlights'))+'</p>'
     +(list.length
-      ? '<div class="arclist" id="vFl">'+list.map(it=>
-          '<button data-f="'+esc(it.flight)+'" class="pick"><span class="tick">\u2713</span>'
-          +'<b>'+esc(it.flight)+'</b><i>'+esc(archSpan(it))+'</i></button>').join('')+'</div>'
+      ? '<div class="arclist multi" id="vFl">'+archRows(list,pick)+'</div>'
       : '<p class="arcempty">'+esc(t('archNone'))+'</p>')
     +'<p class="hint" id="vFlNote"></p>';
   const r=await ask({title:t('vTitle'),text:t('vAsk'),ok:t('vCreate'),cancel:t('cancel'),html:html,
@@ -4670,7 +4672,7 @@ async function createViewerCode(){
       const fl=m.querySelector('#vFl');
       if(fl)fl.addEventListener('click',ev=>{
         const b=ev.target.closest('button[data-f]');if(!b)return;
-        const f=b.dataset.f;pick[f]=!pick[f];b.classList.toggle('pick',pick[f]);paint();
+        const f=b.dataset.f;pick[f]=!pick[f];b.classList.toggle('on',pick[f]);paint();
       });
     }});
   if(!r)return;
@@ -4768,7 +4770,7 @@ function paintJoin(){
     code.classList.toggle('spent',!!CFG.joinCode&&spent);
     root.querySelector('.jCopy').style.visibility=(CFG.joinCode&&!spent)?'':'hidden';
     root.querySelector('.jRevoke').style.display=(CFG.joinCode&&!spent)?'':'none';
-    root.querySelector('.jMake').textContent=CFG.joinCode?t('vNewF'):t('vMakeF');
+    root.querySelector('.jMake').textContent=CFG.joinCode?t('joinNew'):t('joinMake');
     root.querySelector('.jNote').textContent=!CFG.joinCode?''
       :(used?t('joinUsed').replace('{t}',String(CFG.joinUsed).slice(11,16)+'Z')
         :(ms===0?t('joinExpired')
@@ -4797,6 +4799,7 @@ async function loadFlightByCode(){
     applyShared(o);
     if(o.token)CFG.token=o.token;
     CFG.role='follower';CFG.provisioned=1;CFG.joinCode='';CFG.joinId='';
+    applyViewer();                      /* a device leaving viewer mode gets its screen back */
     ENT=[];TOMB=[];save(K_ENT,ENT);save(K_TOMB,TOMB);
     for(const k in ETAG)delete ETAG[k];
     save(K_CFG,CFG);
