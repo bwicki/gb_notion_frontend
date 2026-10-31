@@ -103,7 +103,39 @@ If that is not acceptable, put a Cloudflare Worker in front of the GitHub API ho
 server-side, and point `API` in `index.html` at the Worker. The app never needs to know the
 token in that arrangement.
 
-## 4. Enter it in the app
+## 4. A second token, for viewers
+
+Only if you want to let somebody outside the crew read the archive — a club, an organiser,
+whoever drove the retrieve. Skip it otherwise; everything else works without.
+
+A viewer code has to carry a token, because the repository is private and there is no reading
+it without one. It must not be the token above: that one can write, and a token on somebody
+else's device is a token they can take out of it. So a viewer code carries a second one, which
+GitHub itself will not let write.
+
+Same page, **Generate new token** again:
+
+1. **Token name**: `basket-viewer-readonly`, or anything you will recognise
+2. **Expiration**: a year is reasonable. When it expires the viewers see nothing until you
+   put a new one in; nothing else is affected.
+3. **Repository access**: *Only select repositories* → `gb_flight_data` alone
+4. **Permissions → Repository permissions → Contents → Read-only**
+
+   **This is the step that matters.** If it says *Read and write*, the whole exercise is
+   pointless. Check it on the summary page before you press Generate: it must read
+   *Contents: Read*. GitHub adds *Metadata: Read-only* by itself — that is correct and
+   cannot be turned off.
+
+5. **Generate token**, and copy it — GitHub shows it once.
+
+In the app it goes into *Settings → GitHub connection → Read-only token*, under the one you
+entered above. Then *Save settings*. The *Viewer code* button stays dead until it is there,
+and says why.
+
+What a viewer code carries: the repository, this read-only token, and the flights you chose.
+Not the write token, not the master password, not the WhatsApp numbers, not the map key.
+
+## 5. Enter it in the app
 
 On the device that will be the **master** — normally the pilot in command's iPad:
 
@@ -112,13 +144,13 @@ On the device that will be the **master** — normally the pilot in command's iP
 3. **Flight**: flight ID, callsign, both pilots
 4. **Ballast**: weight per bag, full ready ballast, quick drop amounts
 5. Open **GitHub connection**: `<owner>/gb_flight_data`, branch `main`, folder `data`, paste
-   the token
+   the token — and, if you made the read-only one in section 4, that too
 6. **Check connection** — it should name the repository back to you
 7. **Save settings**
 
-The other devices do not need any of this typed again — see section 6.
+The other devices do not need any of this typed again — see section 7.
 
-## 5. First flight, and what appears
+## 6. First flight, and what appears
 
 Set a flight ID, post one entry. Within a few seconds the data repository contains:
 
@@ -134,7 +166,7 @@ underscore replaced by a hyphen. `GB 2026/01` becomes `GB-2026-01.json`.
 
 No workflow, no Action, no build step. The app is the only writer.
 
-## 6. Adding the other crew members
+## 7. Adding the other crew members
 
 **How a device becomes the master:** it knows the master password, **5678**. On its first
 start every device is asked *Is this the master device?* — the password makes it the master,
@@ -174,7 +206,7 @@ master wins.
 **Two masters would fight** over `_setup.json` and each undo the other. Exactly one device is
 the master.
 
-## 7. Polling from Notion
+## 8. Polling from Notion
 
 **The endpoint to use**, private or public repository alike:
 
@@ -210,7 +242,7 @@ GET https://raw.githubusercontent.com/<owner>/gb_flight_data/main/data/<flight-i
 No token needed, but it sits behind a CDN with roughly a five-minute cache. Fine for working
 through a flight afterwards, too slow to follow one live.
 
-## 8. Checklist before a flight
+## 9. Checklist before a flight
 
 - [ ] Token not expired — check the date on GitHub
 - [ ] Master shows *Check connection* naming the data repository
@@ -221,7 +253,7 @@ through a flight afterwards, too slow to follow one live.
 - [ ] Test entry deleted afterwards, so the flight starts empty
 - [ ] Start ballast entered, or the first inventory planned for before launch
 
-## 9. When something does not arrive
+## 10. When something does not arrive
 
 **The header says `no repository`** — repository or token missing in the settings on that
 device.

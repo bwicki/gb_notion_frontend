@@ -68,16 +68,17 @@ GitHub API, the map tiles, and — if you leave place names on — one lookup pe
 <li><a href="#19-the-log">The log</a></li>
 <li><a href="#20-what-the-app-writes">What the app writes</a></li>
 <li><a href="#21-the-flight-archive">The flight archive</a></li>
-<li><a href="#22-polling-from-notion">Polling from Notion</a></li>
-<li><a href="#23-the-pre-flight-check">The pre-flight check</a></li>
-<li><a href="#24-beginning-a-new-flight">Beginning a new flight</a></li>
-<li><a href="#25-language">Language</a></li>
-<li><a href="#26-keeping-the-crew-on-the-current-build">Keeping the crew on the current build</a></li>
-<li><a href="#27-when-a-change-does-not-appear">When a change does not appear</a></li>
-<li><a href="#28-limits-worth-knowing-before-takeoff">Limits worth knowing before takeoff</a></li>
-<li><a href="#29-version">Version</a></li>
-<li><a href="#30-license">License</a></li>
-<li><a href="#31-files">Files</a></li>
+<li><a href="#22-letting-somebody-else-read-it">Letting somebody else read it</a></li>
+<li><a href="#23-polling-from-notion">Polling from Notion</a></li>
+<li><a href="#24-the-pre-flight-check">The pre-flight check</a></li>
+<li><a href="#25-beginning-a-new-flight">Beginning a new flight</a></li>
+<li><a href="#26-language">Language</a></li>
+<li><a href="#27-keeping-the-crew-on-the-current-build">Keeping the crew on the current build</a></li>
+<li><a href="#28-when-a-change-does-not-appear">When a change does not appear</a></li>
+<li><a href="#29-limits-worth-knowing-before-takeoff">Limits worth knowing before takeoff</a></li>
+<li><a href="#30-version">Version</a></li>
+<li><a href="#31-license">License</a></li>
+<li><a href="#32-files">Files</a></li>
 </ol>
 <h2 id="1-the-screen">1. The screen</h2>
 <p>The whole app fits one phone screen without scrolling, and its outline is always visible.
@@ -822,7 +823,7 @@ nothing else there yet, since a device with no flight has nothing else to press.
 there is a table to synchronise — on a device just unpacked it would be a button with nothing
 behind it. Both are drawn the same way; neither is the loud one. On the master, above the device list, is <em>Join code</em>, and
 the same panel opens from the top right of the <em>Share setup</em> window. The master
-presses <em>Create</em>, reads six characters to the other device — <code>WUP9Q5</code>, in an alphabet with no O
+presses <em>Follower code</em>, reads six characters to the other device — <code>WUP9Q5</code>, in an alphabet with no O
 against 0 and no I against 1 — and that device has the flight: setup, token, presets, templates,
 and the log, which it reads from GitHub as soon as it has the token.</p>
 <p>The setup travels <strong>encrypted with the code itself</strong>, so the relay that carries it holds a box
@@ -832,8 +833,8 @@ than stating it once, and a tap on the copy key puts the code on the clipboard.<
 <p><strong>A code that has been collected stays visible, greyed and struck through</strong>, with the time it
 was taken: <em>Collected at 11:58Z. A code serves one device.</em> The master asks the relay every half
 minute whether its own code is still there — a look that does not take it — so the moment the
-other device has it, the panel says so. Copy and <em>Revoke</em> disappear, and <em>Create</em> becomes <em>New
-code</em>. An expired code is struck in the same way. Knowing which code was handed out, and when it
+other device has it, the panel says so. Copy and <em>Revoke</em> disappear, and the button becomes
+<em>New follower code</em>. An expired code is struck in the same way. Knowing which code was handed out, and when it
 was taken, is worth more than a tidy empty field. Twenty wrong guesses from one address and that address is shut out
 for an hour, which is what makes six characters enough.</p>
 <p>The relay is a small Cloudflare worker, free to run; <code>join-worker/worker.js</code> and the twenty
@@ -1265,7 +1266,85 @@ GeoJSON they carry a null geometry; in the KML they sit in a folder called <em>W
 readable in the sidebar, absent from the globe. Nothing is left out of either file.</p>
 <p>The file is named after the flight — <code>GBX-2608-24.kml</code> — and goes through the same <em>Download</em>
 or <em>Share</em> as the other exports.</p>
-<h2 id="22-polling-from-notion">22. Polling from Notion</h2>
+<h2 id="22-letting-somebody-else-read-it">22. Letting somebody else read it</h2>
+<p>A flight is often of interest to somebody who was not in the basket — a club, an organiser, a
+journalist writing it up, the partner who drove the retrieve. A <strong>viewer code</strong> lets them read
+the archive and nothing else.</p>
+<p>It sits beside the follower code, under <em>Join code</em>: two buttons, <em>Follower code</em> and
+<em>Viewer code</em>. The person types the six characters into the app's own address under <em>Load
+current flight</em>, exactly as a crew member would, and their device turns into an archive reader.</p>
+<h3 id="why-it-needs-a-second-token">Why it needs a second token</h3>
+<p>The flight data lives in a private repository, so reading it needs a GitHub token — there is no
+way around that. A follower code carries the token that can <strong>write</strong>, because a follower
+reports. If a viewer code carried the same one, "they cannot change the data" would be a promise
+of this app's, and a promise is not a lock: anyone who opens the developer tools has the token
+and can write to the repository directly.</p>
+<p>So a viewer code carries a <strong>second token, with Contents set to Read-only</strong>, which is entered
+once in <em>Settings → GitHub connection → Read-only token</em>. It is GitHub that refuses the writing,
+not the app, and it refuses it even to somebody who digs the token out of the device. Without
+that token the <em>Viewer code</em> button says so and makes nothing.</p>
+<p>What a viewer code does <strong>not</strong> carry: the write token, the master password, the WhatsApp
+numbers, the map key. Only the repository, the read-only token, and the flights chosen for it.</p>
+<h3 id="making-one">Making one</h3>
+<p><em>Viewer code</em> asks four things, and only the first is required:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>For whom</strong></td>
+<td>a name, so the list of issued codes means something later</td>
+</tr>
+<tr>
+<td><strong>Valid for</strong></td>
+<td>1 day, 10 days (the usual answer), 30 days, or no limit</td>
+</tr>
+<tr>
+<td><strong>Flights they may see</strong></td>
+<td>every flight to begin with; tap one to leave it out</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Leaving every flight ticked is kept as <em>all flights</em> rather than as a list, so a flight flown
+next month is included too. Untick one and it becomes a list, fixed at what was chosen.</p>
+<p>Unlike a follower code, a viewer code <strong>survives being collected</strong>: several people may use one,
+and a viewer who reinstalls would otherwise be shut out. The relay counts the collections
+instead, and the master sees the tally.</p>
+<h3 id="what-the-viewer-gets">What the viewer gets</h3>
+<p>Their device shows one screen: the flights the code allows, and from each of them everything the
+archive offers the crew — the printout with its kinds and day breaks, and CSV, JSON, GeoJSON and
+KML. No reporting screen, no log, no settings, no menu item that writes. The app reads with the
+read-only token and refuses to write before GitHub even has to.</p>
+<p>The language of the master's device travels with the code, so a viewer is not dropped into
+English because their device is new.</p>
+<h3 id="taking-it-back">Taking it back</h3>
+<p>Every code issued is listed in <em>Devices on this flight</em>, among the crew's devices, marked
+<em>Viewer</em> with its code, its validity, its scope and how often it has been collected. A viewer
+writes nothing, so it cannot appear there the way a device does — what is listed is what the
+master handed out.</p>
+<p><strong>Remove</strong> withdraws it from the relay and from the published setup. The viewer's device checks
+that list each time it opens the archive, finds itself gone and shuts itself down. That last
+part is good manners rather than a lock, and the window says so: somebody who has already
+copied the read-only token out of their device is stopped only by withdrawing that token at
+GitHub — which stops every viewer at once.</p>
+<p><strong>Make follower</strong> produces an ordinary follower code to pass on. Their device then reports on
+the current flight like any other. The viewer code stays until it is removed, so the step is
+reversible.</p>
+<h3 id="the-relay">The relay</h3>
+<p>Both kinds of code go through the same Cloudflare worker, and <strong>version 2 of <code>worker.js</code> is
+required</strong> for viewer codes: version 1 gives every code a day and deletes it on collection.
+The worker is replaced in the Cloudflare dashboard under <em>basket-join → Edit code</em>; the KV
+binding and the <code>ORIGIN</code> variable stay as they are, and follower codes left over from version 1
+keep working.</p>
+<h2 id="23-polling-from-notion">23. Polling from Notion</h2>
 <p><strong>GitHub API — immediate, recommended</strong></p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/contents/data/&lt;flight-id&gt;.json
 Authorization: Bearer &lt;token&gt;
@@ -1278,7 +1357,7 @@ produces duplicates.</p>
 <pre><code>GET https://raw.githubusercontent.com/&lt;owner&gt;/&lt;repo&gt;/main/data/&lt;flight-id&gt;.csv
 </code></pre>
 <p>Behind a CDN with roughly a five minute cache. Fine after the flight, too slow during it.</p>
-<h2 id="23-the-pre-flight-check">23. The pre-flight check</h2>
+<h2 id="24-the-pre-flight-check">24. The pre-flight check</h2>
 <p><em>Pre-flight check</em> in the menu, on the master only, and again by itself before the first entry
 of a new flight — where it has replaced the old reminder to go and verify the settings, which
 said that one should look without saying where.</p>
@@ -1301,7 +1380,7 @@ amber: station presets never edited, a device that has not reported, a join code
 <p>Nothing here blocks anything. A balloon launches with a red cross beside the message templates
 if the crew decides so; the check reports, the crew decides. <em>Re-check</em> runs it again without
 closing.</p>
-<h2 id="24-beginning-a-new-flight">24. Beginning a new flight</h2>
+<h2 id="25-beginning-a-new-flight">25. Beginning a new flight</h2>
 <p><em>Begin new flight</em> appears <strong>only on the master</strong>, at the foot of the unlocked settings, and asks
 for the master password
 <code>5678</code>, then for the name of the new flight, then twice for confirmation — naming how many
@@ -1320,7 +1399,7 @@ into today's flight under the new name.</p>
 <em>New flight must be initiated by the master device</em>; the master is reminded once that the flight
 has been opened and asked to look over the settings, and the setup screen opens for that. From
 the second entry on, anyone reports.</p>
-<h2 id="25-language">25. Language</h2>
+<h2 id="26-language">26. Language</h2>
 <p>Device mode, night colour, confirmation tone and language sit above the password, because they are personal
 preferences rather than flight settings and every crew member may want their own. A device
 whose holder does not know the settings password is a <strong>follower</strong> on a <strong>personal device</strong> —
@@ -1334,7 +1413,7 @@ interface changes:</strong> everything written to GitHub and everything sent to 
 stays English: the column names, the values in <code>type</code>, the message templates. A table that
 changed language depending on who happened to make the entry would be unusable, and the ATC
 coordinator should not have to guess which language the next message arrives in.</p>
-<h2 id="26-keeping-the-crew-on-the-current-build">26. Keeping the crew on the current build</h2>
+<h2 id="27-keeping-the-crew-on-the-current-build">27. Keeping the crew on the current build</h2>
 <p>The service worker takes a new version over the moment it is installed, and the app now looks
 for one at every start, whenever it comes back to the foreground, and every quarter of an hour.
 When one has arrived it says so: <em>A newer version is ready — close the app and open it again.</em></p>
@@ -1343,7 +1422,7 @@ be what is in the repository.</strong> An installed web app keeps running the ve
 until it is closed and opened again — reloading a page inside it is not enough. If a change you
 asked for seems not to have happened, check the version in the bottom right corner first, and
 close the app from the app switcher before opening it again.</p>
-<h2 id="27-when-a-change-does-not-appear">27. When a change does not appear</h2>
+<h2 id="28-when-a-change-does-not-appear">28. When a change does not appear</h2>
 <p>The service worker caches each file on its own and carries on past one that is missing. That
 sounds like housekeeping and is not: <code>cache.addAll()</code> rejects as a whole if a single request
 fails, and a worker whose installation fails is never activated — the app then keeps serving the
@@ -1362,7 +1441,7 @@ takes over anyway.</p>
 </ol>
 <p><code>GET .../data/_seen?ref=main 404</code> in the console is not a fault: it says no device has left its
 card in the repository yet. It disappears with the first one.</p>
-<h2 id="28-limits-worth-knowing-before-takeoff">28. Limits worth knowing before takeoff</h2>
+<h2 id="29-limits-worth-knowing-before-takeoff">29. Limits worth knowing before takeoff</h2>
 <ul>
 <li><strong>GPS in the background:</strong> once the app is not in the foreground and the display locks,
   iPadOS suspends location updates. The app holds a wake lock while it is active. This records
@@ -1388,18 +1467,18 @@ the old.</li>
 - <strong>The pill floats inside the app only</strong> on phones and tablets — see section 4. Slide Over on
   iPad and Pop-up view on Samsung are the routes that put the whole window on top; document
   picture-in-picture on a laptop is the only true always-on-top.</p>
-<h2 id="29-version">29. Version</h2>
+<h2 id="30-version">30. Version</h2>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261018-02</code> is the second build of 18 October 2026.</p>
+smaller counter. <code>v261031-01</code> is the first build of 31 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the
 printed manual is never behind the app. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
-<h2 id="30-license">30. License</h2>
+<h2 id="31-license">31. License</h2>
 <p>Custom license, © 2026 Wicki Aero GmbH.</p>
 <p><strong><a href="license.html">Read the full licence</a></strong> — it opens in a window of its own, and the same text
 sits in <code>LICENSE</code> in the repository.</p>
@@ -1419,7 +1498,7 @@ are your records, not part of the licensed software.</p>
 from a CDN. The app talks to the GitHub API with your token, to the browser's geolocation
 service, and to the wa.me links you tap. That is the whole list, which is also why it works with
 no signal and why there is nothing to keep up to date but the app itself.</p>
-<h2 id="31-files">31. Files</h2>
+<h2 id="32-files">32. Files</h2>
 <table>
 <thead>
 <tr>

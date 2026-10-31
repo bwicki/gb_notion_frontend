@@ -164,7 +164,34 @@ server, no account, no login, and the app works with no signal. The consequences
 <p>If that is not acceptable, put a Cloudflare Worker in front of the GitHub API holding the token
 server-side, and point <code>API</code> in <code>index.html</code> at the Worker. The app never needs to know the
 token in that arrangement.</p>
-<h2 id="4-enter-it-in-the-app">4. Enter it in the app</h2>
+<h2 id="4-a-second-token-for-viewers">4. A second token, for viewers</h2>
+<p>Only if you want to let somebody outside the crew read the archive — a club, an organiser,
+whoever drove the retrieve. Skip it otherwise; everything else works without.</p>
+<p>A viewer code has to carry a token, because the repository is private and there is no reading
+it without one. It must not be the token above: that one can write, and a token on somebody
+else's device is a token they can take out of it. So a viewer code carries a second one, which
+GitHub itself will not let write.</p>
+<p>Same page, <strong>Generate new token</strong> again:</p>
+<ol>
+<li><strong>Token name</strong>: <code>basket-viewer-readonly</code>, or anything you will recognise</li>
+<li><strong>Expiration</strong>: a year is reasonable. When it expires the viewers see nothing until you
+   put a new one in; nothing else is affected.</li>
+<li><strong>Repository access</strong>: <em>Only select repositories</em> → <code>gb_flight_data</code> alone</li>
+<li><strong>Permissions → Repository permissions → Contents → Read-only</strong></li>
+</ol>
+<p><strong>This is the step that matters.</strong> If it says <em>Read and write</em>, the whole exercise is
+   pointless. Check it on the summary page before you press Generate: it must read
+   <em>Contents: Read</em>. GitHub adds <em>Metadata: Read-only</em> by itself — that is correct and
+   cannot be turned off.</p>
+<ol start="5">
+<li><strong>Generate token</strong>, and copy it — GitHub shows it once.</li>
+</ol>
+<p>In the app it goes into <em>Settings → GitHub connection → Read-only token</em>, under the one you
+entered above. Then <em>Save settings</em>. The <em>Viewer code</em> button stays dead until it is there,
+and says why.</p>
+<p>What a viewer code carries: the repository, this read-only token, and the flights you chose.
+Not the write token, not the master password, not the WhatsApp numbers, not the map key.</p>
+<h2 id="5-enter-it-in-the-app">5. Enter it in the app</h2>
 <p>On the device that will be the <strong>master</strong> — normally the pilot in command's iPad:</p>
 <ol>
 <li>Menu → <strong>Settings</strong> → <em>Unlock settings</em>, password <code>1234</code></li>
@@ -172,12 +199,12 @@ token in that arrangement.</p>
 <li><strong>Flight</strong>: flight ID, callsign, both pilots</li>
 <li><strong>Ballast</strong>: weight per bag, full ready ballast, quick drop amounts</li>
 <li>Open <strong>GitHub connection</strong>: <code>&lt;owner&gt;/gb_flight_data</code>, branch <code>main</code>, folder <code>data</code>, paste
-   the token</li>
+   the token — and, if you made the read-only one in section 4, that too</li>
 <li><strong>Check connection</strong> — it should name the repository back to you</li>
 <li><strong>Save settings</strong></li>
 </ol>
-<p>The other devices do not need any of this typed again — see section 6.</p>
-<h2 id="5-first-flight-and-what-appears">5. First flight, and what appears</h2>
+<p>The other devices do not need any of this typed again — see section 7.</p>
+<h2 id="6-first-flight-and-what-appears">6. First flight, and what appears</h2>
 <p>Set a flight ID, post one entry. Within a few seconds the data repository contains:</p>
 <pre><code>data/&lt;flight-id&gt;.json          the table, every row, sorted by time
 data/&lt;flight-id&gt;.csv           the same rows as CSV
@@ -187,7 +214,7 @@ data/_setup.json               the shared setup the followers read
 <p>The file names come from the flight ID with anything that is not a letter, digit, hyphen or
 underscore replaced by a hyphen. <code>GB 2026/01</code> becomes <code>GB-2026-01.json</code>.</p>
 <p>No workflow, no Action, no build step. The app is the only writer.</p>
-<h2 id="6-adding-the-other-crew-members">6. Adding the other crew members</h2>
+<h2 id="7-adding-the-other-crew-members">7. Adding the other crew members</h2>
 <p><strong>How a device becomes the master:</strong> it knows the master password, <strong>5678</strong>. On its first
 start every device is asked <em>Is this the master device?</em> — the password makes it the master,
 <em>Join as follower</em> makes it a follower, and a device set up through an invitation link is a
@@ -218,7 +245,7 @@ screen. A follower can still be unlocked and edited locally, but the next public
 master wins.</p>
 <p><strong>Two masters would fight</strong> over <code>_setup.json</code> and each undo the other. Exactly one device is
 the master.</p>
-<h2 id="7-polling-from-notion">7. Polling from Notion</h2>
+<h2 id="8-polling-from-notion">8. Polling from Notion</h2>
 <p><strong>The endpoint to use</strong>, private or public repository alike:</p>
 <pre><code>GET https://api.github.com/repos/&lt;owner&gt;/gb_flight_data/contents/data/&lt;flight-id&gt;.json
 Authorization: Bearer &lt;token&gt;
@@ -242,7 +269,7 @@ archive or hide the rows whose ids appear there.</p>
 </code></pre>
 <p>No token needed, but it sits behind a CDN with roughly a five-minute cache. Fine for working
 through a flight afterwards, too slow to follow one live.</p>
-<h2 id="8-checklist-before-a-flight">8. Checklist before a flight</h2>
+<h2 id="9-checklist-before-a-flight">9. Checklist before a flight</h2>
 <ul>
 <li>[ ] Token not expired — check the date on GitHub</li>
 <li>[ ] Master shows <em>Check connection</em> naming the data repository</li>
@@ -253,7 +280,7 @@ through a flight afterwards, too slow to follow one live.</p>
 <li>[ ] Test entry deleted afterwards, so the flight starts empty</li>
 <li>[ ] Start ballast entered, or the first inventory planned for before launch</li>
 </ul>
-<h2 id="9-when-something-does-not-arrive">9. When something does not arrive</h2>
+<h2 id="10-when-something-does-not-arrive">10. When something does not arrive</h2>
 <p><strong>The header says <code>no repository</code></strong> — repository or token missing in the settings on that
 device.</p>
 <p><strong>Entries stay <code>queued</code></strong> — no connection, or the token has expired or been revoked. <em>Send now</em>
