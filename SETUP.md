@@ -113,7 +113,11 @@ it without one. It must not be the token above: that one can write, and a token 
 else's device is a token they can take out of it. So a viewer code carries a second one, which
 GitHub itself will not let write.
 
-Same page, **Generate new token** again:
+Same page, **Generate new token** again — and it has to be a **fine-grained** token, the kind
+whose value begins `github_pat_`. The other kind, a classic token beginning `ghp_`, cannot be
+narrowed down to reading: the only scope that opens a private repository to it is `repo`, and
+that scope writes as well. A classic token in this field would read beautifully and write just
+as beautifully, which is the one thing it must not do.
 
 1. **Token name**: `basket-viewer-readonly`, or anything you will recognise
 2. **Expiration**: a year is reasonable. When it expires the viewers see nothing until you
@@ -131,6 +135,12 @@ Same page, **Generate new token** again:
 In the app it goes into *Settings → GitHub connection → Read-only token*, under the one you
 entered above. Then *Save settings*. The *Viewer code* button stays dead until it is there,
 and says why.
+
+Before you hand the first code out, press **Check read-only token** beside it. The app offers
+GitHub a write that cannot possibly go through and reports whether it was refused — which is
+the only honest way to ask, since GitHub will not say what a token may do. If it comes back
+*this token CAN write*, the token is the wrong one: either *Contents* was left on *Read and
+write*, or it is a classic token.
 
 What a viewer code carries: the repository, this read-only token, and the flights you chose.
 Not the write token, not the master password, not the WhatsApp numbers, not the map key.

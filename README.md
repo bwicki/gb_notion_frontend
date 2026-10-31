@@ -1258,8 +1258,21 @@ it is. Nothing is saved, the role does not change, and *Leave preview* goes back
 
 Beside *Check connection* there is **Check read-only token**. It does not test whether the
 token reads — the viewer screen does that — but whether it can **write**, which is the thing
-that matters. GitHub returns the permissions of whichever token asked, so the answer comes
-without anything being written. A token that can write is called out in so many words.
+that matters.
+
+GitHub has no way of being asked what a fine-grained token may do. The permissions a
+repository carries in its own answer are the *person's*, not the token's: the owner of a
+repository always reads there as somebody who may write, whichever token is in hand. So the
+check asks the only way that cannot be misread. It takes a file that is already in the
+repository and offers to overwrite it with a blob sha that is deliberately wrong. A token
+that may write gets as far as the sha and is told it is out of date; a token that may not is
+refused before anyone looks at the sha. Nothing is written either way, and the wrong sha is
+what makes that certain. A token that can write is called out in so many words.
+
+One answer deserves a note of its own: a **classic** token (one that begins `ghp_`) is named
+for what it is instead of being probed. The only scope that opens a private repository to a
+classic token is `repo`, and that scope writes as well as reads, so a classic token can never
+be the read-only one. A fine-grained token with *Contents: Read-only* can.
 
 ### Taking it back
 
@@ -1444,7 +1457,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261031-03` is the third build of 31 October 2026.
+smaller counter. `v261031-04` is the fourth build of 31 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the

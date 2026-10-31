@@ -171,7 +171,11 @@ whoever drove the retrieve. Skip it otherwise; everything else works without.</p
 it without one. It must not be the token above: that one can write, and a token on somebody
 else's device is a token they can take out of it. So a viewer code carries a second one, which
 GitHub itself will not let write.</p>
-<p>Same page, <strong>Generate new token</strong> again:</p>
+<p>Same page, <strong>Generate new token</strong> again — and it has to be a <strong>fine-grained</strong> token, the kind
+whose value begins <code>github_pat_</code>. The other kind, a classic token beginning <code>ghp_</code>, cannot be
+narrowed down to reading: the only scope that opens a private repository to it is <code>repo</code>, and
+that scope writes as well. A classic token in this field would read beautifully and write just
+as beautifully, which is the one thing it must not do.</p>
 <ol>
 <li><strong>Token name</strong>: <code>basket-viewer-readonly</code>, or anything you will recognise</li>
 <li><strong>Expiration</strong>: a year is reasonable. When it expires the viewers see nothing until you
@@ -189,6 +193,11 @@ GitHub itself will not let write.</p>
 <p>In the app it goes into <em>Settings → GitHub connection → Read-only token</em>, under the one you
 entered above. Then <em>Save settings</em>. The <em>Viewer code</em> button stays dead until it is there,
 and says why.</p>
+<p>Before you hand the first code out, press <strong>Check read-only token</strong> beside it. The app offers
+GitHub a write that cannot possibly go through and reports whether it was refused — which is
+the only honest way to ask, since GitHub will not say what a token may do. If it comes back
+<em>this token CAN write</em>, the token is the wrong one: either <em>Contents</em> was left on <em>Read and
+write</em>, or it is a classic token.</p>
 <p>What a viewer code carries: the repository, this read-only token, and the flights you chose.
 Not the write token, not the master password, not the WhatsApp numbers, not the map key.</p>
 <h2 id="5-enter-it-in-the-app">5. Enter it in the app</h2>

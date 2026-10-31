@@ -1334,8 +1334,19 @@ that code shows it, with that code's flights and its validity, and the footer sa
 it is. Nothing is saved, the role does not change, and <em>Leave preview</em> goes back.</p>
 <p>Beside <em>Check connection</em> there is <strong>Check read-only token</strong>. It does not test whether the
 token reads — the viewer screen does that — but whether it can <strong>write</strong>, which is the thing
-that matters. GitHub returns the permissions of whichever token asked, so the answer comes
-without anything being written. A token that can write is called out in so many words.</p>
+that matters.</p>
+<p>GitHub has no way of being asked what a fine-grained token may do. The permissions a
+repository carries in its own answer are the <em>person's</em>, not the token's: the owner of a
+repository always reads there as somebody who may write, whichever token is in hand. So the
+check asks the only way that cannot be misread. It takes a file that is already in the
+repository and offers to overwrite it with a blob sha that is deliberately wrong. A token
+that may write gets as far as the sha and is told it is out of date; a token that may not is
+refused before anyone looks at the sha. Nothing is written either way, and the wrong sha is
+what makes that certain. A token that can write is called out in so many words.</p>
+<p>One answer deserves a note of its own: a <strong>classic</strong> token (one that begins <code>ghp_</code>) is named
+for what it is instead of being probed. The only scope that opens a private repository to a
+classic token is <code>repo</code>, and that scope writes as well as reads, so a classic token can never
+be the read-only one. A fine-grained token with <em>Contents: Read-only</em> can.</p>
 <h3 id="taking-it-back">Taking it back</h3>
 <p>Every code issued is listed in <em>Devices on this flight</em>, among the crew's devices, marked
 <em>Viewer</em> with its code, its validity, its scope and how often it has been collected. A viewer
@@ -1482,7 +1493,7 @@ the old.</li>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261031-03</code> is the third build of 31 October 2026.</p>
+smaller counter. <code>v261031-04</code> is the fourth build of 31 October 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

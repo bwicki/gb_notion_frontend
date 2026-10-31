@@ -995,7 +995,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261031-03';
+const APP_VERSION='v261031-04';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1220,6 +1220,8 @@ const L={en:{
  vCheck404:'Repository not found, or that token has no access to it.',
  vCheckOk:'{r} \u2014 this token can read and cannot write. That is what a viewer code needs.',
  vCheckBad:'{r} \u2014 careful: this token CAN write. Set Contents to Read-only on it, or make a new one, before it goes into a viewer code.',
+ vCheckOld:'{r} \u2014 this is a classic token (ghp_\u2026). A classic token cannot be limited to reading a private repository: the scope that opens one also writes. Make a fine-grained token with Contents: Read-only instead.',
+ vCheckHuh:'{r} \u2014 this token can read, but there is no file in the repository yet to test writing against. Check again once the first flight has been written.',
  vPrevBack:'Leave preview', vPrevFoot:'Preview \u2014 as {n} sees it',
  vMasterWarn:'This device is the master. Taking up a viewer code would hand away the write token, the setup and the current flight, and leave it able only to read. To see what a viewer sees, tap the viewer\u2019s row in Devices on this flight instead.',
  vMasterGo:'Yes, make this a viewer',
@@ -1444,6 +1446,8 @@ const L={en:{
  vCheck404:'Repository nicht gefunden, oder dieses Token hat keinen Zugriff darauf.',
  vCheckOk:'{r} \u2014 dieses Token kann lesen und nicht schreiben. Genau das braucht ein Viewer-Code.',
  vCheckBad:'{r} \u2014 Achtung: dieses Token KANN schreiben. Stell Contents auf Read-only, oder erzeuge ein neues, bevor es in einen Viewer-Code geht.',
+ vCheckOld:'{r} \u2014 das ist ein klassisches Token (ghp_\u2026). Ein klassisches Token kann bei einem privaten Repository nicht auf Lesen beschr\u00e4nkt werden: der Scope, der es \u00f6ffnet, schreibt auch. Erzeuge daf\u00fcr ein fine-grained Token mit Contents: Read-only.',
+ vCheckHuh:'{r} \u2014 dieses Token kann lesen, aber im Repository liegt noch keine Datei, an der sich das Schreiben pr\u00fcfen liesse. Pr\u00fcf nochmals, sobald die erste Fahrt geschrieben ist.',
  vPrevBack:'Vorschau verlassen', vPrevFoot:'Vorschau \u2014 so sieht es {n}',
  vMasterWarn:'Dieses Gerät ist der Master. Einen Viewer-Code aufzunehmen gäbe das Schreibtoken, die Einrichtung und die laufende Fahrt weg und liesse nur noch Lesen übrig. Um zu sehen, was ein Viewer sieht, tippe stattdessen in «Geräte auf dieser Fahrt» auf die Zeile des Viewers.',
  vMasterGo:'Ja, dieses Gerät zum Viewer machen',
@@ -5577,22 +5581,53 @@ $('#btnTest').onclick=async()=>{
     const j=await r.json();toast(t('connectedTo')+' '+j.full_name);
   }catch(e){toast(String(e.message||e))}
 };
-/* The question a read-only token has to answer is not "does it read" but "can it write".
-   GitHub says so itself: the repository it returns carries the permissions of the token that
-   asked. Nothing is written to find out. */
+/* The question a read-only token has to answer is not "does it read" but "can it write", and
+   GitHub will not simply say. The permissions a repository carries in its own JSON are the
+   PERSON's, not the token's: the owner of a repository always reads there as somebody who may
+   write, whatever the token in hand is allowed to do. That is why the first version of this
+   check called every token a writer, the read-only ones included.
+   So the token is asked to write something that cannot possibly go through: a file that is
+   already there, with a blob sha that is deliberately wrong. A token that may write is told
+   its sha is out of date; a token that may not is refused before anyone looks at the sha.
+   Nothing is written either way, and it is the wrong sha that makes that certain. */
 $('#btnTestView').onclick=async()=>{
   const repo=$('#sRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
   const tok=$('#sTokenView').value.trim();
   if(!repo||!tok)return toast(t('vCheckNone'));
+  const H={Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'};
+  const br=$('#sBranch').value.trim()||'main';
+  const dir=($('#sDir').value.trim()||'data').replace(/^\/|\/$/g,'');
+  const q='?ref='+encodeURIComponent(br);
   try{
-    const r=await fetch(`${API}/repos/${repo}`,
-      {headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'}});
+    const r=await fetch(`${API}/repos/${repo}`,{headers:H});
     if(!r.ok)throw new Error(r.status===404?t('vCheck404'):'Response '+r.status);
-    const j=await r.json();
-    const canWrite=!!(j.permissions&&(j.permissions.push||j.permissions.admin));
-    await info(t('vCheck'),canWrite
-      ? t('vCheckBad').replace('{r}',j.full_name)
-      : t('vCheckOk').replace('{r}',j.full_name));
+    const name=(await r.json()).full_name||repo;
+    /* a classic token cannot be narrowed down to reading a private repository at all: the
+       only scope that opens one is `repo`, and that scope writes. Worth saying outright. */
+    if(/^ghp_/.test(tok))return info(t('vCheck'),t('vCheckOld').replace('{r}',name));
+    /* something that exists, to aim the impossible write at: the data folder first, then
+       the root of the repository */
+    let probe=null;
+    for(const p of [dir,'']){
+      const l=await fetch(`${API}/repos/${repo}/contents/${encodeURI(p)}${q}`,{headers:H,cache:'no-store'});
+      if(!l.ok)continue;
+      const a=await l.json();
+      if(Array.isArray(a))probe=a.find(x=>x.type==='file'&&x.sha&&x.path);
+      if(probe)break;
+    }
+    if(!probe)return info(t('vCheck'),t('vCheckHuh').replace('{r}',name));
+    const back=String(probe.sha).split('').reverse().join('');
+    const wrong=back===probe.sha?'0'.repeat(40):back;
+    const w=await fetch(`${API}/repos/${repo}/contents/${encodeURI(probe.path)}`,
+      {method:'PUT',headers:Object.assign({'Content-Type':'application/json'},H),
+       body:JSON.stringify({message:'basket: permission probe, never applied',
+         content:'cHJvYmU=',sha:wrong,branch:br})});
+    /* 403, or 404 on a repository we have just read, is a refusal. Anything else means the
+       token got as far as the sha, which only a token that may write ever does. */
+    const refused=w.status===403||w.status===404;
+    await info(t('vCheck'),refused
+      ? t('vCheckOk').replace('{r}',name)
+      : t('vCheckBad').replace('{r}',name));
   }catch(e){info(t('vCheck'),String(e.message||e))}
 };
 
