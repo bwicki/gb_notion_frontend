@@ -303,6 +303,9 @@ html[data-theme="night"] .pfrow.bad em,html[data-theme="night"] .pfrow.warn em{c
 .devrow button[data-act="hand"],.devrow button[data-act="promote"]{color:var(--ink)}
 .devrow .self{font-size:10.5px;color:var(--muted);padding-right:4px}
 .devrow.viewer b{font-weight:600}
+.devrow .vrow{width:100%;text-align:left;background:none;border:0;padding:0}
+.devrow .vrow:active{opacity:.6}
+.archead #archBack{width:auto;height:34px;font-size:12px;padding:0 12px;flex:0 0 auto}
 .o2head{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;font-size:10px;color:var(--muted);margin-bottom:3px}
 .o2set{display:grid;grid-template-columns:22mm 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px}
 .o2set>span{font-size:12px;color:var(--muted)}
@@ -726,7 +729,8 @@ body.mapon #app{visibility:hidden}
   <!-- ARCHIVE, the whole of what a viewer sees -->
   <section class="view" id="v-arch">
     <div class="scroll arcview">
-      <div class="archead"><h3 data-t="hArchive">Flight archive</h3></div>
+      <div class="archead"><h3 data-t="hArchive">Flight archive</h3>
+        <button id="archBack" class="go sec sm" data-t="vPrevBack" style="display:none">Leave preview</button></div>
       <p class="hint" id="archNote"></p>
       <div class="arclist" id="archList"></div>
     </div>
@@ -906,7 +910,10 @@ body.mapon #app{visibility:hidden}
             <div class="f"><input type="password" id="sToken" data-tp="pToken" placeholder="Fine-grained token" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
             <div class="f"><input type="password" id="sTokenView" data-tp="pTokenView" placeholder="Read-only token (viewers)" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
             <p class="hint" data-t="vTokenHint">A second fine-grained token on the same repository, with Contents set to Read-only. A viewer code carries this one instead of the token above, so a viewer cannot write to the repository even if the token is dug out of the device.</p>
-            <button class="go sm sec" id="btnTest" data-t="checkConn">Check connection</button>
+            <div class="f two btnrow">
+              <button class="go sm sec" id="btnTest" data-t="checkConn">Check connection</button>
+              <button class="go sm sec" id="btnTestView" data-t="vCheck">Check read-only token</button>
+            </div>
           </div>
         </details>
 
@@ -986,7 +993,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261031-02';
+const APP_VERSION='v261031-03';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1042,7 +1049,7 @@ const L={en:{
  kgDropped:'Ballast (in kg) dropped since last ballast drop report', bags:'sand bags', water:'water', remark:'Remark (optional)',
  readyBallast:'Ready ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Received', sent:'Sent', transmitted:'Transmitted', lastMessage:'Last msg', station:'Station',
  message:'Message', confirmLast:'Confirm from last call', copyLast:'Copy from last call', sendWa:'Also send to WhatsApp',
- hDevices:'Devices on this flight', hintDevices:'Crew devices are seen through the entries they wrote; a viewer code is listed because a viewer writes nothing. A device that has not reported for 36 hours is shown as quiet; the master is never counted out.',
+ hDevices:'Devices on this flight', hintDevices:'Crew devices are seen through the entries they wrote; a viewer code is listed because a viewer writes nothing. Tap a viewer row to see the archive as that code shows it. A device that has not reported for 36 hours is shown as quiet; the master is never counted out.',
  devActive:'active', devQuiet:'quiet', devBlocked:'removed', devNever:'nothing written yet',
  devUnknown:'unnamed', devSelf:'this device', devKick:'Remove', devAllow:'Allow again', devMakeMaster:'Make master', devOffered:'Offered',
  handTitle:'Master role', handAsk:'Offer the master role to {d}? Nothing changes until that device accepts.',
@@ -1206,7 +1213,15 @@ const L={en:{
  opsStop:'Stop reminder', opsOff:'Ops Normal reminder stopped',
  opsV5:'Report Ops Normal in five minutes', opsVNow:'Report Ops Normal now',
  opsSnd:'Ops Normal alarm', sndTone:'Tone', sndVoice:'Tone + voice',
- vTitle:'Viewer code', vMake:'Viewer code', archNoDetail:'no details recorded',
+ vTitle:'Viewer code', vMake:'Viewer code',
+ vCheck:'Check read-only token', vCheckNone:'Enter the repository and the read-only token first.',
+ vCheck404:'Repository not found, or that token has no access to it.',
+ vCheckOk:'{r} \u2014 this token can read and cannot write. That is what a viewer code needs.',
+ vCheckBad:'{r} \u2014 careful: this token CAN write. Set Contents to Read-only on it, or make a new one, before it goes into a viewer code.',
+ vPrevBack:'Leave preview', vPrevFoot:'Preview \u2014 as {n} sees it',
+ vMasterWarn:'This device is the master. Taking up a viewer code would hand away the write token, the setup and the current flight, and leave it able only to read. To see what a viewer sees, tap the viewer\u2019s row in Devices on this flight instead.',
+ vMasterGo:'Yes, make this a viewer',
+ archNoDetail:'no details recorded',
  vAsk:'A code that lets somebody outside the crew read the archive — and nothing else.',
  vCreate:'Create code', vFor:'For whom', vForPh:'A name, so the list makes sense',
  vValid:'Valid for', vT1d:'1 day', vT10d:'10 days', vT30d:'30 days', vTforever:'No limit',
@@ -1256,7 +1271,7 @@ const L={en:{
  kgDropped:'Ballast (in kg) seit der letzten Abwurfmeldung', bags:'Sandsäcke', water:'Wasser', remark:'Bemerkung (optional)',
  readyBallast:'Ready Ballast (Sch\u00fctte)', schuette:'Sch\u00fctte', received:'Empfangen', sent:'Gesendet', transmitted:'Gesendet', lastMessage:'Letzte Meldung', station:'Stelle',
  message:'Meldung', confirmLast:'Vom letzten Ruf übernehmen', copyLast:'Vom letzten Ruf kopieren', sendWa:'Auch an WhatsApp senden',
- hDevices:'Geräte auf dieser Fahrt', hintDevices:'Crew-Geräte werden an ihren Einträgen erkannt; ein Viewer-Code steht hier, weil ein Viewer nichts schreibt. Ein Gerät, das 36 Stunden nichts gemeldet hat, gilt als still; der Master nie.',
+ hDevices:'Geräte auf dieser Fahrt', hintDevices:'Crew-Geräte werden an ihren Einträgen erkannt; ein Viewer-Code steht hier, weil ein Viewer nichts schreibt. Auf eine Viewer-Zeile tippen zeigt das Archiv so, wie dieser Code es zeigt. Ein Gerät, das 36 Stunden nichts gemeldet hat, gilt als still; der Master nie.',
  devActive:'aktiv', devQuiet:'still', devBlocked:'entfernt', devNever:'noch nichts geschrieben',
  devUnknown:'ohne Namen', devSelf:'dieses Gerät', devKick:'Entfernen', devAllow:'Wieder zulassen', devMakeMaster:'Zum Master', devOffered:'Angeboten',
  handTitle:'Master-Rolle', handAsk:'Die Master-Rolle an {d} übergeben? Es ändert sich nichts, bis dieses Gerät annimmt.',
@@ -1422,7 +1437,15 @@ const L={en:{
  opsStop:'Erinnerung stoppen', opsOff:'Ops-Normal-Erinnerung gestoppt',
  opsV5:'Ops Normal in fünf Minuten melden', opsVNow:'Ops Normal jetzt melden',
  opsSnd:'Ops-Normal-Alarm', sndTone:'Ton', sndVoice:'Ton + Ansage',
- vTitle:'Viewer-Code', vMake:'Viewer-Code', archNoDetail:'keine Angaben',
+ vTitle:'Viewer-Code', vMake:'Viewer-Code',
+ vCheck:'Lesetoken prüfen', vCheckNone:'Zuerst Repository und Lesetoken eintragen.',
+ vCheck404:'Repository nicht gefunden, oder dieses Token hat keinen Zugriff darauf.',
+ vCheckOk:'{r} \u2014 dieses Token kann lesen und nicht schreiben. Genau das braucht ein Viewer-Code.',
+ vCheckBad:'{r} \u2014 Achtung: dieses Token KANN schreiben. Stell Contents auf Read-only, oder erzeuge ein neues, bevor es in einen Viewer-Code geht.',
+ vPrevBack:'Vorschau verlassen', vPrevFoot:'Vorschau \u2014 so sieht es {n}',
+ vMasterWarn:'Dieses Gerät ist der Master. Einen Viewer-Code aufzunehmen gäbe das Schreibtoken, die Einrichtung und die laufende Fahrt weg und liesse nur noch Lesen übrig. Um zu sehen, was ein Viewer sieht, tippe stattdessen in «Geräte auf dieser Fahrt» auf die Zeile des Viewers.',
+ vMasterGo:'Ja, dieses Gerät zum Viewer machen',
+ archNoDetail:'keine Angaben',
  vAsk:'Ein Code, mit dem jemand ausserhalb der Crew das Archiv lesen kann — und sonst nichts.',
  vCreate:'Code erzeugen', vFor:'Für wen', vForPh:'Ein Name, damit die Liste etwas sagt',
  vValid:'Gültig für', vT1d:'1 Tag', vT10d:'10 Tage', vT30d:'30 Tage', vTforever:'Unbegrenzt',
@@ -2723,18 +2746,22 @@ async function viewerAllowed(){
 async function paintArchView(){
   const box=$('#archList'),note=$('#archNote');
   if(!box)return;
-  $('#archFoot').textContent=vWho();
+  $('#archFoot').textContent=PRV?t('vPrevFoot').replace('{n}',PRV.label):vWho();
+  $('#archBack').style.display=PRV?'':'none';
   note.textContent=t('archLoading');box.innerHTML='';ARCHV=[];
-  const allowed=await viewerAllowed();
-  if(allowed!==true){note.textContent=allowed;return}
+  if(!PRV){
+    const allowed=await viewerAllowed();
+    if(allowed!==true){note.textContent=allowed;return}
+  }
   let list=null;
   try{list=await archiveList()}catch(e){note.textContent=String(e.message||e);return}
-  if(viewing()&&CFG.vflights&&CFG.vflights.length)
-    list=list.filter(it=>CFG.vflights.indexOf(it.flight)>=0);
+  const only=PRV?PRV.flights:(viewing()?CFG.vflights:null);
+  if(only&&only.length)list=list.filter(it=>only.indexOf(it.flight)>=0);
   if(!list.length){note.textContent=t('archNone');return}
   ARCHV=list;
+  const exp=PRV?PRV.exp:CFG.vexp;
   note.textContent=t('vNFlights').replace('{n}',String(list.length))
-    +(CFG.vexp?' \u00b7 '+t('vUntil').replace('{d}',dayOf(CFG.vexp)):'');
+    +(exp?' \u00b7 '+t('vUntil').replace('{d}',dayOf(exp)):'');
   box.innerHTML=archRows(list);
 }
 function applyViewer(){
@@ -2747,6 +2774,10 @@ function applyViewer(){
 /* taking up a viewer code: the device keeps the read token and nothing else */
 async function enterViewer(o){
   if(o.exp&&new Date(o.exp)<new Date())return info(t('vTitle'),t('vExpired'));
+  /* on the master this would throw away the flight, the write token and the setup; it is a
+     thing to do on somebody else's device, so it asks twice here */
+  if(CFG.role==='master'&&!await ask({title:t('vTitle'),text:t('vMasterWarn'),
+      ok:t('vMasterGo'),cancel:t('cancel'),danger:true}))return;
   const ok=await ask({title:t('vTitle'),ok:t('apply'),cancel:t('cancel'),
     text:t('vFound').replace('{c}',o.call||'\u2014').replace('{r}',o.repo||'\u2014')
       .replace('{v}',o.exp?dayOf(o.exp):t('vTforever'))});
@@ -3291,6 +3322,7 @@ function setView(v){
 }
 $('#btnMenu').onclick=()=>openMenu();
 $('#btnLogBack').onclick=()=>setView('form');
+$('#archBack').onclick=previewEnd;
 $('#archList').addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-i]');if(!b)return;
   const it=ARCHV[Number(b.dataset.i)];if(it)openFlight(it);
@@ -5260,12 +5292,27 @@ function viewerRows(){
       Number(x.taken)?t('vTaken').replace('{n}',String(x.taken)):t('vNotTaken')];
     if(over)bits.push(t('vExpiredShort'));
     return `<div class="devrow viewer${over?' stale':''}">
-      <div><b>${esc(x.label||t('vRole'))}</b><i>${esc(bits.join(' \u00b7 '))}</i></div>
+      <button class="vrow" data-prv="${esc(x.vid)}"><b>${esc(x.label||t('vRole'))}</b>
+        <i>${esc(bits.join(' \u00b7 '))}</i></button>
       <span class="devbtns">
         <button data-vw="${esc(x.vid)}" data-act="promote">${esc(t('vPromote'))}</button>
         <button data-vw="${esc(x.vid)}" data-act="drop">${esc(t('vDrop'))}</button>
       </span></div>`;
   }).join('');
+}
+/* Seeing it from the other side without becoming the other side: the master's own device
+   paints the viewer's screen, with that code's flights, and a way back. Nothing is saved,
+   no role changes, and the live flight is untouched. */
+let PRV=null;
+async function previewViewer(x){
+  PRV={flights:x.flights,label:x.label||t('vRole'),exp:x.exp};
+  setView('arch');
+  await paintArchView();
+}
+function previewEnd(){
+  PRV=null;
+  setView('set');
+  paintDevices();
 }
 /* Removing a code takes it out of the letterbox and out of the published list, and the device
    that holds it shuts itself down the next time it looks. That last part is good manners, not
@@ -5329,6 +5376,11 @@ async function offerMaster(devId,name){
 }
 $('#devList').addEventListener('click',async ev=>{
   const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.prv){
+    const x=(CFG.viewers||[]).find(y=>y.vid===b.dataset.prv);
+    if(x)previewViewer(x);
+    return;
+  }
   if(b.dataset.vw)return viewerAct(b.dataset.vw,b.dataset.act||'');
   if(!b.dataset.dev)return;
   if(b.dataset.act==='hand')return offerMaster(b.dataset.dev,b.dataset.name||'');
@@ -5523,6 +5575,25 @@ $('#btnTest').onclick=async()=>{
     const j=await r.json();toast(t('connectedTo')+' '+j.full_name);
   }catch(e){toast(String(e.message||e))}
 };
+/* The question a read-only token has to answer is not "does it read" but "can it write".
+   GitHub says so itself: the repository it returns carries the permissions of the token that
+   asked. Nothing is written to find out. */
+$('#btnTestView').onclick=async()=>{
+  const repo=$('#sRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+  const tok=$('#sTokenView').value.trim();
+  if(!repo||!tok)return toast(t('vCheckNone'));
+  try{
+    const r=await fetch(`${API}/repos/${repo}`,
+      {headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github+json'}});
+    if(!r.ok)throw new Error(r.status===404?t('vCheck404'):'Response '+r.status);
+    const j=await r.json();
+    const canWrite=!!(j.permissions&&(j.permissions.push||j.permissions.admin));
+    await info(t('vCheck'),canWrite
+      ? t('vCheckBad').replace('{r}',j.full_name)
+      : t('vCheckOk').replace('{r}',j.full_name));
+  }catch(e){info(t('vCheck'),String(e.message||e))}
+};
+
 /* Closing a flight and opening the next one. The files of the old flight stay exactly where
    they are — they are named after it — and are listed in an index, so nothing is moved and
    nothing that Notion already polls can break. */

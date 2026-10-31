@@ -1246,6 +1246,21 @@ read-only token and refuses to write before GitHub even has to.
 The language of the master's device travels with the code, so a viewer is not dropped into
 English because their device is new.
 
+### Trying it before you send it
+
+A viewer code cannot be tried out by taking it up on the master — that would hand the write
+token, the setup and the current flight away and leave the device able only to read. The app
+says so and asks twice if anybody tries.
+
+Instead, **tap the viewer's row** in *Devices on this flight*. The archive opens exactly as
+that code shows it, with that code's flights and its validity, and the footer says whose view
+it is. Nothing is saved, the role does not change, and *Leave preview* goes back.
+
+Beside *Check connection* there is **Check read-only token**. It does not test whether the
+token reads — the viewer screen does that — but whether it can **write**, which is the thing
+that matters. GitHub returns the permissions of whichever token asked, so the answer comes
+without anything being written. A token that can write is called out in so many words.
+
 ### Taking it back
 
 Every code issued is listed in *Devices on this flight*, among the crew's devices, marked
@@ -1429,7 +1444,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261031-02` is the second build of 31 October 2026.
+smaller counter. `v261031-03` is the third build of 31 October 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
