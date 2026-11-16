@@ -1111,6 +1111,21 @@ row this device has never seen is carried through untouched. What is new is that
   is the crew's business, rewriting it is not. The deletion travels the ordinary way, through
   `<flight>.deleted.json`, so the radio app learns of it too.
 
+The radio app's side of the arrangement is written down in its own repository,
+[`bwicki/krt2`](https://github.com/bwicki/krt2), under *Funkprotokoll — die Fahrtabelle teilen
+mit Basket Reporting*. It also carries the test that exercises **both** apps against one
+simulated GitHub — a table past a megabyte, a stale sha, an unreadable file — and it needs this
+app's `index.html` to do it:
+
+```
+git clone --depth 1 https://github.com/bwicki/krt2 ../krt2
+cd ../krt2 && npm install jsdom
+node tests/reporting_cross.js ../gb_notion_frontend/index.html src/vhflog.js
+```
+
+Worth running after any change to `ghGet`, to `sync` or to how a row is merged: it is the only
+check that sees the two writers at the same table.
+
 ## 19b. Tables past a megabyte
 
 The GitHub API that this app reads and writes stops putting a file inside its own answer once

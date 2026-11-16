@@ -23,3 +23,18 @@ The stand-in GitHub in that file behaves the way the real one does past a megaby
 metadata answer carries the sha and the size but no content, and the body has to be asked for
 again with the raw media type. A test that passes against a small file proves nothing about
 the case it is there for, so the fixture is built to 1.5 MB on purpose.
+
+## The other writer
+
+The radio app at `krt2.wicki.aero` writes into the same flight table, and its repository carries
+the test that puts both apps on one simulated GitHub — a stale sha, a file past a megabyte, a
+file that cannot be read — with this app's `index.html` as one of the two parties:
+
+```
+git clone --depth 1 https://github.com/bwicki/krt2 ../krt2
+cd ../krt2 && npm install jsdom
+node tests/reporting_cross.js ../gb_notion_frontend/index.html src/vhflog.js
+```
+
+Run it after any change to `ghGet`, to `sync`, or to the way rows are merged. Nothing in this
+folder sees the two writers at the same table; that test does.
