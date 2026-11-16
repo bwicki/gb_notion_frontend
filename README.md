@@ -1,5 +1,7 @@
 # GB Notion Frontend — Basket Reporting
 
+**App v261116-01 · Handbuch Dok. 261116-02**
+
 The reporting form for the basket of a gas balloon. It keeps working without a signal, stamps
 every entry with the time and the position, carries the ballast figure forward across all
 devices, and lets several people report in parallel.
@@ -1576,11 +1578,28 @@ build released that day. The date leads, so `v260813-01` is newer than `v260812-
 smaller counter. `v261116-01` is the first build of 16 November 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
-the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
-PDFs are generated from `README.md` and `SETUP.md` and are regenerated on every build, so the
-printed manual is never behind the app. Bumping the cache name is what
+the script in `index.html`, and the cache name `V` in `sw.js`. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.
+
+### The documents have a stamp of their own
+
+`readme.html`, `setup.html` and the PDFs are generated from `README.md` and `SETUP.md`, and they
+change more often than the app does — a passage rewritten, a step described better, nothing in
+the code at all. **The app's version does not move for those**, because bumping it would make
+every device fetch the whole app again to read a corrected sentence.
+
+So each document carries its own stamp, in the same shape, on the line under its title and in
+the footer of its PDF:
+
+```
+App v261116-01 · Handbuch Dok. 261116-02
+```
+
+`Dok. <YYMMDD>-<nn>` is the date the document was last changed and a counter for that day. Two
+printouts of the manual are then told apart at a glance even when the app behind them is the
+same. Where the two stamps carry different dates, the manual has been corrected since the build
+— which is normal, and the right way round.
 
 ## 31. License
 

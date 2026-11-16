@@ -32,6 +32,7 @@ a{color:inherit}
 .nav2 a{text-decoration:underline;text-underline-offset:3px}</style></head><body><main>
 <p class="nav2">Manual · <a href="setup.html">Setup guide</a> · <a href="notion.html">Notion</a> · <a href="license.html">License</a> · <a href="index.html">Back to the app</a></p>
 <h1 id="gb-notion-frontend-basket-reporting">GB Notion Frontend — Basket Reporting</h1>
+<p><strong>App v261116-01 · Handbuch Dok. 261116-02</strong></p>
 <p>The reporting form for the basket of a gas balloon. It keeps working without a signal, stamps
 every entry with the time and the position, carries the ballast figure forward across all
 devices, and lets several people report in parallel.</p>
@@ -1599,11 +1600,22 @@ the date written backwards, then a counter that restarts at 01 each day and goes
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
 smaller counter. <code>v261116-01</code> is the first build of 16 November 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
-the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
-PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the
-printed manual is never behind the app. Bumping the cache name is what
+the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. Bumping the cache name is what
 forces the service worker to fetch the new files rather than serve the old ones, so a build
 with an unchanged cache name may not reach a device that already has the app installed.</p>
+<h3 id="the-documents-have-a-stamp-of-their-own">The documents have a stamp of their own</h3>
+<p><code>readme.html</code>, <code>setup.html</code> and the PDFs are generated from <code>README.md</code> and <code>SETUP.md</code>, and they
+change more often than the app does — a passage rewritten, a step described better, nothing in
+the code at all. <strong>The app's version does not move for those</strong>, because bumping it would make
+every device fetch the whole app again to read a corrected sentence.</p>
+<p>So each document carries its own stamp, in the same shape, on the line under its title and in
+the footer of its PDF:</p>
+<pre><code>App v261116-01 · Handbuch Dok. 261116-02
+</code></pre>
+<p><code>Dok. &lt;YYMMDD&gt;-&lt;nn&gt;</code> is the date the document was last changed and a counter for that day. Two
+printouts of the manual are then told apart at a glance even when the app behind them is the
+same. Where the two stamps carry different dates, the manual has been corrected since the build
+— which is normal, and the right way round.</p>
 <h2 id="31-license">31. License</h2>
 <p>Custom license, © 2026 Wicki Aero GmbH.</p>
 <p><strong><a href="license.html">Read the full licence</a></strong> — it opens in a window of its own, and the same text

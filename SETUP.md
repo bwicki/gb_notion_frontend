@@ -1,5 +1,7 @@
 # Setup — data repository, token and Notion polling
 
+**App v261116-01 · Setup guide Dok. 261031-01**
+
 Everything the app needs on the GitHub side, and how Notion reads the result. The same material,
 laid out for printing and handing to whoever built the Notion integration, is in
 **Setup-data-repository.pdf** in the repository. Do this once per
