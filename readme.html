@@ -1014,6 +1014,11 @@ and a row of chips above the list filters by kind, each with its count: <em>All 
 ATC 42 · Ressources 18 · POS 5 · PIC 2</em>. Only kinds that actually occur are offered. Reading
 the ATC calls of a long flight is then a tap rather than a search, and the choice is remembered
 between visits.</p>
+<p>One chip works the other way round. When the radio app has filed rows of its own (§19a), a
+<strong>without VHF</strong> chip appears next to <em>All</em>, carrying the count of everything else. Every other
+chip picks one kind to show; this one picks one kind to leave out, which is what you want when
+there are four hundred radio rows and you are looking for the ballast between them. <em>All</em> stays
+the default.</p>
 <p>A row that also went out through WhatsApp says so after the reporter's name — <em>sent to
 WhatsApp</em>, previously the bare abbreviation <code>WA</code>.</p>
 <p>Each row carries its transmission state at the right edge: a green double check when it has
@@ -1031,6 +1036,62 @@ whole flight after every edit and every deletion, so the figures stay consistent
 the sequence the change was made.</p>
 <p>Deleting asks twice, states what is being removed and who recorded it, and warns that the
 deletion is shared with the other devices.</p>
+<h2 id="19a-rows-another-app-wrote">19a. Rows another app wrote</h2>
+<p>Since 16 November 2026 the flight table has a second author. The radio app at
+<strong>krt2.wicki.aero</strong>, which keeps the frequency list of the KRT2, writes its own rows into the
+same <code>data/&lt;flight&gt;.json</code>: kind <strong>VHF</strong>, <code>source</code> <code>krt2</code>, <code>reporter</code> <code>KRT2</code>, and a note such as
+<em>FRQ 127.800 ZURICH F active</em> or <em>Tx 6.2 sec</em>, with the frequency, the station and a position
+beside it. It reads the file with its sha, appends, and writes it back, reading again when
+GitHub reports a conflict — the same courtesy this app shows it.</p>
+<p>Nothing special has to be done to keep those rows: the merge has always worked by <code>id</code>, so a
+row this device has never seen is carried through untouched. What is new is that the app now
+<strong>shows</strong> them properly rather than treating them as a note of unknown kind.</p>
+<ul>
+<li>In the log they carry a <code>VHF</code> tag like any other kind. The line is what the radio app wrote;
+  the frequency and station are added underneath only when its own text does not already carry
+  them, so nothing is said twice.</li>
+<li>The counters, the flight archive's summary, and the CSV, JSON, GeoJSON and KML exports treat
+  them as a kind of their own. In Google Earth they get their own folder and their own colour,
+  so they can be switched off there in one click.</li>
+<li>The ballast arithmetic ignores them, as it ignores everything that is not a <code>Ballast</code> row, so
+  a thousand radio rows change no figure.</li>
+<li><strong>The printout leaves them out unless you ask.</strong> VHF is offered as a chip in the print window
+  like every other kind, but it is the one that starts switched off: a competition flight's
+  worth of transmissions would bury the log it is printed beside. One tap puts them in.</li>
+<li>Tapping one opens it, but there is nothing to edit: the window names who wrote it, shows the
+  text, and offers <em>Delete this entry</em>. A row belongs to the app that filed it; taking it out
+  is the crew's business, rewriting it is not. The deletion travels the ordinary way, through
+  <code>&lt;flight&gt;.deleted.json</code>, so the radio app learns of it too.</li>
+</ul>
+<h2 id="19b-tables-past-a-megabyte">19b. Tables past a megabyte</h2>
+<p>The GitHub API that this app reads and writes stops putting a file inside its own answer once
+the file passes <strong>one megabyte</strong>. The metadata still arrives, with the sha and the size in it,
+but the content comes back empty and marked <code>none</code>. A flight table reaches that mark somewhere
+around eight hundred entries of the ordinary kind — and far sooner once the radio app is
+filing a row per transmission.</p>
+<p>Read naively, such a file looks like an empty table, and the next write would publish this
+device's rows as the whole of it. That is the one misreading that could cost a flight its log,
+and the app is now built so that it cannot happen:</p>
+<ol>
+<li><strong>The file is read whole.</strong> When the content comes back empty but the size says otherwise,
+   the body is fetched a second time with GitHub's raw media type. The sha and the ETag still
+   come from the first answer, so conditional polling costs no more than it did. An answer that
+   refuses the file outright is handled the same way, with the sha taken from the folder
+   listing — a write needs it, or it would try to create a file that is already there.</li>
+<li><strong>A short read is never written back.</strong> If GitHub says the file exists and holds more than
+   a couple of bytes, and the read nonetheless yields no rows, the app refuses to write. What
+   is waiting stays in the queue, the rows are <em>not</em> marked as failed — nothing was attempted
+   — and the next sync tries again.</li>
+<li><strong>A table that would shrink is refused too.</strong> Every row that came back and is not named by
+   a tombstone has to still be there in what goes out, counted by <code>id</code>. As the merge is written
+   today this cannot happen, because it starts from the rows that were read and only adds; the
+   check is a net under the merge itself, for the day somebody changes it.</li>
+</ol>
+<p>A refusal is shown once, not at every poll, in a window whose text can be copied — it names
+the file, the byte count and the repository, which is everything needed to work out what
+happened. It also stays in the footer, in red, until a sync goes through; a toast would be gone
+before anybody had read it. The moment a read works again, the queue goes out and the line
+clears itself.</p>
 <h2 id="20-what-the-app-writes">20. What the app writes</h2>
 <pre><code>data/&lt;flight-id&gt;.json          the table
 data/&lt;flight-id&gt;.csv           the same rows as CSV
@@ -1525,7 +1586,7 @@ the old.</li>
 <p>The build stamp sits in the bottom right of every screen, in the form <code>v&lt;YYMMDD&gt;-&lt;nn&gt;</code> —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so <code>v260813-01</code> is newer than <code>v260812-26</code> despite the
-smaller counter. <code>v261031-05</code> is the fifth build of 31 October 2026.</p>
+smaller counter. <code>v261116-01</code> is the first build of 16 November 2026.</p>
 <p>It lives in two places that must be kept in step: the <code>APP_VERSION</code> constant near the top of
 the script in <code>index.html</code>, and the cache name <code>V</code> in <code>sw.js</code>. <code>readme.html</code>, <code>setup.html</code> and the
 PDFs are generated from <code>README.md</code> and <code>SETUP.md</code> and are regenerated on every build, so the

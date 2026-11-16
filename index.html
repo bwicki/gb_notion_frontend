@@ -105,8 +105,10 @@ html[data-theme="night"] .opsbox.late b,html[data-theme="night"] .opsbox.late sp
 
 
 .warn{font-size:11.5px;line-height:1.35;color:#B5442F;margin:-4px 0 10px}
+#syncNote.lost{color:#B5442F}
 .warn.hide{display:none}
 html[data-theme="night"] .warn{color:#E2705F}
+html[data-theme="night"] #syncNote.lost{color:#E2705F}
 input.bad{border-color:#B5442F}
 .lastmsg{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:0 0 10px;
   background:var(--field)}
@@ -995,7 +997,7 @@ body.mapon #app{visibility:hidden}
 "use strict";
 /* ── Storage ───────────────────────────────────────────────────────── */
 /* build stamp: v<YYMMDD>-<nn>, nn restarts at 01 each day */
-const APP_VERSION='v261031-05';
+const APP_VERSION='v261116-01';
 const K_CFG='bsk.cfg.v6', K_ENT='bsk.entries.v6', K_UI='bsk.ui.v6', K_TOMB='bsk.tomb.v6';
 const PASS='1234';        /* opens the settings on any device */
 const MASTER_PASS='5678'; /* makes a device the one that owns the flight setup */
@@ -1181,7 +1183,11 @@ const L={en:{
  hintTpl:'One template per message type. A line whose placeholders are all empty is dropped; {!key} keeps its line and prints -.',
  lockText:'The rest of the setup is protected so a flight in progress cannot be overwritten by mistake. Reporting works without unlocking.',
  resetDefault:'Reset to default', close:'Close', cancel:'Cancel', ok:'OK', save:'Save', del:'Delete',
- rows:'rows', noEntries:'No entries yet.', logAll:'All', editEntry:'Edit entry', deleteEntry:'Delete this entry',
+ rows:'rows', noEntries:'No entries yet.', logAll:'All', logNoVhf:'without VHF', editEntry:'Edit entry', deleteEntry:'Delete this entry',
+ lgVhf:'Radio', vhfForeign:'Written by {s}. It can be deleted from here, but not rewritten.',
+ syncRefused:'Nothing was written', syncRefusedWhat:'The table was not written, so that no row already in it can be lost. What is waiting stays in the queue and the next sync tries again. If this keeps coming back, this text says what happened:',
+ syncUnread:'Refused to write: {p} exists and holds {b} bytes, but came back empty. Writing now would take every other row away.',
+ syncShrink:'Refused to write: {a} rows would replace {b} in {p}. Rows that were read a moment ago are missing.',
  entryUpdated:'Entry updated', entryDeleted:'Entry deleted', linkCopied:'Link copied',
  msgCopied:'Message copied', tplReset:'Templates reset', reporterSet:'Reporter set to',
  offlineKeep:'Offline — entries stay on this device', addRepo:'Add repository and token in Setup',
@@ -1416,7 +1422,11 @@ const L={en:{
  hintTpl:'Eine Vorlage je Nachrichtentyp. Eine Zeile, deren Platzhalter alle leer sind, fällt weg; {!key} behält die Zeile und schreibt -.',
  lockText:'Der übrige Teil der Einrichtung ist geschützt, damit eine laufende Fahrt nicht versehentlich überschrieben wird. Melden geht ohne Entsperren.',
  resetDefault:'Auf Vorgabe zurücksetzen', close:'Schliessen', cancel:'Abbrechen', ok:'OK',
- save:'Sichern', del:'Löschen', rows:'Zeilen', noEntries:'Noch keine Einträge.', logAll:'Alle',
+ save:'Sichern', del:'Löschen', rows:'Zeilen', noEntries:'Noch keine Einträge.', logAll:'Alle', logNoVhf:'ohne VHF',
+ lgVhf:'Funk', vhfForeign:'Von {s} geschrieben. Von hier löschbar, aber nicht änderbar.',
+ syncRefused:'Es wurde nichts geschrieben', syncRefusedWhat:'Die Tabelle wurde nicht geschrieben, damit keine Zeile verloren geht, die schon darin steht. Was ansteht, bleibt in der Warteschlange, und der nächste Abgleich versucht es erneut. Wenn das wiederkehrt, sagt dieser Text, was passiert ist:',
+ syncUnread:'Nicht geschrieben: {p} existiert und enthält {b} Bytes, kam aber leer zurück. Jetzt zu schreiben würde alle anderen Zeilen entfernen.',
+ syncShrink:'Nicht geschrieben: {a} Zeilen würden {b} in {p} ersetzen. Zeilen, die eben gelesen wurden, fehlen.',
  editEntry:'Eintrag ändern', deleteEntry:'Diesen Eintrag löschen',
  entryUpdated:'Eintrag geändert', entryDeleted:'Eintrag gelöscht', linkCopied:'Link kopiert',
  msgCopied:'Nachricht kopiert', tplReset:'Vorlagen zurückgesetzt', reporterSet:'Melder ist jetzt',
@@ -2059,16 +2069,50 @@ async function followSetup(){
     }
   }catch(e){}
 }
+/* Past a megabyte GitHub stops putting a file inside its own answer: the metadata still comes,
+   with the sha in it, but content is empty and encoding reads "none". A long competition flight
+   passes that mark somewhere around eight hundred entries, and the radio app's VHF rows get
+   there far sooner. Read naively, such a file looks like an empty table, which is the one
+   misreading that could cost a flight its log.
+   So the body is fetched a second time as raw. Everything else stays where it was: the sha and
+   the ETag come from the first answer, where they always are, and a 304 still costs nothing.
+   `size` is carried out of here as well, because sync() needs to know the difference between
+   "the file is empty" and "the file is big and I could not read it". */
 async function ghGet(p,cond){
   const h=hdr();
   if(cond&&ETAG[p])h['If-None-Match']=ETAG[p];
-  const r=await fetch(`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}?ref=${encodeURIComponent(CFG.branch||'main')}`,
-    {headers:h,cache:'no-store'});
+  const u=`${API}/repos/${CFG.repo}/contents/${encodeURI(p)}?ref=${encodeURIComponent(CFG.branch||'main')}`;
+  const raw=()=>fetch(u,{headers:Object.assign(hdr(),{Accept:'application/vnd.github.raw'}),cache:'no-store'});
+  const r=await fetch(u,{headers:h,cache:'no-store'});
   if(r.status===304)return{notModified:true};
   if(r.status===404){delete ETAG[p];return{sha:null,text:''}}
-  if(!r.ok)throw new Error('GET '+r.status);
+  if(!r.ok){
+    /* Some answers refuse the file rather than hand back empty content. The body can still be
+       had as raw, and the sha — which a write needs, or it would try to create a file that is
+       already there — comes from the listing of the folder it sits in. */
+    if(r.status!==403&&r.status!==406&&r.status!==422)throw new Error('GET '+r.status);
+    const rr=await raw();
+    if(!rr.ok)throw new Error('GET '+r.status+'/'+rr.status);
+    const text=await rr.text();
+    let sha=null;
+    try{
+      const dir=p.replace(/\/[^/]*$/,''),name=p.slice(dir.length+1);
+      const f=(await ghList(dir)).find(x=>x.name===name);
+      if(f)sha=f.sha;
+    }catch(e){}
+    delete ETAG[p];
+    return{sha,text,size:text.length};
+  }
   const et=r.headers.get('etag');if(et)ETAG[p]=et;
-  const j=await r.json();return{sha:j.sha,text:j.content?b64d(j.content):''};
+  const j=await r.json();
+  const size=Number(j.size)||0;
+  let text=j.content?b64d(j.content):'';
+  if(!text&&size>0){
+    const rr=await raw();
+    if(!rr.ok)throw new Error('GET raw '+rr.status+' ('+size+' B)');
+    text=await rr.text();
+  }
+  return{sha:j.sha,text,size};
 }
 /* GitHub's own numbers, and what they mean here:
    5000 requests an hour on the token, but conditional GETs that answer 304 cost nothing,
@@ -2149,6 +2193,26 @@ const cell=v=>{if(v==null)return'';const s=String(v);return /[",;\n\r]/.test(s)?
 const toCsv=r=>[COLS.join(',')].concat(r.map(e=>COLS.map(c=>cell(e[c])).join(','))).join('\n')+'\n';
 
 let pollN=0;
+/* shown once per spell of trouble, not once per poll */
+let LOSTWARN=false;
+/* the message is meant to be sent on — it names the file and the numbers, and the window it
+   sits in is the one the app already uses for text somebody has to keep */
+function lostWarn(msg){
+  const txt=msg+'\n'+(CFG.repo||'')+' · '+(CFG.branch||'main')+'\n'+new Date().toISOString();
+  ask({title:t('syncRefused'),text:t('syncRefusedWhat'),
+    html:'<div class="waPre">'+esc(txt)+'</div>',
+    ok:t('copyText'),cancel:t('close'),
+    onMount:m=>{m.querySelector('[data-a="1"]').onclick=async()=>{
+      try{await navigator.clipboard.writeText(txt);toast(t('msgCopied'))}
+      catch(err){toast('Select the text to copy')}}}});
+}
+/* the number of rows the table must not fall below: what came back, less what a tombstone
+   accounts for, counted by id */
+function floorRows(remote,tid){
+  const ids=new Set();
+  (remote||[]).forEach(e=>{if(e&&e.id&&!tid.has(e.id))ids.add(e.id)});
+  return ids.size;
+}
 async function sync(silent,push,attempt,force){
   attempt=attempt||0;push=push!==false;
   if(SYNCING)return;
@@ -2172,6 +2236,12 @@ async function sync(silent,push,attempt,force){
     const tid=new Set(TOMB.map(t=>t.id));
 
     const remote=g.notModified?null:parse(g.text);
+    /* GitHub says there is a file, and that it holds something, but nothing came out of it.
+       Writing now would publish this device's rows as the whole table and take everybody
+       else's away — the crew's and the radio app's alike. Refuse, and come back next time. */
+    if(remote&&g.sha&&(g.size==null||g.size>2)&&!remote.length)
+      throw Object.assign(new Error(t('syncUnread')
+        .replace('{p}',p.json).replace('{b}',String(g.size==null?'?':g.size))),{keep:true});
     const unsent=new Set(ENT.filter(e=>!e.synced).map(e=>e.id));
     const m=new Map();
     if(remote)remote.forEach(e=>{if(e&&e.id)m.set(e.id,e)});
@@ -2180,6 +2250,20 @@ async function sync(silent,push,attempt,force){
     tid.forEach(id=>m.delete(id));
     const all=chrono([...m.values()]);
     recalc(all);
+
+    /* The second half of the same guard, and a net under the merge rather than under the
+       read. Every row that came back and is not named by a tombstone has to still be there
+       when the table goes out; counting distinct ids rather than rows keeps a file that
+       somehow holds the same id twice from reading as a loss. As the merge is written today
+       this cannot fire — it starts from the rows that were read and only adds — which is
+       exactly why it is worth having: it is the merge itself that it watches. */
+    if(push&&remote){
+      const least=floorRows(remote,tid);
+      if(all.length<least)
+        throw Object.assign(new Error(t('syncShrink')
+          .replace('{a}',String(all.length)).replace('{b}',String(least))
+          .replace('{p}',p.json)),{keep:true});
+    }
 
     if(push){
       const msg=`${CFG.flight||'flight'} · ${all.length} rows · ${reporter()}`;
@@ -2196,10 +2280,18 @@ async function sync(silent,push,attempt,force){
     }else{
       ENT=all.map(e=>Object.assign({},e,{synced:!unsent.has(e.id),failed:false}));
     }
-    LASTERR='';save(K_ENT,ENT);LASTSYNC=new Date();paint();
+    LASTERR='';LOSTWARN=false;save(K_ENT,ENT);LASTSYNC=new Date();paint();
     if(!silent)toast((push?t('synced'):t('reloaded'))+' '+all.length+' '+t('rows'));
   }catch(e){
     if(e&&e.conflict&&attempt<3){SYNCING=false;return sync(silent,push,attempt+1,force)}
+    /* A refusal to write is not a transport error: nothing is marked failed, because nothing
+       was attempted, and the queue is kept exactly as it was for the next sync. It is shown
+       once rather than at every poll, and it stays in the footer until a sync goes through. */
+    if(e&&e.keep){
+      LASTERR=String(e.message);paintStatus();
+      if(!LOSTWARN){LOSTWARN=true;lostWarn(LASTERR)}
+      return;
+    }
     if(e&&e.hold){LASTERR=String(e.message);if(!silent)toast(LASTERR);return}
     LASTERR=String(e.message||e);
     /* a transport error marks the rows that did not make it, so the log says why */
@@ -2253,8 +2345,12 @@ function paintStatus(){
   if(qn)qn.textContent=t('quotaNote')
     .replace('{w}',String(writesIn(3600000))).replace('{m}',String(WRITE_HOUR))
     .replace('{r}',RATE==null?'\u2014':String(RATE));
-  $('#syncNote').textContent=un?un+'/'+ENT.length+' '+t('queued')
-    :(LASTSYNC?t('inSync')+' '+localISO(LASTSYNC).slice(11,19):t('nothingSent'));
+  /* a refusal to write stays on the screen: a toast would be gone before anybody read it,
+     and the queue it is protecting is still waiting */
+  $('#syncNote').classList.toggle('lost',!!LASTERR);
+  $('#syncNote').textContent=LASTERR?LASTERR
+    :(un?un+'/'+ENT.length+' '+t('queued')
+       :(LASTSYNC?t('inSync')+' '+localISO(LASTSYNC).slice(11,19):t('nothingSent')));
 }
 function paintReadout(){
   const v=onBoard();
@@ -2319,6 +2415,14 @@ function line(e){
        it inside the message would print it twice */
     h=e.note||t('picChange');
     s='';
+  }else if(e.type==='VHF'){
+    /* written by the radio app, which has already put the sense of it into the note. The
+       frequency is added only when the note does not carry it already, so the line does not
+       say the same thing twice. */
+    const bits=[e.atc_dir==='TX'?'Tx':'',e.atc_freq||'',e.atc_station||''].filter(Boolean).join(' \u00b7 ');
+    const has=e.note&&e.atc_freq&&String(e.note).indexOf(String(e.atc_freq))>=0;
+    h=e.note||bits||t('lgVhf');
+    s=(e.note&&bits&&!has)?bits:'';
   }else if(e.type==='POS'||e.type==='MANPOS'){
     h=(e.type==='MANPOS'?t('lgManPos'):t('lgPos'))
       +(e.pos_lat?'':' \u00b7 '+t('posNoGps'))
@@ -2336,12 +2440,18 @@ const ST_FAIL='<svg viewBox="0 0 24 24" class="st-fail"><path d="M6 6l12 12M18 6
 const stIcon=e=>e.synced?ST_OK:(e.failed?ST_FAIL:ST_WAIT);
 /* the kinds present in this flight, with their counts, so the log can be read one kind at
    a time — an ATC-only reading of a long flight is otherwise a search through everything */
-const LOGKINDS=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC'];
+const LOGKINDS=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC','VHF'];
+/* a filter is either one kind to show, or one kind to leave out, written with a minus in
+   front of it. Only VHF is offered that way: it is the one kind that arrives in hundreds and
+   that somebody reading the log may want out of the way without losing everything else. */
+const hidden=f=>String(f||'').charAt(0)==='-'?String(f).slice(1):'';
+const logKeep=e=>!UI.logF?true:(hidden(UI.logF)?e.type!==hidden(UI.logF):e.type===UI.logF);
 function paintLogFilter(){
   const n={};ENT.forEach(e=>{n[e.type]=(n[e.type]||0)+1});
   const chips=[['',t('logAll')+' '+ENT.length]]
+    .concat(n.VHF?[['-VHF',t('logNoVhf')+' '+(ENT.length-n.VHF)]]:[])
     .concat(LOGKINDS.filter(k=>n[k]).map(k=>[k,k+' '+n[k]]));
-  if(UI.logF&&!n[UI.logF]){UI.logF='';save(K_UI,UI)}
+  if(UI.logF&&!n[hidden(UI.logF)||UI.logF]){UI.logF='';save(K_UI,UI)}
   $('#logFilter').innerHTML=chips.map(([k,l2])=>
     `<button data-k="${esc(k)}"${UI.logF===k?' class="on"':''}>${esc(l2)}</button>`).join('');
 }
@@ -2351,7 +2461,7 @@ $('#logFilter').addEventListener('click',e=>{
 });
 function paintLog(){
   paintLogFilter();
-  const l=chrono(ENT).filter(e=>!UI.logF||e.type===UI.logF).reverse(),box=$('#logList');
+  const l=chrono(ENT).filter(logKeep).reverse(),box=$('#logList');
   if(!l.length){box.innerHTML='<p class="none">'+esc(t('noEntries'))+'</p>';return}
   box.innerHTML=l.map(e=>{
     const {h,s}=line(e);
@@ -2554,12 +2664,14 @@ const srcCall  =()=>SRC?(SRC.call||''):(CFG.call||'');
 async function withSource(src,fn){const prev=SRC;SRC=src;try{return await fn()}finally{SRC=prev}}
 
 async function printSheet(){
-  const kinds=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC'];
-  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,MANPOS:true,PIC:true};
+  const kinds=['Ballast','ATC','Ressources','Other','POS','MANPOS','PIC','VHF'];
+  /* VHF starts off: the radio app files a row per transmission, and a competition flight's
+     worth of them would bury the log it is printed next to. One tap puts them back. */
+  let pick={Ballast:true,ATC:true,Ressources:true,Other:true,POS:true,MANPOS:true,PIC:true,VHF:false};
   await ask({title:t('mPrint'),cancel:t('cancel'),ok:t('print'),
     text:t('printPick'),
     html:'<div class="links wa" id="prK">'+kinds.map(k=>
-      `<button data-k="${k}" class="on">${esc(k)}</button>`).join('')+'</div>',
+      `<button data-k="${k}"${pick[k]?' class="on"':''}>${esc(k)}</button>`).join('')+'</div>',
     onMount:(m,close)=>{
       m.querySelector('#prK').addEventListener('click',ev=>{
         const b=ev.target.closest('button');if(!b)return;
@@ -3052,7 +3164,7 @@ function toGeoJson(rows){
    orange. No icon file is named, so Earth tints its own pin and the file needs nothing
    from the network. */
 const KMLC={Ballast:'ff008cff',ATC:'ffdc641e',Ressources:'ff50a028',Other:'ff827d78',
-            POS:'ffe6aa5a',MANPOS:'ff283cc8',PIC:'ffb4468c'};
+            POS:'ffe6aa5a',MANPOS:'ff283cc8',PIC:'ffb4468c',VHF:'ffc88c3c'};
 const xe=x=>String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const cdata=x=>'<![CDATA['+String(x==null?'':x).replace(/]]>/g,']]&gt;')+']]>';
@@ -5250,6 +5362,8 @@ $('#btnPost').onclick=async()=>{
 
 /* ── Log: edit and delete ──────────────────────────────────────────── */
 function fieldsFor(e){
+  /* the radio app owns these rows; the master may take one out, but not rewrite it */
+  if(e.type==='VHF')return [];
   if(e.type==='Ballast')
     return e.ballast_action==='count'
       ? [['inv_bags','Bags','number'],['water_kg','Water litres','number'],['inv_ready_pct','Ready ballast %','number'],['note','Remark','text']]
@@ -5268,13 +5382,17 @@ async function editEntry(id){
   /* the log is the flight record: one device is answerable for it */
   if(CFG.role!=='master')return info(t('editEntry'),t('editMasterOnly'));
   const val=k=>k==='_kg'?Math.abs(e.ballast_delta_kg||0):(e[k]==null?'':e[k]);
-  const html=fieldsFor(e).map(([k,l,t])=>`<div class="f"><p class="lab">${esc(l)}</p>`+
+  const foreign=e.type==='VHF';
+  const html=(foreign?'<p class="hint">'+esc(t('vhfForeign').replace('{s}',e.source||e.reporter||'\u2014'))+'</p>'
+                     +'<div class="waPre">'+esc(lastText(e))+'</div>':'')
+    +fieldsFor(e).map(([k,l,t])=>`<div class="f"><p class="lab">${esc(l)}</p>`+
     (t==='area'?`<textarea data-k="${k}">${esc(val(k))}</textarea>`
       :`<input data-k="${k}" type="${t}" ${t==='number'?'inputmode="decimal" step="0.5"':''} value="${esc(val(k))}">`)+'</div>').join('')
     +`<p class="lab">${esc(e.type)}${e.ballast_action?' · '+esc(e.ballast_action):''} · ${esc(hm(e.ts_local||e.ts_utc))} · ${esc(e.reporter||e.device||'')}`
     +(e.pos_lat?` · ${esc(e.pos_lat)} ${esc(e.pos_lon)}${e.alt_ft!=null?' '+e.alt_ft+' ft':''}${e.vs_ms!=null?' '+(e.vs_ms>=0?'+':'')+Number(e.vs_ms).toFixed(1)+' m/s':''}`:'')+`</p>`
     +`<button class="go sec sm" id="mDel" style="margin-top:10px">${esc(t('deleteEntry'))}</button>`;
-  const r=await ask({title:t('editEntry'),html,ok:t('save'),cancel:t('close'),onMount:(m,close)=>{
+  const r=await ask({title:foreign?t('lgVhf'):t('editEntry'),html,
+    ok:foreign?t('close'):t('save'),cancel:foreign?false:t('close'),onMount:(m,close)=>{
     m.querySelector('#mDel').onclick=async()=>{
       close();
       if(await confirm2(
@@ -5285,7 +5403,9 @@ async function editEntry(id){
         toast(t('entryDeleted'));if(configured())sync(true,true);
       }};
   }});
-  if(r===null||typeof r!=='object')return;
+  /* a radio row has no fields to save, and the window's one button is Close: coming back
+     from it must not stamp the row as edited by this device */
+  if(foreign||r===null||typeof r!=='object')return;
   applyEdit(e,r);
 }
 function applyEdit(e,v){

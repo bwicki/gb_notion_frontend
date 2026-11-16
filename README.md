@@ -1054,6 +1054,12 @@ ATC 42 · Ressources 18 · POS 5 · PIC 2*. Only kinds that actually occur are o
 the ATC calls of a long flight is then a tap rather than a search, and the choice is remembered
 between visits.
 
+One chip works the other way round. When the radio app has filed rows of its own (§19a), a
+**without VHF** chip appears next to *All*, carrying the count of everything else. Every other
+chip picks one kind to show; this one picks one kind to leave out, which is what you want when
+there are four hundred radio rows and you are looking for the ballast between them. *All* stays
+the default.
+
 A row that also went out through WhatsApp says so after the reporter's name — *sent to
 WhatsApp*, previously the bare abbreviation `WA`.
 
@@ -1075,6 +1081,67 @@ the sequence the change was made.
 
 Deleting asks twice, states what is being removed and who recorded it, and warns that the
 deletion is shared with the other devices.
+
+## 19a. Rows another app wrote
+
+Since 16 November 2026 the flight table has a second author. The radio app at
+**krt2.wicki.aero**, which keeps the frequency list of the KRT2, writes its own rows into the
+same `data/<flight>.json`: kind **VHF**, `source` `krt2`, `reporter` `KRT2`, and a note such as
+*FRQ 127.800 ZURICH F active* or *Tx 6.2 sec*, with the frequency, the station and a position
+beside it. It reads the file with its sha, appends, and writes it back, reading again when
+GitHub reports a conflict — the same courtesy this app shows it.
+
+Nothing special has to be done to keep those rows: the merge has always worked by `id`, so a
+row this device has never seen is carried through untouched. What is new is that the app now
+**shows** them properly rather than treating them as a note of unknown kind.
+
+- In the log they carry a `VHF` tag like any other kind. The line is what the radio app wrote;
+  the frequency and station are added underneath only when its own text does not already carry
+  them, so nothing is said twice.
+- The counters, the flight archive's summary, and the CSV, JSON, GeoJSON and KML exports treat
+  them as a kind of their own. In Google Earth they get their own folder and their own colour,
+  so they can be switched off there in one click.
+- The ballast arithmetic ignores them, as it ignores everything that is not a `Ballast` row, so
+  a thousand radio rows change no figure.
+- **The printout leaves them out unless you ask.** VHF is offered as a chip in the print window
+  like every other kind, but it is the one that starts switched off: a competition flight's
+  worth of transmissions would bury the log it is printed beside. One tap puts them in.
+- Tapping one opens it, but there is nothing to edit: the window names who wrote it, shows the
+  text, and offers *Delete this entry*. A row belongs to the app that filed it; taking it out
+  is the crew's business, rewriting it is not. The deletion travels the ordinary way, through
+  `<flight>.deleted.json`, so the radio app learns of it too.
+
+## 19b. Tables past a megabyte
+
+The GitHub API that this app reads and writes stops putting a file inside its own answer once
+the file passes **one megabyte**. The metadata still arrives, with the sha and the size in it,
+but the content comes back empty and marked `none`. A flight table reaches that mark somewhere
+around eight hundred entries of the ordinary kind — and far sooner once the radio app is
+filing a row per transmission.
+
+Read naively, such a file looks like an empty table, and the next write would publish this
+device's rows as the whole of it. That is the one misreading that could cost a flight its log,
+and the app is now built so that it cannot happen:
+
+1. **The file is read whole.** When the content comes back empty but the size says otherwise,
+   the body is fetched a second time with GitHub's raw media type. The sha and the ETag still
+   come from the first answer, so conditional polling costs no more than it did. An answer that
+   refuses the file outright is handled the same way, with the sha taken from the folder
+   listing — a write needs it, or it would try to create a file that is already there.
+2. **A short read is never written back.** If GitHub says the file exists and holds more than
+   a couple of bytes, and the read nonetheless yields no rows, the app refuses to write. What
+   is waiting stays in the queue, the rows are *not* marked as failed — nothing was attempted
+   — and the next sync tries again.
+3. **A table that would shrink is refused too.** Every row that came back and is not named by
+   a tombstone has to still be there in what goes out, counted by `id`. As the merge is written
+   today this cannot happen, because it starts from the rows that were read and only adds; the
+   check is a net under the merge itself, for the day somebody changes it.
+
+A refusal is shown once, not at every poll, in a window whose text can be copied — it names
+the file, the byte count and the repository, which is everything needed to work out what
+happened. It also stays in the footer, in red, until a sync goes through; a toast would be gone
+before anybody had read it. The moment a read works again, the queue goes out and the line
+clears itself.
 
 ## 20. What the app writes
 
@@ -1491,7 +1558,7 @@ the old.
 The build stamp sits in the bottom right of every screen, in the form `v<YYMMDD>-<nn>` —
 the date written backwards, then a counter that restarts at 01 each day and goes up with every
 build released that day. The date leads, so `v260813-01` is newer than `v260812-26` despite the
-smaller counter. `v261031-05` is the fifth build of 31 October 2026.
+smaller counter. `v261116-01` is the first build of 16 November 2026.
 
 It lives in two places that must be kept in step: the `APP_VERSION` constant near the top of
 the script in `index.html`, and the cache name `V` in `sw.js`. `readme.html`, `setup.html` and the
